@@ -44,8 +44,8 @@ class ShowPiecesView(TemplateView):
         for piece in pieces:
             found_one = True
 
-            base = [piece.nr1, piece.nr2, piece.nr4, piece.nr5, piece.nr6, piece.nr7, piece.nr8, piece.nr9, piece.nr10,
-                    piece.nr11, piece.nr12, piece.nr13, piece.nr14, piece.nr15, piece.nr16]
+            base = [piece.nr1, piece.nr2, piece.nr3, piece.nr4, piece.nr5, piece.nr6, piece.nr7, piece.nr8, piece.nr9,
+                    piece.nr10, piece.nr11, piece.nr12, piece.nr13, piece.nr14, piece.nr15, piece.nr16]
             piece.check_bad = len(set(base)) != 16
 
             piece.img1 = static('pieces/%s.png' % piece.nr1)

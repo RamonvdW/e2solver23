@@ -114,8 +114,8 @@ class Command(BaseCommand):
         else:
             for piece in (Piece2x2
                           .objects
-                          .filter(side1=expected_side1, side2=expected_side2)
-                          .exclude(nr__lte=nr1)
+                          .filter(side1=expected_side1,
+                                  side2=expected_side2)
                           .exclude(nr__lte=nr1)                 # prevents rotation variants
                           .exclude(nr1__in=used_nrs)
                           .exclude(nr2__in=used_nrs)

@@ -82,7 +82,7 @@
                 <td{% if piece.check_bad %} style="color:red"{% endif %}>{{ piece.nr1 }}<sub>{{ piece.rot1 }}</sub>, {{ piece.nr2 }}<sub>{{ piece.rot2 }}</sub>, {{ piece.nr3 }}<sub>{{ piece.rot3 }}</sub>, {{ piece.nr4 }}<sub>{{ piece.rot4 }}</sub>
                     <br>{{ piece.nr5 }}<sub>{{ piece.rot5 }}</sub>, {{ piece.nr6 }}<sub>{{ piece.rot6 }}</sub>, {{ piece.nr7 }}<sub>{{ piece.rot7 }}</sub>, {{ piece.nr8 }}<sub>{{ piece.rot8 }}</sub>
                     <br>{{ piece.nr9 }}<sub>{{ piece.rot9 }}</sub>, {{ piece.nr10 }}<sub>{{ piece.rot10 }}</sub>, {{ piece.nr11 }}<sub>{{ piece.rot11 }}</sub>, {{ piece.nr12 }}<sub>{{ piece.rot12 }}</sub>
-                    <br>{{ piece.nr12 }}<sub>{{ piece.rot13 }}</sub>, {{ piece.nr14 }}<sub>{{ piece.rot14 }}</sub>, {{ piece.nr15 }}<sub>{{ piece.rot15 }}</sub>, {{ piece.nr16 }}<sub>{{ piece.rot16 }}</sub>
+                    <br>{{ piece.nr13 }}<sub>{{ piece.rot13 }}</sub>, {{ piece.nr14 }}<sub>{{ piece.rot14 }}</sub>, {{ piece.nr15 }}<sub>{{ piece.rot15 }}</sub>, {{ piece.nr16 }}<sub>{{ piece.rot16 }}</sub>
                 </td>
                 <td>{{ piece.side1 }}, {{ piece.side2 }}, {{ piece.side3 }}, {{ piece.side4 }}</td>
             </tr>
