@@ -22,17 +22,14 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'dit draait alleen lokaal dus niet echt nodig'
+SECRET_KEY = 'your security key'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-# debug toolbar for database access analysis
-ENABLE_DEBUG_TOOLBAR = True
+ALLOWED_HOSTS = []
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'vps9.st-visir.nl']
-
-INTERNAL_IPS = ['127.0.0.1', 'localhost', 'vps9.st-visir.nl']
+INTERNAL_IPS = []
 
 
 # Application definition
@@ -40,6 +37,7 @@ INSTALLED_APPS = [
     'BasePieces',
     'Pieces2x2',
     'Pieces4x4',
+    'Pieces8x2',
     'CornerSolutions',
     'django.contrib.admin',
     'django.contrib.staticfiles',   # gather static files from modules helper
@@ -110,10 +108,10 @@ WSGI_APPLICATION = 'SiteMain.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'OPTIONS': { 'options': '-c search_path=myschema' },
-        'NAME': 'e2',
-        'USER': 'e2app',
-        'PASSWORD': 'mypassword',
+        'OPTIONS': { 'options': '-c search_path=your_db_schema'},
+        'NAME': 'your_db_name',
+        'USER': 'your_db_user',
+        'PASSWORD': 'your_db_password',
         'HOST': 'localhost',
         'PORT': '5432'
     }
