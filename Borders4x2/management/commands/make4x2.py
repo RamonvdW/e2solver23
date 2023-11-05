@@ -142,7 +142,7 @@ class Command(BaseCommand):
                 bulk.append(piece)
 
                 if len(bulk) > 1000:
-                    #Border4x2.objects.bulk_create(bulk)
+                    Border4x2.objects.bulk_create(bulk)
                     bulk = list()
 
                 if nr >= print_nr:
