@@ -1,0 +1,17 @@
+# required pip packages
+
+# base packages
+-r requirements.txt
+
+# add-ons for dev environment:
+
+# update check
+pip-review
+
+# python code coverage measurement and reporting
+coverage
+
+# django database access analysis for performance / efficient queries
+django-debug-toolbar
+
+# end of file

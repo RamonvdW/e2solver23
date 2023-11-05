@@ -1,0 +1,11 @@
+# required pip packages
+
+-c constraints.in
+
+# web framework
+django
+
+# PostgreSQL database access
+psycopg
+
+# end of file

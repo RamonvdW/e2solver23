@@ -1,0 +1,7 @@
+# constraints for pip packages for E2Solver23
+
+# stick to django 4.2 for now
+django>=4.2,<4.3
+
+# end of file
+
