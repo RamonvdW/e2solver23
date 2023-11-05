@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Piece 4x4</title>
+    <style>
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+            padding: 5px 10px 5px 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Piece8x2</h1>
+
+    <p>
+        {% if url_first %}
+            <a style="margin:10px" href="{{ url_first }}">First</a>
+        {% else %}
+            {% if url_prev100 %}
+                <a style="margin:10px" href="{{ url_prev100 }}">-100</a>
+            {% else %}
+                <span style="margin:10px">-100</span>
+            {% endif %}
+            {% if url_prev10 %}
+                <a style="margin:10px" href="{{ url_prev10 }}">-10</a>
+            {% else %}
+                <span style="margin:10px">-10</span>
+            {% endif %}
+            <a style="margin:10px" href="{{ url_next10 }}">+10</a>
+            <a style="margin:10px" href="{{ url_next100 }}">+100</a>
+            <a style="margin:10px" href="{{ url_next1000 }}">+1000</a>
+        {% endif %}
+    </p>
+
+    <table style="margin-left:auto; margin-right:auto">
+        <thead>
+            <tr>
+                <th>Nr</th>
+                <th>Image</th>
+                <th>Base pieces</th>
+                <th>Side nrs</th>
+            </tr>
+        </thead>
+
+        {% for piece in pieces %}
+            <tr>
+                <td>{{ piece.nr }}</td>
+
+                <!-- one image is 40x40 -->
+                <td>
+                    <div style="display:flex">
+                        <img src="{{ piece.img1 }}" style="transform: {{ piece.transform1 }}">
+                        <img src="{{ piece.img2 }}" style="transform: {{ piece.transform2 }}">
+                        <img src="{{ piece.img3 }}" style="transform: {{ piece.transform3 }}">
+                        <img src="{{ piece.img4 }}" style="transform: {{ piece.transform4 }}">
+                    </div>
+                    <div style="display:flex">
+                        <img src="{{ piece.img5 }}" style="transform: {{ piece.transform5 }}">
+                        <img src="{{ piece.img6 }}" style="transform: {{ piece.transform6 }}">
+                        <img src="{{ piece.img7 }}" style="transform: {{ piece.transform7 }}">
+                        <img src="{{ piece.img8 }}" style="transform: {{ piece.transform8 }}">
+                    </div>
+                    <div style="display:flex">
+                        <img src="{{ piece.img9 }}" style="transform: {{ piece.transform9 }}">
+                        <img src="{{ piece.img10 }}" style="transform: {{ piece.transform10 }}">
+                        <img src="{{ piece.img11 }}" style="transform: {{ piece.transform11 }}">
+                        <img src="{{ piece.img12 }}" style="transform: {{ piece.transform12 }}">
+                    </div>
+                    <div style="display:flex">
+                        <img src="{{ piece.img13 }}" style="transform: {{ piece.transform13 }}">
+                        <img src="{{ piece.img14 }}" style="transform: {{ piece.transform14 }}">
+                        <img src="{{ piece.img15 }}" style="transform: {{ piece.transform15 }}">
+                        <img src="{{ piece.img16 }}" style="transform: {{ piece.transform16 }}">
+                    </div>
+                </td>
+
+                <td{% if piece.check_bad %} style="color:red"{% endif %}>{{ piece.nr1 }}<sub>{{ piece.rot1 }}</sub>, {{ piece.nr2 }}<sub>{{ piece.rot2 }}</sub>, {{ piece.nr3 }}<sub>{{ piece.rot3 }}</sub>, {{ piece.nr4 }}<sub>{{ piece.rot4 }}</sub>
+                    <br>{{ piece.nr5 }}<sub>{{ piece.rot5 }}</sub>, {{ piece.nr6 }}<sub>{{ piece.rot6 }}</sub>, {{ piece.nr7 }}<sub>{{ piece.rot7 }}</sub>, {{ piece.nr8 }}<sub>{{ piece.rot8 }}</sub>
+                    <br>{{ piece.nr9 }}<sub>{{ piece.rot9 }}</sub>, {{ piece.nr10 }}<sub>{{ piece.rot10 }}</sub>, {{ piece.nr11 }}<sub>{{ piece.rot11 }}</sub>, {{ piece.nr12 }}<sub>{{ piece.rot12 }}</sub>
+                    <br>{{ piece.nr13 }}<sub>{{ piece.rot13 }}</sub>, {{ piece.nr14 }}<sub>{{ piece.rot14 }}</sub>, {{ piece.nr15 }}<sub>{{ piece.rot15 }}</sub>, {{ piece.nr16 }}<sub>{{ piece.rot16 }}</sub>
+                </td>
+                <td>{{ piece.side1 }}, {{ piece.side2 }}, {{ piece.side3 }}, {{ piece.side4 }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+
+</body>
+</html>
