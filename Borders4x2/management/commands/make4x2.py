@@ -77,6 +77,15 @@ class Command(BaseCommand):
 
         side_border_nr = TwoSides.objects.filter(two_sides='XX').first().nr
 
+        todo_a = (Piece2x2
+                  .objects
+                  .filter(side1=side_border_nr)
+                  .exclude(side4=side_border_nr)
+                  .exclude(side2=side_border_nr)
+                  .count())
+        count_a = 0
+        print('[INFO] Todo piece A: %s' % todo_a)
+
         nr = 0
         bulk = list()
         print_nr = print_interval = 250000
@@ -86,7 +95,9 @@ class Command(BaseCommand):
                         .exclude(side4=side_border_nr)
                         .exclude(side2=side_border_nr)):
 
-            print('piece_a.nr=%s' % piece_a.nr)
+            perc_a = 1 - (count_a / todo_a)
+            count_a += 1
+            print('[INFO] piece A: %s / %s (%.2f%% left)' % (count_a, todo_a, perc_a * 100))
 
             base_a = (piece_a.nr1, piece_a.nr2, piece_a.nr3, piece_a.nr4)
             used_nrs = set(base_a)
@@ -131,7 +142,7 @@ class Command(BaseCommand):
                 bulk.append(piece)
 
                 if len(bulk) > 1000:
-                    Border4x2.objects.bulk_create(bulk)
+                    #Border4x2.objects.bulk_create(bulk)
                     bulk = list()
 
                 if nr >= print_nr:
