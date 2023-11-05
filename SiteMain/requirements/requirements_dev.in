@@ -1,9 +1,11 @@
 # required pip packages
 
-# base packages
--r requirements.txt
+# web framework
+# stick to django 4.2 for now
+django>=4.2,<4.3
 
-# add-ons for dev environment:
+# PostgreSQL database access
+psycopg
 
 # update check
 pip-review

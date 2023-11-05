@@ -9,7 +9,7 @@ SCRIPT_DIR=$(realpath "$0")             # volg links naar het echte script
 SCRIPT_DIR=$(dirname "$SCRIPT_DIR")     # directory van het script
 cd "$SCRIPT_DIR"
 
-for req in requirements requirements_dev
+for req in requirements_dev
 do
     OUT="$req.txt"
     IN="$req.in"
@@ -19,4 +19,3 @@ do
 done
 
 # end of file
-
