@@ -42,7 +42,7 @@ class ShowPiecesView(TemplateView):
         context['pieces'] = pieces = Border4x2.objects.filter(nr__gte=nr, nr__lt=nr+10).order_by('nr')
         for piece in pieces:
             base = [piece.nr1, piece.nr2, piece.nr3, piece.nr4, piece.nr5, piece.nr6, piece.nr7, piece.nr8]
-            piece.check_bad = len(set(base)) != 16
+            piece.check_bad = len(set(base)) != 8
 
             piece.img1 = static('pieces/%s.png' % piece.nr1)
             piece.img2 = static('pieces/%s.png' % piece.nr2)

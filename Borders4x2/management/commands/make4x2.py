@@ -49,20 +49,20 @@ class Command(BaseCommand):
         """ a 8x2 piece consists of 16 base pieces, each under a certain rotation
             the four sides start at the top and follow the piece clockwise
 
-                              side1 = border
-                    +---+---+---+---+---+---+---+---+
-                    | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 |
-             side 4 +---+---+---+---+---+---+---+---+ side 2
-                    | 9 |10 |11 |12 |13 |14 |15 |16 |
-                    +---+---+---+---+---+---+---+---+
-                                side 3
+                          side1 = border
+                    +---+---+---+---+
+                    | 1 | 2 | 3 | 4 |
+             side 4 +---+---+---+---+ side 2
+                    | 5 | 6 | 7 | 8 |
+                    +---+---+---+---+
+                          side 3
 
-                              side1 = border
-                    +---+---+---+---+---+---+---+---+
-                    |       |       |       |       |
-                    +   A   +   B   +   C   +   D   +
-                    |       |       |       |       |
-                    +---+---+---+---+---+---+---+---+
+                      side1 = border
+                    +---+---+---+---+
+                    |       |       |
+                    +   A   +   B   +
+                    |       |       |
+                    +---+---+---+---+
 
             Piece 2x2:
              
@@ -104,70 +104,39 @@ class Command(BaseCommand):
                             .exclude(nr3__in=used_nrs)
                             .exclude(nr4__in=used_nrs)):
 
-                base_b = (piece_b.nr1, piece_b.nr2, piece_b.nr3, piece_b.nr4)
-                used_nrs = set(base_a + base_b)
+                final_side2 = self.base_nr2piece[piece_b.nr2].get_side(2, piece_b.rot2)
+                final_side2 += self.base_nr2piece[piece_b.nr4].get_side(2, piece_b.rot4)
 
-                piece_c_side_4 = self.side_nr2reverse[piece_b.side2]
+                nr += 1
+                piece = Border4x2(
+                            nr=nr,
+                            side2=final_side2,
+                            side4=final_side4,
+                            nr1=piece_a.nr1,
+                            nr2=piece_a.nr2,
+                            nr3=piece_b.nr1,
+                            nr4=piece_b.nr2,
+                            nr5=piece_a.nr3,
+                            nr6=piece_a.nr4,
+                            nr7=piece_b.nr3,
+                            nr8=piece_b.nr4,
+                            rot1=piece_a.rot1,
+                            rot2=piece_a.rot2,
+                            rot3=piece_b.rot1,
+                            rot4=piece_b.rot2,
+                            rot5=piece_a.rot3,
+                            rot6=piece_a.rot4,
+                            rot7=piece_b.rot3,
+                            rot8=piece_b.rot4)
+                bulk.append(piece)
 
-                for piece_c in (Piece2x2
-                                .objects
-                                .filter(side1=side_border_nr,
-                                        side4=piece_c_side_4)
-                                .exclude(nr1__in=used_nrs)
-                                .exclude(nr2__in=used_nrs)
-                                .exclude(nr3__in=used_nrs)
-                                .exclude(nr4__in=used_nrs)):
+                if len(bulk) > 1000:
+                    Border4x2.objects.bulk_create(bulk)
+                    bulk = list()
 
-                    base_c = (piece_c.nr1, piece_c.nr2, piece_c.nr3, piece_c.nr4)
-                    used_nrs = set(base_a + base_b + base_c)
-
-                    piece_d_side_4 = self.side_nr2reverse[piece_c.side2]
-
-                    for piece_d in (Piece2x2
-                                    .objects
-                                    .filter(side1=side_border_nr,
-                                            side4=piece_d_side_4)
-                                    .exclude(nr1__in=used_nrs)
-                                    .exclude(nr2__in=used_nrs)
-                                    .exclude(nr3__in=used_nrs)
-                                    .exclude(nr4__in=used_nrs)):
-
-                        nr += 1
-
-                        final_side2 = self.base_nr2piece[piece_d.nr2].get_side(2, piece_d.rot2)
-                        final_side2 += self.base_nr2piece[piece_d.nr4].get_side(2, piece_d.rot4)
-
-                        piece = Border4x2(
-                                    nr=nr,
-                                    side2=final_side2,
-                                    side4=final_side4,
-                                    nr1=piece_a.nr1,
-                                    nr2=piece_a.nr2,
-                                    nr3=piece_b.nr1,
-                                    nr4=piece_b.nr2,
-                                    nr5=piece_c.nr1,
-                                    nr6=piece_c.nr2,
-                                    nr7=piece_d.nr1,
-                                    nr8=piece_d.nr2,
-                                    rot1=piece_a.rot1,
-                                    rot2=piece_a.rot2,
-                                    rot3=piece_b.rot1,
-                                    rot4=piece_b.rot2,
-                                    rot5=piece_c.rot1,
-                                    rot6=piece_c.rot2,
-                                    rot7=piece_d.rot1,
-                                    rot8=piece_d.rot2)
-                        bulk.append(piece)
-
-                        if len(bulk) > 1000:
-                            Border4x2.objects.bulk_create(bulk)
-                            bulk = list()
-
-                        if nr >= print_nr:
-                            self.stdout.write('%s' % nr)
-                            print_nr += print_interval
-                    # for
-                # for
+                if nr >= print_nr:
+                    self.stdout.write('%s' % nr)
+                    print_nr += print_interval
             # for
         # for
 
