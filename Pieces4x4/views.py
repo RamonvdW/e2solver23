@@ -43,6 +43,11 @@ class ShowPiecesView(TemplateView):
         context['pieces'] = pieces = Piece4x4.objects.filter(nr__gte=nr, nr__lt=nr+10).order_by('nr')
         for piece in pieces:
             found_one = True
+
+            base = [piece.nr1, piece.nr2, piece.nr4, piece.nr5, piece.nr6, piece.nr7, piece.nr8, piece.nr9, piece.nr10,
+                    piece.nr11, piece.nr12, piece.nr13, piece.nr14, piece.nr15, piece.nr16]
+            piece.check_bad = len(set(base)) != 16
+
             piece.img1 = static('pieces/%s.png' % piece.nr1)
             piece.img2 = static('pieces/%s.png' % piece.nr2)
             piece.img3 = static('pieces/%s.png' % piece.nr3)
