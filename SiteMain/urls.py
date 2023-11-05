@@ -17,7 +17,7 @@ urlpatterns = [
     path('__debug__/', include('debug_toolbar.urls')),
     path('pieces2x2/', include('Pieces2x2.urls')),
     path('pieces4x4/', include('Pieces4x4.urls')),
-    path('pieces8x2/', include('Pieces8x2.urls')),
+    path('borders4x2/', include('Borders4x2.urls')),
     path('corner-solutions/', include('CornerSolutions.urls')),
     path('admin/', admin.site.urls),
 ]

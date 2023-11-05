@@ -37,7 +37,7 @@ INSTALLED_APPS = [
     'BasePieces',
     'Pieces2x2',
     'Pieces4x4',
-    'Pieces8x2',
+    'Borders4x2',
     'CornerSolutions',
     'django.contrib.admin',
     'django.contrib.staticfiles',   # gather static files from modules helper
@@ -108,7 +108,7 @@ WSGI_APPLICATION = 'SiteMain.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'OPTIONS': { 'options': '-c search_path=your_db_schema'},
+        'OPTIONS': { 'options': '-c search_path=your_db_schema'},   # not needed below PostgreSQL version 15
         'NAME': 'your_db_name',
         'USER': 'your_db_user',
         'PASSWORD': 'your_db_password',
@@ -215,6 +215,8 @@ LOGGING = {
     }
 }
 
+
+from SiteMain.settings_local import *
 
 # end of file
 
