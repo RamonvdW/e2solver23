@@ -10,14 +10,12 @@ from django.core.management.base import BaseCommand
 from BasePieces.models import BasePiece
 from Pieces2x2.models import TwoSides, Piece2x2
 
-CHECK_HINTS = True
-ONLY_CORNERS = True
 DO_STORE = True
 
 
 class Command(BaseCommand):
 
-    help = "Generate all 2x2 pieces"
+    help = "Generate all 2x2 pieces, with rotation variants"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -30,9 +28,18 @@ class Command(BaseCommand):
         self.base_with_side3 = dict()   # [side] = [(piece, rot), ..]
         self.base_with_side4 = dict()   # [side] = [(piece, rot), ..]
 
+        self.with_interior = False
+        self.with_corners = False
+        self.with_center = False
+        self.with_sides = False
+
+        self.exclude_piece_nrs = ()
+        self.hint_piece_nrs = (208, 255, 181, 249, 139)
+
+    def _generate_base_with_side(self):
         all_sides = list()
-        for piece in BasePiece.objects.all():
-            side = piece.side4          # the only side with all possibilities
+        for piece in BasePiece.objects.exclude(nr__in=self.exclude_piece_nrs):
+            side = piece.side4          # the only side where all possibilities are found
             if side not in all_sides:
                 all_sides.append(side)
                 self.base_with_side1[side] = list()
@@ -42,7 +49,7 @@ class Command(BaseCommand):
         # for
         all_sides.sort()
 
-        for piece in BasePiece.objects.all():
+        for piece in BasePiece.objects.exclude(nr__in=self.exclude_piece_nrs):
             # rotations are counter-clockwise
             self.base_with_side1[piece.side1].append((piece, 0))
             self.base_with_side2[piece.side1].append((piece, 3))
@@ -65,14 +72,12 @@ class Command(BaseCommand):
             self.base_with_side4[piece.side4].append((piece, 0))
         # for
 
-        if ONLY_CORNERS:
-            self.hint_piece_nrs = (208, 255, 181, 249)      # 139 belongs in the center
-        else:
-            self.hint_piece_nrs = (208, 255, 181, 249, 139)
+    def add_arguments(self, parser):
+        parser.add_argument('--subset', required=True, choices=['corners', 'borders', 'center'],
+                            help="Which subset of Piece2x2 to generate")
 
-    @staticmethod
-    def _iter_piece1():
-        for piece in BasePiece.objects.all():
+    def _iter_piece1(self):
+        for piece in BasePiece.objects.exclude(nr__in=self.exclude_piece_nrs):
             yield piece, 0
             yield piece, 1
             yield piece, 2
@@ -122,6 +127,40 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
+        subset = options['subset']
+
+        if subset == 'corners':
+            self.hint_piece_nrs = (208, 255, 181, 249)
+            self.exclude_piece_nrs = (139,)
+            self.with_interior = True
+            self.with_corners = True
+            self.with_center = False
+            self.with_sides = True
+        elif subset == 'borders':
+            # hints have already been used in the corner
+            self.hint_piece_nrs = ()
+            self.exclude_piece_nrs = (208, 255, 181, 249, 139)
+            self.with_interior = False
+            self.with_corners = False
+            self.with_center = False
+            self.with_sides = True
+        else:
+            self.hint_piece_nrs = (139,)
+            self.exclude_piece_nrs = (208, 255, 181, 249)
+            self.with_interior = True
+            self.with_corners = False
+            self.with_center = True
+            self.with_sides = False
+
+        hints = [str(nr) for nr in self.hint_piece_nrs]
+        if len(hints) > 0:
+            hints_str = "with hint pieces %s" % ", ".join(hints)
+        else:
+            hints_str = "without any hint pieces"
+        self.stdout.write('[INFO] Generating subset Piece2x2 for %s %s' % (repr(subset), hints_str))
+
+        self._generate_base_with_side()
+
         # delete all previously generate 2x2 pieces
         Piece2x2.objects.all().delete()
         TwoSides.objects.all().delete()
@@ -142,7 +181,6 @@ class Command(BaseCommand):
         bulk = list()
         nr = 0
         print_nr = print_interval = 10000
-        limit = 9999999999999
         for piece1, rot1 in self._iter_piece1():
             piece1_side1 = piece1.get_side(1, rot1)
             piece1_side2 = piece1.get_side(2, rot1)
@@ -156,9 +194,27 @@ class Command(BaseCommand):
             piece1_has_side = piece1_side4 == 'X' or piece1_side1 == 'X'
             piece1_is_corner = piece1_side4 == 'X' and piece1_side1 == 'X'
 
+            keep = False
+            if not piece1_has_side:
+                if self.with_interior:
+                    keep = True
+            else:
+                if self.with_corners:
+                    keep = True
+
+                if not piece1_is_corner:
+                    if piece1_has_side and self.with_sides:
+                        keep = True
+
+            # print('piece1=%s, is_corner=%s, has_side=%s --> keep=%s' % (
+            #       piece1.nr, piece1_is_corner, piece1_has_side, keep))
+
+            if not keep:
+                continue
+
             # check the hint positions
             piece1_is_hint = piece1.nr in self.hint_piece_nrs
-            if CHECK_HINTS and piece1_is_hint:
+            if piece1_is_hint:
                 # number 208 can be here under rotation 1
                 if piece1.nr == 208 and rot1 != 1:
                     continue
@@ -175,20 +231,26 @@ class Command(BaseCommand):
                 if piece1.nr == 139 and rot1 != 3:
                     continue
 
-            if ONLY_CORNERS and piece1.nr == 139:
-                continue
-
             for piece2, rot2 in self._iter_piece2(piece1_side2, piece1.nr):
+                piece2_side1 = piece2.get_side(1, rot2)
+                piece2_side2 = piece2.get_side(2, rot2)
                 piece2_side3 = piece2.get_side(3, rot2)
+
+                # prevent 2x2 with border left and right
+                if piece1_side4 == 'X' and piece2_side2 == 'X':
+                    continue
 
                 # prevent borders on the inside
                 if piece2_side3 == 'X':
                     continue
 
-                piece2_has_side = piece2.get_side(1, rot2) == 'X'
+                piece2_has_side = piece2_side1 == 'X'
+
+                if not self.with_sides and piece2_has_side:
+                    continue
 
                 piece2_is_hint = piece2.nr in self.hint_piece_nrs
-                if CHECK_HINTS and piece2_is_hint:
+                if piece2_is_hint:
                     if piece1_has_side:
                         continue
                     # hints cannot be together in the same 2x2
@@ -210,21 +272,26 @@ class Command(BaseCommand):
                     if piece2.nr == 139 and rot2 != 2:
                         continue
 
-                if ONLY_CORNERS and piece2.nr == 139:
-                    continue
-
                 for piece3, rot3 in self._iter_piece3(piece1_side3, piece1.nr, piece2.nr):
                     piece3_side2 = piece3.get_side(2, rot3)
                     piece3_side3 = piece3.get_side(3, rot3)
+                    piece3_side4 = piece3.get_side(4, rot3)
+
+                    # prevent 2x2 with border of top and bottom
+                    if piece1_side1 == 'X' and piece3_side3 == 'X':
+                        continue
 
                     # prevent borders on the inside
                     if piece3_side2 == 'X' or piece3_side3 == 'X':
                         continue
 
-                    piece3_has_side = piece3.get_side(4, rot3) == 'X'
+                    piece3_has_side = piece3_side4 == 'X'
+
+                    if not self.with_sides and piece3_has_side:
+                        continue
 
                     piece3_is_hint = piece3.nr in self.hint_piece_nrs
-                    if CHECK_HINTS and piece3_is_hint:
+                    if piece3_is_hint:
                         if piece1_has_side or piece2_has_side:
                             continue
                         # hints cannot be together in the same 2x2
@@ -246,14 +313,11 @@ class Command(BaseCommand):
                         if piece3.nr == 139 and rot3 != 0:
                             continue
 
-                    if ONLY_CORNERS and piece3.nr == 139:
-                        continue
-
                     for piece4, rot4 in self._iter_piece4(piece3_side2, piece2_side3,
                                                           piece1.nr, piece2.nr, piece3.nr):
 
                         piece4_is_hint = piece4.nr in self.hint_piece_nrs
-                        if CHECK_HINTS and piece4_is_hint:
+                        if piece4_is_hint:
                             if piece1_has_side or piece2_has_side or piece3_has_side:
                                 continue
                             # hints cannot be together in the same 2x2
@@ -275,10 +339,7 @@ class Command(BaseCommand):
                             if piece4.nr == 139 and rot4 != 1:
                                 continue
 
-                        if ONLY_CORNERS:
-                            if piece4.nr == 139:
-                                continue
-
+                        if self.with_corners:
                             if not (piece1_is_hint or piece2_is_hint or piece3_is_hint or piece4_is_hint or
                                     piece1_has_side or piece2_has_side or piece3_has_side):
                                 continue
@@ -383,8 +444,6 @@ class Command(BaseCommand):
                         if len(bulk) >= 1000:
                             Piece2x2.objects.bulk_create(bulk)
                             bulk = list()
-                            if nr > limit:
-                                return
 
                         if nr > print_nr:
                             print_nr += print_interval
@@ -396,5 +455,6 @@ class Command(BaseCommand):
         if len(bulk):
             Piece2x2.objects.bulk_create(bulk)
 
+        self.stdout.write('[INFO] Generated %s Piece2x2 (includes rotation variants)' % nr)
 
 # end of file

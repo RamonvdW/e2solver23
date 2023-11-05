@@ -27,6 +27,8 @@ class TwoSides(models.Model):
     objects = models.Manager()  # for the editor only
 
 
+# TODO: Beware that Piece2x2 might be a subset with the hint pieces, used to generate the corners 4x4
+
 class Piece2x2(models.Model):
 
     """ a 2x2 piece consists of 4 base pieces, each under a certain rotation

@@ -59,7 +59,8 @@
                     </div>
                 </td>
 
-                <td>{{ piece.nr1 }}<sub>{{ piece.rot1 }}</sub>, {{ piece.nr2 }}<sub>{{ piece.rot2 }}</sub>, {{ piece.nr3 }}<sub>{{ piece.rot3 }}</sub>, {{ piece.nr4 }}<sub>{{ piece.rot4 }}</sub></td>
+                <td>{{ piece.nr1 }}<sub>{{ piece.rot1 }}</sub>, {{ piece.nr2 }}<sub>{{ piece.rot2 }}</sub>
+                    <br>{{ piece.nr3 }}<sub>{{ piece.rot3 }}</sub>, {{ piece.nr4 }}<sub>{{ piece.rot4 }}</sub></td>
                 <td>{{ piece.side1 }}, {{ piece.side2 }}, {{ piece.side3 }}, {{ piece.side4 }}</td>
             </tr>
         {% endfor %}
