@@ -56,6 +56,7 @@ class Border4x2(models.Model):
 
         indexes = [
             models.Index(fields=['side2']),
+            models.Index(fields=['side4']),
         ]
 
     objects = models.Manager()  # for the editor only
