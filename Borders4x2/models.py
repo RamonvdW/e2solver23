@@ -54,6 +54,10 @@ class Border4x2(models.Model):
         verbose_name = 'Border 4x2'
         verbose_name_plural = 'Borders 4x2'
 
+        indexes = [
+            models.Index(fields=['side2']),
+        ]
+
     objects = models.Manager()  # for the editor only
 
 
