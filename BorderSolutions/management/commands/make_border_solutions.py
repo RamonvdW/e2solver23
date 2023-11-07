@@ -161,7 +161,11 @@ class Command(BaseCommand):
         # delete the old solutions
         BorderSolution.objects.all().delete()
 
-        hint_c1, hint_c2, hint_c3, hint_c4 = HINT_NRS
+        # 208: top left
+        # 181: bottom left
+        # 249: bottom right
+        # 255: top right
+        hint_c1, hint_c2, hint_c3, hint_c4 = (208, 255, 249, 181)
 
         nr = 0
         used_nrs = (0,)
@@ -176,27 +180,22 @@ class Command(BaseCommand):
 
                 for b1, b2, used_nrs3 in self._iter_border(used_nrs2, b1_exp_side4, b2_exp_side2):
                     print('b1: %s, b2: %s' % (b1.nr, b2.nr))
-                    print('used_nrs3: %s' % repr(used_nrs3))
 
                     # take then next corner, then fit two borders in between
                     # c2 b3 b4 c3
                     for c3, used_nrs4, b5_exp_side4, b4_exp_side2 in self._iter_corner(used_nrs3, hint_c3, c2.nr):
                         print('c3: %s' % c3.nr)
-                        print('used_nrs4: %s' % repr(used_nrs4))
 
                         for b3, b4, used_nrs5 in self._iter_border(used_nrs4, b3_exp_side4, b4_exp_side2):
                             print('b3: %s, b4: %s' % (b3.nr, b4.nr))
-                            print('used_nrs5: %s' % repr(used_nrs5))
 
                             # take then next corner, then fit two borders in between
                             # c3 b5 b6 c4
                             for c4, used_nrs6, b7_exp_side4, b6_exp_side2 in self._iter_corner(used_nrs5, hint_c4, c3.nr):
                                 print('c4: %s' % c4.nr)
-                                print('used_nrs6: %s' % repr(used_nrs6))
 
                                 for b5, b6, used_nrs7 in self._iter_border(used_nrs6, b5_exp_side4, b6_exp_side2):
                                     print('b5: %s, b6: %s' % (b5.nr, b6.nr))
-                                    print('used_nrs7: %s' % repr(used_nrs7))
 
                                     # find the final two borders
                                     # c4 b7 b8 c1
