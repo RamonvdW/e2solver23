@@ -35,66 +35,88 @@
             <!-- c1 -->
             <td>
                 <div style="display:flex">
-                    <img src="{{ piece.img1 }}" style="transform: {{ piece.transform1 }}">
-                    <img src="{{ piece.img2 }}" style="transform: {{ piece.transform2 }}">
-                    <img src="{{ piece.img3 }}" style="transform: {{ piece.transform3 }}">
-                    <img src="{{ piece.img4 }}" style="transform: {{ piece.transform4 }}">
+                    <img src="{{ solution.c1.img1 }}" style="transform: {{ solution.c1.transform1 }}">
+                    <img src="{{ solution.c1.img2 }}" style="transform: {{ solution.c1.transform2 }}">
+                    <img src="{{ solution.c1.img3 }}" style="transform: {{ solution.c1.transform3 }}">
+                    <img src="{{ solution.c1.img4 }}" style="transform: {{ solution.c1.transform4 }}">
                 </div>
                 <div style="display:flex">
-                    <img src="{{ piece.img5 }}" style="transform: {{ piece.transform5 }}">
-                    <img src="{{ piece.img6 }}" style="transform: {{ piece.transform6 }}">
-                    <img src="{{ piece.img7 }}" style="transform: {{ piece.transform7 }}">
-                    <img src="{{ piece.img8 }}" style="transform: {{ piece.transform8 }}">
+                    <img src="{{ solution.c1.img5 }}" style="transform: {{ solution.c1.transform5 }}">
+                    <img src="{{ solution.c1.img6 }}" style="transform: {{ solution.c1.transform6 }}">
+                    <img src="{{ solution.c1.img7 }}" style="transform: {{ solution.c1.transform7 }}">
+                    <img src="{{ solution.c1.img8 }}" style="transform: {{ solution.c1.transform8 }}">
                 </div>
                 <div style="display:flex">
-                    <img src="{{ piece.img9 }}" style="transform: {{ piece.transform9 }}">
-                    <img src="{{ piece.img10 }}" style="transform: {{ piece.transform10 }}">
-                    <img src="{{ piece.img11 }}" style="transform: {{ piece.transform11 }}">
-                    <img src="{{ piece.img12 }}" style="transform: {{ piece.transform12 }}">
+                    <img src="{{ solution.c1.img9 }}" style="transform: {{ solution.c1.transform9 }}">
+                    <img src="{{ solution.c1.img10 }}" style="transform: {{ solution.c1.transform10 }}">
+                    <img src="{{ solution.c1.img11 }}" style="transform: {{ solution.c1.transform11 }}">
+                    <img src="{{ solution.c1.img12 }}" style="transform: {{ solution.c1.transform12 }}">
                 </div>
                 <div style="display:flex">
-                    <img src="{{ piece.img13 }}" style="transform: {{ piece.transform13 }}">
-                    <img src="{{ piece.img14 }}" style="transform: {{ piece.transform14 }}">
-                    <img src="{{ piece.img15 }}" style="transform: {{ piece.transform15 }}">
-                    <img src="{{ piece.img16 }}" style="transform: {{ piece.transform16 }}">
+                    <img src="{{ solution.c1.img13 }}" style="transform: {{ solution.c1.transform13 }}">
+                    <img src="{{ solution.c1.img14 }}" style="transform: {{ solution.c1.transform14 }}">
+                    <img src="{{ solution.c1.img15 }}" style="transform: {{ solution.c1.transform15 }}">
+                    <img src="{{ solution.c1.img16 }}" style="transform: {{ solution.c1.transform16 }}">
                 </div>
             </td>
 
             <!-- b1 -->
             <td>
-
+                <div style="display:flex">
+                    <img src="{{ solution.b1.img1 }}" style="transform: {{ solution.b1.transform1 }}">
+                    <img src="{{ solution.b1.img2 }}" style="transform: {{ solution.b1.transform2 }}">
+                    <img src="{{ solution.b1.img3 }}" style="transform: {{ solution.b1.transform3 }}">
+                    <img src="{{ solution.b1.img4 }}" style="transform: {{ solution.b1.transform4 }}">
+                </div>
+                <div style="display:flex; margin-bottom:80px">
+                    <img src="{{ solution.b1.img5 }}" style="transform: {{ solution.b1.transform5 }}">
+                    <img src="{{ solution.b1.img6 }}" style="transform: {{ solution.b1.transform6 }}">
+                    <img src="{{ solution.b1.img7 }}" style="transform: {{ solution.b1.transform7 }}">
+                    <img src="{{ solution.b1.img8 }}" style="transform: {{ solution.b1.transform8 }}">
+                </div>
             </td>
 
             <!-- b2 -->
             <td>
-
+                <div style="display:flex">
+                    <img src="{{ solution.b2.img1 }}" style="transform: {{ solution.b2.transform1 }}">
+                    <img src="{{ solution.b2.img2 }}" style="transform: {{ solution.b2.transform2 }}">
+                    <img src="{{ solution.b2.img3 }}" style="transform: {{ solution.b2.transform3 }}">
+                    <img src="{{ solution.b2.img4 }}" style="transform: {{ solution.b2.transform4 }}">
+                </div>
+                <div style="display:flex; margin-bottom:80px">
+                    <img src="{{ solution.b2.img5 }}" style="transform: {{ solution.b2.transform5 }}">
+                    <img src="{{ solution.b2.img6 }}" style="transform: {{ solution.b2.transform6 }}">
+                    <img src="{{ solution.b2.img7 }}" style="transform: {{ solution.b2.transform7 }}">
+                    <img src="{{ solution.b2.img8 }}" style="transform: {{ solution.b2.transform8 }}">
+                </div>
             </td>
 
             <!-- c2 -->
             <td>
                 <div style="display:flex">
-                    <img src="{{ piece.img1 }}" style="transform: {{ piece.transform1 }}">
-                    <img src="{{ piece.img2 }}" style="transform: {{ piece.transform2 }}">
-                    <img src="{{ piece.img3 }}" style="transform: {{ piece.transform3 }}">
-                    <img src="{{ piece.img4 }}" style="transform: {{ piece.transform4 }}">
+                    <img src="{{ solution.c2.img13 }}" style="transform: {{ solution.c2.transform13 }}">
+                    <img src="{{ solution.c2.img9 }}" style="transform: {{ solution.c2.transform9 }}">
+                    <img src="{{ solution.c2.img5 }}" style="transform: {{ solution.c2.transform5 }}">
+                    <img src="{{ solution.c2.img1 }}" style="transform: {{ solution.c2.transform1 }}">
                 </div>
                 <div style="display:flex">
-                    <img src="{{ piece.img5 }}" style="transform: {{ piece.transform5 }}">
-                    <img src="{{ piece.img6 }}" style="transform: {{ piece.transform6 }}">
-                    <img src="{{ piece.img7 }}" style="transform: {{ piece.transform7 }}">
-                    <img src="{{ piece.img8 }}" style="transform: {{ piece.transform8 }}">
+                    <img src="{{ solution.c2.img14 }}" style="transform: {{ solution.c2.transform14 }}">
+                    <img src="{{ solution.c2.img10 }}" style="transform: {{ solution.c2.transform10 }}">
+                    <img src="{{ solution.c2.img6 }}" style="transform: {{ solution.c2.transform6 }}">
+                    <img src="{{ solution.c2.img2 }}" style="transform: {{ solution.c2.transform2 }}">
                 </div>
                 <div style="display:flex">
-                    <img src="{{ piece.img9 }}" style="transform: {{ piece.transform9 }}">
-                    <img src="{{ piece.img10 }}" style="transform: {{ piece.transform10 }}">
-                    <img src="{{ piece.img11 }}" style="transform: {{ piece.transform11 }}">
-                    <img src="{{ piece.img12 }}" style="transform: {{ piece.transform12 }}">
+                    <img src="{{ solution.c2.img15 }}" style="transform: {{ solution.c2.transform15 }}">
+                    <img src="{{ solution.c2.img11 }}" style="transform: {{ solution.c2.transform11 }}">
+                    <img src="{{ solution.c2.img7 }}" style="transform: {{ solution.c2.transform7 }}">
+                    <img src="{{ solution.c2.img3 }}" style="transform: {{ solution.c2.transform3 }}">
                 </div>
                 <div style="display:flex">
-                    <img src="{{ piece.img13 }}" style="transform: {{ piece.transform13 }}">
-                    <img src="{{ piece.img14 }}" style="transform: {{ piece.transform14 }}">
-                    <img src="{{ piece.img15 }}" style="transform: {{ piece.transform15 }}">
-                    <img src="{{ piece.img16 }}" style="transform: {{ piece.transform16 }}">
+                    <img src="{{ solution.c2.img16 }}" style="transform: {{ solution.c2.transform16 }}">
+                    <img src="{{ solution.c2.img12 }}" style="transform: {{ solution.c2.transform12 }}">
+                    <img src="{{ solution.c2.img8 }}" style="transform: {{ solution.c2.transform8 }}">
+                    <img src="{{ solution.c2.img4 }}" style="transform: {{ solution.c2.transform4 }}">
                 </div>
             </td>
         </tr>
@@ -102,7 +124,22 @@
         <tr>
             <!-- b8 -->
             <td>
-
+                <div style="display:flex; margin-right:80px">
+                    <img src="{{ solution.b8.img4 }}" style="transform: {{ solution.b8.transform4 }}">
+                    <img src="{{ solution.b8.img8 }}" style="transform: {{ solution.b8.transform8 }}">
+                </div>
+                <div style="display:flex; margin-right:80px">
+                    <img src="{{ solution.b8.img3 }}" style="transform: {{ solution.b8.transform3 }}">
+                    <img src="{{ solution.b8.img7 }}" style="transform: {{ solution.b8.transform7 }}">
+                </div>
+                <div style="display:flex; margin-right:80px">
+                    <img src="{{ solution.b8.img2 }}" style="transform: {{ solution.b8.transform2 }}">
+                    <img src="{{ solution.b8.img6 }}" style="transform: {{ solution.b8.transform6 }}">
+                </div>
+                <div style="display:flex; margin-right:80px">
+                    <img src="{{ solution.b8.img1 }}" style="transform: {{ solution.b8.transform1 }}">
+                    <img src="{{ solution.b8.img5 }}" style="transform: {{ solution.b8.transform5 }}">
+                </div>
             </td>
 
             <td></td>
@@ -110,14 +147,44 @@
 
             <!-- b3 -->
             <td>
-
+                <div style="display:flex; margin-left:80px">
+                    <img src="{{ solution.b3.img5 }}" style="transform: {{ solution.b3.transform5 }}">
+                    <img src="{{ solution.b3.img1 }}" style="transform: {{ solution.b3.transform1 }}">
+                </div>
+                <div style="display:flex; margin-left:80px">
+                    <img src="{{ solution.b3.img6 }}" style="transform: {{ solution.b3.transform6 }}">
+                    <img src="{{ solution.b3.img2 }}" style="transform: {{ solution.b3.transform2 }}">
+                </div>
+                <div style="display:flex; margin-left:80px">
+                    <img src="{{ solution.b3.img7 }}" style="transform: {{ solution.b3.transform7 }}">
+                    <img src="{{ solution.b3.img3 }}" style="transform: {{ solution.b3.transform3 }}">
+                </div>
+                <div style="display:flex; margin-left:80px">
+                    <img src="{{ solution.b3.img8 }}" style="transform: {{ solution.b3.transform8 }}">
+                    <img src="{{ solution.b3.img4 }}" style="transform: {{ solution.b3.transform4 }}">
+                </div>
             </td>
         </tr>
 
         <tr>
             <!-- b7 -->
             <td>
-
+                <div style="display:flex; margin-right:80px">
+                    <img src="{{ solution.b7.img4 }}" style="transform: {{ solution.b7.transform4 }}">
+                    <img src="{{ solution.b7.img8 }}" style="transform: {{ solution.b7.transform8 }}">
+                </div>
+                <div style="display:flex; margin-right:80px">
+                    <img src="{{ solution.b7.img3 }}" style="transform: {{ solution.b7.transform3 }}">
+                    <img src="{{ solution.b7.img7 }}" style="transform: {{ solution.b7.transform7 }}">
+                </div>
+                <div style="display:flex; margin-right:80px">
+                    <img src="{{ solution.b7.img2 }}" style="transform: {{ solution.b7.transform2 }}">
+                    <img src="{{ solution.b7.img6 }}" style="transform: {{ solution.b7.transform6 }}">
+                </div>
+                <div style="display:flex; margin-right:80px">
+                    <img src="{{ solution.b7.img1 }}" style="transform: {{ solution.b7.transform1 }}">
+                    <img src="{{ solution.b7.img5 }}" style="transform: {{ solution.b7.transform5 }}">
+                </div>
             </td>
 
             <td></td>
@@ -125,7 +192,22 @@
 
             <!-- b4 -->
             <td>
-
+                <div style="display:flex; margin-left:80px">
+                    <img src="{{ solution.b4.img5 }}" style="transform: {{ solution.b4.transform5 }}">
+                    <img src="{{ solution.b4.img1 }}" style="transform: {{ solution.b4.transform1 }}">
+                </div>
+                <div style="display:flex; margin-left:80px">
+                    <img src="{{ solution.b4.img6 }}" style="transform: {{ solution.b4.transform6 }}">
+                    <img src="{{ solution.b4.img2 }}" style="transform: {{ solution.b4.transform2 }}">
+                </div>
+                <div style="display:flex; margin-left:80px">
+                    <img src="{{ solution.b4.img7 }}" style="transform: {{ solution.b4.transform7 }}">
+                    <img src="{{ solution.b4.img3 }}" style="transform: {{ solution.b4.transform3 }}">
+                </div>
+                <div style="display:flex; margin-left:80px">
+                    <img src="{{ solution.b4.img8 }}" style="transform: {{ solution.b4.transform8 }}">
+                    <img src="{{ solution.b4.img4 }}" style="transform: {{ solution.b4.transform4 }}">
+                </div>
             </td>
         </tr>
 
@@ -133,66 +215,88 @@
             <!-- c4 -->
             <td>
                 <div style="display:flex">
-                    <img src="{{ piece.img1 }}" style="transform: {{ piece.transform1 }}">
-                    <img src="{{ piece.img2 }}" style="transform: {{ piece.transform2 }}">
-                    <img src="{{ piece.img3 }}" style="transform: {{ piece.transform3 }}">
-                    <img src="{{ piece.img4 }}" style="transform: {{ piece.transform4 }}">
+                    <img src="{{ solution.c4.img4 }}" style="transform: {{ solution.c4.transform4 }}">
+                    <img src="{{ solution.c4.img8 }}" style="transform: {{ solution.c4.transform8 }}">
+                    <img src="{{ solution.c4.img12 }}" style="transform: {{ solution.c4.transform12 }}">
+                    <img src="{{ solution.c4.img16 }}" style="transform: {{ solution.c4.transform16 }}">
                 </div>
                 <div style="display:flex">
-                    <img src="{{ piece.img5 }}" style="transform: {{ piece.transform5 }}">
-                    <img src="{{ piece.img6 }}" style="transform: {{ piece.transform6 }}">
-                    <img src="{{ piece.img7 }}" style="transform: {{ piece.transform7 }}">
-                    <img src="{{ piece.img8 }}" style="transform: {{ piece.transform8 }}">
+                    <img src="{{ solution.c4.img3 }}" style="transform: {{ solution.c4.transform3 }}">
+                    <img src="{{ solution.c4.img7 }}" style="transform: {{ solution.c4.transform7 }}">
+                    <img src="{{ solution.c4.img11 }}" style="transform: {{ solution.c4.transform11 }}">
+                    <img src="{{ solution.c4.img15 }}" style="transform: {{ solution.c4.transform15 }}">
                 </div>
                 <div style="display:flex">
-                    <img src="{{ piece.img9 }}" style="transform: {{ piece.transform9 }}">
-                    <img src="{{ piece.img10 }}" style="transform: {{ piece.transform10 }}">
-                    <img src="{{ piece.img11 }}" style="transform: {{ piece.transform11 }}">
-                    <img src="{{ piece.img12 }}" style="transform: {{ piece.transform12 }}">
+                    <img src="{{ solution.c4.img2 }}" style="transform: {{ solution.c4.transform2 }}">
+                    <img src="{{ solution.c4.img6 }}" style="transform: {{ solution.c4.transform6 }}">
+                    <img src="{{ solution.c4.img10 }}" style="transform: {{ solution.c4.transform10 }}">
+                    <img src="{{ solution.c4.img14 }}" style="transform: {{ solution.c4.transform14 }}">
                 </div>
                 <div style="display:flex">
-                    <img src="{{ piece.img13 }}" style="transform: {{ piece.transform13 }}">
-                    <img src="{{ piece.img14 }}" style="transform: {{ piece.transform14 }}">
-                    <img src="{{ piece.img15 }}" style="transform: {{ piece.transform15 }}">
-                    <img src="{{ piece.img16 }}" style="transform: {{ piece.transform16 }}">
+                    <img src="{{ solution.c4.img1 }}" style="transform: {{ solution.c4.transform1 }}">
+                    <img src="{{ solution.c4.img5 }}" style="transform: {{ solution.c4.transform5 }}">
+                    <img src="{{ solution.c4.img9 }}" style="transform: {{ solution.c4.transform9 }}">
+                    <img src="{{ solution.c4.img13 }}" style="transform: {{ solution.c4.transform13 }}">
                 </div>
             </td>
 
             <!-- b6 -->
             <td>
-
+                <div style="display:flex; margin-top:80px">
+                    <img src="{{ solution.b6.img8 }}" style="transform: {{ solution.b6.transform8 }}">
+                    <img src="{{ solution.b6.img7 }}" style="transform: {{ solution.b6.transform7 }}">
+                    <img src="{{ solution.b6.img6 }}" style="transform: {{ solution.b6.transform6 }}">
+                    <img src="{{ solution.b6.img5 }}" style="transform: {{ solution.b6.transform5 }}">
+                </div>
+                <div style="display:flex">
+                    <img src="{{ solution.b6.img4 }}" style="transform: {{ solution.b6.transform4 }}">
+                    <img src="{{ solution.b6.img3 }}" style="transform: {{ solution.b6.transform3 }}">
+                    <img src="{{ solution.b6.img2 }}" style="transform: {{ solution.b6.transform2 }}">
+                    <img src="{{ solution.b6.img1 }}" style="transform: {{ solution.b6.transform1 }}">
+                </div>
             </td>
 
             <!-- b5 -->
             <td>
-
+                <div style="display:flex;margin-top:80px">
+                    <img src="{{ solution.b5.img8 }}" style="transform: {{ solution.b5.transform8 }}">
+                    <img src="{{ solution.b5.img7 }}" style="transform: {{ solution.b5.transform7 }}">
+                    <img src="{{ solution.b5.img6 }}" style="transform: {{ solution.b5.transform6 }}">
+                    <img src="{{ solution.b5.img5 }}" style="transform: {{ solution.b5.transform5 }}">
+                </div>
+                <div style="display:flex">
+                    <img src="{{ solution.b5.img4 }}" style="transform: {{ solution.b5.transform4 }}">
+                    <img src="{{ solution.b5.img3 }}" style="transform: {{ solution.b5.transform3 }}">
+                    <img src="{{ solution.b5.img2 }}" style="transform: {{ solution.b5.transform2 }}">
+                    <img src="{{ solution.b5.img1 }}" style="transform: {{ solution.b5.transform1 }}">
+                </div>
             </td>
 
             <!-- c3 -->
             <td>
                 <div style="display:flex">
-                    <img src="{{ piece.img1 }}" style="transform: {{ piece.transform1 }}">
-                    <img src="{{ piece.img2 }}" style="transform: {{ piece.transform2 }}">
-                    <img src="{{ piece.img3 }}" style="transform: {{ piece.transform3 }}">
-                    <img src="{{ piece.img4 }}" style="transform: {{ piece.transform4 }}">
+                    <img src="{{ solution.c3.img16 }}" style="transform: {{ solution.c3.transform16 }}">
+                    <img src="{{ solution.c3.img15 }}" style="transform: {{ solution.c3.transform15 }}">
+                    <img src="{{ solution.c3.img14 }}" style="transform: {{ solution.c3.transform14 }}">
+                    <img src="{{ solution.c3.img13 }}" style="transform: {{ solution.c3.transform13 }}">
                 </div>
                 <div style="display:flex">
-                    <img src="{{ piece.img5 }}" style="transform: {{ piece.transform5 }}">
-                    <img src="{{ piece.img6 }}" style="transform: {{ piece.transform6 }}">
-                    <img src="{{ piece.img7 }}" style="transform: {{ piece.transform7 }}">
-                    <img src="{{ piece.img8 }}" style="transform: {{ piece.transform8 }}">
+                    <img src="{{ solution.c3.img12 }}" style="transform: {{ solution.c3.transform12 }}">
+                    <img src="{{ solution.c3.img11 }}" style="transform: {{ solution.c3.transform11 }}">
+                    <img src="{{ solution.c3.img10 }}" style="transform: {{ solution.c3.transform10 }}">
+                    <img src="{{ solution.c3.img9 }}" style="transform: {{ solution.c3.transform9 }}">
                 </div>
                 <div style="display:flex">
-                    <img src="{{ piece.img9 }}" style="transform: {{ piece.transform9 }}">
-                    <img src="{{ piece.img10 }}" style="transform: {{ piece.transform10 }}">
-                    <img src="{{ piece.img11 }}" style="transform: {{ piece.transform11 }}">
-                    <img src="{{ piece.img12 }}" style="transform: {{ piece.transform12 }}">
+                    <img src="{{ solution.c3.img8 }}" style="transform: {{ solution.c3.transform8 }}">
+                    <img src="{{ solution.c3.img7 }}" style="transform: {{ solution.c3.transform7 }}">
+                    <img src="{{ solution.c3.img6 }}" style="transform: {{ solution.c3.transform6 }}">
+                    <img src="{{ solution.c3.img5 }}" style="transform: {{ solution.c3.transform5 }}">
                 </div>
                 <div style="display:flex">
-                    <img src="{{ piece.img13 }}" style="transform: {{ piece.transform13 }}">
-                    <img src="{{ piece.img14 }}" style="transform: {{ piece.transform14 }}">
-                    <img src="{{ piece.img15 }}" style="transform: {{ piece.transform15 }}">
-                    <img src="{{ piece.img16 }}" style="transform: {{ piece.transform16 }}">
+                    <img src="{{ solution.c3.img4 }}" style="transform: {{ solution.c3.transform4 }}">
+                    <img src="{{ solution.c3.img3 }}" style="transform: {{ solution.c3.transform3 }}">
+                    <img src="{{ solution.c3.img2 }}" style="transform: {{ solution.c3.transform2 }}">
+                    <img src="{{ solution.c3.img1 }}" style="transform: {{ solution.c3.transform1 }}">
                 </div>
             </td>
         </tr>
