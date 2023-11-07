@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'Pieces2x2',
     'Pieces4x4',
     'Borders4x2',
-    'CornerSolutions',
+    'BorderSolutions',
     'django.contrib.admin',
     'django.contrib.staticfiles',   # gather static files from modules helper
     'django.contrib.sessions',      # support for database-backed sessions; needed for logged-in user

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Corner Solution</title>
+    <style>
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+            padding: 5px 10px 5px 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Border Solution</h1>
+
+    <p>
+        {% if url_prev %}
+            <a style="margin:10px" href="{{ url_prev }}">-1</a>
+        {% else %}
+            <span style="margin:10px">-1</span>
+        {% endif %}
+        <a style="margin:10px" href="{{ url_next }}">+1</a>
+    </p>
+
+    <table style="margin-left:auto; margin-right:auto">
+        <tr>
+            <td colspan="4">{{ piece.nr }}</td>
+        </tr>
+
+        <tr>
+            <!-- c1 -->
+            <td>
+                <div style="display:flex">
+                    <img src="{{ piece.img1 }}" style="transform: {{ piece.transform1 }}">
+                    <img src="{{ piece.img2 }}" style="transform: {{ piece.transform2 }}">
+                    <img src="{{ piece.img3 }}" style="transform: {{ piece.transform3 }}">
+                    <img src="{{ piece.img4 }}" style="transform: {{ piece.transform4 }}">
+                </div>
+                <div style="display:flex">
+                    <img src="{{ piece.img5 }}" style="transform: {{ piece.transform5 }}">
+                    <img src="{{ piece.img6 }}" style="transform: {{ piece.transform6 }}">
+                    <img src="{{ piece.img7 }}" style="transform: {{ piece.transform7 }}">
+                    <img src="{{ piece.img8 }}" style="transform: {{ piece.transform8 }}">
+                </div>
+                <div style="display:flex">
+                    <img src="{{ piece.img9 }}" style="transform: {{ piece.transform9 }}">
+                    <img src="{{ piece.img10 }}" style="transform: {{ piece.transform10 }}">
+                    <img src="{{ piece.img11 }}" style="transform: {{ piece.transform11 }}">
+                    <img src="{{ piece.img12 }}" style="transform: {{ piece.transform12 }}">
+                </div>
+                <div style="display:flex">
+                    <img src="{{ piece.img13 }}" style="transform: {{ piece.transform13 }}">
+                    <img src="{{ piece.img14 }}" style="transform: {{ piece.transform14 }}">
+                    <img src="{{ piece.img15 }}" style="transform: {{ piece.transform15 }}">
+                    <img src="{{ piece.img16 }}" style="transform: {{ piece.transform16 }}">
+                </div>
+            </td>
+
+            <!-- b1 -->
+            <td>
+
+            </td>
+
+            <!-- b2 -->
+            <td>
+
+            </td>
+
+            <!-- c2 -->
+            <td>
+                <div style="display:flex">
+                    <img src="{{ piece.img1 }}" style="transform: {{ piece.transform1 }}">
+                    <img src="{{ piece.img2 }}" style="transform: {{ piece.transform2 }}">
+                    <img src="{{ piece.img3 }}" style="transform: {{ piece.transform3 }}">
+                    <img src="{{ piece.img4 }}" style="transform: {{ piece.transform4 }}">
+                </div>
+                <div style="display:flex">
+                    <img src="{{ piece.img5 }}" style="transform: {{ piece.transform5 }}">
+                    <img src="{{ piece.img6 }}" style="transform: {{ piece.transform6 }}">
+                    <img src="{{ piece.img7 }}" style="transform: {{ piece.transform7 }}">
+                    <img src="{{ piece.img8 }}" style="transform: {{ piece.transform8 }}">
+                </div>
+                <div style="display:flex">
+                    <img src="{{ piece.img9 }}" style="transform: {{ piece.transform9 }}">
+                    <img src="{{ piece.img10 }}" style="transform: {{ piece.transform10 }}">
+                    <img src="{{ piece.img11 }}" style="transform: {{ piece.transform11 }}">
+                    <img src="{{ piece.img12 }}" style="transform: {{ piece.transform12 }}">
+                </div>
+                <div style="display:flex">
+                    <img src="{{ piece.img13 }}" style="transform: {{ piece.transform13 }}">
+                    <img src="{{ piece.img14 }}" style="transform: {{ piece.transform14 }}">
+                    <img src="{{ piece.img15 }}" style="transform: {{ piece.transform15 }}">
+                    <img src="{{ piece.img16 }}" style="transform: {{ piece.transform16 }}">
+                </div>
+            </td>
+        </tr>
+
+        <tr>
+            <!-- b8 -->
+            <td>
+
+            </td>
+
+            <td></td>
+            <td></td>
+
+            <!-- b3 -->
+            <td>
+
+            </td>
+        </tr>
+
+        <tr>
+            <!-- b7 -->
+            <td>
+
+            </td>
+
+            <td></td>
+            <td></td>
+
+            <!-- b4 -->
+            <td>
+
+            </td>
+        </tr>
+
+        <tr>
+            <!-- c4 -->
+            <td>
+                <div style="display:flex">
+                    <img src="{{ piece.img1 }}" style="transform: {{ piece.transform1 }}">
+                    <img src="{{ piece.img2 }}" style="transform: {{ piece.transform2 }}">
+                    <img src="{{ piece.img3 }}" style="transform: {{ piece.transform3 }}">
+                    <img src="{{ piece.img4 }}" style="transform: {{ piece.transform4 }}">
+                </div>
+                <div style="display:flex">
+                    <img src="{{ piece.img5 }}" style="transform: {{ piece.transform5 }}">
+                    <img src="{{ piece.img6 }}" style="transform: {{ piece.transform6 }}">
+                    <img src="{{ piece.img7 }}" style="transform: {{ piece.transform7 }}">
+                    <img src="{{ piece.img8 }}" style="transform: {{ piece.transform8 }}">
+                </div>
+                <div style="display:flex">
+                    <img src="{{ piece.img9 }}" style="transform: {{ piece.transform9 }}">
+                    <img src="{{ piece.img10 }}" style="transform: {{ piece.transform10 }}">
+                    <img src="{{ piece.img11 }}" style="transform: {{ piece.transform11 }}">
+                    <img src="{{ piece.img12 }}" style="transform: {{ piece.transform12 }}">
+                </div>
+                <div style="display:flex">
+                    <img src="{{ piece.img13 }}" style="transform: {{ piece.transform13 }}">
+                    <img src="{{ piece.img14 }}" style="transform: {{ piece.transform14 }}">
+                    <img src="{{ piece.img15 }}" style="transform: {{ piece.transform15 }}">
+                    <img src="{{ piece.img16 }}" style="transform: {{ piece.transform16 }}">
+                </div>
+            </td>
+
+            <!-- b6 -->
+            <td>
+
+            </td>
+
+            <!-- b5 -->
+            <td>
+
+            </td>
+
+            <!-- c3 -->
+            <td>
+                <div style="display:flex">
+                    <img src="{{ piece.img1 }}" style="transform: {{ piece.transform1 }}">
+                    <img src="{{ piece.img2 }}" style="transform: {{ piece.transform2 }}">
+                    <img src="{{ piece.img3 }}" style="transform: {{ piece.transform3 }}">
+                    <img src="{{ piece.img4 }}" style="transform: {{ piece.transform4 }}">
+                </div>
+                <div style="display:flex">
+                    <img src="{{ piece.img5 }}" style="transform: {{ piece.transform5 }}">
+                    <img src="{{ piece.img6 }}" style="transform: {{ piece.transform6 }}">
+                    <img src="{{ piece.img7 }}" style="transform: {{ piece.transform7 }}">
+                    <img src="{{ piece.img8 }}" style="transform: {{ piece.transform8 }}">
+                </div>
+                <div style="display:flex">
+                    <img src="{{ piece.img9 }}" style="transform: {{ piece.transform9 }}">
+                    <img src="{{ piece.img10 }}" style="transform: {{ piece.transform10 }}">
+                    <img src="{{ piece.img11 }}" style="transform: {{ piece.transform11 }}">
+                    <img src="{{ piece.img12 }}" style="transform: {{ piece.transform12 }}">
+                </div>
+                <div style="display:flex">
+                    <img src="{{ piece.img13 }}" style="transform: {{ piece.transform13 }}">
+                    <img src="{{ piece.img14 }}" style="transform: {{ piece.transform14 }}">
+                    <img src="{{ piece.img15 }}" style="transform: {{ piece.transform15 }}">
+                    <img src="{{ piece.img16 }}" style="transform: {{ piece.transform16 }}">
+                </div>
+            </td>
+        </tr>
+
+    </table>
+
+</body>
+</html>

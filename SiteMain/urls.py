@@ -18,7 +18,7 @@ urlpatterns = [
     path('pieces2x2/', include('Pieces2x2.urls')),
     path('pieces4x4/', include('Pieces4x4.urls')),
     path('borders4x2/', include('Borders4x2.urls')),
-    path('corner-solutions/', include('CornerSolutions.urls')),
+    path('border-solutions/', include('BorderSolutions.urls')),
     path('admin/', admin.site.urls),
 ]
 

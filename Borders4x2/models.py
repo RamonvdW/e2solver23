@@ -9,7 +9,7 @@ from django.db import models
 
 class Border4x2(models.Model):
 
-    """ a 8x2 piece consists of 8 base pieces, each under a certain rotation
+    """ a 4x2 piece consists of 8 base pieces, each under a certain rotation
         the four sides start at the top and follow the piece clockwise
 
                       side1 = border

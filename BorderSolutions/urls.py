@@ -5,9 +5,9 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from CornerSolutions import views
+from BorderSolutions import views
 
-app_name = 'CornerSolutions'
+app_name = 'BorderSolutions'
 
 # base = /corner-solutions/
 
