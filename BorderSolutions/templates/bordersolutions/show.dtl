@@ -28,7 +28,12 @@
 
     <table style="margin-left:auto; margin-right:auto">
         <tr>
-            <td colspan="4">{{ piece.nr }}</td>
+            <td colspan="4">Border solution{{ solution.nr }}</td>
+        </tr>
+        <tr>
+            <td>c1 = {{ solution.c1.nr }}</td>
+            <td colspan="2"></td>
+            <td>c2 = {{ solution.c2.nr }}</td>
         </tr>
 
         <tr>
@@ -299,6 +304,13 @@
                     <img src="{{ solution.c3.img1 }}" style="transform: {{ solution.c3.transform1 }}">
                 </div>
             </td>
+
+            <tr>
+                <td>c4 = {{ solution.c4.nr }}</td>
+                <td colspan="2"></td>
+                <td>c3 = {{ solution.c3.nr }}</td>
+            </tr>
+
         </tr>
 
     </table>

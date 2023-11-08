@@ -18,8 +18,15 @@ class Command(BaseCommand):
 
     help = "Generate border solutions from Piece4x4 and Border4x2"
 
+    # 208: top left
+    # 181: bottom left
+    # 249: bottom right
+    # 255: top right
+    hint_c1, hint_c2, hint_c3, hint_c4 = (208, 255, 249, 181)
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.nr = 0
 
         # cache all base pieces
         self.base_pieces = dict()       # [nr] = BasePiece()
@@ -142,6 +149,92 @@ class Command(BaseCommand):
             yield b, used_nrs2
         # for
 
+    def _find_solution_with_c1(self, c1, used_nrs1, b1_exp_side4, b8_exp_side2):
+        """ Find and store the first solution with c1 """
+        for b8, used_nrs2, b7_exp_side2 in self._iter_border_side2(used_nrs1,
+                                                                   b8_exp_side2):
+            # self.stdout.write('b8: %s' % b8.nr)
+            for b1, used_nrs3, b2_exp_side4 in self._iter_border_side4(used_nrs2,
+                                                                       b1_exp_side4):
+                # self.stdout.write('b1: %s' % b1.nr)
+
+                # take one corner and fit two border pieces
+                # b2 c2 b3
+                for c2, used_nrs4, b3_exp_side4, b2_exp_side2 in self._iter_corner(used_nrs3,
+                                                                                   self.hint_c2):
+                    # self.stdout.write('c2: %s' % c2.nr)
+                    for b2, used_nrs5 in self._iter_border_side2_side4(used_nrs4,
+                                                                       b2_exp_side2,
+                                                                       b2_exp_side4):
+                        # self.stdout.write('b2: %s' % b2.nr)
+                        for b3, used_nrs6, b4_exp_side4 in self._iter_border_side4(used_nrs5,
+                                                                                   b3_exp_side4):
+                            # self.stdout.write('b3: %s' % b3.nr)
+
+                            # take one corner and connect to existing border on one side
+                            # c4 b7
+                            for c4, used_nrs7, b7_exp_side4, b6_exp_side2 in self._iter_corner(used_nrs6,
+                                                                                               self.hint_c4):
+                                # self.stdout.write('c4: %s' % c4.nr)
+                                for b7, used_nrs8 in self._iter_border_side2_side4(used_nrs7,
+                                                                                   b7_exp_side2,
+                                                                                   b7_exp_side4):
+                                    # self.stdout.write('b7: %s' % b7.nr)
+
+                                    # take last corner and fit to existing border on one side
+                                    # b4 c3
+                                    for c3, used_nrs9, b5_exp_side4, b4_exp_side2 in self._iter_corner(used_nrs8,
+                                                                                                       self.hint_c3):
+                                        # self.stdout.write('c3: %s' % c3.nr)
+                                        for b4, used_nrs10 in self._iter_border_side2_side4(used_nrs9,
+                                                                                            b4_exp_side2,
+                                                                                            b4_exp_side4):
+                                            # self.stdout.write('b4: %s' % b4.nr)
+
+                                            # fill the last two borders
+                                            # b5 b6
+                                            for b5, used_nrs11, b6_exp_side4 in self._iter_border_side4(used_nrs10,
+                                                                                                        b5_exp_side4):
+                                                # self.stdout.write('b5: %s' % b5.nr)
+
+                                                for b6, _ in self._iter_border_side2_side4(used_nrs11,
+                                                                                           b6_exp_side2,
+                                                                                           b6_exp_side4):
+                                                    # self.stdout.write('b6: %s' % b6.nr)
+
+                                                    self.nr += 1
+                                                    solution = BorderSolution(
+                                                        nr=self.nr,
+                                                        c1=c1.nr,
+                                                        c2=c2.nr,
+                                                        c3=c3.nr,
+                                                        c4=c4.nr,
+                                                        b1=b1.nr,
+                                                        b2=b2.nr,
+                                                        b3=b3.nr,
+                                                        b4=b4.nr,
+                                                        b5=b5.nr,
+                                                        b6=b6.nr,
+                                                        b7=b7.nr,
+                                                        b8=b8.nr)
+                                                    solution.save()
+                                                    self.stdout.write('[INFO] Solutions: %s' % self.nr)
+
+                                                    # found enough solutions with c1
+                                                    return
+                                                
+                                                # for
+                                            # for
+                                        # for
+                                    # for
+                                # for
+                            # for
+                        # for
+                    # for
+                # for
+            # for
+        # for
+
     def handle(self, *args, **options):
 
         """ a corner solution consists of 4 Piece4x4, each under a certain rotation
@@ -187,99 +280,17 @@ class Command(BaseCommand):
         # delete the old solutions
         BorderSolution.objects.all().delete()
 
-        # 208: top left
-        # 181: bottom left
-        # 249: bottom right
-        # 255: top right
-        hint_c1, hint_c2, hint_c3, hint_c4 = (208, 255, 249, 181)
-
-        nr = 0
-        used_nrs = ()
+        self.nr = 0
 
         # take one corner and fit two border pieces
         # b8 c1 b1
+        used_nrs = ()
         for c1, used_nrs1, b1_exp_side4, b8_exp_side2 in self._iter_corner(used_nrs,
-                                                                           hint_c1):
-            print('c1: %s' % c1.nr)
-            for b8, used_nrs2, b7_exp_side2 in self._iter_border_side2(used_nrs1,
-                                                                       b8_exp_side2):
-                print('b8: %s' % b8.nr)
-                for b1, used_nrs3, b2_exp_side4 in self._iter_border_side4(used_nrs2,
-                                                                           b1_exp_side4):
-                    print('b1: %s' % b1.nr)
-
-                    # take one corner and fit two border pieces
-                    # b2 c2 b3
-                    for c2, used_nrs4, b3_exp_side4, b2_exp_side2 in self._iter_corner(used_nrs3,
-                                                                                       hint_c2):
-                        print('c2: %s' % c2.nr)
-                        for b2, used_nrs5 in self._iter_border_side2_side4(used_nrs4,
-                                                                           b2_exp_side2,
-                                                                           b2_exp_side4):
-                            print('b2: %s' % b2.nr)
-                            for b3, used_nrs6, b4_exp_side4 in self._iter_border_side4(used_nrs5,
-                                                                                       b3_exp_side4):
-                                print('b3: %s' % b3.nr)
-
-                                # take one corner and connect to existing border on one side
-                                # c4 b7
-                                for c4, used_nrs7, b7_exp_side4, b6_exp_side2 in self._iter_corner(used_nrs6,
-                                                                                                   hint_c4):
-                                    print('c4: %s' % c4.nr)
-                                    for b7, used_nrs8 in self._iter_border_side2_side4(used_nrs7,
-                                                                                       b7_exp_side2,
-                                                                                       b7_exp_side4):
-                                        print('b7: %s' % b7.nr)
-
-                                        # take last corner and fit to existing border on one side
-                                        # b4 c3
-                                        for c3, used_nrs9, b5_exp_side4, b4_exp_side2 in self._iter_corner(used_nrs8,
-                                                                                                           hint_c3):
-                                            print('c3: %s' % c3.nr)
-                                            for b4, used_nrs10 in self._iter_border_side2_side4(used_nrs9,
-                                                                                                b4_exp_side2,
-                                                                                                b4_exp_side4):
-                                                print('b4: %s' % b4.nr)
-
-                                                # fill the last two borders
-                                                # b5 b6
-                                                for b5, used_nrs11, b6_exp_side4 in self._iter_border_side4(used_nrs10,
-                                                                                                            b5_exp_side4):
-                                                    print('b5: %s' % b5.nr)
-
-                                                    for b6, _ in self._iter_border_side2_side4(used_nrs11,
-                                                                                               b6_exp_side2,
-                                                                                               b6_exp_side4):
-                                                        print('b6: %s' % b6.nr)
-
-                                                        nr += 1
-                                                        solution = BorderSolution(
-                                                                        nr=nr,
-                                                                        c1=c1.nr,
-                                                                        c2=c2.nr,
-                                                                        c3=c3.nr,
-                                                                        c4=c4.nr,
-                                                                        b1=b1.nr,
-                                                                        b2=b2.nr,
-                                                                        b3=b3.nr,
-                                                                        b4=b4.nr,
-                                                                        b5=b5.nr,
-                                                                        b6=b6.nr,
-                                                                        b7=b7.nr,
-                                                                        b8=b8.nr)
-                                                        solution.save()
-                                                        print('[INFO] Solutions: %s' % nr)
-                                                    # for
-                                                # for
-                                            # for
-                                        # for
-                                    # for
-                                # for
-                            # for
-                        # for
-                    # for
-                # for
-            # for
+                                                                           self.hint_c1):
+            self.stdout.write('c1: %s' % c1.nr)
+            self._find_solution_with_c1(c1, used_nrs1, b1_exp_side4, b8_exp_side2)
         # for
+
+        self.stdout.write('[INFO] Done!')
 
 # end of file
