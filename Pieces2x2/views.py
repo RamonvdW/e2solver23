@@ -35,19 +35,21 @@ class ShowPiecesView(TemplateView):
         except ValueError:
             raise Http404('Not found')
 
-        # maak blokjes van 10
-        nr = int((nr - 1) / 10)
-        nr = 1 + nr * 10
+        # maak blokjes van 5 rijen van 4 breed = 20
+        nr = int((nr - 1) / 20)
+        nr = 1 + nr * 20
 
         if nr > 100:
             context['url_prev100'] = reverse('Pieces2x2:show-pieces', kwargs={'nr': nr-100})
         if nr > 10:
-            context['url_prev10'] = reverse('Pieces2x2:show-pieces', kwargs={'nr': nr-10})
-        context['url_next10'] = reverse('Pieces2x2:show-pieces', kwargs={'nr': nr+10})
+            context['url_prev20'] = reverse('Pieces2x2:show-pieces', kwargs={'nr': nr-20})
+        context['url_next20'] = reverse('Pieces2x2:show-pieces', kwargs={'nr': nr+20})
         context['url_next100'] = reverse('Pieces2x2:show-pieces', kwargs={'nr': nr+100})
         context['url_next1000'] = reverse('Pieces2x2:show-pieces', kwargs={'nr': nr+1000})
 
-        context['pieces'] = pieces = Piece2x2.objects.filter(nr__gte=nr, nr__lt=nr+10).order_by('nr')
+        context['groups'] = groups = list()
+        group = list()
+        pieces = Piece2x2.objects.filter(nr__gte=nr, nr__lt=nr+20).order_by('nr')
         for piece in pieces:
             piece.img1 = static('pieces/%s.png' % piece.nr1)
             piece.img2 = static('pieces/%s.png' % piece.nr2)
@@ -58,6 +60,11 @@ class ShowPiecesView(TemplateView):
             piece.transform2 = self.rot2transform[piece.rot2]
             piece.transform3 = self.rot2transform[piece.rot3]
             piece.transform4 = self.rot2transform[piece.rot4]
+
+            group.append(piece)
+            if len(group) == 4:
+                groups.append(group)
+                group = list()
         # for
 
         return context

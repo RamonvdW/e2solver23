@@ -46,6 +46,7 @@ class Piece2x2(models.Model):
 
     nr = models.PositiveIntegerField(primary_key=True)      # max = 2147483647
 
+    # side is a reference to a TwoSide
     side1 = models.PositiveIntegerField()       # top
     side2 = models.PositiveIntegerField()       # right
     side3 = models.PositiveIntegerField()       # bottom

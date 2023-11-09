@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Corner Solution</title>
+    <title>Border Solution</title>
     <style>
         table, th, td {
             border: 1px solid black;

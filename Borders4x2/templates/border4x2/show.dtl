@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Piece 4x4</title>
+    <title>Border4x2</title>
     <style>
         table, th, td {
             border: 1px solid black;

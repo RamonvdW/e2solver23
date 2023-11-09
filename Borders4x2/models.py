@@ -24,8 +24,9 @@ class Border4x2(models.Model):
     nr = models.PositiveIntegerField(primary_key=True)      # max = 2147483647
 
     # order: clockwise
-    side2 = models.CharField(max_length=2)      # right
-    side4 = models.CharField(max_length=2)      # left
+    side2 = models.CharField(max_length=2)              # right  (4,8)
+    side3 = models.CharField(max_length=4, default='')  # bottom (8,7,6,5)
+    side4 = models.CharField(max_length=2)              # left   (5,1)
 
     # base pieces used to build up this piece
     nr1 = models.PositiveSmallIntegerField()

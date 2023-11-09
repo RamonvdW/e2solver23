@@ -34,7 +34,7 @@ class Command(BaseCommand):
         self.with_sides = False
 
         self.exclude_piece_nrs = ()
-        self.hint_piece_nrs = (208, 255, 181, 249, 139)
+        self.allow_hint_piece_nrs = (208, 255, 181, 249, 139)
 
     def _generate_base_with_side(self):
         all_sides = list()
@@ -130,7 +130,7 @@ class Command(BaseCommand):
         subset = options['subset']
 
         if subset == 'corners':
-            self.hint_piece_nrs = (208, 255, 181, 249)
+            self.allow_hint_piece_nrs = (208, 255, 181, 249)
             self.exclude_piece_nrs = (139,)
             self.with_interior = True
             self.with_corners = True
@@ -138,26 +138,26 @@ class Command(BaseCommand):
             self.with_sides = True
         elif subset == 'borders':
             # hints have already been used in the corner
-            self.hint_piece_nrs = ()
+            self.allow_hint_piece_nrs = ()
             self.exclude_piece_nrs = (208, 255, 181, 249, 139)
             self.with_interior = False
             self.with_corners = False
             self.with_center = False
             self.with_sides = True
         else:
-            self.hint_piece_nrs = (139,)
+            self.allow_hint_piece_nrs = (139,)
             self.exclude_piece_nrs = (208, 255, 181, 249)
             self.with_interior = True
             self.with_corners = False
             self.with_center = True
             self.with_sides = False
 
-        hints = [str(nr) for nr in self.hint_piece_nrs]
+        hints = [str(nr) for nr in self.allow_hint_piece_nrs]
         if len(hints) > 0:
             hints_str = "with hint pieces %s" % ", ".join(hints)
         else:
             hints_str = "without any hint pieces"
-        self.stdout.write('[INFO] Generating subset Piece2x2 for %s %s' % (repr(subset), hints_str))
+        self.stdout.write('[INFO] Generating subset Piece2x2 for %s with hints %s allowed' % (repr(subset), hints_str))
 
         self._generate_base_with_side()
 
@@ -213,7 +213,7 @@ class Command(BaseCommand):
                 continue
 
             # check the hint positions
-            piece1_is_hint = piece1.nr in self.hint_piece_nrs
+            piece1_is_hint = piece1.nr in self.allow_hint_piece_nrs
             if piece1_is_hint:
                 # number 208 can be here under rotation 1
                 if piece1.nr == 208 and rot1 != 1:
@@ -249,7 +249,7 @@ class Command(BaseCommand):
                 if not self.with_sides and piece2_has_side:
                     continue
 
-                piece2_is_hint = piece2.nr in self.hint_piece_nrs
+                piece2_is_hint = piece2.nr in self.allow_hint_piece_nrs
                 if piece2_is_hint:
                     if piece1_has_side:
                         continue
@@ -290,7 +290,7 @@ class Command(BaseCommand):
                     if not self.with_sides and piece3_has_side:
                         continue
 
-                    piece3_is_hint = piece3.nr in self.hint_piece_nrs
+                    piece3_is_hint = piece3.nr in self.allow_hint_piece_nrs
                     if piece3_is_hint:
                         if piece1_has_side or piece2_has_side:
                             continue
@@ -316,7 +316,7 @@ class Command(BaseCommand):
                     for piece4, rot4 in self._iter_piece4(piece3_side2, piece2_side3,
                                                           piece1.nr, piece2.nr, piece3.nr):
 
-                        piece4_is_hint = piece4.nr in self.hint_piece_nrs
+                        piece4_is_hint = piece4.nr in self.allow_hint_piece_nrs
                         if piece4_is_hint:
                             if piece1_has_side or piece2_has_side or piece3_has_side:
                                 continue

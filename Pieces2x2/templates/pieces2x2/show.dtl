@@ -23,12 +23,12 @@
         {% else %}
             <span style="margin:10px">-100</span>
         {% endif %}
-        {% if url_prev10 %}
-            <a style="margin:10px" href="{{ url_prev10 }}">-10</a>
+        {% if url_prev20 %}
+            <a style="margin:10px" href="{{ url_prev20 }}">-20</a>
         {% else %}
-            <span style="margin:10px">-10</span>
+            <span style="margin:10px">-20</span>
         {% endif %}
-        <a style="margin:10px" href="{{ url_next10 }}">+10</a>
+        <a style="margin:10px" href="{{ url_next20 }}">+20</a>
         <a style="margin:10px" href="{{ url_next100 }}">+100</a>
         <a style="margin:10px" href="{{ url_next1000 }}">+1000</a>
     </p>
@@ -43,26 +43,33 @@
             </tr>
         </thead>
 
-        {% for piece in pieces %}
-            <tr>
-                <td>{{ piece.nr }}</td>
+        {% for group in groups %}
+            {% if not forloop.first %}
+                <tr>
+                    <td colspan="4"></td>
+                </tr>
+            {% endif %}
+            {% for piece in group %}
+                <tr>
+                    <td>{{ piece.nr }}</td>
 
-                <!-- one image is 40x40 -->
-                <td>
-                    <div style="display:flex">
-                        <img src="{{ piece.img1 }}" style="transform: {{ piece.transform1 }}">
-                        <img src="{{ piece.img2 }}" style="transform: {{ piece.transform2 }}">
-                    </div>
-                    <div style="display:flex">
-                        <img src="{{ piece.img3 }}" style="transform: {{ piece.transform3 }}">
-                        <img src="{{ piece.img4 }}" style="transform: {{ piece.transform4 }}">
-                    </div>
-                </td>
+                    <!-- one image is 40x40 -->
+                    <td>
+                        <div style="display:flex">
+                            <img src="{{ piece.img1 }}" style="transform: {{ piece.transform1 }}">
+                            <img src="{{ piece.img2 }}" style="transform: {{ piece.transform2 }}">
+                        </div>
+                        <div style="display:flex">
+                            <img src="{{ piece.img3 }}" style="transform: {{ piece.transform3 }}">
+                            <img src="{{ piece.img4 }}" style="transform: {{ piece.transform4 }}">
+                        </div>
+                    </td>
 
-                <td>{{ piece.nr1 }}<sub>{{ piece.rot1 }}</sub>, {{ piece.nr2 }}<sub>{{ piece.rot2 }}</sub>
-                    <br>{{ piece.nr3 }}<sub>{{ piece.rot3 }}</sub>, {{ piece.nr4 }}<sub>{{ piece.rot4 }}</sub></td>
-                <td>{{ piece.side1 }}, {{ piece.side2 }}, {{ piece.side3 }}, {{ piece.side4 }}</td>
-            </tr>
+                    <td>{{ piece.nr1 }}<sub>{{ piece.rot1 }}</sub>, {{ piece.nr2 }}<sub>{{ piece.rot2 }}</sub>
+                        <br>{{ piece.nr3 }}<sub>{{ piece.rot3 }}</sub>, {{ piece.nr4 }}<sub>{{ piece.rot4 }}</sub></td>
+                    <td>{{ piece.side1 }}, {{ piece.side2 }}, {{ piece.side3 }}, {{ piece.side4 }}</td>
+                </tr>
+            {% endfor %}
         {% endfor %}
     </table>
 
