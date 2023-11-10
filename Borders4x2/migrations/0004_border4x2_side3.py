@@ -55,7 +55,9 @@ def calc_side3(apps, _):
                       side 3
     """
 
-    for border in border_klas.objects.all().iterator(chunk_size=10000):
+    count = 0
+    bulk = list()
+    for border in border_klas.objects.all().iterator(chunk_size=100000):
 
         p5 = nr2base[border.nr5]
         s5 = get_side(p5, 3, border.rot5)
@@ -71,7 +73,13 @@ def calc_side3(apps, _):
 
         border.side3 = s8 + s7 + s6 + s5
 
-        border.save(update_fields=['side3'])
+        bulk.append(border)
+
+        if len(bulk) == 100000:
+            count += len(bulk)
+            print(count)
+            border_klas.objects.bulk_update(bulk, ['side3'])
+            bulk = list()
     # for
 
 
