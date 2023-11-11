@@ -212,6 +212,7 @@ class Command(BaseCommand):
              .exclude(nr2__in=used_nrs)
              .exclude(nr3__in=used_nrs)
              .exclude(nr4__in=used_nrs)
+             .iterator(chunk_size=10)
              .first())
         return p is not None
 
@@ -291,6 +292,11 @@ class Command(BaseCommand):
               +         3b+     b6    +     b5    +2a         +
               |  Piece4x4 | Border4x2 | Border4x2 |  Piece4x4 |
               +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+
+            order: c1, b8,p8, b1,p1
+                   c2, b2,p2, b3,p3
+                   c4, b7,p7, b6,p6
+                   c3, b4,p4, b5,p5
 
         """
 
