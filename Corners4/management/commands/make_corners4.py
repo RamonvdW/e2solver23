@@ -252,6 +252,8 @@ class Command(BaseCommand):
                 return
         self.stdout.write('[INFO] Corner base piece number: %s' % c_nr)
 
+        self.nr = c_nr * 100 * 1000000  # = 100M
+
         # delete the old solutions
         Corner4.objects.all().delete()
 
