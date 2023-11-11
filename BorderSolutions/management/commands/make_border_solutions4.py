@@ -204,17 +204,21 @@ class Command(BaseCommand):
     def _test_piece2x2(used_nrs, exp_side4, exp_side1):
         # assert isinstance(exp_side4, int)
         # assert isinstance(exp_side1, int)
-        p = (Piece2x2
-             .objects
-             .filter(side4=exp_side4,
-                     side1=exp_side1)
-             .exclude(nr1__in=used_nrs)
-             .exclude(nr2__in=used_nrs)
-             .exclude(nr3__in=used_nrs)
-             .exclude(nr4__in=used_nrs)
-             .iterator(chunk_size=10)
-             .first())
-        return p is not None
+        for _ in (Piece2x2
+                  .objects
+                  .filter(side4=exp_side4,
+                          side1=exp_side1)
+                  .exclude(nr1__in=used_nrs)
+                  .exclude(nr2__in=used_nrs)
+                  .exclude(nr3__in=used_nrs)
+                  .exclude(nr4__in=used_nrs)
+                  .iterator(chunk_size=10)):
+            # found a solution
+            return True
+        # for
+        
+        # nothing found
+        return False
 
     def handle(self, *args, **options):
 
