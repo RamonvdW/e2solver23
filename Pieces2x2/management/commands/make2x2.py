@@ -4,8 +4,6 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-# maak een account HWL van specifieke vereniging, vanaf de commandline
-
 from django.core.management.base import BaseCommand
 from BasePieces.models import BasePiece
 from Pieces2x2.models import TwoSides, Piece2x2

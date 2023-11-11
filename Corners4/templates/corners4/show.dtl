@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Corner4</title>
+    <style>
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+            padding: 5px 5px 5px 5px;;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Corner4</h1>
+
+    <p>
+        {% if url_prev1000 %}<a style="margin:10px" href="{{ url_prev1000 }}">-1000</a>{% else %}<span style="margin:10px">-1000</span>{% endif %}
+        {% if url_prev100  %}<a style="margin:10px" href="{{ url_prev100  }}">-100</a> {% else %}<span style="margin:10px">-100</span>{% endif %}
+        {% if url_prev10   %}<a style="margin:10px" href="{{ url_prev10   }}">-100</a> {% else %}<span style="margin:10px">-10</span>{% endif %}
+        {% if url_prev1    %}<a style="margin:10px" href="{{ url_prev1    }}">-1</a>   {% else %}<span style="margin:10px">-1</span>{% endif %}
+        <a style="margin:10px" href="{{ url_next1 }}">+1</a>
+        <a style="margin:10px" href="{{ url_next10 }}">+10</a>
+        <a style="margin:10px" href="{{ url_next100 }}">+100</a>
+        <a style="margin:10px" href="{{ url_next1000 }}">+1000</a>
+    </p>
+
+    <table style="margin-left:auto; margin-right:auto">
+        <tr>
+            <td colspan="4">Corner4 {{ corner.nr }}</td>
+        </tr>
+        <tr>
+            <!-- c1 -->
+            <td>
+                <div style="display:flex">
+                    <img src="{{ corner.c.img1 }}" style="transform: {{ corner.c.transform1 }}">
+                    <img src="{{ corner.c.img2 }}" style="transform: {{ corner.c.transform2 }}">
+                    <img src="{{ corner.c.img3 }}" style="transform: {{ corner.c.transform3 }}">
+                    <img src="{{ corner.c.img4 }}" style="transform: {{ corner.c.transform4 }}">
+                </div>
+                <div style="display:flex">
+                    <img src="{{ corner.c.img5 }}" style="transform: {{ corner.c.transform5 }}">
+                    <img src="{{ corner.c.img6 }}" style="transform: {{ corner.c.transform6 }}">
+                    <img src="{{ corner.c.img7 }}" style="transform: {{ corner.c.transform7 }}">
+                    <img src="{{ corner.c.img8 }}" style="transform: {{ corner.c.transform8 }}">
+                </div>
+                <div style="display:flex">
+                    <img src="{{ corner.c.img9 }}" style="transform: {{ corner.c.transform9 }}">
+                    <img src="{{ corner.c.img10 }}" style="transform: {{ corner.c.transform10 }}">
+                    <img src="{{ corner.c.img11 }}" style="transform: {{ corner.c.transform11 }}">
+                    <img src="{{ corner.c.img12 }}" style="transform: {{ corner.c.transform12 }}">
+                </div>
+                <div style="display:flex">
+                    <img src="{{ corner.c.img13 }}" style="transform: {{ corner.c.transform13 }}">
+                    <img src="{{ corner.c.img14 }}" style="transform: {{ corner.c.transform14 }}">
+                    <img src="{{ corner.c.img15 }}" style="transform: {{ corner.c.transform15 }}">
+                    <img src="{{ corner.c.img16 }}" style="transform: {{ corner.c.transform16 }}">
+                </div>
+            </td>
+
+            <td>
+                <!-- b2 -->
+                <div style="display:flex">
+                    <img src="{{ corner.b2.img1 }}" style="transform: {{ corner.b2.transform1 }}">
+                    <img src="{{ corner.b2.img2 }}" style="transform: {{ corner.b2.transform2 }}">
+                    <img src="{{ corner.b2.img3 }}" style="transform: {{ corner.b2.transform3 }}">
+                    <img src="{{ corner.b2.img4 }}" style="transform: {{ corner.b2.transform4 }}">
+                </div>
+                <div style="display:flex">
+                    <img src="{{ corner.b2.img5 }}" style="transform: {{ corner.b2.transform5 }}">
+                    <img src="{{ corner.b2.img6 }}" style="transform: {{ corner.b2.transform6 }}">
+                    <img src="{{ corner.b2.img7 }}" style="transform: {{ corner.b2.transform7 }}">
+                    <img src="{{ corner.b2.img8 }}" style="transform: {{ corner.b2.transform8 }}">
+                </div>
+
+                <!-- p3, p4 -->
+                <div style="display:flex">
+                    <img src="{{ corner.p3.img1 }}" style="transform: {{ corner.p3.transform1 }}">
+                    <img src="{{ corner.p3.img2 }}" style="transform: {{ corner.p3.transform2 }}">
+                    <img src="{{ corner.p4.img1 }}" style="transform: {{ corner.p4.transform1 }}">
+                    <img src="{{ corner.p4.img2 }}" style="transform: {{ corner.p4.transform2 }}">
+                </div>
+                <div style="display:flex">
+                    <img src="{{ corner.p3.img3 }}" style="transform: {{ corner.p3.transform3 }}">
+                    <img src="{{ corner.p3.img4 }}" style="transform: {{ corner.p3.transform4 }}">
+                    <img src="{{ corner.p4.img3 }}" style="transform: {{ corner.p4.transform3 }}">
+                    <img src="{{ corner.p4.img4 }}" style="transform: {{ corner.p4.transform4 }}">
+                </div>
+            </td>
+
+            <td>Side2 = {{ corner.side2 }}</td>
+        </tr>
+
+        <tr>
+            <td>
+                <!-- b1, p2 -->
+                <div style="display:flex">
+                    <img src="{{ corner.b1.img4 }}" style="transform: {{ corner.b1.transform4 }}">
+                    <img src="{{ corner.b1.img8 }}" style="transform: {{ corner.b1.transform8 }}">
+                    <img src="{{ corner.p2.img1 }}" style="transform: {{ corner.p2.transform1 }}">
+                    <img src="{{ corner.p2.img2 }}" style="transform: {{ corner.p2.transform2 }}">
+                </div>
+                <div style="display:flex">
+                    <img src="{{ corner.b1.img3 }}" style="transform: {{ corner.b1.transform3 }}">
+                    <img src="{{ corner.b1.img7 }}" style="transform: {{ corner.b1.transform7 }}">
+                    <img src="{{ corner.p2.img3 }}" style="transform: {{ corner.p2.transform3 }}">
+                    <img src="{{ corner.p2.img4 }}" style="transform: {{ corner.p2.transform4 }}">
+                </div>
+
+                <!-- b1, p1 -->
+                <div style="display:flex">
+                    <img src="{{ corner.b1.img2 }}" style="transform: {{ corner.b1.transform2 }}">
+                    <img src="{{ corner.b1.img6 }}" style="transform: {{ corner.b1.transform6 }}">
+                    <img src="{{ corner.p1.img1 }}" style="transform: {{ corner.p1.transform1 }}">
+                    <img src="{{ corner.p1.img2 }}" style="transform: {{ corner.p1.transform2 }}">
+                </div>
+                <div style="display:flex">
+                    <img src="{{ corner.b1.img1 }}" style="transform: {{ corner.b1.transform1 }}">
+                    <img src="{{ corner.b1.img5 }}" style="transform: {{ corner.b1.transform5 }}">
+                    <img src="{{ corner.p1.img3 }}" style="transform: {{ corner.p1.transform3 }}">
+                    <img src="{{ corner.p1.img4 }}" style="transform: {{ corner.p1.transform4 }}">
+                </div>
+            </td>
+            <td></td>
+        </tr>
+
+        <tr>
+            <td>Side3 = {{ corner.side3 }}</td>
+            <td></td>
+            <td></td>
+        </tr>
+
+        <tr>
+            <td>c = {{ corner.c.nr }}<br>b1 = {{ corner.b1.nr }}<br>b2 = {{ corner.b2.nr }}</td>
+            <td>p1 = {{ corner.p1.nr }}<br>p2 = {{ corner.p2.nr }}<br>p3 = {{ corner.p3.nr }}<br>p4 = {{ corner.p4.nr }}<br></td>
+        </tr>
+
+    </table>
+
+</body>
+</html>

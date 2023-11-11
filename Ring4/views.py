@@ -9,11 +9,12 @@ from django.urls import reverse
 from django.views.generic import TemplateView
 from django.templatetags.static import static
 from Borders4x2.models import Border4x2
-from BorderSolutions.models import BorderSolution
+from Pieces2x2.models import Piece2x2
 from Pieces4x4.models import Piece4x4
+from Ring4.models import Ring4
 
 
-TEMPLATE_VIEW = 'bordersolutions/show.dtl'
+TEMPLATE_VIEW = 'ring4/show.dtl'
 
 
 class ShowView(TemplateView):
@@ -32,7 +33,7 @@ class ShowView(TemplateView):
         7: 'rotate(90deg)',
     }
 
-    # solution is built up clockwise
+    # ring4 is built up clockwise
     # base piece rotations are counter-clockwise
     rot2rot = {
         0: 0,
@@ -105,35 +106,70 @@ class ShowView(TemplateView):
 
         return border4x2
 
+    def _set_ring(self, piece2x2_nr, rot):
+        piece = Piece2x2.objects.get(nr=piece2x2_nr)
+
+        piece.img1 = static('pieces/%s.png' % piece.nr1)
+        piece.img2 = static('pieces/%s.png' % piece.nr2)
+        piece.img3 = static('pieces/%s.png' % piece.nr3)
+        piece.img4 = static('pieces/%s.png' % piece.nr4)
+
+        piece.transform1 = self.rot2transform[piece.rot1]
+        piece.transform2 = self.rot2transform[piece.rot2]
+        piece.transform3 = self.rot2transform[piece.rot3]
+        piece.transform4 = self.rot2transform[piece.rot4]
+
+        return piece
+
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
         try:
             nr = int(kwargs['nr'][:12])      # afkappen voor de veiligheid
-            solution = BorderSolution.objects.get(nr=nr)
-        except (ValueError, BorderSolution.DoesNotExist):
+            ring4 = Ring4.objects.get(nr=nr)
+        except (ValueError, Ring4.DoesNotExist):
             raise Http404('Not found')
 
-        context['solution'] = solution
+        context['ring4'] = ring4
 
-        solution.c1 = self._set_corner(solution.c1, 0)
-        solution.c2 = self._set_corner(solution.c2, 1)
-        solution.c3 = self._set_corner(solution.c3, 2)
-        solution.c4 = self._set_corner(solution.c4, 3)
+        ring4.c1 = self._set_corner(ring4.c1, 0)
+        ring4.c2 = self._set_corner(ring4.c2, 1)
+        ring4.c3 = self._set_corner(ring4.c3, 2)
+        ring4.c4 = self._set_corner(ring4.c4, 3)
 
-        solution.b1 = self._set_border(solution.b1, 0)
-        solution.b2 = self._set_border(solution.b2, 0)
-        solution.b3 = self._set_border(solution.b3, 1)
-        solution.b4 = self._set_border(solution.b4, 1)
-        solution.b5 = self._set_border(solution.b5, 2)
-        solution.b6 = self._set_border(solution.b6, 2)
-        solution.b7 = self._set_border(solution.b7, 3)
-        solution.b8 = self._set_border(solution.b8, 3)
+        ring4.b1 = self._set_border(ring4.b1, 0)
+        ring4.b2 = self._set_border(ring4.b2, 0)
+        ring4.b3 = self._set_border(ring4.b3, 1)
+        ring4.b4 = self._set_border(ring4.b4, 1)
+        ring4.b5 = self._set_border(ring4.b5, 2)
+        ring4.b6 = self._set_border(ring4.b6, 2)
+        ring4.b7 = self._set_border(ring4.b7, 3)
+        ring4.b8 = self._set_border(ring4.b8, 3)
+
+        ring4.p1 = self._set_ring(ring4.p1, 0)
+        ring4.p2 = self._set_ring(ring4.p2, 0)
+        ring4.p3 = self._set_ring(ring4.p3, 0)
+        ring4.p4 = self._set_ring(ring4.p4, 0)
+
+        ring4.p5 = self._set_ring(ring4.p5, 1)
+        ring4.p6 = self._set_ring(ring4.p6, 1)
+        ring4.p7 = self._set_ring(ring4.p7, 1)
+        ring4.p8 = self._set_ring(ring4.p8, 1)
+
+        ring4.p9 = self._set_ring(ring4.p9, 2)
+        ring4.p10 = self._set_ring(ring4.p10, 2)
+        ring4.p11 = self._set_ring(ring4.p11, 2)
+        ring4.p12 = self._set_ring(ring4.p12, 2)
+
+        ring4.p13 = self._set_ring(ring4.p13, 3)
+        ring4.p14 = self._set_ring(ring4.p14, 3)
+        ring4.p15 = self._set_ring(ring4.p15, 3)
+        ring4.p16 = self._set_ring(ring4.p16, 3)
 
         if nr > 1:
-            context['url_prev'] = reverse('BorderSolutions:show', kwargs={'nr': nr-1})
-        context['url_next'] = reverse('BorderSolutions:show', kwargs={'nr': nr+1})
+            context['url_prev'] = reverse('Ring4:show', kwargs={'nr': nr-1})
+        context['url_next'] = reverse('Ring4:show', kwargs={'nr': nr+1})
 
         return context
 

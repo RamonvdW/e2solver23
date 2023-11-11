@@ -19,6 +19,8 @@ urlpatterns = [
     path('pieces4x4/', include('Pieces4x4.urls')),
     path('borders4x2/', include('Borders4x2.urls')),
     path('border-solutions/', include('BorderSolutions.urls')),
+    path('corners4/', include('Corners4.urls')),
+    path('ring4/', include('Ring4.urls')),
     path('admin/', admin.site.urls),
 ]
 

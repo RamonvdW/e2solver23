@@ -9,11 +9,12 @@ from django.urls import reverse
 from django.views.generic import TemplateView
 from django.templatetags.static import static
 from Borders4x2.models import Border4x2
-from BorderSolutions.models import BorderSolution
+from Corners4.models import Corner4
+from Pieces2x2.models import Piece2x2
 from Pieces4x4.models import Piece4x4
 
 
-TEMPLATE_VIEW = 'bordersolutions/show.dtl'
+TEMPLATE_VIEW = 'corners4/show.dtl'
 
 
 class ShowView(TemplateView):
@@ -32,7 +33,7 @@ class ShowView(TemplateView):
         7: 'rotate(90deg)',
     }
 
-    # solution is built up clockwise
+    # corners4 is built up clockwise
     # base piece rotations are counter-clockwise
     rot2rot = {
         0: 0,
@@ -41,7 +42,7 @@ class ShowView(TemplateView):
         3: 1,
     }
 
-    def _set_corner(self, piece4x4_nr, rot):
+    def _set_corner(self, piece4x4_nr):
         piece4x4 = Piece4x4.objects.get(nr=piece4x4_nr)
 
         piece4x4.img1 = static('pieces/%s.png' % piece4x4.nr1)
@@ -61,23 +62,22 @@ class ShowView(TemplateView):
         piece4x4.img15 = static('pieces/%s.png' % piece4x4.nr15)
         piece4x4.img16 = static('pieces/%s.png' % piece4x4.nr16)
 
-        rot = self.rot2rot[rot]
-        piece4x4.transform1 = self.rot2transform[piece4x4.rot1 + rot]
-        piece4x4.transform2 = self.rot2transform[piece4x4.rot2 + rot]
-        piece4x4.transform3 = self.rot2transform[piece4x4.rot3 + rot]
-        piece4x4.transform4 = self.rot2transform[piece4x4.rot4 + rot]
-        piece4x4.transform5 = self.rot2transform[piece4x4.rot5 + rot]
-        piece4x4.transform6 = self.rot2transform[piece4x4.rot6 + rot]
-        piece4x4.transform7 = self.rot2transform[piece4x4.rot7 + rot]
-        piece4x4.transform8 = self.rot2transform[piece4x4.rot8 + rot]
-        piece4x4.transform9 = self.rot2transform[piece4x4.rot9 + rot]
-        piece4x4.transform10 = self.rot2transform[piece4x4.rot10 + rot]
-        piece4x4.transform11 = self.rot2transform[piece4x4.rot11 + rot]
-        piece4x4.transform12 = self.rot2transform[piece4x4.rot12 + rot]
-        piece4x4.transform13 = self.rot2transform[piece4x4.rot13 + rot]
-        piece4x4.transform14 = self.rot2transform[piece4x4.rot14 + rot]
-        piece4x4.transform15 = self.rot2transform[piece4x4.rot15 + rot]
-        piece4x4.transform16 = self.rot2transform[piece4x4.rot16 + rot]
+        piece4x4.transform1 = self.rot2transform[piece4x4.rot1]
+        piece4x4.transform2 = self.rot2transform[piece4x4.rot2]
+        piece4x4.transform3 = self.rot2transform[piece4x4.rot3]
+        piece4x4.transform4 = self.rot2transform[piece4x4.rot4]
+        piece4x4.transform5 = self.rot2transform[piece4x4.rot5]
+        piece4x4.transform6 = self.rot2transform[piece4x4.rot6]
+        piece4x4.transform7 = self.rot2transform[piece4x4.rot7]
+        piece4x4.transform8 = self.rot2transform[piece4x4.rot8]
+        piece4x4.transform9 = self.rot2transform[piece4x4.rot9]
+        piece4x4.transform10 = self.rot2transform[piece4x4.rot10]
+        piece4x4.transform11 = self.rot2transform[piece4x4.rot11]
+        piece4x4.transform12 = self.rot2transform[piece4x4.rot12]
+        piece4x4.transform13 = self.rot2transform[piece4x4.rot13]
+        piece4x4.transform14 = self.rot2transform[piece4x4.rot14]
+        piece4x4.transform15 = self.rot2transform[piece4x4.rot15]
+        piece4x4.transform16 = self.rot2transform[piece4x4.rot16]
 
         return piece4x4
 
@@ -105,35 +105,55 @@ class ShowView(TemplateView):
 
         return border4x2
 
+    def _set_piece2x2(self, nr):
+        piece = Piece2x2.objects.get(nr=nr)
+
+        piece.img1 = static('pieces/%s.png' % piece.nr1)
+        piece.img2 = static('pieces/%s.png' % piece.nr2)
+        piece.img3 = static('pieces/%s.png' % piece.nr3)
+        piece.img4 = static('pieces/%s.png' % piece.nr4)
+
+        piece.transform1 = self.rot2transform[piece.rot1]
+        piece.transform2 = self.rot2transform[piece.rot2]
+        piece.transform3 = self.rot2transform[piece.rot3]
+        piece.transform4 = self.rot2transform[piece.rot4]
+
+        return piece
+
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
         try:
             nr = int(kwargs['nr'][:12])      # afkappen voor de veiligheid
-            solution = BorderSolution.objects.get(nr=nr)
-        except (ValueError, BorderSolution.DoesNotExist):
+            corner = Corner4.objects.get(nr=nr)
+        except (ValueError, Corner4.DoesNotExist):
             raise Http404('Not found')
 
-        context['solution'] = solution
+        context['corner'] = corner
 
-        solution.c1 = self._set_corner(solution.c1, 0)
-        solution.c2 = self._set_corner(solution.c2, 1)
-        solution.c3 = self._set_corner(solution.c3, 2)
-        solution.c4 = self._set_corner(solution.c4, 3)
+        corner.c = self._set_corner(corner.c)
 
-        solution.b1 = self._set_border(solution.b1, 0)
-        solution.b2 = self._set_border(solution.b2, 0)
-        solution.b3 = self._set_border(solution.b3, 1)
-        solution.b4 = self._set_border(solution.b4, 1)
-        solution.b5 = self._set_border(solution.b5, 2)
-        solution.b6 = self._set_border(solution.b6, 2)
-        solution.b7 = self._set_border(solution.b7, 3)
-        solution.b8 = self._set_border(solution.b8, 3)
+        corner.b1 = self._set_border(corner.b1, 3)
+        corner.b2 = self._set_border(corner.b2, 0)
+
+        corner.p1 = self._set_piece2x2(corner.p1)
+        corner.p2 = self._set_piece2x2(corner.p2)
+        corner.p3 = self._set_piece2x2(corner.p3)
+        corner.p4 = self._set_piece2x2(corner.p4)
 
         if nr > 1:
-            context['url_prev'] = reverse('BorderSolutions:show', kwargs={'nr': nr-1})
-        context['url_next'] = reverse('BorderSolutions:show', kwargs={'nr': nr+1})
+            context['url_prev1'] = reverse('Corners4:show', kwargs={'nr': nr-1})
+        if nr > 10:
+            context['url_prev10'] = reverse('Corners4:show', kwargs={'nr': nr - 10})
+        if nr > 100:
+            context['url_prev100'] = reverse('Corners4:show', kwargs={'nr': nr - 100})
+        if nr > 1000:
+            context['url_prev1000'] = reverse('Corners4:show', kwargs={'nr': nr - 1000})
+        context['url_next1'] = reverse('Corners4:show', kwargs={'nr': nr + 1})
+        context['url_next10'] = reverse('Corners4:show', kwargs={'nr': nr + 10})
+        context['url_next100'] = reverse('Corners4:show', kwargs={'nr': nr + 100})
+        context['url_next1000'] = reverse('Corners4:show', kwargs={'nr': nr + 1000})
 
         return context
 
