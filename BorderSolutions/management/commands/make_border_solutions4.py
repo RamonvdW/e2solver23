@@ -8,7 +8,6 @@
 
 from django.core.management.base import BaseCommand
 from BasePieces.models import BasePiece
-from BasePieces.hints import HINT_NRS
 from Borders4x2.models import Border4x2
 from BorderSolutions.models import BorderSolution
 from Pieces2x2.models import TwoSides, Piece2x2
@@ -98,17 +97,21 @@ class Command(BaseCommand):
             c_nrs = (c.nr1, c.nr2, c.nr3, c.nr4, c.nr5, c.nr6, c.nr7, c.nr8,
                      c.nr9, c.nr10, c.nr11, c.nr12, c.nr13, c.nr14, c.nr15, c.nr16)
 
-            exp_side4 = c.side2a = self.get_4x4_side2a_reverse(c)
-            c.side2b = self.get_4x4_side2b_reverse(c)
-            c.side3a = self.get_4x4_side3a_reverse(c)
-            exp_side2 = c.side3b = self.get_4x4_side3b_reverse(c)
+            # for coupling to a Border4x2
+            c.side2a = self.get_4x4_side2a_reverse(c)
+            c.side3b = self.get_4x4_side3b_reverse(c)
+
+            # for coupling to a Piece2x2
+            c.side2b = self.two_sides2nr[self.get_4x4_side2b_reverse(c)]
+            c.side3a = self.two_sides2nr[self.get_4x4_side3a_reverse(c)]
 
             used_nrs2 = used_nrs + c_nrs
 
-            yield c, used_nrs2, exp_side4, exp_side2
+            yield c, used_nrs2
         # for
 
     def _iter_border_side2(self, used_nrs, exp_side2):
+        # assert isinstance(exp_side2, str)
         for b in (Border4x2
                   .objects
                   .filter(side2=exp_side2)
@@ -135,6 +138,7 @@ class Command(BaseCommand):
         # for
             
     def _iter_border_side4(self, used_nrs, exp_side4):
+        # assert isinstance(exp_side4, str)
         for b in (Border4x2
                   .objects
                   .filter(side4=exp_side4)
@@ -170,6 +174,8 @@ class Command(BaseCommand):
                 +---+---+---+---+
                  side3b  side3a
         """
+        # assert isinstance(exp_side2, str)
+        # assert isinstance(exp_side4, str)
         for b in (Border4x2
                   .objects
                   .filter(side4=exp_side4,
@@ -194,21 +200,20 @@ class Command(BaseCommand):
             yield b, used_nrs2
         # for
 
-    def _test_piece2x2(self, used_nrs, exp_side4, exp_side1):
-        found = False
-        for p in (Piece2x2
-                  .objects
-                  .filter(side4=exp_side4,
-                          side1=exp_side1)
-                  .exclude(nr1__in=used_nrs)
-                  .exclude(nr2__in=used_nrs)
-                  .exclude(nr3__in=used_nrs)
-                  .exclude(nr4__in=used_nrs)):
-            # found a p!
-            found = True
-            break   # from the for
-        # for
-        return found
+    @staticmethod
+    def _test_piece2x2(used_nrs, exp_side4, exp_side1):
+        # assert isinstance(exp_side4, int)
+        # assert isinstance(exp_side1, int)
+        p = (Piece2x2
+             .objects
+             .filter(side4=exp_side4,
+                     side1=exp_side1)
+             .exclude(nr1__in=used_nrs)
+             .exclude(nr2__in=used_nrs)
+             .exclude(nr3__in=used_nrs)
+             .exclude(nr4__in=used_nrs)
+             .first())
+        return p is not None
 
     def handle(self, *args, **options):
 
@@ -255,12 +260,12 @@ class Command(BaseCommand):
 
               +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
               |  Piece4x4 | Border4x2 | Border4x2 |  Piece4x4 |
-              +           +     b1    +     b2    +           +
+              +         2a+     b1    +     b2    +3b         +
               |           |  3b    3a |  3b    3a |           |
               +    c1     +--+--+--+--+--+--+--+--+     c2    +
               |           |     |           |     |           |
               +         2b+ p1  +           +  p2 +3a         +
-              |       3a  |     |           |     |  2b       |
+              | 3b    3a  |     |           |     |  2b    2a |
               +--+--+--+--+--+--+           +--+--+--+--+--+--+
               |     |     |                       |     |     |
               +   3a+ p8  +                       +  p3 +3b   +
@@ -278,12 +283,12 @@ class Command(BaseCommand):
               +   3b+ p7  +                       +  p4 +3a   +
               |     |     |                       |     |     |
               +--+--+--+--+--+--+           +--+--+--+--+--+--+
-              |       2b  |     |           |     |  3a       |
+              | 2a    2b  |     |           |     |  3a    3b |
               +         3a+ p6  +           + p5  +2b         +
               |           |     |           |     |           |
               +    c4     +--+--+--+--+--+--+--+--+     c3    +
               |           |  3a       |        3b |           |
-              +           +     b6    +     b5    +           +
+              +         3b+     b6    +     b5    +2a         +
               |  Piece4x4 | Border4x2 | Border4x2 |  Piece4x4 |
               +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
 
@@ -303,91 +308,92 @@ class Command(BaseCommand):
 
         # take one corner and fit two border pieces
         # b8 c1 b1
-        for c1, used_nrs1, b1_exp_s4, b8_exp_s2 in self._iter_corner(used_nrs0,
-                                                                     hint_c1):
+        for c1, used_nrs1 in self._iter_corner(used_nrs0, hint_c1):
             print('c1: %s' % c1.nr)
-            for b8, b7_exp_side2, used_nrs2 in self._iter_border_side2(used_nrs1,
-                                                                       b8_exp_s2):
+            for b8, b7_exp_s2, used_nrs2 in self._iter_border_side2(used_nrs1, c1.side3b):
                 print('b8: %s' % b8.nr)
 
                 # check p8
                 if not self._test_piece2x2(used_nrs2, b8.side3a, c1.side3a):
                     continue
+                print('p8 ok')
 
-                for b1, b2_exp_side4, used_nrs3 in self._iter_border_side4(used_nrs2,
-                                                                           b1_exp_s4):
+                for b1, b2_exp_side4, used_nrs3 in self._iter_border_side4(used_nrs2, c1.side2a):
                     print('b1: %s' % b1.nr)
 
                     # check p1
                     if not self._test_piece2x2(used_nrs3, c1.side2b, b1.side3b):
                         continue
+                    print('p1 ok')
 
                     # take one corner and fit two border pieces
                     # b2 c2 b3
-                    for c2, used_nrs4, b3_exp_s4, b2_exp_s2 in self._iter_corner(used_nrs3,
-                                                                                 hint_c2):
+                    for c2, used_nrs4 in self._iter_corner(used_nrs3, hint_c2):
                         print('c2: %s' % c2.nr)
                         for b2, used_nrs5 in self._iter_border_side2_side4(used_nrs4,
-                                                                           b2_exp_s2,
+                                                                           c2.side3b,
                                                                            b2_exp_side4):
                             print('b2: %s' % b2.nr)
 
                             # check p2
                             if not self._test_piece2x2(used_nrs5, b2.side3a, c2.side3a):
                                 continue
+                            print('p2 ok')
 
-                            for b3, b4_exp_side4, used_nrs6 in self._iter_border_side4(used_nrs5,
-                                                                                       b3_exp_s4):
+                            for b3, b4_exp_side4, used_nrs6 in self._iter_border_side4(used_nrs5, c2.side2a):
                                 print('b3: %s' % b3.nr)
 
                                 # check p3
                                 if not self._test_piece2x2(used_nrs6, c2.side2b, b3.side3b):
                                     continue
+                                print('p3 ok')
 
                                 # take one corner and fit two border pieces
                                 # b6 c4 b7
-                                for c4, used_nrs7, b7_exp_side4, b6_exp_side2 in self._iter_corner(used_nrs6,
-                                                                                                   hint_c4):
+                                for c4, used_nrs7 in self._iter_corner(used_nrs6, hint_c4):
                                     print('c4: %s' % c4.nr)
                                     for b7, used_nrs8 in self._iter_border_side2_side4(used_nrs7,
-                                                                                       b7_exp_side2,
-                                                                                       b7_exp_side4):
+                                                                                       b7_exp_s2,
+                                                                                       c4.side2a):
                                         print('b7: %s' % b7.nr)
 
                                         # check p7
                                         if not self._test_piece2x2(used_nrs8, c4.side2b, b7.side3b):
                                             continue
+                                        print('p7 ok')
 
                                         for b6, b5_exp_side2, used_nrs9 in self._iter_border_side2(used_nrs8,
-                                                                                                   b6_exp_side2):
+                                                                                                   c4.side3b):
                                             print('b6: %s' % b6.nr)
 
                                             # check p6
                                             if not self._test_piece2x2(used_nrs9, b6.side3a, c4.side3a):
                                                 continue
+                                            print('p6 ok')
 
                                             # take one corner and fit two border pieces
                                             # b4 c3 b5
-                                            for c3, used_nrs10, b5_exp_side4, b4_exp_side2 in self._iter_corner(used_nrs9,
-                                                                                                                hint_c3):
+                                            for c3, used_nrs10 in self._iter_corner(used_nrs9, hint_c3):
                                                 print('c3: %s' % c3.nr)
                                                 for b4, used_nrs11 in self._iter_border_side2_side4(used_nrs10,
-                                                                                                    b4_exp_side2,
+                                                                                                    c3.side3b,
                                                                                                     b4_exp_side4):
                                                     print('b4: %s' % b4.nr)
 
                                                     # check p4
                                                     if not self._test_piece2x2(used_nrs11, b4.side3a, c3.side3a):
                                                         continue
+                                                    print('p4 ok')
 
                                                     for b5, used_nrs12 in self._iter_border_side2_side4(used_nrs11,
                                                                                                         b5_exp_side2,
-                                                                                                        b5_exp_side4):
+                                                                                                        c3.side2a):
                                                         print('b5: %s' % b5.nr)
 
                                                         # check p5
                                                         if not self._test_piece2x2(used_nrs12, c3.side2b, b5.side3b):
                                                             continue
+                                                        print('p5 ok')
 
                                                         nr += 1
                                                         solution = BorderSolution(
