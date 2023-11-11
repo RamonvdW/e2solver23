@@ -9,22 +9,22 @@ from django.db import models
 
 class Corner4(models.Model):
 
-    """ a corner4 solution consists of one 4x4, two 4x2 and four 2x2
+    """ a corner4 solution consists of one 4x4, two 4x2 and two 2x2
 
 
       c               b2
         +-------+  +-------+
-        |       |  |  4x2  |
-        +  4x4  +  +---+---+ side 2
-        |       |  |2x2|2x2|
-        +---+---+  +---+---+
-                     p3  p4
+        |       |  |  4x2  | side2
+        +  4x4  +  +---+---+
+        |       |  |2x2|
+        +---+---+  +---+
+                     p2
         +---+---+
-        |   |2x2| p2
-     b1 |4x2+---+
         |   |2x2| p1
-        +---+---+
-          side 3
+     b1 |4x2+---+
+        |   |
+        +---+
+        side3
     """
 
     nr = models.PositiveIntegerField(primary_key=True)      # max = 2147483647
@@ -37,11 +37,6 @@ class Corner4(models.Model):
     # note: each Piece2x2 does exist in 4 possible rotations
     p1 = models.PositiveIntegerField()      # piece2x2
     p2 = models.PositiveIntegerField()      # piece2x2
-    p3 = models.PositiveIntegerField()      # piece2x2
-    p4 = models.PositiveIntegerField()      # piece2x2
-
-    side2 = models.CharField(max_length=4, default='')  # "ABCD", clockwise
-    side3 = models.CharField(max_length=4, default='')
 
     def __str__(self):
         return str(self.nr)

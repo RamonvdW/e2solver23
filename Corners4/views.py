@@ -139,8 +139,6 @@ class ShowView(TemplateView):
 
         corner.p1 = self._set_piece2x2(corner.p1)
         corner.p2 = self._set_piece2x2(corner.p2)
-        corner.p3 = self._set_piece2x2(corner.p3)
-        corner.p4 = self._set_piece2x2(corner.p4)
 
         if nr > 1:
             context['url_prev1'] = reverse('Corners4:show', kwargs={'nr': nr-1})

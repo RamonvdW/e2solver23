@@ -173,65 +173,50 @@ class Command(BaseCommand):
 
               +--+--+--+--+--+--+--+--+
               |  Piece4x4 | Border4x2 |
-              +         2a+     b2    +
+              +         2a+     b2    +  side2
               |           |  3b    3a |
-              +    c1     +--+--+--+--+ side 2
-              |           |     |     |
-              +         2b+  p3 +  p4 +
-              | 3b    3a  |     |     |
-              +--+--+--+--+--+--+--+--+
+              +    c1     +--+--+--+--+
+              |           |     |
+              +         2b+  p2 +
+              | 3b    3a  |     |
+              +--+--+--+--+--+--+
               |     |     |     |
-              +   3a+  p2 +  q  +
+              +   3a+  p1 +  q  +
               |     |     |     |
               + b1  +--+--+--+--+
-              |     |     |
-              +   3b+  p1 +
-              |     |     |
-              +--+--+--+--+
-                  side 3
+              |     |
+              +   3b+
+              |     |
+              +--+--+
+              side3
         """
 
         bulk = list()
         for b1, used_nrs1 in self._iter_border_side2(used_nrs0, c.side3b):
-            for p2, used_nrs2 in self._iter_2x2_side4_1(used_nrs1, b1.side3a, c.side3a):
-                p1_exp_s1 = self.side_nr2reverse[p2.side3]
-                q_exp_side4 = self.side_nr2reverse[p2.side2]
+            for p1, used_nrs2 in self._iter_2x2_side4_1(used_nrs1, b1.side3a, c.side3a):
+                q_exp_side4 = self.side_nr2reverse[p1.side2]
 
                 for b2, used_nrs3 in self._iter_border_side4(used_nrs2, c.side2a):
-                    for p3, used_nrs4 in self._iter_2x2_side4_1(used_nrs3, c.side2b, b2.side3b):
-                        p4_exp_s4 = self.side_nr2reverse[p3.side2]
-                        q_exp_side1 = self.side_nr2reverse[p3.side3]
+                    for p2, used_nrs4 in self._iter_2x2_side4_1(used_nrs3, c.side2b, b2.side3b):
+                        q_exp_side1 = self.side_nr2reverse[p2.side3]
 
                         if not self._test_2x2_side4_1(used_nrs4, q_exp_side4, q_exp_side1):
                             continue
 
-                        for p1, used_nrs5 in self._iter_2x2_side4_1(used_nrs4, b1.side3b, p1_exp_s1):
-                            for p4, _ in self._iter_2x2_side4_1(used_nrs5, p4_exp_s4, b2.side3a):
+                        self.nr += 1
+                        corner = Corner4(
+                                    nr=self.nr,
+                                    c=c.nr,
+                                    b1=b1.nr,
+                                    b2=b2.nr,
+                                    p1=p1.nr,
+                                    p2=p2.nr)
+                        bulk.append(corner)
 
-                                side2 = b2.side2 + self.nr2two_sides[p4.side2]
-                                side3 = self.nr2two_sides[p1.side3] + b1.side4
-
-                                self.nr += 1
-                                corner = Corner4(
-                                            nr=self.nr,
-                                            c=c.nr,
-                                            b1=b1.nr,
-                                            b2=b2.nr,
-                                            p1=p1.nr,
-                                            p2=p2.nr,
-                                            p3=p3.nr,
-                                            p4=p4.nr,
-                                            side2=side2,
-                                            side3=side3)
-                                bulk.append(corner)
-
-                                if len(bulk) >= 1000:
-                                    Corner4.objects.bulk_create(bulk)
-                                    print('[INFO] Solutions: %s' % self.nr)
-                                    bulk = list()
-
-                            # for
-                        # for
+                        if len(bulk) >= 1000:
+                            Corner4.objects.bulk_create(bulk)
+                            print('[INFO] Solutions: %s' % self.nr)
+                            bulk = list()
 
                     # for
                 # for
@@ -253,9 +238,10 @@ class Command(BaseCommand):
         self.stdout.write('[INFO] Corner base piece number: %s' % c_nr)
 
         self.nr = c_nr * 100 * 1000000  # = 100M
+        next_nr = (c_nr + 1) * 100 * 1000000
 
         # delete the old solutions
-        Corner4.objects.all().delete()
+        Corner4.objects.filter(nr__gte=self.nr, nr__lt=next_nr).delete()
 
         for c in Piece4x4.objects.filter(nr1=c_nr).order_by('nr').iterator(chunk_size=1000):
             """
