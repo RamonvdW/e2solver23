@@ -176,31 +176,47 @@ class Command(BaseCommand):
               +         2a+     b2    +  side2
               |           |  3b    3a |
               +    c1     +--+--+--+--+
-              |           |     |
-              +         2b+  p2 +
-              | 3b    3a  |     |
-              +--+--+--+--+--+--+
+              |           |     |     |
+              +         2b+  p2 +  q3 +
+              | 3b    3a  |     |     |
+              +--+--+--+--+--+--+--+--+
               |     |     |     |
-              +   3a+  p1 +  q  +
+              +   3a+  p1 +  q2 +   q = quality check
               |     |     |     |
               + b1  +--+--+--+--+
-              |     |
-              +   3b+
-              |     |
-              +--+--+
+              |     |     |
+              +   3b+  q1 +
+              |     |     |
+              +--+--+--+--+
               side3
         """
 
+        q_fail = 0
         bulk = list()
         for b1, used_nrs1 in self._iter_border_side2(used_nrs0, c.side3b):
+            q1_exp_side4 = b1.side3b
+
             for p1, used_nrs2 in self._iter_2x2_side4_1(used_nrs1, b1.side3a, c.side3a):
-                q_exp_side4 = self.side_nr2reverse[p1.side2]
+                q1_exp_side1 = self.side_nr2reverse[p1.side3]
+                q2_exp_side4 = self.side_nr2reverse[p1.side2]
 
                 for b2, used_nrs3 in self._iter_border_side4(used_nrs2, c.side2a):
-                    for p2, used_nrs4 in self._iter_2x2_side4_1(used_nrs3, c.side2b, b2.side3b):
-                        q_exp_side1 = self.side_nr2reverse[p2.side3]
+                    q3_exp_side1 = b2.side3a
 
-                        if not self._test_2x2_side4_1(used_nrs4, q_exp_side4, q_exp_side1):
+                    for p2, used_nrs4 in self._iter_2x2_side4_1(used_nrs3, c.side2b, b2.side3b):
+                        q2_exp_side1 = self.side_nr2reverse[p2.side3]
+                        q3_exp_side4 = self.side_nr2reverse[p2.side2]
+
+                        if not self._test_2x2_side4_1(used_nrs4, q1_exp_side4, q1_exp_side1):
+                            q_fail += 1
+                            continue
+
+                        if not self._test_2x2_side4_1(used_nrs4, q2_exp_side4, q2_exp_side1):
+                            q_fail += 1
+                            continue
+
+                        if not self._test_2x2_side4_1(used_nrs4, q3_exp_side4, q3_exp_side1):
+                            q_fail += 1
                             continue
 
                         self.nr += 1
@@ -215,7 +231,8 @@ class Command(BaseCommand):
 
                         if len(bulk) >= 1000:
                             Corner4.objects.bulk_create(bulk)
-                            print('[INFO] Solutions: %s' % self.nr)
+                            print('[INFO] Solutions: %s (q-fail %s)' % (self.nr, q_fail))
+                            q_fail = 0
                             bulk = list()
 
                     # for
