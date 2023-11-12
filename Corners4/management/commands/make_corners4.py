@@ -10,7 +10,6 @@ from Borders4x2.models import Border4x2
 from Corners4.models import Corner4
 from Pieces2x2.models import TwoSides, Piece2x2
 from Pieces4x4.models import Piece4x4
-from Ring4.models import Ring4
 
 
 class Command(BaseCommand):
@@ -50,6 +49,8 @@ class Command(BaseCommand):
             3: 1
         }
 
+        self._cache_test_2x2 = dict()   # [(side2, side4)] = dict() [used_nrs] = True/False
+
         self.nr = 0
 
     def add_arguments(self, parser):
@@ -71,23 +72,32 @@ class Command(BaseCommand):
         border4x2.side3a = self.two_sides2nr[border4x2.side3[1] + border4x2.side3[0]]  # 7+8
         border4x2.side3b = self.two_sides2nr[border4x2.side3[3] + border4x2.side3[2]]  # 5+6
 
-    @staticmethod
-    def _test_2x2_side4_1(used_nrs, exp_side4, exp_side1):
-        for _ in (Piece2x2
-                  .objects
-                  .filter(side4=exp_side4,
-                          side1=exp_side1)
-                  .exclude(nr1__in=used_nrs)
-                  .exclude(nr2__in=used_nrs)
-                  .exclude(nr3__in=used_nrs)
-                  .exclude(nr4__in=used_nrs)
-                  .iterator(chunk_size=10)):
-            # found a solution
-            return True
-        # for
+    def _test_2x2_side4_1(self, used_nrs, exp_side4, exp_side1):
+        tup = (exp_side4, exp_side1)
+        try:
+            cache = self._cache_test_2x2[tup]
+        except KeyError:
+            self._cache_test_2x2[tup] = cache = dict()
 
-        # nothing found
-        return False
+        try:
+            result = cache[used_nrs]
+        except KeyError:
+            result = False
+            for _ in (Piece2x2
+                      .objects
+                      .filter(side4=exp_side4,
+                              side1=exp_side1)
+                      .exclude(nr1__in=used_nrs)
+                      .exclude(nr2__in=used_nrs)
+                      .exclude(nr3__in=used_nrs)
+                      .exclude(nr4__in=used_nrs)
+                      .iterator(chunk_size=10)):
+                # found a solution
+                result = True
+            # for
+            cache[used_nrs] = result
+
+        return result
 
     @staticmethod
     def _iter_2x2_side4_1(used_nrs, exp_side4, exp_side1):
@@ -108,17 +118,17 @@ class Command(BaseCommand):
     def _iter_border_side2(self, used_nrs, exp_side2):
         # assert isinstance(exp_side2, str)
         for b in (Border4x2
-                 .objects
-                 .filter(side2=exp_side2)
-                 .exclude(nr1__in=used_nrs)
-                 .exclude(nr2__in=used_nrs)
-                 .exclude(nr3__in=used_nrs)
-                 .exclude(nr4__in=used_nrs)
-                 .exclude(nr5__in=used_nrs)
-                 .exclude(nr6__in=used_nrs)
-                 .exclude(nr7__in=used_nrs)
-                 .exclude(nr8__in=used_nrs)
-                 .iterator(chunk_size=10000)):
+                  .objects
+                  .filter(side2=exp_side2)
+                  .exclude(nr1__in=used_nrs)
+                  .exclude(nr2__in=used_nrs)
+                  .exclude(nr3__in=used_nrs)
+                  .exclude(nr4__in=used_nrs)
+                  .exclude(nr5__in=used_nrs)
+                  .exclude(nr6__in=used_nrs)
+                  .exclude(nr7__in=used_nrs)
+                  .exclude(nr8__in=used_nrs)
+                  .iterator(chunk_size=10000)):
 
             b_nrs = (b.nr1, b.nr2, b.nr3, b.nr4, b.nr5, b.nr6, b.nr7, b.nr8)
             used_nrs2 = used_nrs + b_nrs
@@ -133,17 +143,17 @@ class Command(BaseCommand):
     def _iter_border_side4(self, used_nrs, exp_side4):
         # assert isinstance(exp_side4, str)
         for b in (Border4x2
-                 .objects
-                 .filter(side4=exp_side4)
-                 .exclude(nr1__in=used_nrs)
-                 .exclude(nr2__in=used_nrs)
-                 .exclude(nr3__in=used_nrs)
-                 .exclude(nr4__in=used_nrs)
-                 .exclude(nr5__in=used_nrs)
-                 .exclude(nr6__in=used_nrs)
-                 .exclude(nr7__in=used_nrs)
-                 .exclude(nr8__in=used_nrs)
-                 .iterator(chunk_size=10000)):
+                  .objects
+                  .filter(side4=exp_side4)
+                  .exclude(nr1__in=used_nrs)
+                  .exclude(nr2__in=used_nrs)
+                  .exclude(nr3__in=used_nrs)
+                  .exclude(nr4__in=used_nrs)
+                  .exclude(nr5__in=used_nrs)
+                  .exclude(nr6__in=used_nrs)
+                  .exclude(nr7__in=used_nrs)
+                  .exclude(nr8__in=used_nrs)
+                  .iterator(chunk_size=10000)):
 
             b_nrs = (b.nr1, b.nr2, b.nr3, b.nr4, b.nr5, b.nr6, b.nr7, b.nr8)
             used_nrs2 = used_nrs + b_nrs
