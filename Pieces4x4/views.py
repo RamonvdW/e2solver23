@@ -8,6 +8,7 @@ from django.http import Http404
 from django.urls import reverse
 from django.views.generic import TemplateView
 from django.templatetags.static import static
+from BasePieces.models import BasePiece
 from Pieces4x4.models import Piece4x4
 
 
@@ -25,6 +26,28 @@ class ShowPiecesView(TemplateView):
         2: 'rotate(180deg)',
         3: 'rotate(90deg)',
     }
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        # cache all base pieces
+        self.base_pieces = dict()       # [nr] = BasePiece()
+        for piece in BasePiece.objects.all():
+            self.base_pieces[piece.nr] = piece
+        # for
+
+    """
+        +---+---+---+---+
+        | 1 | 2 | 3 | 4 |
+        +---+---+---+---+
+        | 5 | 6 | 7 | 8 |
+        +---+---+---+---+ side 2
+        | 9 |10 |11 |12 |
+        +---+---+---+---+
+        |13 |14 |15 |16 |
+        +---+---+---+---+
+             side 3
+    """
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -81,16 +104,19 @@ class ShowPiecesView(TemplateView):
             piece.transform14 = self.rot2transform[piece.rot14]
             piece.transform15 = self.rot2transform[piece.rot15]
             piece.transform16 = self.rot2transform[piece.rot16]
+
         # for
 
         if found_one:
-            if nr > 100:
-                context['url_prev100'] = reverse('Pieces4x4:show-pieces', kwargs={'nr': nr-100})
             if nr > 10:
-                context['url_prev10'] = reverse('Pieces4x4:show-pieces', kwargs={'nr': nr-10})
-            context['url_next10'] = reverse('Pieces4x4:show-pieces', kwargs={'nr': nr+10})
-            context['url_next100'] = reverse('Pieces4x4:show-pieces', kwargs={'nr': nr+100})
-            context['url_next1000'] = reverse('Pieces4x4:show-pieces', kwargs={'nr': nr+1000})
+                context['url_prev10'] = reverse('Pieces4x4:show-pieces', kwargs={'nr': nr - 10})
+                if nr > 100:
+                    context['url_prev100'] = reverse('Pieces4x4:show-pieces', kwargs={'nr': nr - 100})
+                    if nr > 1000:
+                        context['url_prev1000'] = reverse('Pieces4x4:show-pieces', kwargs={'nr': nr - 1000})
+            context['url_next10'] = reverse('Pieces4x4:show-pieces', kwargs={'nr': nr + 10})
+            context['url_next100'] = reverse('Pieces4x4:show-pieces', kwargs={'nr': nr + 100})
+            context['url_next1000'] = reverse('Pieces4x4:show-pieces', kwargs={'nr': nr + 1000})
         else:
             # zoek het eerste nummer
             piece = Piece4x4.objects.order_by('nr').first()

@@ -64,6 +64,10 @@ class Piece4x4(models.Model):
     rot15 = models.PositiveSmallIntegerField()
     rot16 = models.PositiveSmallIntegerField()
 
+    # clock-wise
+    side2 = models.CharField(max_length=4, default='')      # "ABCD"
+    side3 = models.CharField(max_length=4, default='')
+
     def __str__(self):
         return str(self.pk)
 
@@ -74,6 +78,8 @@ class Piece4x4(models.Model):
         indexes = [
             models.Index(fields=['nr1']),
             models.Index(fields=['nr11']),
+            models.Index(fields=['side2']),
+            models.Index(fields=['side3']),
         ]
 
     objects = models.Manager()  # for the editor only

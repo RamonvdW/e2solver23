@@ -27,8 +27,10 @@ class Command(BaseCommand):
         self.side_nr_is_border = dict()     # [side nr] = True/False
 
         two_sides2nr = dict()   # ['XX'] = nr
+        self.nr2two_sides = dict()   # [nr] = 'XX'
         for two in TwoSides.objects.all():
             two_sides2nr[two.two_sides] = two.nr
+            self.nr2two_sides[two.nr] = two.two_sides
             self.side_nr_is_border[two.nr] = two.two_sides == 'XX'
         # for
         for two in TwoSides.objects.all():
@@ -188,6 +190,7 @@ class Command(BaseCommand):
                 # if len(used_nrs2) != 8:
                 #     print('piece1 + piece2 not 8 unique pieces!')
                 #     continue
+                side2a = self.nr2two_sides[piece2.side2]
 
                 if DO_STORE:
                     tup3 = (piece2.nr1, piece2.rot1)
@@ -203,6 +206,7 @@ class Command(BaseCommand):
                     # if len(used_nrs3) != 12:
                     #     print('piece1 + piece2 + piece3 not 12 unique pieces!')
                     #     continue
+                    side3b = self.nr2two_sides[piece3.side3]
 
                     if DO_STORE:
                         tup11 = (piece3.nr1, piece3.rot1)
@@ -219,6 +223,8 @@ class Command(BaseCommand):
                         # if len(used_nrs4) != 16:
                         #     print('piece1 + piece2 + piece3 + piece4 not 16 unique pieces!')
                         #     continue
+                        side2b = self.nr2two_sides[piece3.side2]
+                        side3a = self.nr2two_sides[piece3.side3]
 
                         nr += 1
 
@@ -230,10 +236,6 @@ class Command(BaseCommand):
 
                             piece = Piece4x4(
                                         nr=base_nr + nr,
-                                        side1=0,
-                                        side2=0,
-                                        side3=0,
-                                        side4=0,
                                         nr1=tup1[0], rot1=tup1[1],
                                         nr2=tup2[0], rot2=tup2[1],
                                         nr3=tup3[0], rot3=tup3[1],
@@ -250,7 +252,8 @@ class Command(BaseCommand):
                                         nr14=tup14[0], rot14=tup14[1],
                                         nr15=tup15[0], rot15=tup15[1],
                                         nr16=tup16[0], rot16=tup16[1],
-                                        piece2x2_nr1=piece1.nr)
+                                        side2=side2a + side2b,
+                                        side3=side3a + side3b)
                             bulk.append(piece)
 
                             if len(bulk) >= 1000:

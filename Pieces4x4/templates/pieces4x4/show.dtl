@@ -21,16 +21,9 @@
         {% if url_first %}
             <a style="margin:10px" href="{{ url_first }}">First</a>
         {% else %}
-            {% if url_prev100 %}
-                <a style="margin:10px" href="{{ url_prev100 }}">-100</a>
-            {% else %}
-                <span style="margin:10px">-100</span>
-            {% endif %}
-            {% if url_prev10 %}
-                <a style="margin:10px" href="{{ url_prev10 }}">-10</a>
-            {% else %}
-                <span style="margin:10px">-10</span>
-            {% endif %}
+            {% if url_prev1000 %}<a style="margin:10px" href="{{ url_prev1000 }}">-1000</a>{% else %}<span style="margin:10px">-1000</span>{% endif %}
+            {% if url_prev100  %}<a style="margin:10px" href="{{ url_prev100  }}">-100</a>{% else  %}<span style="margin:10px">-100</span>{% endif %}
+            {% if url_prev10   %}<a style="margin:10px" href="{{ url_prev10   }}">-10</a>{% else   %}<span style="margin:10px">-10</span>{% endif %}
             <a style="margin:10px" href="{{ url_next10 }}">+10</a>
             <a style="margin:10px" href="{{ url_next100 }}">+100</a>
             <a style="margin:10px" href="{{ url_next1000 }}">+1000</a>
@@ -84,7 +77,7 @@
                     <br>{{ piece.nr9 }}<sub>{{ piece.rot9 }}</sub>, {{ piece.nr10 }}<sub>{{ piece.rot10 }}</sub>, {{ piece.nr11 }}<sub>{{ piece.rot11 }}</sub>, {{ piece.nr12 }}<sub>{{ piece.rot12 }}</sub>
                     <br>{{ piece.nr13 }}<sub>{{ piece.rot13 }}</sub>, {{ piece.nr14 }}<sub>{{ piece.rot14 }}</sub>, {{ piece.nr15 }}<sub>{{ piece.rot15 }}</sub>, {{ piece.nr16 }}<sub>{{ piece.rot16 }}</sub>
                 </td>
-                <td>{{ piece.side1 }}, {{ piece.side2 }}, {{ piece.side3 }}, {{ piece.side4 }}</td>
+                <td>{{ piece.side2 }},<br>{{ piece.side3 }}</td>
             </tr>
         {% endfor %}
     </table>

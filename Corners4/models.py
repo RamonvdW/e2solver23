@@ -29,6 +29,7 @@ class Corner4(models.Model):
 
     nr = models.PositiveIntegerField(primary_key=True)      # max = 2147483647
 
+    # (c is not used)
     c = models.PositiveIntegerField()       # piece4x4
 
     b1 = models.PositiveIntegerField()      # border4x2
