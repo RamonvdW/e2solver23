@@ -66,7 +66,8 @@ class Command(BaseCommand):
             self.stdout.write('[ERROR] Unsupported hint number (%s)' % repr(options['hint'][0]))
             return
 
-        base_nr = hint_nr * 10 * 1000000   # 10M spread
+        idx = HINT_NRS.index(hint_nr) + 1       # 1..4
+        base_nr = idx * 100 * 1000000   # 100M spread
 
         # delete all previously generate 8x2 pieces
         Bar12x2.objects.filter(h1=hint_nr).delete()
