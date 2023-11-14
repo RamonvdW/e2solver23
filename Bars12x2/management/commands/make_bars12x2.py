@@ -33,6 +33,7 @@ class Command(BaseCommand):
                 self.side_nr2reverse[two.nr] = 9999   # bestaat niet
         # for
 
+        self.other_hints = list(HINT_NRS)
         self.nr = 0
 
     def add_arguments(self, parser):
@@ -52,9 +53,8 @@ class Command(BaseCommand):
             exp_side4 = self.side_nr2reverse[p.side2]
             yield p, used_nrs2, exp_side4
 
-    @staticmethod
-    def _find_2x2_side4_h2(used_nrs, exp_side4):
-        for p in Piece2x2.objects.filter(side4=exp_side4).filter(nr2__in=HINT_NRS).exclude(nr1__in=used_nrs).exclude(nr2__in=used_nrs).exclude(nr3__in=used_nrs).exclude(nr4__in=used_nrs):
+    def _find_2x2_side4_h2(self, used_nrs, exp_side4):
+        for p in Piece2x2.objects.filter(side4=exp_side4).filter(nr2__in=self.other_hints).exclude(nr1__in=used_nrs).exclude(nr3__in=used_nrs).exclude(nr4__in=used_nrs):
             yield p
 
     def handle(self, *args, **options):
@@ -65,6 +65,8 @@ class Command(BaseCommand):
         if hint_nr not in HINT_NRS:
             self.stdout.write('[ERROR] Unsupported hint number (%s)' % repr(options['hint'][0]))
             return
+
+        self.other_hints.remove(hint_nr)
 
         idx = HINT_NRS.index(hint_nr) + 1       # 1..4
         base_nr = idx * 100 * 1000000   # 100M spread
