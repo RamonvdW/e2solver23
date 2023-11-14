@@ -21,6 +21,7 @@ urlpatterns = [
     path('border-solutions/', include('BorderSolutions.urls')),
     path('corners4/', include('Corners4.urls')),
     path('ring4/', include('Ring4.urls')),
+    path('bars12x2/', include('Bars12x2.urls')),
     path('admin/', admin.site.urls),
 ]
 

@@ -4,12 +4,9 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.apps import AppConfig
+from django.contrib import admin
+from Bars12x2.models import Bar12x2
 
-
-class BasePiecesConfig(AppConfig):
-    default_auto_field = 'django.db.models.BigAutoField'
-    name = 'BasePieces'
-
+admin.site.register(Bar12x2)
 
 # end of file

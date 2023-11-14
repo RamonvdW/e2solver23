@@ -7,9 +7,9 @@
 from django.apps import AppConfig
 
 
-class BasePiecesConfig(AppConfig):
+class Bars12x2Config(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'BasePieces'
+    name = 'Bars12x2'
 
 
 # end of file

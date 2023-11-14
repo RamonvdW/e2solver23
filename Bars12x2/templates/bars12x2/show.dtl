@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bar12x2</title>
+    <style>
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+            padding: 2px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Bar12x2</h1>
+
+    <p>
+        {% if url_prev100 %}<a style="margin:10px" href="{{ url_prev100 }}">-100</a>{% else %}<span style="margin:10px">-100</span>{% endif %}
+        {% if url_prev10 %}<a style="margin:10px" href="{{ url_prev10 }}">-20</a>{% else %}<span style="margin:10px">-10</span>{% endif %}
+        <a style="margin:10px" href="{{ url_next10 }}">+10</a>
+        <a style="margin:10px" href="{{ url_next100 }}">+100</a>
+        <a style="margin:10px" href="{{ url_next1000 }}">+1000</a>
+    </p>
+
+    <table style="margin-left:auto; margin-right:auto">
+        <thead>
+            <tr>
+                <th>Nr</th>
+                <th>h1</th>
+                <th>p1</th>
+                <th>p2</th>
+                <th>p3</th>
+                <th>p4</th>
+                <th>p5</th>
+                <th>p6</th>
+                <th>h2</th>
+            </tr>
+        </thead>
+
+        {% for bar in bars %}
+            <tr>
+                <td>{{ bar.nr }}</td>
+                <td>{{ bar.h1 }}</td>
+                <!-- one image is 40x40 -->
+
+                <!-- p1 -->
+                <td>
+                    <div style="display:flex">
+                        <img src="{{ bar.p1.img1 }}" style="transform: {{ bar.p1.transform1 }}">
+                        <img src="{{ bar.p1.img2 }}" style="transform: {{ bar.p1.transform2 }}">
+                    </div>
+                    <div style="display:flex">
+                        <img src="{{ bar.p1.img3 }}" style="transform: {{ bar.p1.transform3 }}">
+                        <img src="{{ bar.p1.img4 }}" style="transform: {{ bar.p1.transform4 }}">
+                    </div>
+                    <span>{{ bar.p1.nr }}</span>
+                </td>
+
+                <!-- p2 -->
+                <td>
+                    <div style="display:flex">
+                        <img src="{{ bar.p2.img1 }}" style="transform: {{ bar.p2.transform1 }}">
+                        <img src="{{ bar.p2.img2 }}" style="transform: {{ bar.p2.transform2 }}">
+                    </div>
+                    <div style="display:flex">
+                        <img src="{{ bar.p2.img3 }}" style="transform: {{ bar.p2.transform3 }}">
+                        <img src="{{ bar.p2.img4 }}" style="transform: {{ bar.p2.transform4 }}">
+                    </div>
+                    <span>{{ bar.p2.nr }}</span>
+                </td>
+
+                <!-- p3 -->
+                <td>
+                    <div style="display:flex">
+                        <img src="{{ bar.p3.img1 }}" style="transform: {{ bar.p3.transform1 }}">
+                        <img src="{{ bar.p3.img2 }}" style="transform: {{ bar.p3.transform2 }}">
+                    </div>
+                    <div style="display:flex">
+                        <img src="{{ bar.p3.img3 }}" style="transform: {{ bar.p3.transform3 }}">
+                        <img src="{{ bar.p3.img4 }}" style="transform: {{ bar.p3.transform4 }}">
+                    </div>
+                    <span>{{ bar.p3.nr }}</span>
+                </td>
+
+                <!-- p4 -->
+                <td>
+                    <div style="display:flex">
+                        <img src="{{ bar.p4.img1 }}" style="transform: {{ bar.p4.transform1 }}">
+                        <img src="{{ bar.p4.img2 }}" style="transform: {{ bar.p4.transform2 }}">
+                    </div>
+                    <div style="display:flex">
+                        <img src="{{ bar.p4.img3 }}" style="transform: {{ bar.p4.transform3 }}">
+                        <img src="{{ bar.p4.img4 }}" style="transform: {{ bar.p4.transform4 }}">
+                    </div>
+                    <span>{{ bar.p4.nr }}</span>
+                </td>
+
+                <!-- p5 -->
+                <td>
+                    <div style="display:flex">
+                        <img src="{{ bar.p5.img1 }}" style="transform: {{ bar.p5.transform1 }}">
+                        <img src="{{ bar.p5.img2 }}" style="transform: {{ bar.p5.transform2 }}">
+                    </div>
+                    <div style="display:flex">
+                        <img src="{{ bar.p5.img3 }}" style="transform: {{ bar.p5.transform3 }}">
+                        <img src="{{ bar.p5.img4 }}" style="transform: {{ bar.p5.transform4 }}">
+                    </div>
+                    <span>{{ bar.p5.nr }}</span>
+                </td>
+
+                <!-- p6 -->
+                <td>
+                    <div style="display:flex">
+                        <img src="{{ bar.p6.img1 }}" style="transform: {{ bar.p6.transform1 }}">
+                        <img src="{{ bar.p6.img2 }}" style="transform: {{ bar.p6.transform2 }}">
+                    </div>
+                    <div style="display:flex">
+                        <img src="{{ bar.p6.img3 }}" style="transform: {{ bar.p6.transform3 }}">
+                        <img src="{{ bar.p6.img4 }}" style="transform: {{ bar.p6.transform4 }}">
+                    </div>
+                    <span>{{ bar.p6.nr }}</span>
+                </td>
+
+                <td>{{ bar.h2 }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+
+</body>
+</html>

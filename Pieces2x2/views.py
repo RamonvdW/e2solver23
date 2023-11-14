@@ -14,7 +14,7 @@ from Pieces2x2.models import Piece2x2
 TEMPLATE_VIEW = 'pieces2x2/show.dtl'
 
 
-class ShowPiecesView(TemplateView):
+class ShowView(TemplateView):
 
     template_name = TEMPLATE_VIEW
 
@@ -41,7 +41,7 @@ class ShowPiecesView(TemplateView):
 
         if nr > 100:
             context['url_prev100'] = reverse('Pieces2x2:show-pieces', kwargs={'nr': nr-100})
-        if nr > 10:
+        if nr > 20:
             context['url_prev20'] = reverse('Pieces2x2:show-pieces', kwargs={'nr': nr-20})
         context['url_next20'] = reverse('Pieces2x2:show-pieces', kwargs={'nr': nr+20})
         context['url_next100'] = reverse('Pieces2x2:show-pieces', kwargs={'nr': nr+100})

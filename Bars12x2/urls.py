@@ -5,16 +5,16 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from Pieces2x2 import views
+from Bars12x2 import views
 
-app_name = 'Pieces2x2'
+app_name = 'Bars12x2'
 
-# base = /pieces2x2/
+# base = /corner-solutions/
 
 urlpatterns = [
     path('view/<nr>/',
          views.ShowView.as_view(),
-         name='show-pieces'),
+         name='show'),
 ]
 
 

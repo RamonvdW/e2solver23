@@ -71,7 +71,7 @@ class Command(BaseCommand):
         # for
 
     def add_arguments(self, parser):
-        parser.add_argument('--subset', required=True, choices=['corners', 'borders', 'center'],
+        parser.add_argument('--subset', required=True, choices=['corners', 'borders', 'center', 'center+hints'],
                             help="Which subset of Piece2x2 to generate")
 
     def _iter_piece1(self):
@@ -142,9 +142,16 @@ class Command(BaseCommand):
             self.with_corners = False
             self.with_center = False
             self.with_sides = True
-        else:
+        elif subset == 'center':
             self.allow_hint_piece_nrs = (139,)
             self.exclude_piece_nrs = (208, 255, 181, 249)
+            self.with_interior = True
+            self.with_corners = False
+            self.with_center = True
+            self.with_sides = False
+        else:   # subset == 'center+hints':
+            self.allow_hint_piece_nrs = (139, 208, 255, 181, 249)
+            self.exclude_piece_nrs = ()
             self.with_interior = True
             self.with_corners = False
             self.with_center = True
@@ -155,7 +162,7 @@ class Command(BaseCommand):
             hints_str = "with hint pieces %s" % ", ".join(hints)
         else:
             hints_str = "without any hint pieces"
-        self.stdout.write('[INFO] Generating subset Piece2x2 for %s with hints %s allowed' % (repr(subset), hints_str))
+        self.stdout.write('[INFO] Generating subset Piece2x2 for %s %s allowed' % (repr(subset), hints_str))
 
         self._generate_base_with_side()
 
