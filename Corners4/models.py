@@ -9,8 +9,7 @@ from django.db import models
 
 class Corner4(models.Model):
 
-    """ a corner4 solution consists of one 4x4, two 4x2 and two 2x2
-
+    """ a corner4 solution consists of two Border4x2, two Piece2x2 and has a matching corner Piece4x4
 
       c               b2
         +-------+  +-------+
@@ -18,13 +17,13 @@ class Corner4(models.Model):
         +  4x4  +  +---+---+
         |       |  |2x2|
         +---+---+  +---+
-                     p2
+                    p2
         +---+---+
         |   |2x2| p1
      b1 |4x2+---+
         |   |
         +---+
-        side3
+        side4
     """
 
     nr = models.PositiveIntegerField(primary_key=True)      # max = 2147483647
