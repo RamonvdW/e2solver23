@@ -47,7 +47,7 @@ class ShowView(TemplateView):
         context = super().get_context_data(**kwargs)
 
         try:
-            nr = int(kwargs['nr'][:8])      # afkappen voor de veiligheid
+            nr = int(kwargs['nr'][:10])      # afkappen voor de veiligheid
         except ValueError:
             raise Http404('Not found')
 

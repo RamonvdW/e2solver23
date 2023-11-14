@@ -47,14 +47,14 @@ class Command(BaseCommand):
             yield p, used_nrs, exp_side4
 
     def _find_2x2_side4(self, used_nrs, exp_side4):
-        for p in Piece2x2.objects.filter(side=exp_side4).exclude(nr1__in=used_nrs).exclude(nr2__in=used_nrs).exclude(nr3__in=used_nrs).exclude(nr4__in=used_nrs):
+        for p in Piece2x2.objects.filter(side4=exp_side4).exclude(nr1__in=used_nrs).exclude(nr2__in=used_nrs).exclude(nr3__in=used_nrs).exclude(nr4__in=used_nrs):
             used_nrs2 = used_nrs + (p.nr1, p.nr2, p.nr3, p.nr4)
             exp_side4 = self.side_nr2reverse[p.side2]
             yield p, used_nrs2, exp_side4
 
     @staticmethod
     def _find_2x2_side4_h2(used_nrs, exp_side4):
-        for p in Piece2x2.objects.filter(side=exp_side4).filter(nr4__in=HINT_NRS).exclude(nr1__in=used_nrs).exclude(nr2__in=used_nrs).exclude(nr3__in=used_nrs):
+        for p in Piece2x2.objects.filter(side4=exp_side4).filter(nr2__in=HINT_NRS).exclude(nr1__in=used_nrs).exclude(nr2__in=used_nrs).exclude(nr3__in=used_nrs).exclude(nr4__in=used_nrs):
             yield p
 
     def handle(self, *args, **options):
@@ -66,11 +66,12 @@ class Command(BaseCommand):
             self.stdout.write('[ERROR] Unsupported hint number (%s)' % repr(options['hint'][0]))
             return
 
-        base_nr = hint_nr * 100 * 1000000   # 100M spread
+        base_nr = hint_nr * 10 * 1000000   # 10M spread
 
         # delete all previously generate 8x2 pieces
         Bar12x2.objects.filter(h1=hint_nr).delete()
 
+        bulk = list()
         used_nrs0 = (139,)
         for p1, used_nrs1, p2_exp_side4 in self._find_2x2_h1(used_nrs0, hint_nr):
 
@@ -84,15 +85,32 @@ class Command(BaseCommand):
 
                             for p6 in self._find_2x2_side4_h2(used_nrs5, p6_exp_side4):
 
-                                self.stdout.write('Found %s' % repr([p1, p2, p3, p4, p5, p6]))
-
                                 self.nr += 1
+                                bar = Bar12x2(
+                                            nr=base_nr + self.nr,
+                                            h1=p1.nr1,
+                                            h2=p6.nr2,
+                                            p1=p1.nr,
+                                            p2=p2.nr,
+                                            p3=p3.nr,
+                                            p4=p4.nr,
+                                            p5=p5.nr,
+                                            p6=p6.nr)
+
+                                bulk.append(bar)
+                                if len(bulk) >= 10000:
+                                    Bar12x2.objects.bulk_create(bulk)
+                                    bulk = list()
+                                    print(self.nr)
                             # for
                         # for
                     # for
                 # for
             # for
         # for
+
+        if len(bulk):
+            Bar12x2.objects.bulk_create(bulk)
 
         self.stdout.write('[INFO] Total generated: %s' % self.nr)
 
