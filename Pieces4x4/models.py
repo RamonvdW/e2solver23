@@ -26,7 +26,7 @@ class Piece4x4(models.Model):
                      side 3
     """
 
-    nr = models.PositiveIntegerField(primary_key=True)      # max = 2147483647
+    nr = models.PositiveBigIntegerField(primary_key=True)      # max = 9223372036854775807
 
     # base pieces used to build up this piece
     nr1 = models.PositiveSmallIntegerField()

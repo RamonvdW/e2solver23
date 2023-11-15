@@ -40,9 +40,13 @@ class Command(BaseCommand):
             except KeyError:
                 self.side_nr2reverse[two.nr] = 9999   # bestaat niet
         # for
-        self.side_border = two_sides2nr['XX']
 
-        self.stdout.write('[INFO] Creating piece4 cache')
+        try:
+            self.side_border = two_sides2nr['XX']
+        except KeyError:
+            self.side_border = 9999
+
+        self.stdout.write('[INFO] Creating two-sides cache for Piece2x2')
 
         self.piece4 = dict()    # [(side1, side2)] = [Piece2x2, ...]
         for piece in Piece2x2.objects.all():
@@ -56,7 +60,7 @@ class Command(BaseCommand):
         self.stdout.write('[INFO] Done')
 
     def add_arguments(self, parser):
-        parser.add_argument('nr', nargs=1, help="piece2x2 nr for first position")
+        parser.add_argument('nr', nargs=1, help="Base piece number for top-left corner")
 
     def _iter_piece1(self, nr):
         # no inner border wanted on the internals of the 2x2 (sides 2 and 3 of the top-left piece)
@@ -71,7 +75,7 @@ class Command(BaseCommand):
                       .filter(side4=expected_side4)
                       .exclude(side2=self.side_border)
                       .exclude(side3=self.side_border)
-                      .exclude(nr__lte=nr1)                 # prevents rotation variants
+                      #.exclude(nr__lte=nr1)                 # prevents rotation variants
                       .exclude(nr1__in=used_nrs)
                       .exclude(nr2__in=used_nrs)
                       .exclude(nr3__in=used_nrs)
@@ -84,7 +88,7 @@ class Command(BaseCommand):
         qset = (Piece2x2
                 .objects
                 .filter(side1=expected_side1)
-                .exclude(nr__lte=nr1)                 # prevents rotation variants
+                #.exclude(nr__lte=nr1)                 # prevents rotation variants
                 .exclude(nr1__in=used_nrs)
                 .exclude(nr2__in=used_nrs)
                 .exclude(nr3__in=used_nrs)
@@ -116,7 +120,7 @@ class Command(BaseCommand):
                           .objects
                           .filter(side1=expected_side1,
                                   side2=expected_side2)
-                          .exclude(nr__lte=nr1)                 # prevents rotation variants
+                          #.exclude(nr__lte=nr1)                 # prevents rotation variants
                           .exclude(nr1__in=used_nrs)
                           .exclude(nr2__in=used_nrs)
                           .exclude(nr3__in=used_nrs)
@@ -170,11 +174,14 @@ class Command(BaseCommand):
 
             piece1_is_corner = piece1.side4 == self.side_border and piece1.side1 == self.side_border
 
-            base1 = [piece1.nr1, piece1.nr2, piece1.nr3, piece1.nr4]
+            base1 = (piece1.nr1, piece1.nr2, piece1.nr3, piece1.nr4)
             used_nrs1 = set(base1)
             # if len(used_nrs1) != 4:
             #     print('piece1 not 4 unique pieces!')
             #     continue
+
+            if first_nr in HINT_NRS:
+                used_nrs1 = set(base1 + HINT_NRS)       # avoid any other hint from being used
 
             if DO_STORE:
                 tup1 = (piece1.nr1, piece1.rot1)
@@ -185,7 +192,7 @@ class Command(BaseCommand):
             expected_side4 = self.side_nr2reverse[piece1.side2]
             for piece2 in self._iter_piece2(expected_side4, piece1.nr, used_nrs1):
 
-                base2 = [piece2.nr1, piece2.nr2, piece2.nr3, piece2.nr4]
+                base2 = (piece2.nr1, piece2.nr2, piece2.nr3, piece2.nr4)
                 used_nrs2 = set(base1 + base2)
                 # if len(used_nrs2) != 8:
                 #     print('piece1 + piece2 not 8 unique pieces!')
@@ -201,7 +208,7 @@ class Command(BaseCommand):
                 expected_side1 = self.side_nr2reverse[piece2.side3]
                 for piece3 in self._iter_piece3(expected_side1, piece1.nr, piece1_is_corner, used_nrs2):
 
-                    base3 = [piece3.nr1, piece3.nr2, piece3.nr3, piece3.nr4]
+                    base3 = (piece3.nr1, piece3.nr2, piece3.nr3, piece3.nr4)
                     used_nrs3 = set(base1 + base2 + base3)
                     # if len(used_nrs3) != 12:
                     #     print('piece1 + piece2 + piece3 not 12 unique pieces!')
