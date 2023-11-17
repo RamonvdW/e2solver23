@@ -8,6 +8,7 @@ from django.db import models
 
 
 class TwoSides(models.Model):
+
     """ a side consisting of 2 consecutive base pieces
 
         the primary key of this record is a simple number that can be used efficiently in queries
@@ -33,7 +34,7 @@ class Piece2x2(models.Model):
 
     """ a 2x2 piece consists of 4 base pieces, each under a certain rotation
 
-        each side consists of 2 base piece sides and is given a new simple numeric
+        each side consists of 2 base piece sides and is given a new simple numeric reference
 
                  side 1
                +---+---+
@@ -45,6 +46,9 @@ class Piece2x2(models.Model):
     """
 
     nr = models.PositiveIntegerField(primary_key=True)      # max = 2147483647
+
+    is_border = models.BooleanField()
+    has_hint = models.BooleanField()
 
     # side is a reference to a TwoSide
     side1 = models.PositiveIntegerField()       # top
@@ -144,6 +148,8 @@ class Piece2x2(models.Model):
         verbose_name_plural = 'Pieces 2x2'
 
         indexes = [
+            models.Index(fields=['is_border']),
+            models.Index(fields=['has_hint']),
             models.Index(fields=['nr1']),
             models.Index(fields=['nr2']),
             models.Index(fields=['nr3']),
@@ -152,10 +158,6 @@ class Piece2x2(models.Model):
             models.Index(fields=['side2']),
             models.Index(fields=['side3']),
             models.Index(fields=['side4']),
-            models.Index(fields=['side1', 'side2']),
-            models.Index(fields=['side2', 'side3']),
-            models.Index(fields=['side3', 'side4']),
-            models.Index(fields=['side4', 'side1']),
         ]
 
     objects = models.Manager()  # for the editor only
