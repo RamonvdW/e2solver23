@@ -157,17 +157,8 @@ class Command(BaseCommand):
                 # number 208 can be here under rotation 1
                 if piece1.nr == 208 and rot1 != 1:
                     continue
-                # number 255 can be here under rotation 2
-                if piece1.nr == 255 and rot1 != 2:
-                    continue
-                # number 181 can be here under rotation 0
-                if piece1.nr == 181 and rot1 != 0:
-                    continue
-                # number 249 can be here under rotation 2
-                if piece1.nr == 249 and rot1 != 2:
-                    continue
-                # number 139 can be here under rotation 3
-                if piece1.nr == 139 and rot1 != 3:
+                # other hints are not needed on p1
+                if piece1.nr in (139, 181, 249, 255):
                     continue
 
             for piece2, rot2 in self._iter_piece2(piece1_side2, (piece1.nr,)):
@@ -197,20 +188,14 @@ class Command(BaseCommand):
                     # hints cannot be together in the same 2x2
                     if piece1_is_hint:
                         continue
-                    # number 208 can be here under rotation 0
-                    if piece2.nr == 208 and rot2 != 0:
+                    # number 139 can be here under rotation 2
+                    if piece2.nr == 139 and rot2 != 2:
                         continue
                     # number 255 can be here under rotation 1
                     if piece2.nr == 255 and rot2 != 1:
                         continue
-                    # number 181 can be here under rotation 3
-                    if piece2.nr == 181 and rot2 != 3:
-                        continue
-                    # number 249 can be here under rotation 1
-                    if piece2.nr == 249 and rot2 != 1:
-                        continue
-                    # number 139 can be here under rotation 2
-                    if piece2.nr == 139 and rot2 != 2:
+                    # other hints are not needed on p2
+                    if piece2.nr in (208, 181, 249):
                         continue
 
                 for piece3, rot3 in self._iter_piece3(piece1_side3, (piece1.nr, piece2.nr)):
@@ -239,20 +224,11 @@ class Command(BaseCommand):
                         # hints cannot be together in the same 2x2
                         if piece1_is_hint or piece2_is_hint:
                             continue
-                        # number 208 can be here under rotation 2
-                        if piece3.nr == 208 and rot3 != 2:
-                            continue
-                        # number 255 can be here under rotation 3
-                        if piece3.nr == 255 and rot3 != 3:
-                            continue
                         # number 181 can be here under rotation 1
                         if piece3.nr == 181 and rot3 != 1:
                             continue
-                        # number 249 can be here under rotation 3
-                        if piece3.nr == 249 and rot3 != 3:
-                            continue
-                        # number 139 can be here under rotation 0
-                        if piece3.nr == 139 and rot3 != 0:
+                        # other hints are not needed on p3
+                        if piece3.nr in (139, 208, 249, 255):
                             continue
 
                     for piece4, rot4 in self._iter_piece4(piece3_side2, piece2_side3,
@@ -265,20 +241,11 @@ class Command(BaseCommand):
                             # hints cannot be together in the same 2x2
                             if piece1_is_hint or piece2_is_hint or piece3_is_hint:
                                 continue
-                            # number 208 can be here under rotation 3
-                            if piece4.nr == 208 and rot4 != 3:
-                                continue
-                            # number 255 can be here under rotation 0
-                            if piece4.nr == 255 and rot4 != 0:
-                                continue
-                            # number 181 can be here under rotation 2
-                            if piece4.nr == 181 and rot4 != 2:
-                                continue
                             # number 249 can be here under rotation 0
                             if piece4.nr == 249 and rot4 != 0:
                                 continue
-                            # number 139 can be here under rotation 1
-                            if piece4.nr == 139 and rot4 != 1:
+                            # other hints are not needed on p4
+                            if piece4.nr in (139, 181, 208, 255):
                                 continue
 
                         # check border compatibility piece2 and piece4
