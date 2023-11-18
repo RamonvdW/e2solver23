@@ -515,7 +515,7 @@ class Command(BaseCommand):
             for nr in range(1, 64+1):
                 p = self.board[nr]
                 if not p:
-                    if nr not in P_CORNER and nr not in P_BORDER:
+                    if self.board_gap_count <= 28 or (nr not in P_CORNER and nr not in P_BORDER):
                         options = self.board_options[nr]
                         tup = (options, nr)
                         best_spot.append(tup)
