@@ -39,13 +39,15 @@ class ShowView(TemplateView):
         nr = int((nr - 1) / 20)
         nr = 1 + nr * 20
 
+        if nr > 1000:
+            context['url_prev1000'] = reverse('Pieces2x2:show', kwargs={'nr': nr-1000})
         if nr > 100:
-            context['url_prev100'] = reverse('Pieces2x2:show-pieces', kwargs={'nr': nr-100})
+            context['url_prev100'] = reverse('Pieces2x2:show', kwargs={'nr': nr-100})
         if nr > 20:
-            context['url_prev20'] = reverse('Pieces2x2:show-pieces', kwargs={'nr': nr-20})
-        context['url_next20'] = reverse('Pieces2x2:show-pieces', kwargs={'nr': nr+20})
-        context['url_next100'] = reverse('Pieces2x2:show-pieces', kwargs={'nr': nr+100})
-        context['url_next1000'] = reverse('Pieces2x2:show-pieces', kwargs={'nr': nr+1000})
+            context['url_prev20'] = reverse('Pieces2x2:show', kwargs={'nr': nr-20})
+        context['url_next20'] = reverse('Pieces2x2:show', kwargs={'nr': nr+20})
+        context['url_next100'] = reverse('Pieces2x2:show', kwargs={'nr': nr+100})
+        context['url_next1000'] = reverse('Pieces2x2:show', kwargs={'nr': nr+1000})
 
         context['groups'] = groups = list()
         group = list()

@@ -195,7 +195,7 @@ class Command(BaseCommand):
                     if piece2.nr == 255 and rot2 != 1:
                         continue
                     # other hints are not needed on p2
-                    if piece2.nr in (208, 181, 249):
+                    if piece2.nr in (181, 208, 249):
                         continue
 
                 for piece3, rot3 in self._iter_piece3(piece1_side3, (piece1.nr, piece2.nr)):

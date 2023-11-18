@@ -5,11 +5,11 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from Pieces2x2 import views
+from Solutions import views
 
-app_name = 'Pieces2x2'
+app_name = 'Solutions'
 
-# base = /pieces2x2/
+# base = /solutions/
 
 urlpatterns = [
     path('view/<nr>/',

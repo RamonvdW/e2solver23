@@ -18,16 +18,9 @@
     <h1>Piece2x2</h1>
 
     <p>
-        {% if url_prev100 %}
-            <a style="margin:10px" href="{{ url_prev100 }}">-100</a>
-        {% else %}
-            <span style="margin:10px">-100</span>
-        {% endif %}
-        {% if url_prev20 %}
-            <a style="margin:10px" href="{{ url_prev20 }}">-20</a>
-        {% else %}
-            <span style="margin:10px">-20</span>
-        {% endif %}
+        {% if url_prev1000 %}<a style="margin:10px" href="{{ url_prev1000 }}">-1000</a>{% else %}<span style="margin:10px">-1000</span>{% endif %}
+        {% if url_prev100  %}<a style="margin:10px" href="{{ url_prev100  }}">-100</a>{%  else %}<span style="margin:10px">-100</span>{% endif %}
+        {% if url_prev20   %}<a style="margin:10px" href="{{ url_prev20   }}">-20</a>{%   else %}<span style="margin:10px">-20</span>{% endif %}
         <a style="margin:10px" href="{{ url_next20 }}">+20</a>
         <a style="margin:10px" href="{{ url_next100 }}">+100</a>
         <a style="margin:10px" href="{{ url_next1000 }}">+1000</a>
