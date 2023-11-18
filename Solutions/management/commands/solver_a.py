@@ -7,7 +7,7 @@
 from django.core.management.base import BaseCommand
 from Pieces2x2.models import TwoSides, Piece2x2
 from Solutions.models import Solution, State, P_CORNER, P_BORDER, P_HINTS
-
+import datetime
 
 ALL_HINT_NRS = (139, 181, 209, 249, 255)
 
@@ -504,6 +504,8 @@ class Command(BaseCommand):
         if options['verbose']:
             self.verbose += 1
 
+        next = datetime.datetime.now() + datetime.timedelta(minutes=15)
+
         self.stdout.write('[INFO] Initializing board')
         self._init_board(options['layout'][0])
         self._save_board()
@@ -538,6 +540,11 @@ class Command(BaseCommand):
                     # self.stdout.write('[INFO] Backtracked to nr %s with greater_than %s' % (nr, greater_than))
                     self._board_free_nr(nr)
             # while
+
+            if datetime.datetime.now() > next:
+                self.stdout.write('[INFO] Information milestone')
+                self._save_board()
+                next += datetime.timedelta(minutes=15)
 
             if self.board_gap_count < self.lowest_gap_count:
                 self.lowest_gap_count = self.board_gap_count

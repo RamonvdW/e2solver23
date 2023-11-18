@@ -8,8 +8,8 @@ from django.http import Http404
 from django.urls import reverse
 from django.views.generic import TemplateView
 from django.templatetags.static import static
-from Pieces2x2.models import Piece2x2, TwoSides
-from Solutions.models import Solution, P_CORNER, P_BORDER, P_HINTS
+from Pieces2x2.models import Piece2x2
+from Solutions.models import Solution
 from types import SimpleNamespace
 
 TEMPLATE_VIEW = 'solutions/show.dtl'
