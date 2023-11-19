@@ -12,6 +12,10 @@ app_name = 'Solutions'
 # base = /solutions/
 
 urlpatterns = [
+    path('view/auto/',
+         views.ShowAutoView.as_view(),
+         name='show'),
+
     path('view/<nr>/',
          views.ShowView.as_view(),
          name='show'),

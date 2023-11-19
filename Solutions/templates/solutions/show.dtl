@@ -61,5 +61,13 @@
 
     </table>
 
+    {% if auto_reload %}
+        <script>
+            setTimeout(function(){
+                window.location.reload();
+            }, 15*1000);        // 15 seconds
+        </script>
+    {% endif %}
+
 </body>
 </html>
