@@ -19,6 +19,14 @@ urlpatterns = [
     path('view/<nr>/',
          views.ShowView.as_view(),
          name='show'),
+
+    path('view4x4/auto/',
+         views.Show4x4AutoView.as_view(),
+         name='auto-show-4x4'),
+
+    path('view4x4/<nr>/',
+         views.Show4x4View.as_view(),
+         name='show-4x4'),
 ]
 
 
