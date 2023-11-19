@@ -78,8 +78,6 @@ class ShowView(TemplateView):
         context['solution'] = sol = Solution.objects.get(nr=nr)
         _fill_sol(sol)
 
-        if nr > 1000:
-            context['url_prev1000'] = reverse('Solutions:show', kwargs={'nr': nr-1000})
         if nr > 100:
             context['url_prev100'] = reverse('Solutions:show', kwargs={'nr': nr-100})
         if nr > 10:
@@ -89,7 +87,8 @@ class ShowView(TemplateView):
         context['url_next1'] = reverse('Solutions:show', kwargs={'nr': nr+1})
         context['url_next10'] = reverse('Solutions:show', kwargs={'nr': nr+10})
         context['url_next100'] = reverse('Solutions:show', kwargs={'nr': nr+100})
-        context['url_next1000'] = reverse('Solutions:show', kwargs={'nr': nr+1000})
+
+        context['url_auto'] = reverse('Solutions:auto-show')
 
         return context
 
@@ -108,6 +107,14 @@ class ShowAutoView(TemplateView):
             _fill_sol(sol)
 
         context['auto_reload'] = True
+
+        nr = sol.nr
+        if nr > 100:
+            context['url_prev100'] = reverse('Solutions:show', kwargs={'nr': nr-100})
+        if nr > 10:
+            context['url_prev10'] = reverse('Solutions:show', kwargs={'nr': nr-10})
+        if nr > 1:
+            context['url_prev1'] = reverse('Solutions:show', kwargs={'nr': nr-1})
 
         return context
 
