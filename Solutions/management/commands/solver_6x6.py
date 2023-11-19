@@ -6,50 +6,53 @@
 
 from django.core.management.base import BaseCommand
 from Pieces2x2.models import TwoSides, Piece2x2
-from Solutions.models import Solution4x4, P_CORNER, P_BORDER, P_HINTS
+from Solutions.models import Solution4x4, Solution6x6, P_CORNER, P_BORDER, P_HINTS
+import time
 
 ALL_HINT_NRS = (139, 181, 209, 249, 255)
 
 
 class Command(BaseCommand):
 
-    help = "Solver 4x4"
+    help = "Solver 6x6"
 
     """
-         1  2  3  4  5  6    7  8
-         9 10 11 12 13 14   15 16
+         1   2  3  4  5  6  7   8
+          
+         9  10 11 12 13 14 15  16
+        17  18 19 20 21 22 23  24
+        25  26 27 28 29 30 31  32
+        33  34 35 36 37 38 39  40
+        41  42 43 44 45 46 47  48
+        49  50 51 52 53 54 55  56
          
-        17 18  19 20 21 22  23 24
-        25 26  27 28 29 30  31 32
-        33 34  35 36 37 38  39 40
-        41 42  43 44 45 46  47 48
-        
-        49 50  51 52 53 54  55 56
-        57 58  59 60 61 62  63 64
+        57  58 59 60 61 62 63  64
     """
 
     solve_order = (
-        36,                       # center
-        35, 27, 28,
-        20, 19,                   # 2x3
-        44, 43,                   # 2x4
+        34, 26,
+        52, 53,
+        12, 13,
+        31, 39,                   # grote plus = 24
 
-        37, 29,
-        21, 30, 22,
-        45, 38, 46,               # 4x4 = 16
+        42, 50, 51,               # corner 1
+        14, 15, 23,               # corner 2
+        11, 18, 10,               # corner 3
+        47, 54, 55,               # corner 4
     )
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.verbose = 0
-        self.board = dict()             # [nr] = Piece2x2
-        self.board_options = dict()     # [nr] = count of possible Piece2x2
+        self.board = dict()                 # [nr] = Piece2x2
+        self.board_options = dict()         # [nr] = count of possible Piece2x2
         self.board_gap_count = 0
         self.board_unused_nrs = list()
-        self.neighbours = dict()     # [nr] = (side 1, 2, 3, 4 neighbour nrs)
-        self._solve_nr = 0
+        self.neighbours = dict()            # [nr] = (side 1, 2, 3, 4 neighbour nrs)
         self._count_cache = dict()
         self.board_solve_order = list()     # [nr, nr, ..]
+        self.all_unused_nrs = list()
+        self.based_on = 0
 
         self._calc_neighbours()
 
@@ -225,7 +228,7 @@ class Command(BaseCommand):
                 setattr(sol, field_note, note)
         # for
 
-    def _save_board4x4(self):
+    def _save_board6x6(self):
         base_nrs = list()
         p_count = 0
         nrs = [0]
@@ -246,20 +249,25 @@ class Command(BaseCommand):
             return
 
         sol_nr = 1
-        s = Solution4x4.objects.all().order_by('-nr').first()
+        s = Solution6x6.objects.all().order_by('-nr').first()
         if s:
             sol_nr = s.nr + 1
 
         self.stdout.write('[INFO] Saving board %s with gap count %s' % (sol_nr, self.board_gap_count))
 
-        sol = Solution4x4(
-                nr=sol_nr)
+        sol = Solution6x6(
+                nr=sol_nr,
+                based_on_4x4=self.based_on)
 
         for nr in range(1, 64+1):
-            if nr in (19, 20, 21, 22,
-                      27, 28, 29, 30,
-                      35, 36, 37, 38,
-                      43, 44, 45, 46):
+            if nr not in (1, 2, 3, 4, 5, 6, 7, 8,
+                          9, 16,
+                          17, 24,
+                          25, 32,
+                          33, 40,
+                          41, 48,
+                          49, 56,
+                          57, 58, 59, 60, 61, 62, 63, 64):
                 field_nr = 'nr%s' % nr
                 setattr(sol, field_nr, nrs[nr])
         # for
@@ -268,7 +276,7 @@ class Command(BaseCommand):
 
         sol.save()
 
-        # self.stdout.write('[INFO] Done')
+        self.stdout.write('[INFO] Done')
 
     def _board_free_nr(self, nr):
         p = self.board[nr]
@@ -436,26 +444,35 @@ class Command(BaseCommand):
         # for
         return False            # failure
 
-    def _init_board(self):
+    def load_board_4x4(self, sol):
         for nr in range(1, 64+1):
             self.board[nr] = None
         # for
 
         self.board_unused_nrs = [nr for nr in range(1, 256+1) if nr not in ALL_HINT_NRS]
-        self.board_gap_count = 64
-        self.all_unused_nrs = self.board_unused_nrs[:]
+
+        for nr in (19, 20, 21, 22,
+                   27, 28, 29, 30,
+                   35, 36, 37, 38,
+                   43, 44, 45, 46):
+
+            field_nr = 'nr%s' % nr
+            p_nr = getattr(sol, field_nr)
+            p = Piece2x2.objects.get(nr=p_nr)       # TODO: get all with 1 query
+            self._board_fill_nr(nr, p)
+        # for
+
+        self.board_gap_count = 64 - 16
+        self.all_unused_nrs = self.board_unused_nrs[:]      # copy
+        self._count_cache = dict()
+        self.board_solve_order = list()     # [nr, nr, ..]
+        self.based_on = sol.nr
 
         self._count_all(1, 1)
 
-    def handle(self, *args, **options):
-
-        if options['verbose']:
-            self.verbose += 1
-
+    def find_6x6(self):
         min_options = 1
-
-        self.stdout.write('[INFO] Initializing board')
-        self._init_board()
+        best = 999
 
         while self.board_gap_count > 0:
 
@@ -472,6 +489,9 @@ class Command(BaseCommand):
                     # success
                     self.board_solve_order.append(nr)
                     placed_piece = True
+                    if self.board_gap_count < best:
+                        self._save_board6x6()
+                        best = self.board_gap_count
                 else:
                     # backtrack and continue with next option in previous spot
                     if len(self.board_solve_order) == 0:
@@ -485,8 +505,36 @@ class Command(BaseCommand):
                     self._board_free_nr(nr)
             # while
 
-            if len(self.board_solve_order) == 16:
-                self._save_board4x4()
+            if len(self.board_solve_order) == 36:
+                self._save_board6x6()
         # while
+
+    def handle(self, *args, **options):
+
+        if options['verbose']:
+            self.verbose += 1
+
+        my_processor = int(time.time() - 946684800.0)     # seconds since Jan 1, 2000
+        self.stdout.write('[INFO] my_processor is %s' % my_processor)
+
+        while True:
+            sol = Solution4x4.objects.filter(is_processed=False, processor=0).order_by('nr').first()     # lowest first
+
+            if sol:
+                self.stdout.write('[INFO] Loading Solution4x4 nr %s' % sol.nr)
+                sol.processor = my_processor
+                sol.save(update_fields=['processor'])
+
+                self.load_board_4x4(sol)
+                self.find_6x6()
+
+                sol.is_processed = True
+                sol.save(update_fields=['is_processed'])
+
+            else:
+                self.stdout.write('[INFO] Waiting for new 4x4 (press Ctrl+C to abort)')
+                time.sleep(60)
+        # while
+
 
 # end of file

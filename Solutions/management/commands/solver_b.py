@@ -237,6 +237,7 @@ class Command(BaseCommand):
     def _count_all(self, work_nr, min_options):
         self._count_cache = dict()
 
+        # start with the neighbours so we can quickly find a dead-end
         nrs = list(self.neighbours[work_nr])
         for nr in range(1, 64+1):
             if nr not in nrs:

@@ -90,6 +90,8 @@ class ShowView(TemplateView):
 
         context['url_auto'] = reverse('Solutions:auto-show')
 
+        context['title'] = 'Solution'
+
         return context
 
 
@@ -108,6 +110,7 @@ class Show4x4View(TemplateView):
 
         context['solution'] = sol = Solution4x4.objects.get(nr=nr)
         for nr in range(1, 64 + 1):
+            # add the missing pieces
             if nr not in (19, 20, 21, 22,
                           27, 28, 29, 30,
                           35, 36, 37, 38,
@@ -129,6 +132,57 @@ class Show4x4View(TemplateView):
         context['url_next100'] = reverse('Solutions:show-4x4', kwargs={'nr': nr+100})
 
         context['url_auto'] = reverse('Solutions:auto-show-4x4')
+
+        context['title'] = 'Solution 4x4'
+
+        return context
+
+
+class Show6x6View(TemplateView):
+
+    template_name = TEMPLATE_VIEW
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        try:
+            nr = int(kwargs['nr'][:10])      # afkappen voor de veiligheid
+        except ValueError:
+            raise Http404('Not found')
+
+        context['solution'] = sol = Solution6x6.objects.get(nr=nr)
+        for nr in range(1, 64 + 1):
+            # add the missing pieces
+            if nr in (1, 2, 3, 4, 5, 6, 7, 8,
+                      9, 16,
+                      17, 24,
+                      25, 32,
+                      33, 40,
+                      41, 48,
+                      49, 56,
+                      57, 58, 59, 60, 61, 62, 63, 64):
+                nr_str = 'nr%s' % nr
+                setattr(sol, nr_str, 0)
+        # for
+        _fill_sol(sol)
+
+        context['based_on'] = '4x4 nr %s' % sol.based_on_4x4
+
+        nr = sol.nr
+        if nr > 100:
+            context['url_prev100'] = reverse('Solutions:show-6x6', kwargs={'nr': nr-100})
+        if nr > 10:
+            context['url_prev10'] = reverse('Solutions:show-6x6', kwargs={'nr': nr-10})
+        if nr > 1:
+            context['url_prev1'] = reverse('Solutions:show-6x6', kwargs={'nr': nr-1})
+        context['url_next1'] = reverse('Solutions:show-6x6', kwargs={'nr': nr+1})
+        context['url_next10'] = reverse('Solutions:show-6x6', kwargs={'nr': nr+10})
+        context['url_next100'] = reverse('Solutions:show-6x6', kwargs={'nr': nr+100})
+
+        context['url_auto'] = reverse('Solutions:auto-show-6x6')
+
+        context['title'] = 'Solution 6x6'
 
         return context
 
@@ -156,6 +210,8 @@ class ShowAutoView(TemplateView):
         if nr > 1:
             context['url_prev1'] = reverse('Solutions:show', kwargs={'nr': nr-1})
 
+        context['title'] = 'Solution'
+
         return context
 
 
@@ -170,6 +226,7 @@ class Show4x4AutoView(TemplateView):
         sol = Solution4x4.objects.order_by('-nr').first()       # highest first
         if sol:
             for nr in range(1, 64+1):
+                # add the missing pieces
                 if nr not in (19, 20, 21, 22,
                               27, 28, 29, 30,
                               35, 36, 37, 38,
@@ -190,5 +247,51 @@ class Show4x4AutoView(TemplateView):
         if nr > 1:
             context['url_prev1'] = reverse('Solutions:show-4x4', kwargs={'nr': nr-1})
 
+        context['title'] = 'Solution 4x4'
+
         return context
+
+
+class Show6x6AutoView(TemplateView):
+
+    template_name = TEMPLATE_VIEW
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        sol = Solution6x6.objects.order_by('-nr').first()       # highest first
+        if sol:
+            for nr in range(1, 64+1):
+                # add the missing pieces
+                if nr in (1, 2, 3, 4, 5, 6, 7, 8,
+                          9, 16,
+                          17, 24,
+                          25, 32,
+                          33, 40,
+                          41, 48,
+                          49, 56,
+                          57, 58, 59, 60, 61, 62, 63, 64):
+                    nr_str = 'nr%s' % nr
+                    setattr(sol, nr_str, 0)
+            # for
+            context['solution'] = sol
+            _fill_sol(sol)
+
+        context['auto_reload'] = True
+        context['based_on'] = '4x4 nr %s' % sol.based_on_4x4
+
+        nr = sol.nr
+        if nr > 100:
+            context['url_prev100'] = reverse('Solutions:show-6x6', kwargs={'nr': nr-100})
+        if nr > 10:
+            context['url_prev10'] = reverse('Solutions:show-6x6', kwargs={'nr': nr-10})
+        if nr > 1:
+            context['url_prev1'] = reverse('Solutions:show-6x6', kwargs={'nr': nr-1})
+
+        context['title'] = 'Solution 6x6'
+
+        return context
+
+
 # end of file

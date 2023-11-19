@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Solution</title>
+    <title>{{ title }}</title>
     <style>
         table, th, td {
             border: 1px solid black;
@@ -15,7 +15,7 @@
 
 <body>
 
-    <h1>Solution</h1>
+    <h1>{{ title }}</h1>
 
     <p>
         {% if url_prev100 %}<a style="margin:10px" href="{{ url_prev100 }}">-100</a>{%  else %}<span style="margin:10px">-100</span>{% endif %}
@@ -32,6 +32,11 @@
             <tr>
                 <th colspan="8">Nr {{ solution.nr }} at {{ solution.when }}</th>
             </tr>
+            {% if based_on %}
+                <tr>
+                    <td colspan="8">Based on {{ based_on }}</td>
+                </tr>
+            {% endif %}
         </thead>
 
         <tr>

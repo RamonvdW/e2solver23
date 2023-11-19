@@ -27,6 +27,14 @@ urlpatterns = [
     path('view4x4/<nr>/',
          views.Show4x4View.as_view(),
          name='show-4x4'),
+
+    path('view6x6/auto/',
+         views.Show6x6AutoView.as_view(),
+         name='auto-show-6x6'),
+
+    path('view6x6/<nr>/',
+         views.Show6x6View.as_view(),
+         name='show-6x6'),
 ]
 
 
