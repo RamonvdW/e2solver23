@@ -30,15 +30,15 @@ class Command(BaseCommand):
     """
 
     solve_order = (
-        34, 26,
-        52, 53,
         12, 13,
-        31, 39,                   # grote plus = 24
+        31, 39,
+        52, 53,
+        34, 26,       # grote plus = 24
 
-        42, 50, 51,               # corner 1
-        14, 15, 23,               # corner 2
-        11, 18, 10,               # corner 3
-        47, 54, 55,               # corner 4
+        11, 18, 10,   # corner 1
+        14, 23, 15,   # corner 2
+        47, 54, 55,   # corner 3
+        42, 51, 50,   # corner 4
     )
 
     def __init__(self, **kwargs):
