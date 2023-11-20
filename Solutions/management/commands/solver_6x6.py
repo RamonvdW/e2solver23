@@ -246,6 +246,67 @@ class Command(BaseCommand):
         # for
         return False
 
+    def _count_important(self, work_nr, min_options):
+        self._count_freedom_cache = dict()
+
+        important = (
+            (10, 9, 1, 2),
+            (11, 3),
+            (12, 4),
+            (13, 5),
+            (14, 6),
+            (15, 7, 8, 16),
+            (23, 24),
+            (31, 32),
+            (39, 40),
+            (47, 48),
+            (55, 56, 64, 63),
+            (54, 62),
+            (53, 61),
+            (52, 60),
+            (51, 59),
+            (50, 58, 57, 49),
+            (42, 41),
+            (34, 33),
+            (26, 25),
+            (18, 17),
+        )
+
+        # start with the neighbours so we can quickly find a dead-end
+        nrs = list(self.neighbours[work_nr])
+        for tup in important:
+            nr = tup[0]
+            if self.board[nr] is None:
+                nrs.append(nr)
+            else:
+                for nr in tup[1:]:
+                    nrs.append(nr)
+        # for
+        nrs = set(nrs)      # removes dupes
+
+        for nr in nrs:
+            if nr > 0 and self.board[nr] is None:
+                # empty spot on the board
+                count, freedom = self._count_2x2(nr, self.board_unused_nrs)
+                self.board_options[nr] = count
+                if "," in freedom:
+                    # is listing critical base pieces are critical
+                    self.board_criticality[nr] = freedom.count(',')
+                elif freedom == "?":
+                    self.board_criticality[nr] = 999
+                elif freedom == "20+":
+                    self.board_criticality[nr] = 20
+                else:
+                    # convert back to number
+                    self.board_criticality[nr] = int(freedom)
+
+                if count < min_options:
+                    # found a dead end
+                    # self.stdout.write(' [%s] less than %s options for %s' % (work_nr, min_options, nr))
+                    return True
+        # for
+        return False
+
     def _document_gaps(self, sol):
         for nr in range(1, 64+1):
             p = self.board[nr]
@@ -420,6 +481,8 @@ class Command(BaseCommand):
 
         qset = Piece2x2.objects.filter(nr__gt=greater_than).order_by('nr')
 
+        unused_nrs = [nr for nr in self.board_unused_nrs if nr > 64]        # skip outer borders
+
         if s1:
             qset = qset.filter(side1=s1)
         elif x1:
@@ -443,22 +506,24 @@ class Command(BaseCommand):
         if p1:
             qset = qset.filter(nr1=p1)
         else:
-            qset = qset.filter(nr1__in=self.board_unused_nrs)
+            qset = qset.filter(nr1__in=unused_nrs)
 
         if p2:
             qset = qset.filter(nr2=p2)
         else:
-            qset = qset.filter(nr2__in=self.board_unused_nrs)
+            qset = qset.filter(nr2__in=unused_nrs)
 
         if p3:
             qset = qset.filter(nr3=p3)
         else:
-            qset = qset.filter(nr3__in=self.board_unused_nrs)
+            qset = qset.filter(nr3__in=unused_nrs)
 
         if p4:
             qset = qset.filter(nr4=p4)
         else:
-            qset = qset.filter(nr4__in=self.board_unused_nrs)
+            qset = qset.filter(nr4__in=unused_nrs)
+
+        # print(qset.explain())
 
         for p in qset:
             yield p
@@ -466,7 +531,8 @@ class Command(BaseCommand):
     def _try_fill_nr(self, nr, greater_than, min_options):
         for p in self._iter_for_nr(nr, greater_than):
             self._board_fill_nr(nr, p)
-            is_dead_end = self._count_all(nr, min_options)
+            # is_dead_end = self._count_all(nr, min_options)
+            is_dead_end = self._count_important(nr, min_options)
             if not is_dead_end:
                 return True     # success
             self._board_free_nr(nr)
@@ -479,6 +545,7 @@ class Command(BaseCommand):
             self.board_criticality[nr] = 999
         # for
 
+        # start at 65 to skip all outer border pieces?
         self.board_unused_nrs = [nr for nr in range(1, 256+1) if nr not in ALL_HINT_NRS]
 
         for nr in (19, 20, 21, 22,
@@ -585,6 +652,7 @@ class Command(BaseCommand):
                     greater_than = p.nr
                     # self.stdout.write('[INFO] Backtracked to nr %s with greater_than %s' % (nr, greater_than))
                     self._board_free_nr(nr)
+                    self._count_important(nr, min_options)      # update the criticality stats
             # while
 
             if len(self.board_solve_order) == 36:
