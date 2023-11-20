@@ -35,7 +35,9 @@
             </tr>
             {% if based_on %}
                 <tr>
-                    <td colspan="8">Based on {{ based_on }}</td>
+                    <td>{% if url_prev4x4 %}<a href="{{ url_prev4x4 }}">Prev</a>{% endif %}</td>
+                    <td colspan="6">Based on {{ based_on }}</td>
+                    <td>{% if url_next4x4 %}<a href="{{ url_next4x4 }}">Next</a>{% endif %}</td>
                 </tr>
             {% endif %}
         </thead>

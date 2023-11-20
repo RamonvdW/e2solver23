@@ -184,6 +184,13 @@ class Show6x6View(TemplateView):
         context['url_next10'] = reverse('Solutions:show-6x6', kwargs={'nr': nr+10})
         context['url_next100'] = reverse('Solutions:show-6x6', kwargs={'nr': nr+100})
 
+        pks = list(Solution6x6.objects.filter(based_on_4x4=sol.based_on_4x4).order_by('pk').values_list('pk', flat=True))
+        idx = pks.index(sol.pk)
+        if idx > 0:
+            context['url_prev4x4'] = reverse('Solutions:show-6x6', kwargs={'nr': pks[idx-1]})
+        if idx < len(pks) - 1:
+            context['url_next4x4'] = reverse('Solutions:show-6x6', kwargs={'nr': pks[idx+1]})
+
         context['url_auto'] = reverse('Solutions:auto-show-6x6')
 
         context['title'] = 'Solution 6x6'

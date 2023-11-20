@@ -40,7 +40,7 @@ class Command(BaseCommand):
         self.board_gap_count = 0
         self.board_unused_nrs = list()
         self.neighbours = dict()            # [nr] = (side 1, 2, 3, 4 neighbour nrs)
-        self._count_cache = dict()
+        self._count_freedom_cache = dict()
         self.board_solve_order = list()     # [nr, nr, ..]
         self.all_unused_nrs = list()
         self.based_on = 0
@@ -136,8 +136,7 @@ class Command(BaseCommand):
 
         tup = (s1, s2, s3, s4, p1, p2, p3, p4, x1, x2, x3, x4, tuple(unused_nrs))
         try:
-            count = self._count_cache[tup]
-            freedom = '?'
+            count, freedom = self._count_freedom_cache[tup]
         except KeyError:
             qset = Piece2x2.objects.all()
 
@@ -181,12 +180,14 @@ class Command(BaseCommand):
             else:
                 qset = qset.filter(nr4__in=unused_nrs)
 
-            self._count_cache[tup] = count = qset.count()
+            count = qset.count()
 
             avail_nrs = set(list(qset.distinct('nr1').values_list('nr1', flat=True)) +
                             list(qset.distinct('nr2').values_list('nr2', flat=True)) +
                             list(qset.distinct('nr3').values_list('nr3', flat=True)) +
                             list(qset.distinct('nr4').values_list('nr4', flat=True)))
+
+            avail_nrs = [nr for nr in avail_nrs if nr > 64]     # 1..4 = corner; next 60 = borders
             avail_len = len(avail_nrs)
             if avail_len == 0 or avail_len > 5:
                 freedom = str(avail_len)
@@ -196,10 +197,12 @@ class Command(BaseCommand):
                 avail_nrs = [str(nr) for nr in avail_nrs]
                 freedom = ",".join(avail_nrs)
 
+            self._count_freedom_cache[tup] = (count, freedom)
+
         return count, freedom
 
     def _count_all(self, work_nr, min_options):
-        self._count_cache = dict()
+        self._count_freedom_cache = dict()
 
         # start with the neighbours so we can quickly find a dead-end
         nrs = list(self.neighbours[work_nr])
@@ -479,7 +482,7 @@ class Command(BaseCommand):
 
         self.board_gap_count = 64 - 16
         self.all_unused_nrs = self.board_unused_nrs[:]      # copy
-        self._count_cache = dict()
+        self._count_freedom_cache = dict()
         self.board_solve_order = list()     # [nr, nr, ..]
         self.based_on = sol.pk
 
@@ -529,13 +532,13 @@ class Command(BaseCommand):
 
     def find_6x6(self):
 
-        next_time = datetime.datetime.now() + datetime.timedelta(minutes=15)
+        next_time = datetime.datetime.now() + datetime.timedelta(minutes=2)
         min_options = 1
         best = 999
 
         while True:
 
-            nr = self.get_next_nr()
+            nr = self.get_next_nr()     # can return 0 to trigger backtracking
 
             greater_than = 0
             placed_piece = False
@@ -546,6 +549,7 @@ class Command(BaseCommand):
                     placed_piece = True
                     if self.board_gap_count < best:
                         self._save_board6x6()
+                        next_time = datetime.datetime.now() + datetime.timedelta(minutes=2)
                         best = self.board_gap_count
                 else:
                     # backtrack and continue with next option in previous spot
@@ -569,7 +573,7 @@ class Command(BaseCommand):
             if datetime.datetime.now() > next_time:
                 self.stdout.write('[INFO] Information milestone')
                 self._save_board6x6()
-                next_time += datetime.timedelta(minutes=15)
+                next_time = datetime.datetime.now() + datetime.timedelta(minutes=2)
 
         # while
 
