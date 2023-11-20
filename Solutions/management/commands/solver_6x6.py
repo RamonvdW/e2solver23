@@ -87,6 +87,7 @@ class Command(BaseCommand):
         s1, s2, s3, s4 = self._get_sides(nr)
         p1 = p2 = p3 = p4 = None
         x1 = x2 = x3 = x4 = None
+        has_hint = False
 
         if nr in P_CORNER:
             if nr == 1:
@@ -123,6 +124,7 @@ class Command(BaseCommand):
             x1 = x2 = x3 = x4 = self.rev_border
 
             if nr in P_HINTS:
+                has_hint = True
                 if nr == 10:
                     p1 = 208
                 elif nr == 15:
@@ -189,6 +191,12 @@ class Command(BaseCommand):
 
             avail_nrs = [nr for nr in avail_nrs if nr > 64]     # 1..4 = corner; next 60 = borders
             avail_len = len(avail_nrs)
+            if has_hint and avail_len > 0:
+                # hint results in fewer options
+                # give these positions some penalty
+                avail_len += 25
+                # avail_len= int(avail_len * 1.25)
+
             if avail_len == 0 or avail_len > 5:
                 freedom = str(avail_len)
             else:
@@ -213,6 +221,7 @@ class Command(BaseCommand):
 
         for nr in nrs:
             if nr > 0 and self.board[nr] is None:
+                # empty spot on the board
                 count, freedom = self._count_2x2(nr, self.board_unused_nrs)
                 self.board_options[nr] = count
                 self.board_freedom[nr] = freedom
@@ -246,7 +255,8 @@ class Command(BaseCommand):
                 count1 = self.board_options[nr]     # self._count_2x2(nr, self.board_unused_nrs)
                 freedom1 = self.board_freedom[nr]
                 count2, _ = self._count_2x2(nr, self.all_unused_nrs)
-                note = '%s (max %s) %s' % (count1, count2, freedom1)
+                note = '%s{%s}%s' % (count1, count2, freedom1)
+                note = note[:30]        # avoid database errors
 
                 setattr(sol, field_note, note)
         # for
@@ -268,8 +278,8 @@ class Command(BaseCommand):
         l1 = len(set(base_nrs))
         l2 = p_count * 4
         if l1 != l2:
+            base_nrs.sort()
             self.stdout.write('[ERROR] Solution has %s instead of %s base nrs: %s' % (l1, l2, repr(base_nrs)))
-            return
 
         self.stdout.write('[INFO] Saving board with gap count %s' % self.board_gap_count)
 
@@ -496,14 +506,12 @@ class Command(BaseCommand):
         current_depth = len(self.board_solve_order)
         # print('  current_depth = %s' % current_depth)
 
-        solve_order = (
-            13, 39, 52, 26,  # starter in each side
-            12, 31, 53, 34,  # big plus
-            11, 18, 10,  # corner 1
-            14, 23, 15,  # corner 2
-            47, 54, 55,  # corner 3
-            42, 51, 50,  # corner 4
-        )
+        solve_todo = (
+            10, 11, 12, 13, 14, 15,
+            18, 23, 26, 31, 34, 39, 42, 47,
+            50, 51, 52, 53, 54, 55)
+
+        corners_todo = (10, 15, 50, 55)
 
         if current_depth >= 20:
             # trigger back-tracking
@@ -511,10 +519,13 @@ class Command(BaseCommand):
         else:
             # find the critical items
             critical = list()
-            for nr in solve_order:
+            corners = list()
+            for nr in solve_todo:
                 if nr not in self.board_solve_order:
                     tup = (self.board_criticality[nr], nr)
                     critical.append(tup)
+                    if nr in corners_todo:
+                        corners.append(nr)
             # for
             critical.sort()     # smallest first
             # print('   critical nrs:')
@@ -522,7 +533,14 @@ class Command(BaseCommand):
             #     print('      [%s] %s' % (tup[1], tup[0]))
             # # for
 
-            tup = critical[0]
+            if len(corners) == 1 and len(critical) > 1:
+                # preference is to wait with the last corner
+                idx = 0
+                while idx < len(critical) and critical[idx][1] in corners:
+                    idx += 1
+                tup = critical[idx]
+            else:
+                tup = critical[0]
             nr = tup[1]
 
             # nr = solve_order[current_depth]
