@@ -245,15 +245,9 @@ class Command(BaseCommand):
             self.stdout.write('[ERROR] Solution has %s instead of %s base nrs: %s' % (l1, l2, repr(base_nrs)))
             return
 
-        sol_nr = 1
-        s = Solution4x4.objects.all().order_by('-nr').first()
-        if s:
-            sol_nr = s.nr + 1
+        # self.stdout.write('[INFO] Saving board with gap count %s' % self.board_gap_count)
 
-        self.stdout.write('[INFO] Saving board %s with gap count %s' % (sol_nr, self.board_gap_count))
-
-        sol = Solution4x4(
-                nr=sol_nr)
+        sol = Solution4x4()
 
         for nr in range(1, 64+1):
             if nr in (19, 20, 21, 22,
@@ -268,7 +262,7 @@ class Command(BaseCommand):
 
         sol.save()
 
-        # self.stdout.write('[INFO] Done')
+        self.stdout.write('[INFO] Saved board %s' % sol.pk)
 
     def _board_free_nr(self, nr):
         p = self.board[nr]

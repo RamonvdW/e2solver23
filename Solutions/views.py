@@ -108,7 +108,9 @@ class Show4x4View(TemplateView):
         except ValueError:
             raise Http404('Not found')
 
-        context['solution'] = sol = Solution4x4.objects.get(nr=nr)
+        context['solution'] = sol = Solution4x4.objects.get(pk=nr)
+        sol.nr = sol.pk
+
         for nr in range(1, 64 + 1):
             # add the missing pieces
             if nr not in (19, 20, 21, 22,
@@ -151,7 +153,9 @@ class Show6x6View(TemplateView):
         except ValueError:
             raise Http404('Not found')
 
-        context['solution'] = sol = Solution6x6.objects.get(nr=nr)
+        context['solution'] = sol = Solution6x6.objects.get(pk=nr)
+        sol.nr = sol.pk
+
         for nr in range(1, 64 + 1):
             # add the missing pieces
             if nr in (1, 2, 3, 4, 5, 6, 7, 8,
@@ -223,8 +227,9 @@ class Show4x4AutoView(TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        sol = Solution4x4.objects.order_by('-nr').first()       # highest first
+        sol = Solution4x4.objects.order_by('-pk').first()       # highest first
         if sol:
+            sol.nr = sol.pk
             for nr in range(1, 64+1):
                 # add the missing pieces
                 if nr not in (19, 20, 21, 22,
@@ -260,8 +265,9 @@ class Show6x6AutoView(TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        sol = Solution6x6.objects.order_by('-nr').first()       # highest first
+        sol = Solution6x6.objects.order_by('-pk').first()       # highest first
         if sol:
+            sol.nr = sol.pk
             for nr in range(1, 64+1):
                 # add the missing pieces
                 if nr in (1, 2, 3, 4, 5, 6, 7, 8,

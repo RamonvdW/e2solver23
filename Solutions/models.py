@@ -207,8 +207,6 @@ class Solution6x6(models.Model):
         57  58 59 60 61 62 63  64
     """
 
-    nr = models.PositiveIntegerField(primary_key=True)      # max = 2147483647
-
     when = models.DateTimeField(auto_now_add=True)
 
     # was this 6x6 processed further into an 8x8?
@@ -350,8 +348,6 @@ class Solution4x4(models.Model):
         57 58  59 60 61 62  63 64
     """
 
-    nr = models.PositiveBigIntegerField(primary_key=True)
-
     when = models.DateTimeField(auto_now_add=True)
 
     # was this 4x4 processed further into an 6x6?
@@ -447,18 +443,6 @@ class Solution4x4(models.Model):
     class Meta:
         verbose_name = 'Solution 4x4'
         verbose_name_plural = 'Solutions 4x4'
-
-    objects = models.Manager()  # for the editor only
-
-
-class State(models.Model):
-
-    nr = models.PositiveBigIntegerField(primary_key=True)
-
-    evict = models.PositiveSmallIntegerField()      # 1..64
-
-    class Meta:
-        verbose_name = 'State'
 
     objects = models.Manager()  # for the editor only
 

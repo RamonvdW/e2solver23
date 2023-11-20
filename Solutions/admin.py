@@ -21,6 +21,5 @@ class AdminSolution4x4(admin.ModelAdmin):
 admin.site.register(Solution)
 admin.site.register(Solution4x4, AdminSolution6x6)
 admin.site.register(Solution6x6, AdminSolution6x6)
-# admin.site.register(State)
 
 # end of file

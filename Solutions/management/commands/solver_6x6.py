@@ -30,16 +30,25 @@ class Command(BaseCommand):
     """
 
     solve_order = (
-        12, 13,
-        31, 39,
-        52, 53,
-        34, 26,       # grote plus = 24
-
-        11, 18, 10,   # corner 1
-        14, 23, 15,   # corner 2
-        47, 54, 55,   # corner 3
-        42, 51, 50,   # corner 4
+        13, 39, 52, 26,     # starter in each side
+        12, 31, 53, 34,     # big plus
+        11, 18, 10,         # corner 1
+        14, 23, 15,         # corner 2
+        47, 54, 55,         # corner 3
+        42, 51, 50,         # corner 4
     )
+
+    # solve_order = (
+    #     12, 13,
+    #     31, 39,
+    #     52, 53,
+    #     34, 26,       # grote plus = 24
+    #
+    #     11, 18, 10,   # corner 1
+    #     14, 23, 15,   # corner 2
+    #     47, 54, 55,   # corner 3
+    #     42, 51, 50,   # corner 4
+    # )
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -248,15 +257,9 @@ class Command(BaseCommand):
             self.stdout.write('[ERROR] Solution has %s instead of %s base nrs: %s' % (l1, l2, repr(base_nrs)))
             return
 
-        sol_nr = 1
-        s = Solution6x6.objects.all().order_by('-nr').first()
-        if s:
-            sol_nr = s.nr + 1
-
-        self.stdout.write('[INFO] Saving board %s with gap count %s' % (sol_nr, self.board_gap_count))
+        self.stdout.write('[INFO] Saving board with gap count %s' % self.board_gap_count)
 
         sol = Solution6x6(
-                nr=sol_nr,
                 based_on_4x4=self.based_on)
 
         for nr in range(1, 64+1):
@@ -276,7 +279,7 @@ class Command(BaseCommand):
 
         sol.save()
 
-        self.stdout.write('[INFO] Done')
+        self.stdout.write('[INFO] Saved board %s' % sol.pk)
 
     def _board_free_nr(self, nr):
         p = self.board[nr]
@@ -466,7 +469,7 @@ class Command(BaseCommand):
         self.all_unused_nrs = self.board_unused_nrs[:]      # copy
         self._count_cache = dict()
         self.board_solve_order = list()     # [nr, nr, ..]
-        self.based_on = sol.nr
+        self.based_on = sol.pk
 
         self._count_all(1, 1)
 
@@ -518,10 +521,10 @@ class Command(BaseCommand):
         self.stdout.write('[INFO] my_processor is %s' % my_processor)
 
         while True:
-            sol = Solution4x4.objects.filter(is_processed=False, processor=0).order_by('nr').first()     # lowest first
+            sol = Solution4x4.objects.filter(is_processed=False, processor=0).order_by('pk').first()     # lowest first
 
             if sol:
-                self.stdout.write('[INFO] Loading Solution4x4 nr %s' % sol.nr)
+                self.stdout.write('[INFO] Loading Solution4x4 nr %s' % sol.pk)
                 sol.processor = my_processor
                 sol.save(update_fields=['processor'])
 
