@@ -44,6 +44,7 @@ class Command(BaseCommand):
         self.board_solve_order = list()     # [nr, nr, ..]
         self.all_unused_nrs = list()
         self.based_on = 0
+        self.interval_mins = 15
 
         self._calc_neighbours()
 
@@ -81,6 +82,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('--verbose', action='store_true')
+        parser.add_argument('--interval', nargs=1, help='Interval in minutes (default: 15) for saving progress board')
 
     def _count_2x2(self, nr, unused_nrs):
         # get the sides
@@ -550,7 +552,7 @@ class Command(BaseCommand):
 
     def find_6x6(self):
 
-        next_time = datetime.datetime.now() + datetime.timedelta(minutes=2)
+        next_time = datetime.datetime.now() + datetime.timedelta(minutes=self.interval_mins)
         min_options = 1
         best = 999
 
@@ -567,7 +569,7 @@ class Command(BaseCommand):
                     placed_piece = True
                     if self.board_gap_count < best:
                         self._save_board6x6()
-                        next_time = datetime.datetime.now() + datetime.timedelta(minutes=2)
+                        next_time = datetime.datetime.now() + datetime.timedelta(minutes=self.interval_mins)
                         best = self.board_gap_count
                 else:
                     # backtrack and continue with next option in previous spot
@@ -589,9 +591,9 @@ class Command(BaseCommand):
                 self._save_board6x6()
 
             if datetime.datetime.now() > next_time:
-                self.stdout.write('[INFO] Information milestone')
+                self.stdout.write('[INFO] Progress milestone')
                 self._save_board6x6()
-                next_time = datetime.datetime.now() + datetime.timedelta(minutes=2)
+                next_time = datetime.datetime.now() + datetime.timedelta(minutes=self.interval_mins)
 
         # while
 
@@ -599,6 +601,10 @@ class Command(BaseCommand):
 
         if options['verbose']:
             self.verbose += 1
+
+        if options['interval']:
+            self.interval_mins = int(options['interval'][0])
+        self.stdout.write('[INFO] Progress interval is %s minutes' % self.interval_mins)
 
         my_processor = int(time.time() - 946684800.0)     # seconds since Jan 1, 2000
         self.stdout.write('[INFO] my_processor is %s' % my_processor)
