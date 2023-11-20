@@ -7,6 +7,7 @@
 from django.core.management.base import BaseCommand
 from Pieces2x2.models import TwoSides, Piece2x2
 from Solutions.models import Solution4x4, Solution6x6, P_CORNER, P_BORDER, P_HINTS
+import datetime
 import time
 
 ALL_HINT_NRS = (139, 181, 209, 249, 255)
@@ -29,32 +30,13 @@ class Command(BaseCommand):
         57  58 59 60 61 62 63  64
     """
 
-    solve_order = (
-        13, 39, 52, 26,     # starter in each side
-        12, 31, 53, 34,     # big plus
-        11, 18, 10,         # corner 1
-        14, 23, 15,         # corner 2
-        47, 54, 55,         # corner 3
-        42, 51, 50,         # corner 4
-    )
-
-    # solve_order = (
-    #     12, 13,
-    #     31, 39,
-    #     52, 53,
-    #     34, 26,       # grote plus = 24
-    #
-    #     11, 18, 10,   # corner 1
-    #     14, 23, 15,   # corner 2
-    #     47, 54, 55,   # corner 3
-    #     42, 51, 50,   # corner 4
-    # )
-
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.verbose = 0
         self.board = dict()                 # [nr] = Piece2x2
         self.board_options = dict()         # [nr] = count of possible Piece2x2
+        self.board_criticality = dict()     # [nr] = number (lower is more critical)
+        self.board_freedom = dict()         # [nr] = "statement"
         self.board_gap_count = 0
         self.board_unused_nrs = list()
         self.neighbours = dict()            # [nr] = (side 1, 2, 3, 4 neighbour nrs)
@@ -155,6 +137,7 @@ class Command(BaseCommand):
         tup = (s1, s2, s3, s4, p1, p2, p3, p4, x1, x2, x3, x4, tuple(unused_nrs))
         try:
             count = self._count_cache[tup]
+            freedom = '?'
         except KeyError:
             qset = Piece2x2.objects.all()
 
@@ -200,7 +183,20 @@ class Command(BaseCommand):
 
             self._count_cache[tup] = count = qset.count()
 
-        return count
+            avail_nrs = set(list(qset.distinct('nr1').values_list('nr1', flat=True)) +
+                            list(qset.distinct('nr2').values_list('nr2', flat=True)) +
+                            list(qset.distinct('nr3').values_list('nr3', flat=True)) +
+                            list(qset.distinct('nr4').values_list('nr4', flat=True)))
+            avail_len = len(avail_nrs)
+            if avail_len == 0 or avail_len > 5:
+                freedom = str(avail_len)
+            else:
+                avail_nrs = list(avail_nrs)
+                avail_nrs.sort()
+                avail_nrs = [str(nr) for nr in avail_nrs]
+                freedom = ",".join(avail_nrs)
+
+        return count, freedom
 
     def _count_all(self, work_nr, min_options):
         self._count_cache = dict()
@@ -214,7 +210,21 @@ class Command(BaseCommand):
 
         for nr in nrs:
             if nr > 0 and self.board[nr] is None:
-                self.board_options[nr] = count = self._count_2x2(nr, self.board_unused_nrs)
+                count, freedom = self._count_2x2(nr, self.board_unused_nrs)
+                self.board_options[nr] = count
+                self.board_freedom[nr] = freedom
+
+                if "," in freedom:
+                    # is listing critical base pieces are critical
+                    self.board_criticality[nr] = freedom.count(',')
+                elif freedom == "?":
+                    self.board_criticality[nr] = 999
+                elif freedom == "20+":
+                    self.board_criticality[nr] = 20
+                else:
+                    # convert back to number
+                    self.board_criticality[nr] = int(freedom)
+
                 if count < min_options:
                     # found a dead end
                     # self.stdout.write(' [%s] less than %s options for %s' % (work_nr, min_options, nr))
@@ -231,8 +241,9 @@ class Command(BaseCommand):
 
                 # could the number of Piece2x2 that could fit here, not considered unused_nrs
                 count1 = self.board_options[nr]     # self._count_2x2(nr, self.board_unused_nrs)
-                count2 = self._count_2x2(nr, self.all_unused_nrs)
-                note = '%s (max %s)' % (count1, count2)
+                freedom1 = self.board_freedom[nr]
+                count2, _ = self._count_2x2(nr, self.all_unused_nrs)
+                note = '%s (max %s) %s' % (count1, count2, freedom1)
 
                 setattr(sol, field_note, note)
         # for
@@ -450,6 +461,7 @@ class Command(BaseCommand):
     def load_board_4x4(self, sol):
         for nr in range(1, 64+1):
             self.board[nr] = None
+            self.board_criticality[nr] = 999
         # for
 
         self.board_unused_nrs = [nr for nr in range(1, 256+1) if nr not in ALL_HINT_NRS]
@@ -473,17 +485,57 @@ class Command(BaseCommand):
 
         self._count_all(1, 1)
 
+    def get_next_nr(self):
+        # collect all
+        # print('get_next_nr:')
+        # print('  board_solve_order = %s' % repr(self.board_solve_order))
+
+        current_depth = len(self.board_solve_order)
+        # print('  current_depth = %s' % current_depth)
+
+        solve_order = (
+            13, 39, 52, 26,  # starter in each side
+            12, 31, 53, 34,  # big plus
+            11, 18, 10,  # corner 1
+            14, 23, 15,  # corner 2
+            47, 54, 55,  # corner 3
+            42, 51, 50,  # corner 4
+        )
+
+        if current_depth >= 20:
+            # trigger back-tracking
+            nr = 0
+        else:
+            # find the critical items
+            critical = list()
+            for nr in solve_order:
+                if nr not in self.board_solve_order:
+                    tup = (self.board_criticality[nr], nr)
+                    critical.append(tup)
+            # for
+            critical.sort()     # smallest first
+            # print('   critical nrs:')
+            # for tup in critical[:5]:
+            #     print('      [%s] %s' % (tup[1], tup[0]))
+            # # for
+
+            tup = critical[0]
+            nr = tup[1]
+
+            # nr = solve_order[current_depth]
+
+        # print('  returning nr = %s' % nr)
+        return nr
+
     def find_6x6(self):
+
+        next_time = datetime.datetime.now() + datetime.timedelta(minutes=15)
         min_options = 1
         best = 999
 
-        while self.board_gap_count > 0:
+        while True:
 
-            current_depth = len(self.board_solve_order)
-            if current_depth < len(self.solve_order):
-                nr = self.solve_order[current_depth]
-            else:
-                nr = 0
+            nr = self.get_next_nr()
 
             greater_than = 0
             placed_piece = False
@@ -503,6 +555,9 @@ class Command(BaseCommand):
 
                     nr = self.board_solve_order.pop(-1)
                     p = self.board[nr]
+                    if not p:
+                        self.stderr.write('[DEBUG] No p2x2 at nr %s !!' % nr)
+                        return
                     greater_than = p.nr
                     # self.stdout.write('[INFO] Backtracked to nr %s with greater_than %s' % (nr, greater_than))
                     self._board_free_nr(nr)
@@ -510,6 +565,12 @@ class Command(BaseCommand):
 
             if len(self.board_solve_order) == 36:
                 self._save_board6x6()
+
+            if datetime.datetime.now() > next_time:
+                self.stdout.write('[INFO] Information milestone')
+                self._save_board6x6()
+                next_time += datetime.timedelta(minutes=15)
+
         # while
 
     def handle(self, *args, **options):

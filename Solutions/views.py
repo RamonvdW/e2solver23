@@ -28,7 +28,7 @@ def _get_2x2(nr, note):
         piece = SimpleNamespace()
 
         piece.is_empty = True
-        piece.note = note
+        piece.note = note.replace(',', ', ')
     else:
         piece = Piece2x2.objects.get(nr=nr)
 

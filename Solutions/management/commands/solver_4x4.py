@@ -44,9 +44,10 @@ class Command(BaseCommand):
         self.verbose = 0
         self.board = dict()             # [nr] = Piece2x2
         self.board_options = dict()     # [nr] = count of possible Piece2x2
+        self.board_freedom = dict()     # [nr] = "statement"
         self.board_gap_count = 0
         self.board_unused_nrs = list()
-        self.neighbours = dict()     # [nr] = (side 1, 2, 3, 4 neighbour nrs)
+        self.neighbours = dict()        # [nr] = (side 1, 2, 3, 4 neighbour nrs)
         self._solve_nr = 0
         self._count_cache = dict()
         self.board_solve_order = list()     # [nr, nr, ..]
@@ -143,6 +144,7 @@ class Command(BaseCommand):
         tup = (s1, s2, s3, s4, p1, p2, p3, p4, x1, x2, x3, x4, tuple(unused_nrs))
         try:
             count = self._count_cache[tup]
+            freedom = '?'
         except KeyError:
             qset = Piece2x2.objects.all()
 
@@ -188,7 +190,17 @@ class Command(BaseCommand):
 
             self._count_cache[tup] = count = qset.count()
 
-        return count
+            avail_nrs = set(list(qset.distinct('nr1').values_list('nr1', flat=True)) +
+                            list(qset.distinct('nr2').values_list('nr2', flat=True)) +
+                            list(qset.distinct('nr3').values_list('nr3', flat=True)) +
+                            list(qset.distinct('nr4').values_list('nr4', flat=True)))
+            avail_len = len(avail_nrs)
+            if avail_len > 5:
+                freedom = str(len(avail_nrs))
+            else:
+                freedom = ",".join([str(nr) for nr in avail_nrs])
+
+        return count, freedom
 
     def _count_all(self, work_nr, min_options):
         self._count_cache = dict()
@@ -202,7 +214,9 @@ class Command(BaseCommand):
 
         for nr in nrs:
             if nr > 0 and self.board[nr] is None:
-                self.board_options[nr] = count = self._count_2x2(nr, self.board_unused_nrs)
+                count, freedom = self._count_2x2(nr, self.board_unused_nrs)
+                self.board_options[nr] = count
+                self.board_freedom[nr] = freedom
                 if count < min_options:
                     # found a dead end
                     # self.stdout.write(' [%s] less than %s options for %s' % (work_nr, min_options, nr))
@@ -219,8 +233,9 @@ class Command(BaseCommand):
 
                 # could the number of Piece2x2 that could fit here, not considered unused_nrs
                 count1 = self.board_options[nr]     # self._count_2x2(nr, self.board_unused_nrs)
-                count2 = self._count_2x2(nr, self.all_unused_nrs)
-                note = '%s (max %s)' % (count1, count2)
+                freedom1 = self.board_freedom[nr]
+                count2, _ = self._count_2x2(nr, self.all_unused_nrs)
+                note = '%s (max %s) %s' % (count1, count2, freedom1)
 
                 setattr(sol, field_note, note)
         # for
