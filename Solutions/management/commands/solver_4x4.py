@@ -88,6 +88,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('--verbose', action='store_true')
+        parser.add_argument('--start', nargs=1, help='Start with this Piece4x4 number')
 
     def _count_2x2(self, nr, unused_nrs):
         # get the sides
@@ -461,6 +462,11 @@ class Command(BaseCommand):
         if options['verbose']:
             self.verbose += 1
 
+        if options['start']:
+            start = int(options['start'][0])
+        else:
+            start = 0
+
         min_options = 1
 
         self.stdout.write('[INFO] Initializing board')
@@ -474,7 +480,12 @@ class Command(BaseCommand):
             else:
                 nr = 0
 
-            greater_than = 0
+            if current_depth == 0:
+                greater_than = start
+                self.stdout.write('[INFO] Starting at %s' % start)
+            else:
+                greater_than = 0
+
             placed_piece = False
             while not placed_piece:
                 if nr > 0 and self._try_fill_nr(nr, greater_than, min_options):
