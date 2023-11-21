@@ -6,11 +6,9 @@
 
 from django.core.management.base import BaseCommand
 from Pieces2x2.models import TwoSides, Piece2x2
-from Solutions.models import Solution4x4, Solution6x6, P_CORNER, P_BORDER, P_HINTS
+from Solutions.models import Solution4x4, Solution6x6, P_CORNER, P_BORDER, P_HINTS, ALL_HINT_NRS
 import datetime
 import time
-
-ALL_HINT_NRS = (139, 181, 209, 249, 255)
 
 
 class Command(BaseCommand):
@@ -42,7 +40,7 @@ class Command(BaseCommand):
         self.neighbours = dict()            # [nr] = (side 1, 2, 3, 4 neighbour nrs)
         self._count_freedom_cache = dict()
         self.board_solve_order = list()     # [nr, nr, ..]
-        self.all_unused_nrs = list()
+        # self.all_unused_nrs = list()
         self.based_on = 0
         self.interval_mins = 15
 
@@ -318,7 +316,7 @@ class Command(BaseCommand):
                 # could the number of Piece2x2 that could fit here, not considered unused_nrs
                 count1 = self.board_options[nr]     # self._count_2x2(nr, self.board_unused_nrs)
                 freedom1 = self.board_freedom[nr]
-                count2, _ = self._count_2x2(nr, self.all_unused_nrs)
+                count2, _ = self._count_2x2(nr, self.board_unused_nrs)
                 note = '%s{%s}%s' % (count1, count2, freedom1)
                 note = note[:30]        # avoid database errors
 
@@ -561,7 +559,7 @@ class Command(BaseCommand):
         # for
 
         self.board_gap_count = 64 - 16
-        self.all_unused_nrs = self.board_unused_nrs[:]      # copy
+        # self.all_unused_nrs = self.board_unused_nrs[:]      # copy
         self._count_freedom_cache = dict()
         self.board_solve_order = list()     # [nr, nr, ..]
         self.based_on = sol.pk

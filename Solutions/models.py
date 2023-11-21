@@ -9,6 +9,7 @@ from django.db import models
 P_CORNER = (1, 8, 57, 64)
 P_BORDER = (2, 3, 4, 5, 6, 7,  16, 24, 32, 40, 48, 56,  9, 17, 25, 33, 41, 49,  58, 59, 60, 61, 62, 63)
 P_HINTS = (10, 15, 36, 50, 55)
+ALL_HINT_NRS = (139, 181, 208, 249, 255)
 
 
 class Solution(models.Model):

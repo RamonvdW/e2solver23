@@ -6,9 +6,7 @@
 
 from django.core.management.base import BaseCommand
 from Pieces2x2.models import TwoSides, Piece2x2
-from Solutions.models import Solution4x4, P_CORNER, P_BORDER, P_HINTS
-
-ALL_HINT_NRS = (139, 181, 209, 249, 255)
+from Solutions.models import Solution4x4, P_CORNER, P_BORDER, P_HINTS, ALL_HINT_NRS
 
 
 class Command(BaseCommand):

@@ -6,10 +6,8 @@
 
 from django.core.management.base import BaseCommand
 from Pieces2x2.models import TwoSides, Piece2x2
-from Solutions.models import Solution, State, P_CORNER, P_BORDER, P_HINTS
+from Solutions.models import Solution, P_CORNER, P_BORDER, P_HINTS, ALL_HINT_NRS
 import datetime
-
-ALL_HINT_NRS = (139, 181, 209, 249, 255)
 
 
 class Command(BaseCommand):
@@ -276,18 +274,6 @@ class Command(BaseCommand):
                 pass
         # for
         self.board_gap_count -= 1
-
-    def _get_evict(self):
-        if len(self._evict_cache) == 0:
-            self._evict_cache = list(State
-                                     .objects
-                                     .filter(nr__gt=self.last_used_state)
-                                     .order_by('nr')
-                                     .values_list('evict', flat=True)[:10000])
-
-        self.last_used_state = nr = self._evict_cache.pop(0)
-        # self.stdout.write('-%s' % nr)
-        return nr
 
     def _select_solve_nr(self):
         self._solve_nr += 1

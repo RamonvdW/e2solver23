@@ -5,7 +5,6 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from BasePieces.models import BasePiece
 from Pieces2x2.models import TwoSides, Piece2x2
 
 
@@ -41,7 +40,7 @@ class Command(BaseCommand):
         c4 = Piece2x2.objects.filter(side4=border.nr).count()
         self.stdout.write('Border counts: %s, %s, %s, %s' % (c1, c2, c3, c4))
 
-        for hint in (139, 181, 209, 249, 255):
+        for hint in ALL_HINT_NRS:
             c1 = Piece2x2.objects.filter(nr1=hint).count()
             c2 = Piece2x2.objects.filter(nr2=hint).count()
             c3 = Piece2x2.objects.filter(nr3=hint).count()
