@@ -191,7 +191,8 @@ class Command(BaseCommand):
                             list(qset.distinct('nr3').values_list('nr3', flat=True)) +
                             list(qset.distinct('nr4').values_list('nr4', flat=True)))
 
-            avail_nrs = [nr for nr in avail_nrs if nr > 64]     # 1..4 = corner; next 60 = borders
+            # print('[%s] avail_nrs = %s' % (nr, avail_nrs))
+
             avail_len = len(avail_nrs)
             if has_hint and avail_len > 0:
                 # hint results in fewer options
@@ -481,7 +482,7 @@ class Command(BaseCommand):
 
         qset = Piece2x2.objects.filter(nr__gt=greater_than).order_by('nr')
 
-        unused_nrs = [nr for nr in self.board_unused_nrs if nr > 64]        # skip outer borders
+        unused_nrs = [nr for nr in self.board_unused_nrs if nr > 60]        # skip outer borders
 
         if s1:
             qset = qset.filter(side1=s1)
@@ -564,6 +565,10 @@ class Command(BaseCommand):
         self._count_freedom_cache = dict()
         self.board_solve_order = list()     # [nr, nr, ..]
         self.based_on = sol.pk
+
+        # lst = self.board_unused_nrs[:]
+        # lst.sort()
+        # print('[DEBUG] Unused base nrs (excl. hints): %s' % ", ".join([str(nr) for nr in lst]))
 
         self._count_all(1, 1)
 
