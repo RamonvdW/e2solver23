@@ -33,6 +33,7 @@ class Command(BaseCommand):
         self.verbose = 0
         self.board = dict()                 # [nr] = Piece2x2
         self.board_options = dict()         # [nr] = count of possible Piece2x2
+        self.board_must_have = dict()       # [nr] = list(base nrs)
         self.board_criticality = dict()     # [nr] = number (lower is more critical)
         self.board_freedom = dict()         # [nr] = "statement"
         self.board_gap_count = 0
@@ -136,6 +137,8 @@ class Command(BaseCommand):
                 elif nr == 55:
                     p4 = 249
 
+        must_have_nrs = list()
+
         tup = (s1, s2, s3, s4, p1, p2, p3, p4, x1, x2, x3, x4, tuple(unused_nrs))
         try:
             count, freedom = self._count_freedom_cache[tup]
@@ -182,27 +185,42 @@ class Command(BaseCommand):
             else:
                 qset = qset.filter(nr4__in=unused_nrs)
 
-            avail_nr1 = list(qset.distinct('nr1').values_list('nr1', flat=True))
-            avail_nr2 = list(qset.distinct('nr2').values_list('nr2', flat=True))
-            avail_nr3 = list(qset.distinct('nr3').values_list('nr3', flat=True))
-            avail_nr4 = list(qset.distinct('nr4').values_list('nr4', flat=True))
-
-            avail_nrs = set(avail_nr1 + avail_nr2 + avail_nr3 + avail_nr4)
-            avail_len = len(avail_nrs)
-
-            if avail_len == 0 or avail_len > 5:
-                freedom = str(avail_len)
-            else:
-                avail_nrs = list(avail_nrs)
-                avail_nrs.sort()
-                avail_nrs = [str(nr) for nr in avail_nrs]
-                freedom = ",".join(avail_nrs)
-
             count = qset.count()
+
+            if count > 0:
+                avail_nr1 = list(qset.distinct('nr1').values_list('nr1', flat=True))
+                avail_nr2 = list(qset.distinct('nr2').values_list('nr2', flat=True))
+                avail_nr3 = list(qset.distinct('nr3').values_list('nr3', flat=True))
+                avail_nr4 = list(qset.distinct('nr4').values_list('nr4', flat=True))
+
+                avail_nrs = set(avail_nr1 + avail_nr2 + avail_nr3 + avail_nr4)
+                avail_len = len(avail_nrs)
+
+                if avail_len == 0 or avail_len > 5:
+                    freedom = str(avail_len)
+                else:
+                    avail_nrs = list(avail_nrs)
+                    avail_nrs.sort()
+                    avail_nrs = [str(nr) for nr in avail_nrs]
+                    freedom = ",".join(avail_nrs)
+
+                for avail in (avail_nr1, avail_nr2, avail_nr3, avail_nr4):
+                    if len(avail) == 1:
+                        must_have_nrs.append(avail[0])
+                # for
+
+                # if nr == 12 and count < 20:
+                #     print('[%s] count=%s, freedom=%s, must_have_nrs=%s' % (nr, count, freedom, must_have_nrs))
+                #     print('     p1: %s' % avail_nr1)
+                #     print('     p2: %s' % avail_nr2)
+                #     print('     p3: %s' % avail_nr3)
+                #     print('     p4: %s' % avail_nr4)
+            else:
+                freedom = '0'
 
             self._count_freedom_cache[tup] = (count, freedom)
 
-        return count, freedom
+        return count, freedom, must_have_nrs
 
     def _count_all(self, work_nr, min_options):
         self._count_freedom_cache = dict()
@@ -217,9 +235,10 @@ class Command(BaseCommand):
         for nr in nrs:
             if nr > 0 and self.board[nr] is None:
                 # empty spot on the board
-                count, freedom = self._count_2x2(nr, self.board_unused_nrs)
+                count, freedom, must_have_nrs = self._count_2x2(nr, self.board_unused_nrs)
                 self.board_options[nr] = count
                 self.board_freedom[nr] = freedom
+                self.board_must_have[nr] = must_have_nrs
 
                 if "," in freedom:
                     # is listing critical base pieces are critical
@@ -280,9 +299,10 @@ class Command(BaseCommand):
         for nr in nrs:
             if nr > 0 and self.board[nr] is None:
                 # empty spot on the board
-                count, freedom = self._count_2x2(nr, self.board_unused_nrs)
+                count, freedom, must_have_nrs = self._count_2x2(nr, self.board_unused_nrs)
                 self.board_options[nr] = count
                 self.board_freedom[nr] = freedom
+                self.board_must_have[nr] = must_have_nrs
                 if "," in freedom:
                     # is listing critical base pieces are critical
                     self.board_criticality[nr] = freedom.count(',')
@@ -310,9 +330,10 @@ class Command(BaseCommand):
 
                 # could the number of Piece2x2 that could fit here, not considered unused_nrs
                 count1 = self.board_options[nr]     # self._count_2x2(nr, self.board_unused_nrs)
-                freedom1 = self.board_freedom[nr]
-                count2, _ = self._count_2x2(nr, self.board_unused_nrs)
-                note = '%s{%s}%s' % (count1, count2, freedom1)
+                freedom = self.board_freedom[nr]
+                # count2, _, _ = self._count_2x2(nr, self.board_unused_nrs)
+                # note = '%s{%s}%s' % (count1, count2, freedom)
+                note = "%s %s" % (count1, freedom)
                 note = note[:30]        # avoid database errors
 
                 setattr(sol, field_note, note)
@@ -475,7 +496,16 @@ class Command(BaseCommand):
 
         qset = Piece2x2.objects.filter(nr__gt=greater_than).order_by('nr')
 
-        unused_nrs = [nr for nr in self.board_unused_nrs if nr > 60]        # skip outer borders
+        reserved_nrs = list()
+        for chk_nr in range(1, 64+1):
+            if chk_nr != nr:
+                reserved_nrs.extend(self.board_must_have[chk_nr])
+        # for
+        # print('[%s] reserved_nrs=%s' % (nr, reserved_nrs))
+
+        # skip outer borders
+        # skip base pieces reserved for certain positions on the board
+        unused_nrs = [nr for nr in self.board_unused_nrs if nr > 60 and nr not in reserved_nrs]
 
         if s1:
             qset = qset.filter(side1=s1)
@@ -519,8 +549,11 @@ class Command(BaseCommand):
 
         # print(qset.explain())
 
+        todo = qset.count()
         for p in qset:
+            print('%s[%s] %s left' % (" " * len(self.board_solve_order), nr, todo))
             yield p
+            todo -= 1
 
     def _try_fill_nr(self, nr, greater_than, min_options):
         for p in self._iter_for_nr(nr, greater_than):
@@ -573,6 +606,11 @@ class Command(BaseCommand):
         current_depth = len(self.board_solve_order)
         # print('  current_depth = %s' % current_depth)
 
+        # if current_depth < 8:
+        #     solve_start = (11, 13, 23, 39, 54, 52, 42, 26)
+        #     nr = solve_start[current_depth]
+        #     return nr
+
         solve_todo = (
             10, 11, 12, 13, 14, 15,
             18, 23, 26, 31, 34, 39, 42, 47,
@@ -620,6 +658,10 @@ class Command(BaseCommand):
         next_time = datetime.datetime.now() + datetime.timedelta(minutes=self.interval_mins)
         min_options = 1
         best = 999
+
+        for nr in range(1, 64+1):
+            self.board_must_have[nr] = list()
+        # for
 
         while True:
 
