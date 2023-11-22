@@ -182,21 +182,13 @@ class Command(BaseCommand):
             else:
                 qset = qset.filter(nr4__in=unused_nrs)
 
-            count = qset.count()
+            avail_nr1 = list(qset.distinct('nr1').values_list('nr1', flat=True))
+            avail_nr2 = list(qset.distinct('nr2').values_list('nr2', flat=True))
+            avail_nr3 = list(qset.distinct('nr3').values_list('nr3', flat=True))
+            avail_nr4 = list(qset.distinct('nr4').values_list('nr4', flat=True))
 
-            avail_nrs = set(list(qset.distinct('nr1').values_list('nr1', flat=True)) +
-                            list(qset.distinct('nr2').values_list('nr2', flat=True)) +
-                            list(qset.distinct('nr3').values_list('nr3', flat=True)) +
-                            list(qset.distinct('nr4').values_list('nr4', flat=True)))
-
-            # print('[%s] avail_nrs = %s' % (nr, avail_nrs))
-
+            avail_nrs = set(avail_nr1 + avail_nr2 + avail_nr3 + avail_nr4)
             avail_len = len(avail_nrs)
-            if has_hint and avail_len > 0:
-                # hint results in fewer options
-                # give these positions some penalty
-                avail_len += 25
-                # avail_len= int(avail_len * 1.25)
 
             if avail_len == 0 or avail_len > 5:
                 freedom = str(avail_len)
@@ -205,6 +197,8 @@ class Command(BaseCommand):
                 avail_nrs.sort()
                 avail_nrs = [str(nr) for nr in avail_nrs]
                 freedom = ",".join(avail_nrs)
+
+            count = qset.count()
 
             self._count_freedom_cache[tup] = (count, freedom)
 
@@ -288,6 +282,7 @@ class Command(BaseCommand):
                 # empty spot on the board
                 count, freedom = self._count_2x2(nr, self.board_unused_nrs)
                 self.board_options[nr] = count
+                self.board_freedom[nr] = freedom
                 if "," in freedom:
                     # is listing critical base pieces are critical
                     self.board_criticality[nr] = freedom.count(',')
