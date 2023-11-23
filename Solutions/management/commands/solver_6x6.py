@@ -82,6 +82,7 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('--verbose', action='store_true')
         parser.add_argument('--interval', nargs=1, help='Interval in minutes (default: 15) for saving progress board')
+        parser.add_argument('--start', nargs=1, help="Minimum 4x4 board number to start with")
 
     def _count_2x2(self, nr, unused_nrs):
         # get the sides
@@ -664,7 +665,6 @@ class Command(BaseCommand):
         # for
 
         while True:
-
             nr = self.get_next_nr()     # can return 0 to trigger backtracking
 
             greater_than = 0
@@ -699,10 +699,10 @@ class Command(BaseCommand):
                 self._save_board6x6()
 
             if datetime.datetime.now() > next_time:
-                self.stdout.write('[INFO] Progress milestone')
-                self._save_board6x6()
                 next_time = datetime.datetime.now() + datetime.timedelta(minutes=self.interval_mins)
-
+                # self.stdout.write('[INFO] Progress milestone')
+                # self._save_board6x6()
+                best = 999      # allow a few progress reports
         # while
 
     def handle(self, *args, **options):
@@ -714,11 +714,22 @@ class Command(BaseCommand):
             self.interval_mins = int(options['interval'][0])
         self.stdout.write('[INFO] Progress interval is %s minutes' % self.interval_mins)
 
+        if options['start']:
+            min_4x4_pk = int(options['start'][0])
+        else:
+            min_4x4_pk = 1
+
         my_processor = int(time.time() - 946684800.0)     # seconds since Jan 1, 2000
         self.stdout.write('[INFO] my_processor is %s' % my_processor)
 
         while True:
-            sol = Solution4x4.objects.filter(is_processed=False, processor=0).order_by('pk').first()     # lowest first
+            sol = (Solution4x4
+                   .objects
+                   .filter(is_processed=False,
+                           processor=0,
+                           pk__gte=min_4x4_pk)
+                   .order_by('pk')      # lowest first
+                   .first())
 
             if sol:
                 self.stdout.write('[INFO] Loading Solution4x4 nr %s' % sol.pk)

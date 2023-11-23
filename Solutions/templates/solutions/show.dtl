@@ -46,7 +46,7 @@
             {% for piece in solution.p2x2s %}
                 <td>
                     {% if piece.is_empty %}
-                        <div style="width:80px; height:80px">{{ piece.note }}</div>
+                        <div style="width:80px; height:80px">{{ piece.note|linebreaksbr }}</div>
                     {% else %}
                         <div style="display:flex">
                             <img src="{{ piece.img1 }}" width=40 height=40 style="transform: {{ piece.transform1 }}">
