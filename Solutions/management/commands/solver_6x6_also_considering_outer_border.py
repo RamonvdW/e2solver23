@@ -13,7 +13,7 @@ import time
 
 class Command(BaseCommand):
 
-    help = "Solver 6x6 (ignoring outer border)"
+    help = "Solver 6x6"
 
     """
          1   2  3  4  5  6  7   8
@@ -27,10 +27,6 @@ class Command(BaseCommand):
          
         57  58 59 60 61 62 63  64
     """
-
-    NR_IGNORE = (1, 2, 3, 4, 5, 6, 7, 8,
-                 9, 16, 17, 24, 25, 32, 33, 40, 41, 48, 49, 56,
-                 57, 58, 59, 60, 61, 62, 63, 64)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -67,8 +63,21 @@ class Command(BaseCommand):
         for nr in range(1, 64+1):
             self.neighbours[nr] = (nr - 8, nr + 1, nr + 8, nr - 1)
 
-        for nr in self.NR_IGNORE:
-            self.neighbours[nr] = (0, 0, 0, 0)
+        # redo the corners
+        self.neighbours[1] = (0, 1 + 1, 1 + 8, 0)
+        self.neighbours[8] = (0, 0, 8 + 8, 8 - 1)
+        self.neighbours[57] = (57 - 8, 57 + 1, 0, 0)
+        self.neighbours[64] = (64 - 8, 0, 0, 64 - 1)
+
+        # redo for the borders
+        for nr in range(2, 7+1):
+            self.neighbours[nr] = (0, nr + 1, nr + 8, nr - 1)
+        for nr in range(9, 49+1, 8):
+            self.neighbours[nr] = (nr - 8, nr + 1, nr + 8, 0)
+        for nr in range(16, 56+1, 8):
+            self.neighbours[nr] = (nr - 8, 0, nr + 8, nr - 1)
+        for nr in range(58, 63+1):
+            self.neighbours[nr] = (nr - 8, nr + 1, 0, nr - 1)
 
     def add_arguments(self, parser):
         parser.add_argument('--verbose', action='store_true')
@@ -220,9 +229,8 @@ class Command(BaseCommand):
         # start with the neighbours so we can quickly find a dead-end
         nrs = list(self.neighbours[work_nr])
         for nr in range(1, 64+1):
-            if nr not in self.NR_IGNORE:
-                if nr not in nrs:           # avoid dupes
-                    nrs.append(nr)
+            if nr not in nrs:
+                nrs.append(nr)
         # for
 
         for nr in nrs:
@@ -254,14 +262,39 @@ class Command(BaseCommand):
     def _count_important(self, work_nr, min_options):
         self._count_freedom_cache = dict()
 
-        important = [
-            10, 11, 12, 13, 14, 15,
-            18, 23, 26, 31, 34, 39, 42, 47,
-            50, 51, 52, 53, 54, 55]
+        important = (
+            (10, 9, 1, 2),
+            (11, 3),
+            (12, 4),
+            (13, 5),
+            (14, 6),
+            (15, 7, 8, 16),
+            (23, 24),
+            (31, 32),
+            (39, 40),
+            (47, 48),
+            (55, 56, 64, 63),
+            (54, 62),
+            (53, 61),
+            (52, 60),
+            (51, 59),
+            (50, 58, 57, 49),
+            (42, 41),
+            (34, 33),
+            (26, 25),
+            (18, 17),
+        )
 
         # start with the neighbours so we can quickly find a dead-end
         nrs = list(self.neighbours[work_nr])
-        nrs.extend(important)
+        for tup in important:
+            nr = tup[0]
+            if self.board[nr] is None:
+                nrs.append(nr)
+            else:
+                for nr in tup[1:]:
+                    nrs.append(nr)
+        # for
         nrs = set(nrs)      # removes dupes
 
         for nr in nrs:
@@ -291,21 +324,20 @@ class Command(BaseCommand):
 
     def _document_gaps(self, sol):
         for nr in range(1, 64+1):
-            if nr not in self.NR_IGNORE:
-                p = self.board[nr]
-                if not p:
-                    # gap
-                    field_note = 'note%s' % nr
+            p = self.board[nr]
+            if not p:
+                # gap
+                field_note = 'note%s' % nr
 
-                    # could the number of Piece2x2 that could fit here, not considered unused_nrs
-                    count1 = self.board_options[nr]     # self._count_2x2(nr, self.board_unused_nrs)
-                    freedom = self.board_freedom[nr]
-                    # count2, _, _ = self._count_2x2(nr, self.board_unused_nrs)
-                    # note = '%s{%s}%s' % (count1, count2, freedom)
-                    note = "%s %s" % (count1, freedom)
-                    note = note[:30]        # avoid database errors
+                # could the number of Piece2x2 that could fit here, not considered unused_nrs
+                count1 = self.board_options[nr]     # self._count_2x2(nr, self.board_unused_nrs)
+                freedom = self.board_freedom[nr]
+                # count2, _, _ = self._count_2x2(nr, self.board_unused_nrs)
+                # note = '%s{%s}%s' % (count1, count2, freedom)
+                note = "%s %s" % (count1, freedom)
+                note = note[:30]        # avoid database errors
 
-                    setattr(sol, field_note, note)
+                setattr(sol, field_note, note)
         # for
 
     def _save_board6x6(self):
@@ -589,7 +621,6 @@ class Command(BaseCommand):
 
         if current_depth >= 20:
             # trigger back-tracking
-            self.stdout.write('[DEBUG] current_depth=%s; start backtracking' % current_depth)
             nr = 0
         else:
             # find the critical items
@@ -632,8 +663,6 @@ class Command(BaseCommand):
         for nr in range(1, 64+1):
             self.board_must_have[nr] = list()
         # for
-
-        self._save_board6x6()
 
         while True:
             nr = self.get_next_nr()     # can return 0 to trigger backtracking

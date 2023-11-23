@@ -68,6 +68,31 @@
 
     </table>
 
+    <!--
+    <br><br>
+
+    <table style="margin-left:auto; margin-right:auto">
+        <thead>
+            <tr>
+                <th style="padding:5px">Side</th>
+                <th style="padding:5px">Max</th>
+                <th style="padding:5px">Closed</th>
+                <th style="padding:5px">Open</th>
+                <th style="padding:5px">Left</th>
+            </tr>
+        </thead>
+        {% for s_nr, s_open, s_used, s_max, s_left in solution.s1_counts %}
+            <tr>
+                <td style="padding:5px">{{ s_nr }}</td>
+                <td style="padding:5px">{{ s_max }}</td>
+                <td style="padding:5px">{{ s_used }}</td>
+                <td style="padding:5px">{{ s_open }}</td>
+                <td style="padding:5px">{{ s_left }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+    -->
+
     {% if auto_reload %}
         <script>
             setTimeout(function(){

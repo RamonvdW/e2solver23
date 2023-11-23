@@ -8,7 +8,8 @@ from django.http import Http404
 from django.urls import reverse
 from django.views.generic import TemplateView
 from django.templatetags.static import static
-from Pieces2x2.models import Piece2x2
+from BasePieces.models import BasePiece
+from Pieces2x2.models import Piece2x2, TwoSides
 from Solutions.models import Solution, Solution4x4, Solution6x6
 from types import SimpleNamespace
 
@@ -28,11 +29,12 @@ def _get_2x2(nr, note):
         piece = SimpleNamespace()
 
         piece.is_empty = True
-        piece.note = '2x2: ' + note.replace(' ', '\n1x1: {').replace(',', ', ')
-        if ',' in note:
-            piece.note += '}'
-        else:
-            piece.note = piece.note.replace('{', '')
+        if note:
+            piece.note = '2x2: ' + note.replace(' ', '\n1x1: {').replace(',', ', ')
+            if ',' in note:
+                piece.note += '}'
+            else:
+                piece.note = piece.note.replace('{', '')
     else:
         piece = Piece2x2.objects.get(nr=nr)
 
@@ -51,15 +53,102 @@ def _get_2x2(nr, note):
     return piece
 
 
+def _calc_neighbours():
+    neighbours = dict()
+
+    for nr in range(1, 64+1):
+        neighbours[nr] = (nr - 8, nr + 1, nr + 8, nr - 1)       # side 1, 2, 3, 4
+    # for
+
+    # redo the corners
+    neighbours[1] = (0, 1 + 1, 1 + 8, 0)
+    neighbours[8] = (0, 0, 8 + 8, 8 - 1)
+    neighbours[57] = (57 - 8, 57 + 1, 0, 0)
+    neighbours[64] = (64 - 8, 0, 0, 64 - 1)
+
+    # redo for the borders
+    for nr in range(2, 7+1):
+        neighbours[nr] = (0, nr + 1, nr + 8, nr - 1)
+    for nr in range(9, 49+1, 8):
+        neighbours[nr] = (nr - 8, nr + 1, nr + 8, 0)
+    for nr in range(16, 56+1, 8):
+        neighbours[nr] = (nr - 8, 0, nr + 8, nr - 1)
+    for nr in range(58, 63+1):
+        neighbours[nr] = (nr - 8, nr + 1, 0, nr - 1)
+
+    return neighbours
+
+
 def _fill_sol(sol):
+    neighbours = _calc_neighbours()
+
     sol.p2x2s = list()
+
+    s1_open = dict()         # ["side"] = count
+    s1_used = dict()         # ["side"] = count
+    s1_max = dict()          # ["side"] = count
+
+    nr2base = dict()
+    for base in BasePiece.objects.all():
+        nr2base[base.nr] = base
+        for side in (base.side1, base.side2, base.side3, base.side4):
+            try:
+                s1_max[side] += 1
+            except KeyError:
+                s1_max[side] = 1
+                s1_used[side] = 0
+                s1_open[side] = 0
+        # for
+    # for
+
     for nr in range(1, 64 + 1):
         field_nr = 'nr%s' % nr
         field_note = 'note%s' % nr
 
         p2x2 = _get_2x2(getattr(sol, field_nr), getattr(sol, field_note))
         sol.p2x2s.append(p2x2)
+
+        # side_is_open = [None, ]
+        # for other_nr in neighbours[nr]:
+        #     if other_nr > 0:
+        #         field_nr = 'nr%s' % other_nr
+        #         check_nr = getattr(sol, field_nr)
+        #     else:
+        #         check_nr = 0
+        #     side_is_open.append(check_nr == 0)
+        # # for
+        #
+        # if not p2x2.is_empty:
+        #     for base_nr, base_rot, out_sides, in_sides in (
+        #             (p2x2.nr1, p2x2.rot1, (1, 4), (2, 3)),
+        #             (p2x2.nr2, p2x2.rot2, (1, 2), (3, 4)),
+        #             (p2x2.nr3, p2x2.rot3, (3, 4), (1, 2)),
+        #             (p2x2.nr4, p2x2.rot4, (2, 3), (1, 4))):
+        #
+        #         base = nr2base[base_nr]
+        #         for side in in_sides:
+        #             s1 = base.get_side(side, base_rot)
+        #             s1_used[s1] += 1
+        #         # for
+        #         for side in out_sides:
+        #             s1 = base.get_side(side, base_rot)
+        #             if side_is_open[side]:
+        #                 s1_open[s1] += 1
+        #             else:
+        #                 s1_used[s1] += 1
+        #         # for
+        #     # for
     # for
+
+    # sol.s1_counts = list()
+    # for s1, s_max in s1_max.items():
+    #     s_open = s1_open[s1]
+    #     s_used = s1_used[s1]
+    #     s_left = s_max - s_used - s_open*2
+    #     tup = (s1, s_open, s_used, s_max, s_left)
+    #     sol.s1_counts.append(tup)
+    # # for
+    # sol.s1_counts.sort()
 
     for nr in range(8, 66 + 1, 8):
         sol.p2x2s[nr - 1].break_after = True

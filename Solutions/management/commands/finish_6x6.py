@@ -13,7 +13,7 @@ import time
 
 class Command(BaseCommand):
 
-    help = "Solver 6x6 (ignoring outer border)"
+    help = "Solver 6x6"
 
     """
          1   2  3  4  5  6  7   8
@@ -27,10 +27,6 @@ class Command(BaseCommand):
          
         57  58 59 60 61 62 63  64
     """
-
-    NR_IGNORE = (1, 2, 3, 4, 5, 6, 7, 8,
-                 9, 16, 17, 24, 25, 32, 33, 40, 41, 48, 49, 56,
-                 57, 58, 59, 60, 61, 62, 63, 64)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -67,13 +63,25 @@ class Command(BaseCommand):
         for nr in range(1, 64+1):
             self.neighbours[nr] = (nr - 8, nr + 1, nr + 8, nr - 1)
 
-        for nr in self.NR_IGNORE:
-            self.neighbours[nr] = (0, 0, 0, 0)
+        # redo the corners
+        self.neighbours[1] = (0, 1 + 1, 1 + 8, 0)
+        self.neighbours[8] = (0, 0, 8 + 8, 8 - 1)
+        self.neighbours[57] = (57 - 8, 57 + 1, 0, 0)
+        self.neighbours[64] = (64 - 8, 0, 0, 64 - 1)
+
+        # redo for the borders
+        for nr in range(2, 7+1):
+            self.neighbours[nr] = (0, nr + 1, nr + 8, nr - 1)
+        for nr in range(9, 49+1, 8):
+            self.neighbours[nr] = (nr - 8, nr + 1, nr + 8, 0)
+        for nr in range(16, 56+1, 8):
+            self.neighbours[nr] = (nr - 8, 0, nr + 8, nr - 1)
+        for nr in range(58, 63+1):
+            self.neighbours[nr] = (nr - 8, nr + 1, 0, nr - 1)
 
     def add_arguments(self, parser):
         parser.add_argument('--verbose', action='store_true')
         parser.add_argument('--interval', nargs=1, help='Interval in minutes (default: 15) for saving progress board')
-        parser.add_argument('--start', nargs=1, help="Minimum 4x4 board number to start with")
 
     def _count_2x2(self, nr, unused_nrs):
         # get the sides
@@ -220,15 +228,15 @@ class Command(BaseCommand):
         # start with the neighbours so we can quickly find a dead-end
         nrs = list(self.neighbours[work_nr])
         for nr in range(1, 64+1):
-            if nr not in self.NR_IGNORE:
-                if nr not in nrs:           # avoid dupes
-                    nrs.append(nr)
+            if nr not in nrs:
+                nrs.append(nr)
         # for
 
         for nr in nrs:
             if nr > 0 and self.board[nr] is None:
                 # empty spot on the board
                 count, freedom, must_have_nrs = self._count_2x2(nr, self.board_unused_nrs)
+                print('[%s] count=%s, freedom=%s, must_have_nrs=%s' % (nr, count, freedom, must_have_nrs))
                 self.board_options[nr] = count
                 self.board_freedom[nr] = freedom
                 self.board_must_have[nr] = must_have_nrs
@@ -254,14 +262,39 @@ class Command(BaseCommand):
     def _count_important(self, work_nr, min_options):
         self._count_freedom_cache = dict()
 
-        important = [
-            10, 11, 12, 13, 14, 15,
-            18, 23, 26, 31, 34, 39, 42, 47,
-            50, 51, 52, 53, 54, 55]
+        important = (
+            (10, 9, 1, 2),
+            (11, 3),
+            (12, 4),
+            (13, 5),
+            (14, 6),
+            (15, 7, 8, 16),
+            (23, 24),
+            (31, 32),
+            (39, 40),
+            (47, 48),
+            (55, 56, 64, 63),
+            (54, 62),
+            (53, 61),
+            (52, 60),
+            (51, 59),
+            (50, 58, 57, 49),
+            (42, 41),
+            (34, 33),
+            (26, 25),
+            (18, 17),
+        )
 
         # start with the neighbours so we can quickly find a dead-end
         nrs = list(self.neighbours[work_nr])
-        nrs.extend(important)
+        for tup in important:
+            nr = tup[0]
+            if self.board[nr] is None:
+                nrs.append(nr)
+            else:
+                for nr in tup[1:]:
+                    nrs.append(nr)
+        # for
         nrs = set(nrs)      # removes dupes
 
         for nr in nrs:
@@ -284,28 +317,27 @@ class Command(BaseCommand):
 
                 if count < min_options:
                     # found a dead end
-                    # self.stdout.write(' [%s] less than %s options for %s' % (work_nr, min_options, nr))
+                    self.stdout.write(' [%s] less than %s options for %s' % (work_nr, min_options, nr))
                     return True
         # for
         return False
 
     def _document_gaps(self, sol):
         for nr in range(1, 64+1):
-            if nr not in self.NR_IGNORE:
-                p = self.board[nr]
-                if not p:
-                    # gap
-                    field_note = 'note%s' % nr
+            p = self.board[nr]
+            if not p:
+                # gap
+                field_note = 'note%s' % nr
 
-                    # could the number of Piece2x2 that could fit here, not considered unused_nrs
-                    count1 = self.board_options[nr]     # self._count_2x2(nr, self.board_unused_nrs)
-                    freedom = self.board_freedom[nr]
-                    # count2, _, _ = self._count_2x2(nr, self.board_unused_nrs)
-                    # note = '%s{%s}%s' % (count1, count2, freedom)
-                    note = "%s %s" % (count1, freedom)
-                    note = note[:30]        # avoid database errors
+                # could the number of Piece2x2 that could fit here, not considered unused_nrs
+                count1 = self.board_options[nr]     # self._count_2x2(nr, self.board_unused_nrs)
+                freedom = self.board_freedom[nr]
+                # count2, _, _ = self._count_2x2(nr, self.board_unused_nrs)
+                # note = '%s{%s}%s' % (count1, count2, freedom)
+                note = "%s %s" % (count1, freedom)
+                note = note[:30]        # avoid database errors
 
-                    setattr(sol, field_note, note)
+                setattr(sol, field_note, note)
         # for
 
     def _save_board6x6(self):
@@ -526,6 +558,7 @@ class Command(BaseCommand):
 
     def _try_fill_nr(self, nr, greater_than, min_options):
         for p in self._iter_for_nr(nr, greater_than):
+            print('[%s] trying %s' % (nr, p.nr))
             self._board_fill_nr(nr, p)
             # is_dead_end = self._count_all(nr, min_options)
             is_dead_end = self._count_important(nr, min_options)
@@ -535,7 +568,7 @@ class Command(BaseCommand):
         # for
         return False            # failure
 
-    def load_board_4x4(self, sol):
+    def load_partial(self, partial):
         for nr in range(1, 64+1):
             self.board[nr] = None
             self.board_criticality[nr] = 999
@@ -544,22 +577,17 @@ class Command(BaseCommand):
         # start at 65 to skip all outer border pieces?
         self.board_unused_nrs = [nr for nr in range(1, 256+1) if nr not in ALL_HINT_NRS]
 
-        for nr in (19, 20, 21, 22,
-                   27, 28, 29, 30,
-                   35, 36, 37, 38,
-                   43, 44, 45, 46):
-
-            field_nr = 'nr%s' % nr
-            p_nr = getattr(sol, field_nr)
-            p = Piece2x2.objects.get(nr=p_nr)       # TODO: get all with 1 query
-            self._board_fill_nr(nr, p)
+        for nr, p_nr in partial.items():
+            if p_nr > 0:
+                p = Piece2x2.objects.get(nr=p_nr)
+                self._board_fill_nr(nr, p)
         # for
 
         self.board_gap_count = 64 - 16
         # self.all_unused_nrs = self.board_unused_nrs[:]      # copy
         self._count_freedom_cache = dict()
         self.board_solve_order = list()     # [nr, nr, ..]
-        self.based_on = sol.pk
+        self.based_on = 0
 
         # lst = self.board_unused_nrs[:]
         # lst.sort()
@@ -589,7 +617,6 @@ class Command(BaseCommand):
 
         if current_depth >= 20:
             # trigger back-tracking
-            self.stdout.write('[DEBUG] current_depth=%s; start backtracking' % current_depth)
             nr = 0
         else:
             # find the critical items
@@ -620,7 +647,7 @@ class Command(BaseCommand):
 
             # nr = solve_order[current_depth]
 
-        # print('  returning nr = %s' % nr)
+        print('  returning nr = %s' % nr)
         return nr
 
     def find_6x6(self):
@@ -633,9 +660,8 @@ class Command(BaseCommand):
             self.board_must_have[nr] = list()
         # for
 
-        self._save_board6x6()
-
         while True:
+
             nr = self.get_next_nr()     # can return 0 to trigger backtracking
 
             greater_than = 0
@@ -670,10 +696,10 @@ class Command(BaseCommand):
                 self._save_board6x6()
 
             if datetime.datetime.now() > next_time:
+                self.stdout.write('[INFO] Progress milestone')
+                self._save_board6x6()
                 next_time = datetime.datetime.now() + datetime.timedelta(minutes=self.interval_mins)
-                # self.stdout.write('[INFO] Progress milestone')
-                # self._save_board6x6()
-                best = 999      # allow a few progress reports
+
         # while
 
     def handle(self, *args, **options):
@@ -685,38 +711,83 @@ class Command(BaseCommand):
             self.interval_mins = int(options['interval'][0])
         self.stdout.write('[INFO] Progress interval is %s minutes' % self.interval_mins)
 
-        if options['start']:
-            min_4x4_pk = int(options['start'][0])
-        else:
-            min_4x4_pk = 1
+        partial1 = {
+            10: 0,
+            11: 0,
+            12: 1948650,
+            13: 1712192,
+            14: 2663384,
+            15: 1755894,
+            18: 2740263,
+            19: 706730,
+            20: 234350,
+            21: 2141126,
+            22: 2037716,
+            23: 2527875,
+            26: 909813,
+            27: 202379,
+            28: 1278745,
+            29: 405930,
+            30: 1011715,
+            31: 3534169,
+            34: 813700,
+            35: 144432,
+            36: 273976,
+            37: 1069726,
+            38: 1263838,
+            39: 3112472,
+            42: 1777621,
+            43: 323294,
+            44: 308974,
+            45: 2113579,
+            46: 3736845,
+            47: 3376081,
+            50: 1453403,
+            51: 2819370,
+            52: 3709672,
+            53: 2459420,
+            54: 2480212,
+            55: 745975}
 
-        my_processor = int(time.time() - 946684800.0)     # seconds since Jan 1, 2000
-        self.stdout.write('[INFO] my_processor is %s' % my_processor)
+        partial = {
+            10: 3024145,
+            11: 1044036,
+            12: 1412996,
+            13: 468924,
+            14: 2182589,
+            15: 3555703,
+            18: 914030,
+            19: 567095,
+            20: 239697,
+            21: 531427,
+            22: 3706169,
+            23: 3400664,
+            26: 2283179,
+            27: 181660,
+            28: 654090,
+            29: 659839,
+            30: 951086,
+            31: 1287433,
+            34: 919848,
+            35: 167843,
+            36: 2136028,
+            37: 625560,
+            38: 1865427,
+            39: 1939379,
+            42: 2252958,
+            43: 492230,
+            44: 418518,
+            45: 3012047,
+            46: 1564358,
+            47: 1205935,
+            51: 1267452,
+            52: 3254878,
+            53: 2843051,
+            54: 1357437,
+            55: 3786691,
+        }
 
-        while True:
-            sol = (Solution4x4
-                   .objects
-                   .filter(is_processed=False,
-                           processor=0,
-                           pk__gte=min_4x4_pk)
-                   .order_by('pk')      # lowest first
-                   .first())
-
-            if sol:
-                self.stdout.write('[INFO] Loading Solution4x4 nr %s' % sol.pk)
-                sol.processor = my_processor
-                sol.save(update_fields=['processor'])
-
-                self.load_board_4x4(sol)
-                self.find_6x6()
-
-                sol.is_processed = True
-                sol.save(update_fields=['is_processed'])
-
-            else:
-                self.stdout.write('[INFO] Waiting for new 4x4 (press Ctrl+C to abort)')
-                time.sleep(60)
-        # while
-
+        self.load_partial(partial)
+        self.find_6x6()
 
 # end of file
