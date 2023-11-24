@@ -7,7 +7,6 @@
 from django.core.management.base import BaseCommand
 from Pieces2x2.models import TwoSides, Piece2x2, Block2x8
 from Solutions.models import Solution4x4, Solution6x6, P_CORNER, P_BORDER, P_HINTS, ALL_HINT_NRS
-import datetime
 import time
 
 
@@ -93,7 +92,7 @@ class Command(BaseCommand):
         s1, s2, s3, s4 = self._get_sides(nr)
         p1 = p2 = p3 = p4 = None
         x1 = x2 = x3 = x4 = None
-        has_hint = False
+        # has_hint = False
 
         if nr in P_CORNER:
             if nr == 1:
@@ -130,7 +129,7 @@ class Command(BaseCommand):
             x1 = x2 = x3 = x4 = self.rev_border
 
             if nr in P_HINTS:
-                has_hint = True
+                # has_hint = True
                 if nr == 10:
                     p1 = 208
                 elif nr == 15:
@@ -215,7 +214,8 @@ class Command(BaseCommand):
                 # for
 
                 # if nr == 12 and count < 20:
-                #     self.stdout.write('[%s] count=%s, freedom=%s, must_have_nrs=%s' % (nr, count, freedom, must_have_nrs))
+                #     self.stdout.write('[%s] count=%s, freedom=%s, must_have_nrs=%s' % (
+                #                        nr, count, freedom, must_have_nrs))
                 #     self.stdout.write('     p1: %s' % avail_nr1)
                 #     self.stdout.write('     p2: %s' % avail_nr2)
                 #     self.stdout.write('     p3: %s' % avail_nr3)
@@ -477,7 +477,8 @@ class Command(BaseCommand):
                 elif nr == 55:
                     p4 = 249
 
-        # self.stdout.write('[%s] s=%s,%s,%s,%s x=%s,%s,%s,%s p=%s,%s,%s,%s' % (nr, s1, s2, s3, s4, x1, x2, x3, x4, p1, p2, p3, p4))
+        # self.stdout.write('[%s] s=%s,%s,%s,%s x=%s,%s,%s,%s p=%s,%s,%s,%s' % (
+        #                       nr, s1, s2, s3, s4, x1, x2, x3, x4, p1, p2, p3, p4))
 
         qset = Piece2x2.objects.filter(nr__gt=greater_than).order_by('nr')
 
@@ -665,7 +666,7 @@ class Command(BaseCommand):
             is_dead_end = self._count_important(54, min_options)
             if not is_dead_end:
                 self._save_board6x6()
-                self._find_block4()
+                self._find_6x6_block4()
 
             self._board_free_nr(51)
             self._board_free_nr(52)
@@ -818,11 +819,14 @@ class Command(BaseCommand):
         big_side = [self.side_nr2reverse[self.board[nr].side1] for nr in self.NRS_4X4_SIDE1]
 
         count = 0
+        bulk = list()
         unused_nrs0 = [nr for nr in self.board_unused_nrs if nr > 60]       # skip borders
         unused_nrs = set(unused_nrs0)
         # query all Piece2x2 needed
-        qset = Piece2x2.objects.filter(side3__in=big_side, nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs)
-        for p1 in qset.filter(side3=big_side[0], nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs):
+        qset = Piece2x2.objects.filter(side3__in=big_side,
+                                       nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs)
+        for p1 in qset.filter(side3=big_side[0],
+                              nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs):
             unused_nrs1 = unused_nrs0[:]
             unused_nrs1.remove(p1.nr1)
             unused_nrs1.remove(p1.nr2)
@@ -830,7 +834,8 @@ class Command(BaseCommand):
             unused_nrs1.remove(p1.nr4)
             unused_nrs = set(unused_nrs1)
             p2_exp_s4 = self.side_nr2reverse[p1.side2]
-            for p2 in qset.filter(side3=big_side[1], side4=p2_exp_s4, nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs):
+            for p2 in qset.filter(side3=big_side[1], side4=p2_exp_s4,
+                                  nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs):
                 unused_nrs2 = unused_nrs1[:]
                 unused_nrs2.remove(p2.nr1)
                 unused_nrs2.remove(p2.nr2)
@@ -838,7 +843,8 @@ class Command(BaseCommand):
                 unused_nrs2.remove(p2.nr4)
                 unused_nrs = set(unused_nrs2)
                 p3_exp_s4 = self.side_nr2reverse[p2.side2]
-                for p3 in qset.filter(side3=big_side[2], side4=p3_exp_s4, nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs):
+                for p3 in qset.filter(side3=big_side[2], side4=p3_exp_s4,
+                                      nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs):
                     unused_nrs3 = unused_nrs2[:]
                     unused_nrs3.remove(p3.nr1)
                     unused_nrs3.remove(p3.nr2)
@@ -846,54 +852,64 @@ class Command(BaseCommand):
                     unused_nrs3.remove(p3.nr4)
                     unused_nrs = set(unused_nrs3)
                     p4_exp_s4 = self.side_nr2reverse[p3.side2]
-                    for p4 in qset.filter(side3=big_side[3], side4=p4_exp_s4, nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs):
+                    for p4 in qset.filter(side3=big_side[3], side4=p4_exp_s4,
+                                          nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs,
+                                          nr4__in=unused_nrs):
                         # prevent dupes
-                        _ = Block2x8.objects.get_or_create(
-                                                processor=self.my_processor,
-                                                type=1,
-                                                p1=p1.nr,
-                                                p2=p2.nr,
-                                                p3=p3.nr,
-                                                p4=p4.nr,
-                                                b1=big_side[0],
-                                                b2=big_side[1],
-                                                b3=big_side[2],
-                                                b4=big_side[3],
-                                                nr1=p1.nr1,
-                                                nr2=p1.nr2,
-                                                nr3=p1.nr3,
-                                                nr4=p1.nr4,
-                                                nr5=p2.nr1,
-                                                nr6=p2.nr2,
-                                                nr7=p2.nr3,
-                                                nr8=p2.nr4,
-                                                nr9=p3.nr1,
-                                                nr10=p3.nr2,
-                                                nr11=p3.nr3,
-                                                nr12=p3.nr4,
-                                                nr13=p4.nr1,
-                                                nr14=p4.nr2,
-                                                nr15=p4.nr3,
-                                                nr16=p4.nr4,
-                                                side1=0,
-                                                side2=p4.side2,
-                                                side3=0,            # big side
-                                                side4=p1.side4)
+                        block = Block2x8(
+                                        processor=self.my_processor,
+                                        type=1,
+                                        p1=p1.nr,
+                                        p2=p2.nr,
+                                        p3=p3.nr,
+                                        p4=p4.nr,
+                                        b1=big_side[0],
+                                        b2=big_side[1],
+                                        b3=big_side[2],
+                                        b4=big_side[3],
+                                        nr1=p1.nr1,
+                                        nr2=p1.nr2,
+                                        nr3=p1.nr3,
+                                        nr4=p1.nr4,
+                                        nr5=p2.nr1,
+                                        nr6=p2.nr2,
+                                        nr7=p2.nr3,
+                                        nr8=p2.nr4,
+                                        nr9=p3.nr1,
+                                        nr10=p3.nr2,
+                                        nr11=p3.nr3,
+                                        nr12=p3.nr4,
+                                        nr13=p4.nr1,
+                                        nr14=p4.nr2,
+                                        nr15=p4.nr3,
+                                        nr16=p4.nr4,
+                                        side1=0,
+                                        side2=p4.side2,
+                                        side3=0,            # big side
+                                        side4=p1.side4)
+                        bulk.append(block)
 
-                        chk = (p1.nr1, p1.nr2, p1.nr3, p1.nr4,
-                               p2.nr1, p2.nr2, p2.nr3, p2.nr4,
-                               p3.nr1, p3.nr2, p3.nr3, p3.nr4,
-                               p4.nr1, p4.nr2, p4.nr3, p4.nr4)
-                        if len(set(chk)) != 16:
-                            self.stdout.write('[ERROR] Block2x8 does not consist of 16 base pieces: %s' % repr(chk))
+                        # chk = (p1.nr1, p1.nr2, p1.nr3, p1.nr4,
+                        #        p2.nr1, p2.nr2, p2.nr3, p2.nr4,
+                        #        p3.nr1, p3.nr2, p3.nr3, p3.nr4,
+                        #        p4.nr1, p4.nr2, p4.nr3, p4.nr4)
+                        # if len(set(chk)) != 16:
+                        #     self.stdout.write('[ERROR] Block2x8 does not consist of 16 base pieces: %s' % repr(chk))
 
                         count += 1
                         if count % 1000 == 0:
                             self.stdout.write("%s" % count)
+
+                        if len(bulk) >= 1000:
+                            Block2x8.objects.bulk_create(bulk)
+                            bulk = list()
                     # for
                 # for
             # for
         # for
+
+        if len(bulk) > 0:
+            Block2x8.objects.bulk_create(bulk)
 
         self.stdout.write('Total: %s' % count)
         return count
@@ -903,11 +919,14 @@ class Command(BaseCommand):
         big_side = [self.side_nr2reverse[self.board[nr].side2] for nr in self.NRS_4X4_SIDE2]
 
         count = 0
+        bulk = list()
         unused_nrs0 = [nr for nr in self.board_unused_nrs if nr > 60]       # skip borders
         unused_nrs = set(unused_nrs0)
         # query all Piece2x2 needed
-        qset = Piece2x2.objects.filter(side4__in=big_side, nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs)
-        for p1 in qset.filter(side4=big_side[0], nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs):
+        qset = Piece2x2.objects.filter(side4__in=big_side,
+                                       nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs)
+        for p1 in qset.filter(side4=big_side[0],
+                              nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs):
             unused_nrs1 = unused_nrs0[:]
             unused_nrs1.remove(p1.nr1)
             unused_nrs1.remove(p1.nr2)
@@ -915,7 +934,8 @@ class Command(BaseCommand):
             unused_nrs1.remove(p1.nr4)
             unused_nrs = set(unused_nrs1)
             p2_exp_s1 = self.side_nr2reverse[p1.side3]
-            for p2 in qset.filter(side4=big_side[1], side1=p2_exp_s1, nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs):
+            for p2 in qset.filter(side4=big_side[1], side1=p2_exp_s1,
+                                  nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs):
                 unused_nrs2 = unused_nrs1[:]
                 unused_nrs2.remove(p2.nr1)
                 unused_nrs2.remove(p2.nr2)
@@ -923,7 +943,8 @@ class Command(BaseCommand):
                 unused_nrs2.remove(p2.nr4)
                 unused_nrs = set(unused_nrs2)
                 p3_exp_s1 = self.side_nr2reverse[p2.side3]
-                for p3 in qset.filter(side4=big_side[2], side1=p3_exp_s1, nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs):
+                for p3 in qset.filter(side4=big_side[2], side1=p3_exp_s1,
+                                      nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs):
                     unused_nrs3 = unused_nrs2[:]
                     unused_nrs3.remove(p3.nr1)
                     unused_nrs3.remove(p3.nr2)
@@ -931,54 +952,64 @@ class Command(BaseCommand):
                     unused_nrs3.remove(p3.nr4)
                     unused_nrs = set(unused_nrs3)
                     p4_exp_s1 = self.side_nr2reverse[p3.side3]
-                    for p4 in qset.filter(side4=big_side[3], side1=p4_exp_s1, nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs):
+                    for p4 in qset.filter(side4=big_side[3], side1=p4_exp_s1,
+                                          nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs,
+                                          nr4__in=unused_nrs):
                         # prevent dupes
-                        _ = Block2x8.objects.get_or_create(
-                                                processor=self.my_processor,
-                                                type=2,
-                                                p1=p1.nr,
-                                                p2=p2.nr,
-                                                p3=p3.nr,
-                                                p4=p4.nr,
-                                                b1=big_side[0],
-                                                b2=big_side[1],
-                                                b3=big_side[2],
-                                                b4=big_side[3],
-                                                nr1=p1.nr1,
-                                                nr2=p1.nr2,
-                                                nr3=p1.nr3,
-                                                nr4=p1.nr4,
-                                                nr5=p2.nr1,
-                                                nr6=p2.nr2,
-                                                nr7=p2.nr3,
-                                                nr8=p2.nr4,
-                                                nr9=p3.nr1,
-                                                nr10=p3.nr2,
-                                                nr11=p3.nr3,
-                                                nr12=p3.nr4,
-                                                nr13=p4.nr1,
-                                                nr14=p4.nr2,
-                                                nr15=p4.nr3,
-                                                nr16=p4.nr4,
-                                                side1=p1.side1,
-                                                side2=0,
-                                                side3=p4.side3,
-                                                side4=0)            # big side
+                        block = Block2x8(
+                                        processor=self.my_processor,
+                                        type=2,
+                                        p1=p1.nr,
+                                        p2=p2.nr,
+                                        p3=p3.nr,
+                                        p4=p4.nr,
+                                        b1=big_side[0],
+                                        b2=big_side[1],
+                                        b3=big_side[2],
+                                        b4=big_side[3],
+                                        nr1=p1.nr1,
+                                        nr2=p1.nr2,
+                                        nr3=p1.nr3,
+                                        nr4=p1.nr4,
+                                        nr5=p2.nr1,
+                                        nr6=p2.nr2,
+                                        nr7=p2.nr3,
+                                        nr8=p2.nr4,
+                                        nr9=p3.nr1,
+                                        nr10=p3.nr2,
+                                        nr11=p3.nr3,
+                                        nr12=p3.nr4,
+                                        nr13=p4.nr1,
+                                        nr14=p4.nr2,
+                                        nr15=p4.nr3,
+                                        nr16=p4.nr4,
+                                        side1=p1.side1,
+                                        side2=0,
+                                        side3=p4.side3,
+                                        side4=0)            # big side
 
-                        chk = (p1.nr1, p1.nr2, p1.nr3, p1.nr4,
-                               p2.nr1, p2.nr2, p2.nr3, p2.nr4,
-                               p3.nr1, p3.nr2, p3.nr3, p3.nr4,
-                               p4.nr1, p4.nr2, p4.nr3, p4.nr4)
-                        if len(set(chk)) != 16:
-                            self.stdout.write('[ERROR] Block2x8 does not consist of 16 base pieces: %s' % repr(chk))
+                        bulk.append(block)
+                        # chk = (p1.nr1, p1.nr2, p1.nr3, p1.nr4,
+                        #        p2.nr1, p2.nr2, p2.nr3, p2.nr4,
+                        #        p3.nr1, p3.nr2, p3.nr3, p3.nr4,
+                        #        p4.nr1, p4.nr2, p4.nr3, p4.nr4)
+                        # if len(set(chk)) != 16:
+                        #     self.stdout.write('[ERROR] Block2x8 does not consist of 16 base pieces: %s' % repr(chk))
 
                         count += 1
                         if count % 1000 == 0:
                             self.stdout.write("%s" % count)
+
+                        if len(bulk) >= 1000:
+                            Block2x8.objects.bulk_create(bulk)
+                            bulk = list()
                     # for
                 # for
             # for
         # for
+
+        if len(bulk) > 0:
+            Block2x8.objects.bulk_create(bulk)
 
         self.stdout.write('Total: %s' % count)
         return count
@@ -988,11 +1019,14 @@ class Command(BaseCommand):
         big_side = [self.side_nr2reverse[self.board[nr].side3] for nr in self.NRS_4X4_SIDE3]
 
         count = 0
+        bulk = list()
         unused_nrs0 = [nr for nr in self.board_unused_nrs if nr > 60]       # skip borders
         unused_nrs = set(unused_nrs0)
         # query all Piece2x2 needed
-        qset = Piece2x2.objects.filter(side1__in=big_side, nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs)
-        for p1 in qset.filter(side1=big_side[0], nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs):
+        qset = Piece2x2.objects.filter(side1__in=big_side,
+                                       nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs)
+        for p1 in qset.filter(side1=big_side[0],
+                              nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs):
             unused_nrs1 = unused_nrs0[:]
             unused_nrs1.remove(p1.nr1)
             unused_nrs1.remove(p1.nr2)
@@ -1000,7 +1034,8 @@ class Command(BaseCommand):
             unused_nrs1.remove(p1.nr4)
             unused_nrs = set(unused_nrs1)
             p2_exp_s2 = self.side_nr2reverse[p1.side4]
-            for p2 in qset.filter(side1=big_side[1], side2=p2_exp_s2, nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs):
+            for p2 in qset.filter(side1=big_side[1], side2=p2_exp_s2,
+                                  nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs):
                 unused_nrs2 = unused_nrs1[:]
                 unused_nrs2.remove(p2.nr1)
                 unused_nrs2.remove(p2.nr2)
@@ -1008,7 +1043,8 @@ class Command(BaseCommand):
                 unused_nrs2.remove(p2.nr4)
                 unused_nrs = set(unused_nrs2)
                 p3_exp_s2 = self.side_nr2reverse[p2.side4]
-                for p3 in qset.filter(side1=big_side[2], side2=p3_exp_s2, nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs):
+                for p3 in qset.filter(side1=big_side[2], side2=p3_exp_s2,
+                                      nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs):
                     unused_nrs3 = unused_nrs2[:]
                     unused_nrs3.remove(p3.nr1)
                     unused_nrs3.remove(p3.nr2)
@@ -1016,54 +1052,64 @@ class Command(BaseCommand):
                     unused_nrs3.remove(p3.nr4)
                     unused_nrs = set(unused_nrs3)
                     p4_exp_s2 = self.side_nr2reverse[p3.side4]
-                    for p4 in qset.filter(side1=big_side[3], side2=p4_exp_s2, nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs):
+                    for p4 in qset.filter(side1=big_side[3], side2=p4_exp_s2,
+                                          nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs,
+                                          nr4__in=unused_nrs):
                         # prevent dupes
-                        _ = Block2x8.objects.get_or_create(
-                                                processor=self.my_processor,
-                                                type=3,
-                                                p1=p1.nr,
-                                                p2=p2.nr,
-                                                p3=p3.nr,
-                                                p4=p4.nr,
-                                                b1=big_side[0],
-                                                b2=big_side[1],
-                                                b3=big_side[2],
-                                                b4=big_side[3],
-                                                nr1=p1.nr1,
-                                                nr2=p1.nr2,
-                                                nr3=p1.nr3,
-                                                nr4=p1.nr4,
-                                                nr5=p2.nr1,
-                                                nr6=p2.nr2,
-                                                nr7=p2.nr3,
-                                                nr8=p2.nr4,
-                                                nr9=p3.nr1,
-                                                nr10=p3.nr2,
-                                                nr11=p3.nr3,
-                                                nr12=p3.nr4,
-                                                nr13=p4.nr1,
-                                                nr14=p4.nr2,
-                                                nr15=p4.nr3,
-                                                nr16=p4.nr4,
-                                                side1=0,            # big side
-                                                side2=p1.side2,
-                                                side3=0,
-                                                side4=p4.side4)
+                        block = Block2x8(
+                                        processor=self.my_processor,
+                                        type=3,
+                                        p1=p1.nr,
+                                        p2=p2.nr,
+                                        p3=p3.nr,
+                                        p4=p4.nr,
+                                        b1=big_side[0],
+                                        b2=big_side[1],
+                                        b3=big_side[2],
+                                        b4=big_side[3],
+                                        nr1=p1.nr1,
+                                        nr2=p1.nr2,
+                                        nr3=p1.nr3,
+                                        nr4=p1.nr4,
+                                        nr5=p2.nr1,
+                                        nr6=p2.nr2,
+                                        nr7=p2.nr3,
+                                        nr8=p2.nr4,
+                                        nr9=p3.nr1,
+                                        nr10=p3.nr2,
+                                        nr11=p3.nr3,
+                                        nr12=p3.nr4,
+                                        nr13=p4.nr1,
+                                        nr14=p4.nr2,
+                                        nr15=p4.nr3,
+                                        nr16=p4.nr4,
+                                        side1=0,            # big side
+                                        side2=p1.side2,
+                                        side3=0,
+                                        side4=p4.side4)
+                        bulk.append(block)
 
-                        chk = (p1.nr1, p1.nr2, p1.nr3, p1.nr4,
-                               p2.nr1, p2.nr2, p2.nr3, p2.nr4,
-                               p3.nr1, p3.nr2, p3.nr3, p3.nr4,
-                               p4.nr1, p4.nr2, p4.nr3, p4.nr4)
-                        if len(set(chk)) != 16:
-                            self.stdout.write('[ERROR] Block2x8 does not consist of 16 base pieces: %s' % repr(chk))
+                        # chk = (p1.nr1, p1.nr2, p1.nr3, p1.nr4,
+                        #        p2.nr1, p2.nr2, p2.nr3, p2.nr4,
+                        #        p3.nr1, p3.nr2, p3.nr3, p3.nr4,
+                        #        p4.nr1, p4.nr2, p4.nr3, p4.nr4)
+                        # if len(set(chk)) != 16:
+                        #     self.stdout.write('[ERROR] Block2x8 does not consist of 16 base pieces: %s' % repr(chk))
 
                         count += 1
                         if count % 1000 == 0:
                             self.stdout.write("%s" % count)
+
+                        if len(bulk) >= 1000:
+                            Block2x8.objects.bulk_create(bulk)
+                            bulk = list()
                     # for
                 # for
             # for
         # for
+
+        if len(bulk) > 0:
+            Block2x8.objects.bulk_create(bulk)
 
         self.stdout.write('Total: %s' % count)
         return count
@@ -1073,11 +1119,14 @@ class Command(BaseCommand):
         big_side = [self.side_nr2reverse[self.board[nr].side4] for nr in self.NRS_4X4_SIDE4]
 
         count = 0
+        bulk = list()
         unused_nrs0 = [nr for nr in self.board_unused_nrs if nr > 60]       # skip borders
         unused_nrs = set(unused_nrs0)
         # query all Piece2x2 needed
-        qset = Piece2x2.objects.filter(side2__in=big_side, nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs)
-        for p1 in qset.filter(side2=big_side[0], nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs):
+        qset = Piece2x2.objects.filter(side2__in=big_side,
+                                       nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs)
+        for p1 in qset.filter(side2=big_side[0],
+                              nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs):
             unused_nrs1 = unused_nrs0[:]
             unused_nrs1.remove(p1.nr1)
             unused_nrs1.remove(p1.nr2)
@@ -1085,7 +1134,8 @@ class Command(BaseCommand):
             unused_nrs1.remove(p1.nr4)
             unused_nrs = set(unused_nrs1)
             p2_exp_s3 = self.side_nr2reverse[p1.side1]
-            for p2 in qset.filter(side2=big_side[1], side3=p2_exp_s3, nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs):
+            for p2 in qset.filter(side2=big_side[1], side3=p2_exp_s3,
+                                  nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs):
                 unused_nrs2 = unused_nrs1[:]
                 unused_nrs2.remove(p2.nr1)
                 unused_nrs2.remove(p2.nr2)
@@ -1093,7 +1143,8 @@ class Command(BaseCommand):
                 unused_nrs2.remove(p2.nr4)
                 unused_nrs = set(unused_nrs2)
                 p3_exp_s3 = self.side_nr2reverse[p2.side1]
-                for p3 in qset.filter(side2=big_side[2], side3=p3_exp_s3, nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs):
+                for p3 in qset.filter(side2=big_side[2], side3=p3_exp_s3,
+                                      nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs):
                     unused_nrs3 = unused_nrs2[:]
                     unused_nrs3.remove(p3.nr1)
                     unused_nrs3.remove(p3.nr2)
@@ -1101,54 +1152,64 @@ class Command(BaseCommand):
                     unused_nrs3.remove(p3.nr4)
                     unused_nrs = set(unused_nrs3)
                     p4_exp_s3 = self.side_nr2reverse[p3.side1]
-                    for p4 in qset.filter(side2=big_side[3], side3=p4_exp_s3, nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs):
+                    for p4 in qset.filter(side2=big_side[3], side3=p4_exp_s3,
+                                          nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs,
+                                          nr4__in=unused_nrs):
                         # prevent dupes
-                        _ = Block2x8.objects.get_or_create(
-                                                processor=self.my_processor,
-                                                type=4,
-                                                p1=p1.nr,
-                                                p2=p2.nr,
-                                                p3=p3.nr,
-                                                p4=p4.nr,
-                                                b1=big_side[0],
-                                                b2=big_side[1],
-                                                b3=big_side[2],
-                                                b4=big_side[3],
-                                                nr1=p1.nr1,
-                                                nr2=p1.nr2,
-                                                nr3=p1.nr3,
-                                                nr4=p1.nr4,
-                                                nr5=p2.nr1,
-                                                nr6=p2.nr2,
-                                                nr7=p2.nr3,
-                                                nr8=p2.nr4,
-                                                nr9=p3.nr1,
-                                                nr10=p3.nr2,
-                                                nr11=p3.nr3,
-                                                nr12=p3.nr4,
-                                                nr13=p4.nr1,
-                                                nr14=p4.nr2,
-                                                nr15=p4.nr3,
-                                                nr16=p4.nr4,
-                                                side1=p4.side1,
-                                                side2=0,            # big side
-                                                side3=p1.side3,
-                                                side4=0)
+                        block = Block2x8(
+                                        processor=self.my_processor,
+                                        type=4,
+                                        p1=p1.nr,
+                                        p2=p2.nr,
+                                        p3=p3.nr,
+                                        p4=p4.nr,
+                                        b1=big_side[0],
+                                        b2=big_side[1],
+                                        b3=big_side[2],
+                                        b4=big_side[3],
+                                        nr1=p1.nr1,
+                                        nr2=p1.nr2,
+                                        nr3=p1.nr3,
+                                        nr4=p1.nr4,
+                                        nr5=p2.nr1,
+                                        nr6=p2.nr2,
+                                        nr7=p2.nr3,
+                                        nr8=p2.nr4,
+                                        nr9=p3.nr1,
+                                        nr10=p3.nr2,
+                                        nr11=p3.nr3,
+                                        nr12=p3.nr4,
+                                        nr13=p4.nr1,
+                                        nr14=p4.nr2,
+                                        nr15=p4.nr3,
+                                        nr16=p4.nr4,
+                                        side1=p4.side1,
+                                        side2=0,            # big side
+                                        side3=p1.side3,
+                                        side4=0)
+                        bulk.append(block)
 
-                        chk = (p1.nr1, p1.nr2, p1.nr3, p1.nr4,
-                               p2.nr1, p2.nr2, p2.nr3, p2.nr4,
-                               p3.nr1, p3.nr2, p3.nr3, p3.nr4,
-                               p4.nr1, p4.nr2, p4.nr3, p4.nr4)
-                        if len(set(chk)) != 16:
-                            self.stdout.write('[ERROR] Block2x8 does not consist of 16 base pieces: %s' % repr(chk))
+                        # chk = (p1.nr1, p1.nr2, p1.nr3, p1.nr4,
+                        #        p2.nr1, p2.nr2, p2.nr3, p2.nr4,
+                        #        p3.nr1, p3.nr2, p3.nr3, p3.nr4,
+                        #        p4.nr1, p4.nr2, p4.nr3, p4.nr4)
+                        # if len(set(chk)) != 16:
+                        #     self.stdout.write('[ERROR] Block2x8 does not consist of 16 base pieces: %s' % repr(chk))
 
                         count += 1
                         if count % 1000 == 0:
                             self.stdout.write("%s" % count)
+
+                        if len(bulk) >= 1000:
+                            Block2x8.objects.bulk_create(bulk)
+                            bulk = list()
                     # for
                 # for
             # for
         # for
+
+        if len(bulk) > 0:
+            Block2x8.objects.bulk_create(bulk)
 
         self.stdout.write('Total: %s' % count)
         return count
