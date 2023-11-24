@@ -60,6 +60,7 @@ class Command(BaseCommand):
         # self.all_unused_nrs = list()
         self.based_on = 0
         self.interval_mins = 15
+        self.my_processor = int(time.time() - 946684800.0)     # seconds since Jan 1, 2000
 
         self._calc_neighbours()
 
@@ -589,24 +590,26 @@ class Command(BaseCommand):
         unused_nrs = set(unused_nrs0)
         min_options = 1
         for block2 in (Block2x8
-                .objects
-                .filter(type=4, b1=big_side[0], b2=big_side[1], b3=big_side[2], b4=big_side[3])
-                .filter(nr1__in=unused_nrs)
-                .filter(nr2__in=unused_nrs)
-                .filter(nr3__in=unused_nrs)
-                .filter(nr4__in=unused_nrs)
-                .filter(nr5__in=unused_nrs)
-                .filter(nr6__in=unused_nrs)
-                .filter(nr7__in=unused_nrs)
-                .filter(nr8__in=unused_nrs)
-                .filter(nr9__in=unused_nrs)
-                .filter(nr10__in=unused_nrs)
-                .filter(nr11__in=unused_nrs)
-                .filter(nr12__in=unused_nrs)
-                .filter(nr13__in=unused_nrs)
-                .filter(nr14__in=unused_nrs)
-                .filter(nr15__in=unused_nrs)
-                .filter(nr16__in=unused_nrs)):
+                       .objects
+                       .filter(processor=self.my_processor,
+                               type=4,
+                               b1=big_side[0], b2=big_side[1], b3=big_side[2], b4=big_side[3])
+                       .filter(nr1__in=unused_nrs)
+                       .filter(nr2__in=unused_nrs)
+                       .filter(nr3__in=unused_nrs)
+                       .filter(nr4__in=unused_nrs)
+                       .filter(nr5__in=unused_nrs)
+                       .filter(nr6__in=unused_nrs)
+                       .filter(nr7__in=unused_nrs)
+                       .filter(nr8__in=unused_nrs)
+                       .filter(nr9__in=unused_nrs)
+                       .filter(nr10__in=unused_nrs)
+                       .filter(nr11__in=unused_nrs)
+                       .filter(nr12__in=unused_nrs)
+                       .filter(nr13__in=unused_nrs)
+                       .filter(nr14__in=unused_nrs)
+                       .filter(nr15__in=unused_nrs)
+                       .filter(nr16__in=unused_nrs)):
 
             # place the 4 pieces
             self._board_fill_nr(42, Piece2x2.objects.get(nr=block2.p1))
@@ -633,7 +636,9 @@ class Command(BaseCommand):
         min_options = 1
         for block2 in (Block2x8
                        .objects
-                       .filter(type=3, b1=big_side[0], b2=big_side[1], b3=big_side[2], b4=big_side[3])
+                       .filter(processor=self.my_processor,
+                               type=3,
+                               b1=big_side[0], b2=big_side[1], b3=big_side[2], b4=big_side[3])
                        .filter(nr1__in=unused_nrs)
                        .filter(nr2__in=unused_nrs)
                        .filter(nr3__in=unused_nrs)
@@ -676,7 +681,9 @@ class Command(BaseCommand):
         min_options = 1
         for block2 in (Block2x8
                        .objects
-                       .filter(type=2, b1=big_side[0], b2=big_side[1], b3=big_side[2], b4=big_side[3])
+                       .filter(processor=self.my_processor,
+                               type=2,
+                               b1=big_side[0], b2=big_side[1], b3=big_side[2], b4=big_side[3])
                        .filter(nr1__in=unused_nrs)
                        .filter(nr2__in=unused_nrs)
                        .filter(nr3__in=unused_nrs)
@@ -719,7 +726,9 @@ class Command(BaseCommand):
         min_options = 1
         for block1 in (Block2x8
                        .objects
-                       .filter(type=1, b1=big_side[0], b2=big_side[1], b3=big_side[2], b4=big_side[3])
+                       .filter(processor=self.my_processor,
+                               type=1,
+                               b1=big_side[0], b2=big_side[1], b3=big_side[2], b4=big_side[3])
                        .filter(nr1__in=unused_nrs)
                        .filter(nr2__in=unused_nrs)
                        .filter(nr3__in=unused_nrs)
@@ -840,6 +849,7 @@ class Command(BaseCommand):
                     for p4 in qset.filter(side3=big_side[3], side4=p4_exp_s4, nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs):
                         # prevent dupes
                         _ = Block2x8.objects.get_or_create(
+                                                processor=self.my_processor,
                                                 type=1,
                                                 p1=p1.nr,
                                                 p2=p2.nr,
@@ -924,6 +934,7 @@ class Command(BaseCommand):
                     for p4 in qset.filter(side4=big_side[3], side1=p4_exp_s1, nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs):
                         # prevent dupes
                         _ = Block2x8.objects.get_or_create(
+                                                processor=self.my_processor,
                                                 type=2,
                                                 p1=p1.nr,
                                                 p2=p2.nr,
@@ -1008,6 +1019,7 @@ class Command(BaseCommand):
                     for p4 in qset.filter(side1=big_side[3], side2=p4_exp_s2, nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs):
                         # prevent dupes
                         _ = Block2x8.objects.get_or_create(
+                                                processor=self.my_processor,
                                                 type=3,
                                                 p1=p1.nr,
                                                 p2=p2.nr,
@@ -1092,6 +1104,7 @@ class Command(BaseCommand):
                     for p4 in qset.filter(side2=big_side[3], side3=p4_exp_s3, nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs):
                         # prevent dupes
                         _ = Block2x8.objects.get_or_create(
+                                                processor=self.my_processor,
                                                 type=4,
                                                 p1=p1.nr,
                                                 p2=p2.nr,
@@ -1165,8 +1178,7 @@ class Command(BaseCommand):
         else:
             min_4x4_pk = 1
 
-        my_processor = int(time.time() - 946684800.0)     # seconds since Jan 1, 2000
-        self.stdout.write('[INFO] my_processor is %s' % my_processor)
+        self.stdout.write('[INFO] my_processor is %s' % self.my_processor)
 
         while True:
             sol = (Solution4x4
@@ -1179,7 +1191,7 @@ class Command(BaseCommand):
 
             if sol:
                 self.stdout.write('[INFO] Loading Solution4x4 nr %s' % sol.pk)
-                sol.processor = my_processor
+                sol.processor = self.my_processor
                 sol.save(update_fields=['processor'])
 
                 self.load_board_4x4(sol)

@@ -218,6 +218,10 @@ class Block2x8(models.Model):
 
     """
 
+    # belongs to which instance? (avoids conflicts)
+    processor = models.PositiveIntegerField()
+
+    # 1=top, 2=right, 3=bottom, 4=left
     type = models.PositiveSmallIntegerField()
 
     # 2x2 pieces used to build up this piece
