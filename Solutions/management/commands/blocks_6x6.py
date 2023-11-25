@@ -896,6 +896,8 @@ class Command(BaseCommand):
 
         if count == 0:
             # out of options on one side
+            if len(sides_todo) == 4:
+                print('[INFO] Out of options for side %s from %s' % (s, repr(order)))
             return
 
         print('[INFO] Selected side %s from %s' % (s, repr(order)))
