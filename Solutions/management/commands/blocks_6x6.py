@@ -771,7 +771,7 @@ class Command(BaseCommand):
 
         self._save_board6x6()
 
-        self._find_6x6_block4()
+        self._find_6x6_block1()
 
         # return
         #
@@ -818,412 +818,363 @@ class Command(BaseCommand):
         self.stdout.write('[INFO] Generating Block2x8 for side1')
         big_side = [self.side_nr2reverse[self.board[nr].side1] for nr in self.NRS_4X4_SIDE1]
 
+        always = {nr: 0 for nr in range(1, 256+1)}
+
         count = 0
         bulk = list()
         unused_nrs0 = [nr for nr in self.board_unused_nrs if nr > 60]       # skip borders
         unused_nrs = set(unused_nrs0)
         # query all Piece2x2 needed
-        qset = Piece2x2.objects.filter(side3__in=big_side,
-                                       nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs)
-        for p1 in qset.filter(side3=big_side[0],
-                              nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs):
-            unused_nrs1 = unused_nrs0[:]
-            unused_nrs1.remove(p1.nr1)
-            unused_nrs1.remove(p1.nr2)
-            unused_nrs1.remove(p1.nr3)
-            unused_nrs1.remove(p1.nr4)
-            unused_nrs = set(unused_nrs1)
-            p2_exp_s4 = self.side_nr2reverse[p1.side2]
-            for p2 in qset.filter(side3=big_side[1], side4=p2_exp_s4,
-                                  nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs):
-                unused_nrs2 = unused_nrs1[:]
-                unused_nrs2.remove(p2.nr1)
-                unused_nrs2.remove(p2.nr2)
-                unused_nrs2.remove(p2.nr3)
-                unused_nrs2.remove(p2.nr4)
-                unused_nrs = set(unused_nrs2)
-                p3_exp_s4 = self.side_nr2reverse[p2.side2]
-                for p3 in qset.filter(side3=big_side[2], side4=p3_exp_s4,
-                                      nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs):
-                    unused_nrs3 = unused_nrs2[:]
-                    unused_nrs3.remove(p3.nr1)
-                    unused_nrs3.remove(p3.nr2)
-                    unused_nrs3.remove(p3.nr3)
-                    unused_nrs3.remove(p3.nr4)
-                    unused_nrs = set(unused_nrs3)
-                    p4_exp_s4 = self.side_nr2reverse[p3.side2]
-                    for p4 in qset.filter(side3=big_side[3], side4=p4_exp_s4,
-                                          nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs,
-                                          nr4__in=unused_nrs):
-                        # prevent dupes
-                        block = Block2x8(
-                                        processor=self.my_processor,
-                                        type=1,
-                                        p1=p1.nr,
-                                        p2=p2.nr,
-                                        p3=p3.nr,
-                                        p4=p4.nr,
-                                        b1=big_side[0],
-                                        b2=big_side[1],
-                                        b3=big_side[2],
-                                        b4=big_side[3],
-                                        nr1=p1.nr1,
-                                        nr2=p1.nr2,
-                                        nr3=p1.nr3,
-                                        nr4=p1.nr4,
-                                        nr5=p2.nr1,
-                                        nr6=p2.nr2,
-                                        nr7=p2.nr3,
-                                        nr8=p2.nr4,
-                                        nr9=p3.nr1,
-                                        nr10=p3.nr2,
-                                        nr11=p3.nr3,
-                                        nr12=p3.nr4,
-                                        nr13=p4.nr1,
-                                        nr14=p4.nr2,
-                                        nr15=p4.nr3,
-                                        nr16=p4.nr4,
-                                        side1=0,
-                                        side2=p4.side2,
-                                        side3=0,            # big side
-                                        side4=p1.side4)
-                        bulk.append(block)
+        p2x2s = list(Piece2x2.objects.filter(side3__in=big_side, nr1__in=unused_nrs, nr2__in=unused_nrs,
+                                             nr3__in=unused_nrs, nr4__in=unused_nrs))
 
-                        # chk = (p1.nr1, p1.nr2, p1.nr3, p1.nr4,
-                        #        p2.nr1, p2.nr2, p2.nr3, p2.nr4,
-                        #        p3.nr1, p3.nr2, p3.nr3, p3.nr4,
-                        #        p4.nr1, p4.nr2, p4.nr3, p4.nr4)
-                        # if len(set(chk)) != 16:
-                        #     self.stdout.write('[ERROR] Block2x8 does not consist of 16 base pieces: %s' % repr(chk))
+        for p1 in p2x2s:
+            if p1.side3 == big_side[0]:
+                unused_nrs1 = [nr for nr in unused_nrs0 if nr not in (p1.nr1, p1.nr2, p1.nr3, p1.nr4)]
+                unused_nrs = set(unused_nrs1)
+                p2_exp_s4 = self.side_nr2reverse[p1.side2]
 
-                        count += 1
-                        if count % 1000 == 0:
-                            self.stdout.write("%s" % count)
+                for p2 in p2x2s:
+                    if (p2.side3 == big_side[1] and p2.side4 == p2_exp_s4 and p2.nr1 in unused_nrs
+                            and p2.nr2 in unused_nrs and p2.nr3 in unused_nrs and p2.nr4 in unused_nrs):
 
-                        if len(bulk) >= 1000:
-                            Block2x8.objects.bulk_create(bulk)
-                            bulk = list()
-                    # for
+                        unused_nrs2 = [nr for nr in unused_nrs1 if nr not in (p2.nr1, p2.nr2, p2.nr3, p2.nr4)]
+                        unused_nrs = set(unused_nrs2)
+                        p3_exp_s4 = self.side_nr2reverse[p2.side2]
+
+                        for p3 in p2x2s:
+                            if (p3.side3 == big_side[2] and p3.side4 == p3_exp_s4 and p3.nr1 in unused_nrs
+                                    and p3.nr2 in unused_nrs and p3.nr3 in unused_nrs and p3.nr4 in unused_nrs):
+
+                                unused_nrs3 = [nr for nr in unused_nrs2 if nr not in (p3.nr1, p3.nr2, p3.nr3, p3.nr4)]
+                                unused_nrs = set(unused_nrs3)
+                                p4_exp_s4 = self.side_nr2reverse[p3.side2]
+
+                                for p4 in p2x2s:
+                                    if (p4.side3 == big_side[3] and p4.side4 == p4_exp_s4 and p4.nr1 in unused_nrs
+                                            and p4.nr2 in unused_nrs and p4.nr3 in unused_nrs and p4.nr4 in unused_nrs):
+
+                                        block = Block2x8(
+                                                        processor=self.my_processor,
+                                                        type=1,
+                                                        p1=p1.nr, p2=p2.nr, p3=p3.nr, p4=p4.nr,
+                                                        b1=big_side[0], b2=big_side[1], b3=big_side[2], b4=big_side[3],
+                                                        nr1=p1.nr1, nr2=p1.nr2, nr3=p1.nr3, nr4=p1.nr4,
+                                                        nr5=p2.nr1, nr6=p2.nr2, nr7=p2.nr3, nr8=p2.nr4,
+                                                        nr9=p3.nr1, nr10=p3.nr2, nr11=p3.nr3, nr12=p3.nr4,
+                                                        nr13=p4.nr1, nr14=p4.nr2, nr15=p4.nr3, nr16=p4.nr4,
+                                                        side1=0,
+                                                        side2=p4.side2,
+                                                        side3=0,            # big side
+                                                        side4=p1.side4)
+                                        bulk.append(block)
+
+                                        chk = (p1.nr1, p1.nr2, p1.nr3, p1.nr4,
+                                               p2.nr1, p2.nr2, p2.nr3, p2.nr4,
+                                               p3.nr1, p3.nr2, p3.nr3, p3.nr4,
+                                               p4.nr1, p4.nr2, p4.nr3, p4.nr4)
+                                        if len(set(chk)) != 16:
+                                            self.stdout.write('[ERROR] Block2x8 does not consist of 16 base pieces: %s' % repr(chk))
+                                        for p in chk:
+                                            always[p] += 1
+                                        # for
+
+                                        count += 1
+                                        if count % 5000 == 0:
+                                            self.stdout.write("%s" % count)
+
+                                        if len(bulk) >= 1000:
+                                            Block2x8.objects.bulk_create(bulk)
+                                            bulk = list()
+                                # for
+                        # for
                 # for
-            # for
         # for
 
         if len(bulk) > 0:
             Block2x8.objects.bulk_create(bulk)
 
-        self.stdout.write('Total: %s' % count)
-        return count
+        paxat = [p for p, v in always.items() if v == count]
 
-    def _generate_2x8_side2(self):
+        self.stdout.write('Total: %s; paxat: %s' % (count, repr(paxat)))
+
+        return count, paxat
+
+    def _generate_2x8_side2(self, avoid_nrs):
         self.stdout.write('[INFO] Generating Block2x8 for side2')
         big_side = [self.side_nr2reverse[self.board[nr].side2] for nr in self.NRS_4X4_SIDE2]
 
+        always = {nr: 0 for nr in range(1, 256+1)}
+
         count = 0
         bulk = list()
         unused_nrs0 = [nr for nr in self.board_unused_nrs if nr > 60]       # skip borders
+        unused_nrs0 = [nr for nr in unused_nrs0 if nr not in avoid_nrs]
         unused_nrs = set(unused_nrs0)
         # query all Piece2x2 needed
-        qset = Piece2x2.objects.filter(side4__in=big_side,
-                                       nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs)
-        for p1 in qset.filter(side4=big_side[0],
-                              nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs):
-            unused_nrs1 = unused_nrs0[:]
-            unused_nrs1.remove(p1.nr1)
-            unused_nrs1.remove(p1.nr2)
-            unused_nrs1.remove(p1.nr3)
-            unused_nrs1.remove(p1.nr4)
-            unused_nrs = set(unused_nrs1)
-            p2_exp_s1 = self.side_nr2reverse[p1.side3]
-            for p2 in qset.filter(side4=big_side[1], side1=p2_exp_s1,
-                                  nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs):
-                unused_nrs2 = unused_nrs1[:]
-                unused_nrs2.remove(p2.nr1)
-                unused_nrs2.remove(p2.nr2)
-                unused_nrs2.remove(p2.nr3)
-                unused_nrs2.remove(p2.nr4)
-                unused_nrs = set(unused_nrs2)
-                p3_exp_s1 = self.side_nr2reverse[p2.side3]
-                for p3 in qset.filter(side4=big_side[2], side1=p3_exp_s1,
-                                      nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs):
-                    unused_nrs3 = unused_nrs2[:]
-                    unused_nrs3.remove(p3.nr1)
-                    unused_nrs3.remove(p3.nr2)
-                    unused_nrs3.remove(p3.nr3)
-                    unused_nrs3.remove(p3.nr4)
-                    unused_nrs = set(unused_nrs3)
-                    p4_exp_s1 = self.side_nr2reverse[p3.side3]
-                    for p4 in qset.filter(side4=big_side[3], side1=p4_exp_s1,
-                                          nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs,
-                                          nr4__in=unused_nrs):
-                        # prevent dupes
-                        block = Block2x8(
-                                        processor=self.my_processor,
-                                        type=2,
-                                        p1=p1.nr,
-                                        p2=p2.nr,
-                                        p3=p3.nr,
-                                        p4=p4.nr,
-                                        b1=big_side[0],
-                                        b2=big_side[1],
-                                        b3=big_side[2],
-                                        b4=big_side[3],
-                                        nr1=p1.nr1,
-                                        nr2=p1.nr2,
-                                        nr3=p1.nr3,
-                                        nr4=p1.nr4,
-                                        nr5=p2.nr1,
-                                        nr6=p2.nr2,
-                                        nr7=p2.nr3,
-                                        nr8=p2.nr4,
-                                        nr9=p3.nr1,
-                                        nr10=p3.nr2,
-                                        nr11=p3.nr3,
-                                        nr12=p3.nr4,
-                                        nr13=p4.nr1,
-                                        nr14=p4.nr2,
-                                        nr15=p4.nr3,
-                                        nr16=p4.nr4,
-                                        side1=p1.side1,
-                                        side2=0,
-                                        side3=p4.side3,
-                                        side4=0)            # big side
+        p2x2s = list(Piece2x2.objects.filter(side4__in=big_side,
+                                             nr1__in=unused_nrs, nr2__in=unused_nrs,
+                                             nr3__in=unused_nrs, nr4__in=unused_nrs))
 
-                        bulk.append(block)
-                        # chk = (p1.nr1, p1.nr2, p1.nr3, p1.nr4,
-                        #        p2.nr1, p2.nr2, p2.nr3, p2.nr4,
-                        #        p3.nr1, p3.nr2, p3.nr3, p3.nr4,
-                        #        p4.nr1, p4.nr2, p4.nr3, p4.nr4)
-                        # if len(set(chk)) != 16:
-                        #     self.stdout.write('[ERROR] Block2x8 does not consist of 16 base pieces: %s' % repr(chk))
+        for p1 in p2x2s:
+            if p1.side4 == big_side[0]:
 
-                        count += 1
-                        if count % 1000 == 0:
-                            self.stdout.write("%s" % count)
+                unused_nrs1 = [nr for nr in unused_nrs0 if nr not in (p1.nr1, p1.nr2, p1.nr3, p1.nr4)]
+                unused_nrs = set(unused_nrs1)
+                p2_exp_s1 = self.side_nr2reverse[p1.side3]
 
-                        if len(bulk) >= 1000:
-                            Block2x8.objects.bulk_create(bulk)
-                            bulk = list()
-                    # for
+                for p2 in p2x2s:
+                    if (p2.side4 == big_side[1] and p2.side1 == p2_exp_s1 and p2.nr1 in unused_nrs
+                            and p2.nr2 in unused_nrs and p2.nr3 in unused_nrs and p2.nr4 in unused_nrs):
+
+                        unused_nrs2 = [nr for nr in unused_nrs1 if nr not in (p2.nr1, p2.nr2, p2.nr3, p2.nr4)]
+                        unused_nrs = set(unused_nrs2)
+                        p3_exp_s1 = self.side_nr2reverse[p2.side3]
+
+                        for p3 in p2x2s:
+                            if (p3.side4 == big_side[2] and p3.side1 == p3_exp_s1 and p3.nr1 in unused_nrs
+                                    and p3.nr2 in unused_nrs and p3.nr3 in unused_nrs and p3.nr4 in unused_nrs):
+
+                                unused_nrs3 = [nr for nr in unused_nrs2 if nr not in (p3.nr1, p3.nr2, p3.nr3, p3.nr4)]
+                                unused_nrs = set(unused_nrs3)
+                                p4_exp_s1 = self.side_nr2reverse[p3.side3]
+
+                                for p4 in p2x2s:
+                                    if (p4.side4 == big_side[3] and p4.side1 == p4_exp_s1 and p4.nr1 in unused_nrs
+                                            and p4.nr2 in unused_nrs and p4.nr3 in unused_nrs and p4.nr4 in unused_nrs):
+
+                                        block = Block2x8(
+                                                        processor=self.my_processor,
+                                                        type=2,
+                                                        p1=p1.nr, p2=p2.nr, p3=p3.nr,p4=p4.nr,
+                                                        b1=big_side[0], b2=big_side[1], b3=big_side[2], b4=big_side[3],
+                                                        nr1=p1.nr1, nr2=p1.nr2, nr3=p1.nr3, nr4=p1.nr4,
+                                                        nr5=p2.nr1, nr6=p2.nr2, nr7=p2.nr3, nr8=p2.nr4,
+                                                        nr9=p3.nr1, nr10=p3.nr2, nr11=p3.nr3, nr12=p3.nr4,
+                                                        nr13=p4.nr1, nr14=p4.nr2, nr15=p4.nr3, nr16=p4.nr4,
+                                                        side1=p1.side1,
+                                                        side2=0,
+                                                        side3=p4.side3,
+                                                        side4=0)            # big side
+                                        bulk.append(block)
+
+                                        chk = (p1.nr1, p1.nr2, p1.nr3, p1.nr4,
+                                               p2.nr1, p2.nr2, p2.nr3, p2.nr4,
+                                               p3.nr1, p3.nr2, p3.nr3, p3.nr4,
+                                               p4.nr1, p4.nr2, p4.nr3, p4.nr4)
+                                        if len(set(chk)) != 16:
+                                            self.stdout.write('[ERROR] Block2x8 does not consist of 16 base pieces: %s' % repr(chk))
+                                        for p in chk:
+                                            always[p] += 1
+                                        # for
+
+                                        count += 1
+                                        if count % 5000 == 0:
+                                            self.stdout.write("%s" % count)
+
+                                        if len(bulk) >= 1000:
+                                            Block2x8.objects.bulk_create(bulk)
+                                            bulk = list()
+                                # for
+                        # for
                 # for
-            # for
         # for
 
         if len(bulk) > 0:
             Block2x8.objects.bulk_create(bulk)
 
-        self.stdout.write('Total: %s' % count)
-        return count
+        paxat = [p for p, v in always.items() if v == count]
 
-    def _generate_2x8_side3(self):
+        self.stdout.write('Total: %s; paxat: %s' % (count, repr(paxat)))
+
+        return count, paxat
+
+    def _generate_2x8_side3(self, avoid_nrs):
         self.stdout.write('[INFO] Generating Block2x8 for side3')
         big_side = [self.side_nr2reverse[self.board[nr].side3] for nr in self.NRS_4X4_SIDE3]
 
+        always = {nr: 0 for nr in range(1, 256+1)}
+
         count = 0
         bulk = list()
         unused_nrs0 = [nr for nr in self.board_unused_nrs if nr > 60]       # skip borders
+        unused_nrs0 = [nr for nr in unused_nrs0 if nr not in avoid_nrs]
         unused_nrs = set(unused_nrs0)
         # query all Piece2x2 needed
-        qset = Piece2x2.objects.filter(side1__in=big_side,
-                                       nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs)
-        for p1 in qset.filter(side1=big_side[0],
-                              nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs):
-            unused_nrs1 = unused_nrs0[:]
-            unused_nrs1.remove(p1.nr1)
-            unused_nrs1.remove(p1.nr2)
-            unused_nrs1.remove(p1.nr3)
-            unused_nrs1.remove(p1.nr4)
-            unused_nrs = set(unused_nrs1)
-            p2_exp_s2 = self.side_nr2reverse[p1.side4]
-            for p2 in qset.filter(side1=big_side[1], side2=p2_exp_s2,
-                                  nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs):
-                unused_nrs2 = unused_nrs1[:]
-                unused_nrs2.remove(p2.nr1)
-                unused_nrs2.remove(p2.nr2)
-                unused_nrs2.remove(p2.nr3)
-                unused_nrs2.remove(p2.nr4)
-                unused_nrs = set(unused_nrs2)
-                p3_exp_s2 = self.side_nr2reverse[p2.side4]
-                for p3 in qset.filter(side1=big_side[2], side2=p3_exp_s2,
-                                      nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs):
-                    unused_nrs3 = unused_nrs2[:]
-                    unused_nrs3.remove(p3.nr1)
-                    unused_nrs3.remove(p3.nr2)
-                    unused_nrs3.remove(p3.nr3)
-                    unused_nrs3.remove(p3.nr4)
-                    unused_nrs = set(unused_nrs3)
-                    p4_exp_s2 = self.side_nr2reverse[p3.side4]
-                    for p4 in qset.filter(side1=big_side[3], side2=p4_exp_s2,
-                                          nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs,
-                                          nr4__in=unused_nrs):
-                        # prevent dupes
-                        block = Block2x8(
-                                        processor=self.my_processor,
-                                        type=3,
-                                        p1=p1.nr,
-                                        p2=p2.nr,
-                                        p3=p3.nr,
-                                        p4=p4.nr,
-                                        b1=big_side[0],
-                                        b2=big_side[1],
-                                        b3=big_side[2],
-                                        b4=big_side[3],
-                                        nr1=p1.nr1,
-                                        nr2=p1.nr2,
-                                        nr3=p1.nr3,
-                                        nr4=p1.nr4,
-                                        nr5=p2.nr1,
-                                        nr6=p2.nr2,
-                                        nr7=p2.nr3,
-                                        nr8=p2.nr4,
-                                        nr9=p3.nr1,
-                                        nr10=p3.nr2,
-                                        nr11=p3.nr3,
-                                        nr12=p3.nr4,
-                                        nr13=p4.nr1,
-                                        nr14=p4.nr2,
-                                        nr15=p4.nr3,
-                                        nr16=p4.nr4,
-                                        side1=0,            # big side
-                                        side2=p1.side2,
-                                        side3=0,
-                                        side4=p4.side4)
-                        bulk.append(block)
+        p2x2s = list(Piece2x2.objects.filter(side1__in=big_side,
+                                             nr1__in=unused_nrs, nr2__in=unused_nrs,
+                                             nr3__in=unused_nrs, nr4__in=unused_nrs))
 
-                        # chk = (p1.nr1, p1.nr2, p1.nr3, p1.nr4,
-                        #        p2.nr1, p2.nr2, p2.nr3, p2.nr4,
-                        #        p3.nr1, p3.nr2, p3.nr3, p3.nr4,
-                        #        p4.nr1, p4.nr2, p4.nr3, p4.nr4)
-                        # if len(set(chk)) != 16:
-                        #     self.stdout.write('[ERROR] Block2x8 does not consist of 16 base pieces: %s' % repr(chk))
+        for p1 in p2x2s:
+            if p1.side1 == big_side[0]:
 
-                        count += 1
-                        if count % 1000 == 0:
-                            self.stdout.write("%s" % count)
+                unused_nrs1 = [nr for nr in unused_nrs0 if nr not in (p1.nr1, p1.nr2, p1.nr3, p1.nr4)]
+                unused_nrs = set(unused_nrs1)
+                p2_exp_s2 = self.side_nr2reverse[p1.side4]
 
-                        if len(bulk) >= 1000:
-                            Block2x8.objects.bulk_create(bulk)
-                            bulk = list()
-                    # for
+                for p2 in p2x2s:
+                    if (p2.side1 == big_side[1] and p2.side2 == p2_exp_s2 and p2.nr1 in unused_nrs
+                            and p2.nr2 in unused_nrs and p2.nr3 in unused_nrs and p2.nr4 in unused_nrs):
+
+                        unused_nrs2 = [nr for nr in unused_nrs1 if nr not in (p2.nr1, p2.nr2, p2.nr3, p2.nr4)]
+                        unused_nrs = set(unused_nrs2)
+                        p3_exp_s2 = self.side_nr2reverse[p2.side4]
+
+                        for p3 in p2x2s:
+                            if (p3.side1 == big_side[2] and p3.side2 == p3_exp_s2 and p3.nr1 in unused_nrs
+                                    and p3.nr2 in unused_nrs and p3.nr3 in unused_nrs and p3.nr4 in unused_nrs):
+
+                                unused_nrs3 = [nr for nr in unused_nrs2 if nr not in (p3.nr1, p3.nr2, p3.nr3, p3.nr4)]
+                                unused_nrs = set(unused_nrs3)
+                                p4_exp_s2 = self.side_nr2reverse[p3.side4]
+
+                                for p4 in p2x2s:
+                                    if (p4.side1 == big_side[3] and p4.side2 == p4_exp_s2  and p4.nr1 in unused_nrs
+                                            and p4.nr2 in unused_nrs and p4.nr3 in unused_nrs and p4.nr4 in unused_nrs):
+
+                                        block = Block2x8(
+                                                        processor=self.my_processor,
+                                                        type=3,
+                                                        p1=p1.nr, p2=p2.nr, p3=p3.nr, p4=p4.nr,
+                                                        b1=big_side[0], b2=big_side[1], b3=big_side[2], b4=big_side[3],
+                                                        nr1=p1.nr1, nr2=p1.nr2, nr3=p1.nr3, nr4=p1.nr4,
+                                                        nr5=p2.nr1, nr6=p2.nr2, nr7=p2.nr3, nr8=p2.nr4,
+                                                        nr9=p3.nr1, nr10=p3.nr2, nr11=p3.nr3, nr12=p3.nr4,
+                                                        nr13=p4.nr1, nr14=p4.nr2, nr15=p4.nr3, nr16=p4.nr4,
+                                                        side1=0,            # big side
+                                                        side2=p1.side2,
+                                                        side3=0,
+                                                        side4=p4.side4)
+                                        bulk.append(block)
+
+                                        chk = (p1.nr1, p1.nr2, p1.nr3, p1.nr4,
+                                               p2.nr1, p2.nr2, p2.nr3, p2.nr4,
+                                               p3.nr1, p3.nr2, p3.nr3, p3.nr4,
+                                               p4.nr1, p4.nr2, p4.nr3, p4.nr4)
+                                        if len(set(chk)) != 16:
+                                            self.stdout.write('[ERROR] Block2x8 does not consist of 16 base pieces: %s' % repr(chk))
+                                        for p in chk:
+                                            always[p] += 1
+                                        # for
+
+                                        count += 1
+                                        if count % 5000 == 0:
+                                            self.stdout.write("%s" % count)
+
+                                        if len(bulk) >= 1000:
+                                            Block2x8.objects.bulk_create(bulk)
+                                            bulk = list()
+                                # for
+                        # for
                 # for
-            # for
         # for
 
         if len(bulk) > 0:
             Block2x8.objects.bulk_create(bulk)
 
-        self.stdout.write('Total: %s' % count)
-        return count
+        paxat = [p for p, v in always.items() if v == count]
 
-    def _generate_2x8_side4(self):
+        self.stdout.write('Total: %s; paxat: %s' % (count, repr(paxat)))
+
+        return count, paxat
+
+    def _generate_2x8_side4(self, avoid_nrs):
         self.stdout.write('[INFO] Generating Block2x8 for side4')
         big_side = [self.side_nr2reverse[self.board[nr].side4] for nr in self.NRS_4X4_SIDE4]
 
         count = 0
         bulk = list()
         unused_nrs0 = [nr for nr in self.board_unused_nrs if nr > 60]       # skip borders
+        unused_nrs0 = [nr for nr in unused_nrs0 if nr not in avoid_nrs]
         unused_nrs = set(unused_nrs0)
         # query all Piece2x2 needed
-        qset = Piece2x2.objects.filter(side2__in=big_side,
-                                       nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs)
-        for p1 in qset.filter(side2=big_side[0],
-                              nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs):
-            unused_nrs1 = unused_nrs0[:]
-            unused_nrs1.remove(p1.nr1)
-            unused_nrs1.remove(p1.nr2)
-            unused_nrs1.remove(p1.nr3)
-            unused_nrs1.remove(p1.nr4)
-            unused_nrs = set(unused_nrs1)
-            p2_exp_s3 = self.side_nr2reverse[p1.side1]
-            for p2 in qset.filter(side2=big_side[1], side3=p2_exp_s3,
-                                  nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs):
-                unused_nrs2 = unused_nrs1[:]
-                unused_nrs2.remove(p2.nr1)
-                unused_nrs2.remove(p2.nr2)
-                unused_nrs2.remove(p2.nr3)
-                unused_nrs2.remove(p2.nr4)
-                unused_nrs = set(unused_nrs2)
-                p3_exp_s3 = self.side_nr2reverse[p2.side1]
-                for p3 in qset.filter(side2=big_side[2], side3=p3_exp_s3,
-                                      nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs):
-                    unused_nrs3 = unused_nrs2[:]
-                    unused_nrs3.remove(p3.nr1)
-                    unused_nrs3.remove(p3.nr2)
-                    unused_nrs3.remove(p3.nr3)
-                    unused_nrs3.remove(p3.nr4)
-                    unused_nrs = set(unused_nrs3)
-                    p4_exp_s3 = self.side_nr2reverse[p3.side1]
-                    for p4 in qset.filter(side2=big_side[3], side3=p4_exp_s3,
-                                          nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs,
-                                          nr4__in=unused_nrs):
-                        # prevent dupes
-                        block = Block2x8(
-                                        processor=self.my_processor,
-                                        type=4,
-                                        p1=p1.nr,
-                                        p2=p2.nr,
-                                        p3=p3.nr,
-                                        p4=p4.nr,
-                                        b1=big_side[0],
-                                        b2=big_side[1],
-                                        b3=big_side[2],
-                                        b4=big_side[3],
-                                        nr1=p1.nr1,
-                                        nr2=p1.nr2,
-                                        nr3=p1.nr3,
-                                        nr4=p1.nr4,
-                                        nr5=p2.nr1,
-                                        nr6=p2.nr2,
-                                        nr7=p2.nr3,
-                                        nr8=p2.nr4,
-                                        nr9=p3.nr1,
-                                        nr10=p3.nr2,
-                                        nr11=p3.nr3,
-                                        nr12=p3.nr4,
-                                        nr13=p4.nr1,
-                                        nr14=p4.nr2,
-                                        nr15=p4.nr3,
-                                        nr16=p4.nr4,
-                                        side1=p4.side1,
-                                        side2=0,            # big side
-                                        side3=p1.side3,
-                                        side4=0)
-                        bulk.append(block)
+        p2x2s = list(Piece2x2.objects.filter(side2__in=big_side, nr1__in=unused_nrs, nr2__in=unused_nrs,
+                                             nr3__in=unused_nrs, nr4__in=unused_nrs))
+        for side in big_side:
+            c = len([p for p in p2x2s if p.side2 == side])
+            print('  side2 %s: %s' % (side, c))
+        # for
 
-                        # chk = (p1.nr1, p1.nr2, p1.nr3, p1.nr4,
-                        #        p2.nr1, p2.nr2, p2.nr3, p2.nr4,
-                        #        p3.nr1, p3.nr2, p3.nr3, p3.nr4,
-                        #        p4.nr1, p4.nr2, p4.nr3, p4.nr4)
-                        # if len(set(chk)) != 16:
-                        #     self.stdout.write('[ERROR] Block2x8 does not consist of 16 base pieces: %s' % repr(chk))
+        for p1 in p2x2s:
+            if p1.side2 == big_side[0]:
 
-                        count += 1
-                        if count % 1000 == 0:
-                            self.stdout.write("%s" % count)
+                unused_nrs1 = [nr for nr in unused_nrs0 if nr not in (p1.nr1, p1.nr2, p1.nr3, p1.nr4)]
+                unused_nrs = set(unused_nrs1)
+                p2_exp_s3 = self.side_nr2reverse[p1.side1]
 
-                        if len(bulk) >= 1000:
-                            Block2x8.objects.bulk_create(bulk)
-                            bulk = list()
-                    # for
+                for p2 in p2x2s:
+                    if (p2.side2 == big_side[1] and p2.side3 == p2_exp_s3 and p2.nr1 in unused_nrs
+                            and p2.nr2 in unused_nrs and p2.nr3 in unused_nrs and p2.nr4 in unused_nrs):
+
+                        unused_nrs2 = [nr for nr in unused_nrs1 if nr not in (p2.nr1, p2.nr2, p2.nr3, p2.nr4)]
+                        unused_nrs = set(unused_nrs2)
+                        p3_exp_s3 = self.side_nr2reverse[p2.side1]
+
+                        for p3 in p2x2s:
+                            if (p3.side2 == big_side[2] and p3.side3 == p3_exp_s3 and p3.nr1 in unused_nrs
+                                    and p3.nr2 in unused_nrs and p3.nr3 in unused_nrs and p3.nr4 in unused_nrs):
+
+                                unused_nrs3 = [nr for nr in unused_nrs2 if nr not in (p3.nr1, p3.nr2, p3.nr3, p3.nr4)]
+                                unused_nrs = set(unused_nrs3)
+                                p4_exp_s3 = self.side_nr2reverse[p3.side1]
+
+                                for p4 in p2x2s:
+                                    if (p4.side2 == big_side[3] and p4.side3 == p4_exp_s3 and p4.nr1 in unused_nrs
+                                            and p4.nr2 in unused_nrs and p4.nr3 in unused_nrs and p4.nr4 in unused_nrs):
+
+                                        block = Block2x8(
+                                                        processor=self.my_processor,
+                                                        type=4,
+                                                        p1=p1.nr, p2=p2.nr, p3=p3.nr, p4=p4.nr,
+                                                        b1=big_side[0], b2=big_side[1], b3=big_side[2], b4=big_side[3],
+                                                        nr1=p1.nr1, nr2=p1.nr2, nr3=p1.nr3, nr4=p1.nr4,
+                                                        nr5=p2.nr1, nr6=p2.nr2, nr7=p2.nr3, nr8=p2.nr4,
+                                                        nr9=p3.nr1, nr10=p3.nr2, nr11=p3.nr3, nr12=p3.nr4,
+                                                        nr13=p4.nr1, nr14=p4.nr2, nr15=p4.nr3, nr16=p4.nr4,
+                                                        side1=p4.side1,
+                                                        side2=0,            # big side
+                                                        side3=p1.side3,
+                                                        side4=0)
+                                        bulk.append(block)
+
+                                        chk = (p1.nr1, p1.nr2, p1.nr3, p1.nr4,
+                                               p2.nr1, p2.nr2, p2.nr3, p2.nr4,
+                                               p3.nr1, p3.nr2, p3.nr3, p3.nr4,
+                                               p4.nr1, p4.nr2, p4.nr3, p4.nr4)
+                                        if len(set(chk)) != 16:
+                                            self.stdout.write('[ERROR] Block2x8 does not consist of 16 base pieces: %s' % repr(chk))
+
+                                        count += 1
+                                        if count % 5000 == 0:
+                                            self.stdout.write("%s" % count)
+
+                                        if len(bulk) >= 1000:
+                                            Block2x8.objects.bulk_create(bulk)
+                                            bulk = list()
+                                # for
+                        # for
                 # for
-            # for
         # for
 
         if len(bulk) > 0:
             Block2x8.objects.bulk_create(bulk)
 
         self.stdout.write('Total: %s' % count)
+
         return count
 
     def _generate_2x8_blocks(self):
         self.stdout.write('[INFO] Start generate Block2x8')
-        if self._generate_2x8_side1() == 0:
-            return
-        if self._generate_2x8_side2() == 0:
-            return
-        if self._generate_2x8_side3() == 0:
-            return
-        if self._generate_2x8_side4() == 0:
-            return 0
+
+        count, avoid_nrs1 = self._generate_2x8_side1()
+        if count:
+            count, avoid_nrs2 = self._generate_2x8_side2(avoid_nrs1)
+            if count:
+                count, avoid_nrs3 = self._generate_2x8_side3(avoid_nrs1 + avoid_nrs2)
+                if count:
+                    count = self._generate_2x8_side4(avoid_nrs1 + avoid_nrs2 + avoid_nrs3)
+
+        return count > 0
 
     def handle(self, *args, **options):
 
@@ -1256,8 +1207,8 @@ class Command(BaseCommand):
                 sol.save(update_fields=['processor'])
 
                 self.load_board_4x4(sol)
-                self._generate_2x8_blocks()
-                self.find_6x6()
+                if self._generate_2x8_blocks():
+                    self.find_6x6()
 
                 sol.is_processed = True
                 sol.save(update_fields=['is_processed'])
