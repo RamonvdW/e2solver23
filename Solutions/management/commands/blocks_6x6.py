@@ -227,7 +227,7 @@ class Command(BaseCommand):
 
         return count, freedom, must_have_nrs
 
-    def _count_all(self, work_nr, min_options):
+    def _count_all(self, work_nr):
         self._count_freedom_cache = dict()
 
         # start with the neighbours so we can quickly find a dead-end
@@ -257,14 +257,14 @@ class Command(BaseCommand):
                     # convert back to number
                     self.board_criticality[nr] = int(freedom)
 
-                if count < min_options:
+                if count == 0:
                     # found a dead end
-                    # self.stdout.write(' [%s] less than %s options for %s' % (work_nr, min_options, nr))
+                    # self.stdout.write(' [%s] less than %s options for %s' % (work_nr, nr))
                     return True
         # for
         return False
 
-    def _count_important(self, work_nr, min_options):
+    def _count_important(self, work_nr):
         self._count_freedom_cache = dict()
 
         important = [
@@ -295,9 +295,9 @@ class Command(BaseCommand):
                     # convert back to number
                     self.board_criticality[nr] = int(freedom)
 
-                if count < min_options:
+                if count == 0:
                     # found a dead end
-                    # self.stdout.write(' [%s] less than %s options for %s' % (work_nr, min_options, nr))
+                    # self.stdout.write(' [%s] less than %s options for %s' % (work_nr, nr))
                     return True
         # for
         return False
@@ -341,7 +341,7 @@ class Command(BaseCommand):
             base_nrs.sort()
             self.stdout.write('[ERROR] Solution has %s instead of %s base nrs: %s' % (l1, l2, repr(base_nrs)))
 
-        self.stdout.write('[INFO] Saving board with gap count %s' % self.board_gap_count)
+        # self.stdout.write('[INFO] Saving board with gap count %s' % self.board_gap_count)
         # self.stdout.write('       Used base nrs: %s' % repr(base_nrs))
 
         sol = Solution6x6(
@@ -364,7 +364,7 @@ class Command(BaseCommand):
 
         sol.save()
 
-        self.stdout.write('[INFO] Saved board %s' % sol.pk)
+        self.stdout.write('[INFO] Saved board %s with gap count %s' % (sol.pk, self.board_gap_count))
 
     def _board_free_nr(self, nr):
         p = self.board[nr]
@@ -541,11 +541,11 @@ class Command(BaseCommand):
             yield p
             todo -= 1
 
-    def _try_fill_nr(self, nr, greater_than, min_options):
+    def _try_fill_nr(self, nr, greater_than):
         for p in self._iter_for_nr(nr, greater_than):
             self._board_fill_nr(nr, p)
-            # is_dead_end = self._count_all(nr, min_options)
-            is_dead_end = self._count_important(nr, min_options)
+            # is_dead_end = self._count_all(nr)
+            is_dead_end = self._count_important(nr)
             if not is_dead_end:
                 return True     # success
             self._board_free_nr(nr)
@@ -582,35 +582,38 @@ class Command(BaseCommand):
         # lst.sort()
         # self.stdout.write('[DEBUG] Unused base nrs (excl. hints): %s' % ", ".join([str(nr) for nr in lst]))
 
-        self._count_all(1, 1)
+        self._count_all(1)
 
-    def _find_6x6_block4(self):
+    def _count_6x6_block4(self):
+        big_side = [self.side_nr2reverse[self.board[nr].side4] for nr in self.NRS_4X4_SIDE4]
+        unused_nrs0 = self.board_unused_nrs[:]
+        unused_nrs = set(unused_nrs0)
+        count = (Block2x8
+                 .objects
+                 .filter(processor=self.my_processor,
+                         type=4,
+                         b1=big_side[0], b2=big_side[1], b3=big_side[2], b4=big_side[3])
+                 .filter(nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs,
+                         nr5__in=unused_nrs, nr6__in=unused_nrs, nr7__in=unused_nrs, nr8__in=unused_nrs,
+                         nr9__in=unused_nrs, nr10__in=unused_nrs, nr11__in=unused_nrs, nr12__in=unused_nrs,
+                         nr13__in=unused_nrs, nr14__in=unused_nrs, nr15__in=unused_nrs, nr16__in=unused_nrs)
+                 .count())
+        return count
+
+    def _find_6x6_block4(self, sides_todo, blocks_todo):
         # iterate through the Block2x8 for side4
         big_side = [self.side_nr2reverse[self.board[nr].side4] for nr in self.NRS_4X4_SIDE4]
         unused_nrs0 = self.board_unused_nrs[:]
         unused_nrs = set(unused_nrs0)
-        min_options = 1
         for block2 in (Block2x8
                        .objects
                        .filter(processor=self.my_processor,
                                type=4,
                                b1=big_side[0], b2=big_side[1], b3=big_side[2], b4=big_side[3])
-                       .filter(nr1__in=unused_nrs)
-                       .filter(nr2__in=unused_nrs)
-                       .filter(nr3__in=unused_nrs)
-                       .filter(nr4__in=unused_nrs)
-                       .filter(nr5__in=unused_nrs)
-                       .filter(nr6__in=unused_nrs)
-                       .filter(nr7__in=unused_nrs)
-                       .filter(nr8__in=unused_nrs)
-                       .filter(nr9__in=unused_nrs)
-                       .filter(nr10__in=unused_nrs)
-                       .filter(nr11__in=unused_nrs)
-                       .filter(nr12__in=unused_nrs)
-                       .filter(nr13__in=unused_nrs)
-                       .filter(nr14__in=unused_nrs)
-                       .filter(nr15__in=unused_nrs)
-                       .filter(nr16__in=unused_nrs)):
+                       .filter(nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs,
+                               nr5__in=unused_nrs, nr6__in=unused_nrs, nr7__in=unused_nrs, nr8__in=unused_nrs,
+                               nr9__in=unused_nrs, nr10__in=unused_nrs, nr11__in=unused_nrs, nr12__in=unused_nrs,
+                               nr13__in=unused_nrs, nr14__in=unused_nrs, nr15__in=unused_nrs, nr16__in=unused_nrs)):
 
             # place the 4 pieces
             self._board_fill_nr(42, Piece2x2.objects.get(nr=block2.p1))
@@ -618,10 +621,13 @@ class Command(BaseCommand):
             self._board_fill_nr(26, Piece2x2.objects.get(nr=block2.p3))
             self._board_fill_nr(18, Piece2x2.objects.get(nr=block2.p4))
 
-            is_dead_end = self._count_important(42, min_options)
+            is_dead_end = self._count_important(42)
             if not is_dead_end:
-                self._save_board6x6()
-                # TODO: solve corners
+                if blocks_todo > 0:
+                    self.stdout.write('block1: %s left' % blocks_todo)
+                self._find_6x6_next(sides_todo)
+
+            blocks_todo -= 1
 
             self._board_free_nr(18)
             self._board_free_nr(26)
@@ -629,33 +635,36 @@ class Command(BaseCommand):
             self._board_free_nr(42)
         # for
 
-    def _find_6x6_block3(self):
+    def _count_6x6_block3(self):
+        big_side = [self.side_nr2reverse[self.board[nr].side3] for nr in self.NRS_4X4_SIDE3]
+        unused_nrs0 = self.board_unused_nrs[:]
+        unused_nrs = set(unused_nrs0)
+        count = (Block2x8
+                 .objects
+                 .filter(processor=self.my_processor,
+                         type=3,
+                         b1=big_side[0], b2=big_side[1], b3=big_side[2], b4=big_side[3])
+                 .filter(nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs,
+                         nr5__in=unused_nrs, nr6__in=unused_nrs, nr7__in=unused_nrs, nr8__in=unused_nrs,
+                         nr9__in=unused_nrs, nr10__in=unused_nrs, nr11__in=unused_nrs, nr12__in=unused_nrs,
+                         nr13__in=unused_nrs, nr14__in=unused_nrs, nr15__in=unused_nrs, nr16__in=unused_nrs)
+                 .count())
+        return count
+
+    def _find_6x6_block3(self, sides_todo, blocks_todo):
         # iterate through the Block2x8 for side3
         big_side = [self.side_nr2reverse[self.board[nr].side3] for nr in self.NRS_4X4_SIDE3]
         unused_nrs0 = self.board_unused_nrs[:]
         unused_nrs = set(unused_nrs0)
-        min_options = 1
         for block2 in (Block2x8
                        .objects
                        .filter(processor=self.my_processor,
                                type=3,
                                b1=big_side[0], b2=big_side[1], b3=big_side[2], b4=big_side[3])
-                       .filter(nr1__in=unused_nrs)
-                       .filter(nr2__in=unused_nrs)
-                       .filter(nr3__in=unused_nrs)
-                       .filter(nr4__in=unused_nrs)
-                       .filter(nr5__in=unused_nrs)
-                       .filter(nr6__in=unused_nrs)
-                       .filter(nr7__in=unused_nrs)
-                       .filter(nr8__in=unused_nrs)
-                       .filter(nr9__in=unused_nrs)
-                       .filter(nr10__in=unused_nrs)
-                       .filter(nr11__in=unused_nrs)
-                       .filter(nr12__in=unused_nrs)
-                       .filter(nr13__in=unused_nrs)
-                       .filter(nr14__in=unused_nrs)
-                       .filter(nr15__in=unused_nrs)
-                       .filter(nr16__in=unused_nrs)):
+                       .filter(nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs,
+                               nr5__in=unused_nrs, nr6__in=unused_nrs, nr7__in=unused_nrs, nr8__in=unused_nrs,
+                               nr9__in=unused_nrs, nr10__in=unused_nrs, nr11__in=unused_nrs, nr12__in=unused_nrs,
+                               nr13__in=unused_nrs, nr14__in=unused_nrs, nr15__in=unused_nrs, nr16__in=unused_nrs)):
 
             # place the 4 pieces
             self._board_fill_nr(54, Piece2x2.objects.get(nr=block2.p1))
@@ -663,44 +672,50 @@ class Command(BaseCommand):
             self._board_fill_nr(52, Piece2x2.objects.get(nr=block2.p3))
             self._board_fill_nr(51, Piece2x2.objects.get(nr=block2.p4))
 
-            is_dead_end = self._count_important(54, min_options)
+            is_dead_end = self._count_important(54)
             if not is_dead_end:
-                self._save_board6x6()
-                self._find_6x6_block4()
+                if blocks_todo > 0:
+                    self.stdout.write('block1: %s left' % blocks_todo)
+                self._find_6x6_next(sides_todo)
+
+            blocks_todo -= 1
 
             self._board_free_nr(51)
             self._board_free_nr(52)
             self._board_free_nr(53)
             self._board_free_nr(54)
         # for
-        
-    def _find_6x6_block2(self):
+
+    def _count_6x6_block2(self):
+        big_side = [self.side_nr2reverse[self.board[nr].side2] for nr in self.NRS_4X4_SIDE2]
+        unused_nrs0 = self.board_unused_nrs[:]
+        unused_nrs = set(unused_nrs0)
+        count = (Block2x8
+                 .objects
+                 .filter(processor=self.my_processor,
+                         type=2,
+                         b1=big_side[0], b2=big_side[1], b3=big_side[2], b4=big_side[3])
+                 .filter(nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs,
+                         nr5__in=unused_nrs, nr6__in=unused_nrs, nr7__in=unused_nrs, nr8__in=unused_nrs,
+                         nr9__in=unused_nrs, nr10__in=unused_nrs, nr11__in=unused_nrs, nr12__in=unused_nrs,
+                         nr13__in=unused_nrs, nr14__in=unused_nrs, nr15__in=unused_nrs, nr16__in=unused_nrs)
+                 .count())
+        return count
+
+    def _find_6x6_block2(self, sides_todo, blocks_todo):
         # iterate through the Block2x8 for side2
         big_side = [self.side_nr2reverse[self.board[nr].side2] for nr in self.NRS_4X4_SIDE2]
         unused_nrs0 = self.board_unused_nrs[:]
         unused_nrs = set(unused_nrs0)
-        min_options = 1
         for block2 in (Block2x8
                        .objects
                        .filter(processor=self.my_processor,
                                type=2,
                                b1=big_side[0], b2=big_side[1], b3=big_side[2], b4=big_side[3])
-                       .filter(nr1__in=unused_nrs)
-                       .filter(nr2__in=unused_nrs)
-                       .filter(nr3__in=unused_nrs)
-                       .filter(nr4__in=unused_nrs)
-                       .filter(nr5__in=unused_nrs)
-                       .filter(nr6__in=unused_nrs)
-                       .filter(nr7__in=unused_nrs)
-                       .filter(nr8__in=unused_nrs)
-                       .filter(nr9__in=unused_nrs)
-                       .filter(nr10__in=unused_nrs)
-                       .filter(nr11__in=unused_nrs)
-                       .filter(nr12__in=unused_nrs)
-                       .filter(nr13__in=unused_nrs)
-                       .filter(nr14__in=unused_nrs)
-                       .filter(nr15__in=unused_nrs)
-                       .filter(nr16__in=unused_nrs)):
+                       .filter(nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs,
+                               nr5__in=unused_nrs, nr6__in=unused_nrs, nr7__in=unused_nrs, nr8__in=unused_nrs,
+                               nr9__in=unused_nrs, nr10__in=unused_nrs, nr11__in=unused_nrs, nr12__in=unused_nrs,
+                               nr13__in=unused_nrs, nr14__in=unused_nrs, nr15__in=unused_nrs, nr16__in=unused_nrs)):
 
             # place the 4 pieces
             self._board_fill_nr(23, Piece2x2.objects.get(nr=block2.p1))
@@ -708,10 +723,13 @@ class Command(BaseCommand):
             self._board_fill_nr(39, Piece2x2.objects.get(nr=block2.p3))
             self._board_fill_nr(47, Piece2x2.objects.get(nr=block2.p4))
 
-            is_dead_end = self._count_important(23, min_options)
+            is_dead_end = self._count_important(23)
             if not is_dead_end:
-                self._save_board6x6()
-                self._find_6x6_block3()
+                if blocks_todo > 0:
+                    self.stdout.write('block2: %s left' % blocks_todo)
+                self._find_6x6_next(sides_todo)
+
+            blocks_todo -= 1
 
             self._board_free_nr(47)
             self._board_free_nr(39)
@@ -719,33 +737,36 @@ class Command(BaseCommand):
             self._board_free_nr(23)
         # for
 
-    def _find_6x6_block1(self):
+    def _count_6x6_block1(self):
+        big_side = [self.side_nr2reverse[self.board[nr].side1] for nr in self.NRS_4X4_SIDE1]
+        unused_nrs0 = self.board_unused_nrs[:]
+        unused_nrs = set(unused_nrs0)
+        count = (Block2x8
+                 .objects
+                 .filter(processor=self.my_processor,
+                         type=1,
+                         b1=big_side[0], b2=big_side[1], b3=big_side[2], b4=big_side[3])
+                 .filter(nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs,
+                         nr5__in=unused_nrs, nr6__in=unused_nrs, nr7__in=unused_nrs, nr8__in=unused_nrs,
+                         nr9__in=unused_nrs, nr10__in=unused_nrs, nr11__in=unused_nrs, nr12__in=unused_nrs,
+                         nr13__in=unused_nrs, nr14__in=unused_nrs, nr15__in=unused_nrs, nr16__in=unused_nrs)
+                 .count())
+        return count
+
+    def _find_6x6_block1(self, sides_todo, blocks_todo):
         # iterate through the Block2x8 for each side, then add corners
         big_side = [self.side_nr2reverse[self.board[nr].side1] for nr in self.NRS_4X4_SIDE1]
         unused_nrs0 = self.board_unused_nrs[:]
         unused_nrs = set(unused_nrs0)
-        min_options = 1
         for block1 in (Block2x8
                        .objects
                        .filter(processor=self.my_processor,
                                type=1,
                                b1=big_side[0], b2=big_side[1], b3=big_side[2], b4=big_side[3])
-                       .filter(nr1__in=unused_nrs)
-                       .filter(nr2__in=unused_nrs)
-                       .filter(nr3__in=unused_nrs)
-                       .filter(nr4__in=unused_nrs)
-                       .filter(nr5__in=unused_nrs)
-                       .filter(nr6__in=unused_nrs)
-                       .filter(nr7__in=unused_nrs)
-                       .filter(nr8__in=unused_nrs)
-                       .filter(nr9__in=unused_nrs)
-                       .filter(nr10__in=unused_nrs)
-                       .filter(nr11__in=unused_nrs)
-                       .filter(nr12__in=unused_nrs)
-                       .filter(nr13__in=unused_nrs)
-                       .filter(nr14__in=unused_nrs)
-                       .filter(nr15__in=unused_nrs)
-                       .filter(nr16__in=unused_nrs)):
+                       .filter(nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs,
+                               nr5__in=unused_nrs, nr6__in=unused_nrs, nr7__in=unused_nrs, nr8__in=unused_nrs,
+                               nr9__in=unused_nrs, nr10__in=unused_nrs, nr11__in=unused_nrs, nr12__in=unused_nrs,
+                               nr13__in=unused_nrs, nr14__in=unused_nrs, nr15__in=unused_nrs, nr16__in=unused_nrs)):
 
             # place the 4 pieces
             self._board_fill_nr(11, Piece2x2.objects.get(nr=block1.p1))
@@ -753,9 +774,13 @@ class Command(BaseCommand):
             self._board_fill_nr(13, Piece2x2.objects.get(nr=block1.p3))
             self._board_fill_nr(14, Piece2x2.objects.get(nr=block1.p4))
 
-            is_dead_end = self._count_important(11, min_options)
+            is_dead_end = self._count_important(11)
             if not is_dead_end:
-                self._find_6x6_block2()
+                if blocks_todo > 0:
+                    self.stdout.write('block1: %s left' % blocks_todo)
+                self._find_6x6_next(sides_todo)
+
+            blocks_todo -= 1
 
             self._board_free_nr(14)
             self._board_free_nr(13)
@@ -763,25 +788,62 @@ class Command(BaseCommand):
             self._board_free_nr(11)
         # for
 
-    def find_6x6(self):
+    def _count_block_n(self, n):
+        if n == 1:
+            count = self._count_6x6_block1()
+        elif n == 2:
+            count = self._count_6x6_block2()
+        elif n == 3:
+            count = self._count_6x6_block3()
+        else:
+            count = self._count_6x6_block4()
+        return count
 
-        for nr in range(1, 64+1):
-            self.board_must_have[nr] = list()
+    def _find_6x6_corners(self):
+
+        for p1 in self._iter_for_nr(10, 0):
+            self._board_fill_nr(10, p1)
+            is_dead_end = self._count_important(10)
+            if not is_dead_end:
+                self._save_board6x6()
+
+                for p2 in self._iter_for_nr(15, 0):
+                    self._board_fill_nr(15, p2)
+                    is_dead_end = self._count_important(15)
+                    if not is_dead_end:
+                        self._save_board6x6()
+
+                        for p3 in self._iter_for_nr(50, 0):
+                            self._board_fill_nr(50, p3)
+                            is_dead_end = self._count_important(50)
+                            if not is_dead_end:
+                                self._save_board6x6()
+
+                                for p4 in self._iter_for_nr(55, 0):
+                                    self._board_fill_nr(55, p4)
+                                    is_dead_end = self._count_important(55)
+                                    if not is_dead_end:
+                                        self._save_board6x6()
+
+                                    self._board_free_nr(55)
+                                # for
+
+                            self._board_free_nr(50)
+                        # for
+
+                    self._board_free_nr(15)
+                # for
+
+            self._board_free_nr(10)
         # for
 
-        self._save_board6x6()
-
-        self._find_6x6_block1()
-
-        # return
-        #
         # while True:
         #     nr = self.get_next_nr()     # can return 0 to trigger backtracking
         #
         #     greater_than = 0
         #     placed_piece = False
         #     while not placed_piece:
-        #         if nr > 0 and self._try_fill_nr(nr, greater_than, min_options):
+        #         if nr > 0 and self._try_fill_nr(nr, greater_than):
         #             # success
         #             placed_piece = True
         #             if self.board_gap_count < best:
@@ -801,7 +863,7 @@ class Command(BaseCommand):
         #             greater_than = p.nr
         #             # self.stdout.write('[INFO] Backtracked to nr %s with greater_than %s' % (nr, greater_than))
         #             self._board_free_nr(nr)
-        #             self._count_important(nr, min_options)      # update the criticality stats
+        #             self._count_important(nr)      # update the criticality stats
         #     # while
         #
         #     if len(self.board_solve_order) == 36:
@@ -814,15 +876,62 @@ class Command(BaseCommand):
         #         best = 999      # allow a few progress reports
         # # while
 
-    def _generate_2x8_side1(self):
-        self.stdout.write('[INFO] Generating Block2x8 for side1')
+    def _find_6x6_next(self, sides_todo):
+        if len(sides_todo) == 0:
+            self._save_board6x6()
+            self._find_6x6_corners()
+            return
+
+        # progress
+        if len(sides_todo) <= 1:
+            self._save_board6x6()
+
+        order = list()
+        for s in sides_todo:
+            tup = (self._count_block_n(s), s)
+            order.append(tup)
+        # for
+        order.sort()        # smallest first
+        count, s = order[0]
+
+        if count == 0:
+            # out of options on one side
+            return
+
+        print('[INFO] Selected side %s from %s' % (s, repr(order)))
+
+        remaining_sides = [side for side in sides_todo if side != s]
+        if len(remaining_sides) <= 2:
+            count = 0
+
+        if s == 1:
+            self._find_6x6_block1(remaining_sides, count)
+        elif s == 2:
+            self._find_6x6_block2(remaining_sides, count)
+        elif s == 3:
+            self._find_6x6_block3(remaining_sides, count)
+        elif s == 4:
+            self._find_6x6_block4(remaining_sides, count)
+
+    def find_6x6(self):
+        self.stdout.write('[INFO] Start solving')
+
+        for nr in range(1, 64+1):
+            self.board_must_have[nr] = list()
+        # for
+
+        self._save_board6x6()
+
+        remaining_sides = [1, 2, 3, 4]
+        self._find_6x6_next(remaining_sides)
+
+    def _generate_2x8_side1(self, avoid_nrs):
         big_side = [self.side_nr2reverse[self.board[nr].side1] for nr in self.NRS_4X4_SIDE1]
-
         always = {nr: 0 for nr in range(1, 256+1)}
-
         count = 0
         bulk = list()
         unused_nrs0 = [nr for nr in self.board_unused_nrs if nr > 60]       # skip borders
+        unused_nrs0 = [nr for nr in unused_nrs0 if nr not in avoid_nrs]
         unused_nrs = set(unused_nrs0)
         # query all Piece2x2 needed
         p2x2s = list(Piece2x2.objects.filter(side3__in=big_side, nr1__in=unused_nrs, nr2__in=unused_nrs,
@@ -874,14 +983,15 @@ class Command(BaseCommand):
                                                p3.nr1, p3.nr2, p3.nr3, p3.nr4,
                                                p4.nr1, p4.nr2, p4.nr3, p4.nr4)
                                         if len(set(chk)) != 16:
-                                            self.stdout.write('[ERROR] Block2x8 does not consist of 16 base pieces: %s' % repr(chk))
+                                            self.stdout.write(
+                                                '[ERROR] Block2x8 does not consist of 16 base pieces: %s' % repr(chk))
                                         for p in chk:
                                             always[p] += 1
                                         # for
 
                                         count += 1
-                                        if count % 5000 == 0:
-                                            self.stdout.write("%s" % count)
+                                        # if count % 5000 == 0:
+                                        #     self.stdout.write("%s" % count)
 
                                         if len(bulk) >= 1000:
                                             Block2x8.objects.bulk_create(bulk)
@@ -896,16 +1006,11 @@ class Command(BaseCommand):
 
         paxat = [p for p, v in always.items() if v == count]
 
-        self.stdout.write('Total: %s; paxat: %s' % (count, repr(paxat)))
-
         return count, paxat
 
     def _generate_2x8_side2(self, avoid_nrs):
-        self.stdout.write('[INFO] Generating Block2x8 for side2')
         big_side = [self.side_nr2reverse[self.board[nr].side2] for nr in self.NRS_4X4_SIDE2]
-
         always = {nr: 0 for nr in range(1, 256+1)}
-
         count = 0
         bulk = list()
         unused_nrs0 = [nr for nr in self.board_unused_nrs if nr > 60]       # skip borders
@@ -946,7 +1051,7 @@ class Command(BaseCommand):
                                         block = Block2x8(
                                                         processor=self.my_processor,
                                                         type=2,
-                                                        p1=p1.nr, p2=p2.nr, p3=p3.nr,p4=p4.nr,
+                                                        p1=p1.nr, p2=p2.nr, p3=p3.nr, p4=p4.nr,
                                                         b1=big_side[0], b2=big_side[1], b3=big_side[2], b4=big_side[3],
                                                         nr1=p1.nr1, nr2=p1.nr2, nr3=p1.nr3, nr4=p1.nr4,
                                                         nr5=p2.nr1, nr6=p2.nr2, nr7=p2.nr3, nr8=p2.nr4,
@@ -963,14 +1068,15 @@ class Command(BaseCommand):
                                                p3.nr1, p3.nr2, p3.nr3, p3.nr4,
                                                p4.nr1, p4.nr2, p4.nr3, p4.nr4)
                                         if len(set(chk)) != 16:
-                                            self.stdout.write('[ERROR] Block2x8 does not consist of 16 base pieces: %s' % repr(chk))
+                                            self.stdout.write(
+                                                '[ERROR] Block2x8 does not consist of 16 base pieces: %s' % repr(chk))
                                         for p in chk:
                                             always[p] += 1
                                         # for
 
                                         count += 1
-                                        if count % 5000 == 0:
-                                            self.stdout.write("%s" % count)
+                                        # if count % 5000 == 0:
+                                        #     self.stdout.write("%s" % count)
 
                                         if len(bulk) >= 1000:
                                             Block2x8.objects.bulk_create(bulk)
@@ -985,16 +1091,11 @@ class Command(BaseCommand):
 
         paxat = [p for p, v in always.items() if v == count]
 
-        self.stdout.write('Total: %s; paxat: %s' % (count, repr(paxat)))
-
         return count, paxat
 
     def _generate_2x8_side3(self, avoid_nrs):
-        self.stdout.write('[INFO] Generating Block2x8 for side3')
         big_side = [self.side_nr2reverse[self.board[nr].side3] for nr in self.NRS_4X4_SIDE3]
-
         always = {nr: 0 for nr in range(1, 256+1)}
-
         count = 0
         bulk = list()
         unused_nrs0 = [nr for nr in self.board_unused_nrs if nr > 60]       # skip borders
@@ -1029,7 +1130,7 @@ class Command(BaseCommand):
                                 p4_exp_s2 = self.side_nr2reverse[p3.side4]
 
                                 for p4 in p2x2s:
-                                    if (p4.side1 == big_side[3] and p4.side2 == p4_exp_s2  and p4.nr1 in unused_nrs
+                                    if (p4.side1 == big_side[3] and p4.side2 == p4_exp_s2 and p4.nr1 in unused_nrs
                                             and p4.nr2 in unused_nrs and p4.nr3 in unused_nrs and p4.nr4 in unused_nrs):
 
                                         block = Block2x8(
@@ -1052,14 +1153,15 @@ class Command(BaseCommand):
                                                p3.nr1, p3.nr2, p3.nr3, p3.nr4,
                                                p4.nr1, p4.nr2, p4.nr3, p4.nr4)
                                         if len(set(chk)) != 16:
-                                            self.stdout.write('[ERROR] Block2x8 does not consist of 16 base pieces: %s' % repr(chk))
+                                            self.stdout.write(
+                                                '[ERROR] Block2x8 does not consist of 16 base pieces: %s' % repr(chk))
                                         for p in chk:
                                             always[p] += 1
                                         # for
 
                                         count += 1
-                                        if count % 5000 == 0:
-                                            self.stdout.write("%s" % count)
+                                        # if count % 5000 == 0:
+                                        #     self.stdout.write("%s" % count)
 
                                         if len(bulk) >= 1000:
                                             Block2x8.objects.bulk_create(bulk)
@@ -1074,14 +1176,11 @@ class Command(BaseCommand):
 
         paxat = [p for p, v in always.items() if v == count]
 
-        self.stdout.write('Total: %s; paxat: %s' % (count, repr(paxat)))
-
         return count, paxat
 
     def _generate_2x8_side4(self, avoid_nrs):
-        self.stdout.write('[INFO] Generating Block2x8 for side4')
         big_side = [self.side_nr2reverse[self.board[nr].side4] for nr in self.NRS_4X4_SIDE4]
-
+        always = {nr: 0 for nr in range(1, 256+1)}
         count = 0
         bulk = list()
         unused_nrs0 = [nr for nr in self.board_unused_nrs if nr > 60]       # skip borders
@@ -1090,10 +1189,6 @@ class Command(BaseCommand):
         # query all Piece2x2 needed
         p2x2s = list(Piece2x2.objects.filter(side2__in=big_side, nr1__in=unused_nrs, nr2__in=unused_nrs,
                                              nr3__in=unused_nrs, nr4__in=unused_nrs))
-        for side in big_side:
-            c = len([p for p in p2x2s if p.side2 == side])
-            print('  side2 %s: %s' % (side, c))
-        # for
 
         for p1 in p2x2s:
             if p1.side2 == big_side[0]:
@@ -1142,11 +1237,15 @@ class Command(BaseCommand):
                                                p3.nr1, p3.nr2, p3.nr3, p3.nr4,
                                                p4.nr1, p4.nr2, p4.nr3, p4.nr4)
                                         if len(set(chk)) != 16:
-                                            self.stdout.write('[ERROR] Block2x8 does not consist of 16 base pieces: %s' % repr(chk))
+                                            self.stdout.write(
+                                                '[ERROR] Block2x8 does not consist of 16 base pieces: %s' % repr(chk))
+                                        for p in chk:
+                                            always[p] += 1
+                                        # for
 
                                         count += 1
-                                        if count % 5000 == 0:
-                                            self.stdout.write("%s" % count)
+                                        # if count % 5000 == 0:
+                                        #     self.stdout.write("%s" % count)
 
                                         if len(bulk) >= 1000:
                                             Block2x8.objects.bulk_create(bulk)
@@ -1159,22 +1258,54 @@ class Command(BaseCommand):
         if len(bulk) > 0:
             Block2x8.objects.bulk_create(bulk)
 
-        self.stdout.write('Total: %s' % count)
+        paxat = [p for p, v in always.items() if v == count]
 
-        return count
+        return count, paxat
 
     def _generate_2x8_blocks(self):
-        self.stdout.write('[INFO] Start generate Block2x8')
+        self.stdout.write('[INFO] Generating Block2x8')
 
-        count, avoid_nrs1 = self._generate_2x8_side1()
-        if count:
-            count, avoid_nrs2 = self._generate_2x8_side2(avoid_nrs1)
-            if count:
-                count, avoid_nrs3 = self._generate_2x8_side3(avoid_nrs1 + avoid_nrs2)
-                if count:
-                    count = self._generate_2x8_side4(avoid_nrs1 + avoid_nrs2 + avoid_nrs3)
+        avoid_nrs2 = list()
+        avoid_nrs3 = list()
+        avoid_nrs4 = list()
+        prev_count = 0
+        new_count = 1
 
-        return count > 0
+        while new_count > prev_count:
+
+            if prev_count > 0:
+                print('New count %s --> another round!' % new_count)
+                Block2x8.objects.filter(processor=self.my_processor).delete()
+
+            options, avoid_nrs1 = self._generate_2x8_side1(avoid_nrs2 + avoid_nrs3 + avoid_nrs4)
+            self.stdout.write('[INFO] Blocks for side1: %s; paxat: %s' % (options, repr(avoid_nrs1)))
+            if options == 0:
+                return False
+
+            if prev_count == 0:
+                prev_count = len(avoid_nrs1)
+            else:
+                prev_count = new_count
+
+            options, avoid_nrs2 = self._generate_2x8_side2(avoid_nrs1 + avoid_nrs3 + avoid_nrs4)
+            self.stdout.write('[INFO] Blocks for side2: %s; paxat: %s' % (options, repr(avoid_nrs2)))
+            if options == 0:
+                return False
+
+            options, avoid_nrs3 = self._generate_2x8_side3(avoid_nrs1 + avoid_nrs2 + avoid_nrs4)
+            self.stdout.write('[INFO] Blocks for side3: %s; paxat: %s' % (options, repr(avoid_nrs3)))
+            if options == 0:
+                return False
+
+            options, avoid_nrs4 = self._generate_2x8_side4(avoid_nrs1 + avoid_nrs2 + avoid_nrs3)
+            self.stdout.write('[INFO] Blocks for side4: %s; paxat: %s' % (options, repr(avoid_nrs4)))
+            if options == 0:
+                return False
+
+            new_count = len(avoid_nrs1) + len(avoid_nrs2) + len(avoid_nrs3) + len(avoid_nrs4)
+        # while
+
+        return True
 
     def handle(self, *args, **options):
 
