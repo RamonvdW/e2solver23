@@ -1275,7 +1275,8 @@ class Command(BaseCommand):
 
             if prev_count > 0:
                 print('New count %s --> another round!' % new_count)
-                Block2x8.objects.filter(processor=self.my_processor).delete()
+
+            Block2x8.objects.filter(processor=self.my_processor).delete()
 
             options, avoid_nrs1 = self._generate_2x8_side1(avoid_nrs2 + avoid_nrs3 + avoid_nrs4)
             self.stdout.write('[INFO] Blocks for side1: %s; paxat: %s' % (options, repr(avoid_nrs1)))
