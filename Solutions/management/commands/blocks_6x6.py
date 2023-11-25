@@ -1004,7 +1004,7 @@ class Command(BaseCommand):
         if len(bulk) > 0:
             Block2x8.objects.bulk_create(bulk)
 
-        paxat = [p for p, v in always.items() if v == count]
+        paxat = [p for p, v in always.items() if v == count and count > 0]
 
         return count, paxat
 
@@ -1089,7 +1089,7 @@ class Command(BaseCommand):
         if len(bulk) > 0:
             Block2x8.objects.bulk_create(bulk)
 
-        paxat = [p for p, v in always.items() if v == count]
+        paxat = [p for p, v in always.items() if v == count and count > 0]
 
         return count, paxat
 
@@ -1174,7 +1174,7 @@ class Command(BaseCommand):
         if len(bulk) > 0:
             Block2x8.objects.bulk_create(bulk)
 
-        paxat = [p for p, v in always.items() if v == count]
+        paxat = [p for p, v in always.items() if v == count and count > 0]
 
         return count, paxat
 
@@ -1258,7 +1258,7 @@ class Command(BaseCommand):
         if len(bulk) > 0:
             Block2x8.objects.bulk_create(bulk)
 
-        paxat = [p for p, v in always.items() if v == count]
+        paxat = [p for p, v in always.items() if v == count and count > 0]
 
         return count, paxat
 
