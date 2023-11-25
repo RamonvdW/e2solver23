@@ -1271,9 +1271,9 @@ class Command(BaseCommand):
         avoid_nrs3 = list()
         avoid_nrs4 = list()
         prev_count = 0
-        new_count = 1
+        new_count = 999
 
-        while new_count > prev_count:
+        while new_count != prev_count:
 
             if prev_count > 0:
                 print('New count %s --> another round!' % new_count)
@@ -1284,11 +1284,6 @@ class Command(BaseCommand):
             self.stdout.write('[INFO] Blocks for side1: %s; paxat: %s' % (options, repr(avoid_nrs1)))
             if options == 0:
                 return False
-
-            if prev_count == 0:
-                prev_count = len(avoid_nrs1)
-            else:
-                prev_count = new_count
 
             options, avoid_nrs2 = self._generate_2x8_side2(avoid_nrs1 + avoid_nrs3 + avoid_nrs4)
             self.stdout.write('[INFO] Blocks for side2: %s; paxat: %s' % (options, repr(avoid_nrs2)))
@@ -1304,6 +1299,12 @@ class Command(BaseCommand):
             self.stdout.write('[INFO] Blocks for side4: %s; paxat: %s' % (options, repr(avoid_nrs4)))
             if options == 0:
                 return False
+
+            if new_count == 999:
+                # optimization: avoid second round when avoid_nrs1 is not empty, since it will be considered
+                prev_count = len(avoid_nrs1)
+            else:
+                prev_count = new_count
 
             new_count = len(avoid_nrs1) + len(avoid_nrs2) + len(avoid_nrs3) + len(avoid_nrs4)
         # while
