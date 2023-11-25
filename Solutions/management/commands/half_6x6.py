@@ -6,7 +6,7 @@
 
 from django.core.management.base import BaseCommand
 from Pieces2x2.models import TwoSides, Piece2x2, Block2x8
-from Solutions.models import Solution4x4, Solution6x6, P_CORNER, P_BORDER, P_HINTS, ALL_HINT_NRS
+from Solutions.models import Solution4x4, Solution6x6, Half6, P_CORNER, P_BORDER, P_HINTS, ALL_HINT_NRS
 import time
 
 
@@ -17,22 +17,7 @@ import time
 
 class Command(BaseCommand):
 
-    help = "Solver 6x6 using 8x2 blocks"
-
-    """
-         1   2  3  4  5  6  7   8
-                +-----------+
-         9  10  |11 12 13 14|  15  16
-           +--+ +-----------+ +--+
-        17 |18|  19 20 21 22  |23| 24
-        25 |26|  27 28 29 30  |31| 32
-        33 |34|  35 36 37 38  |39| 40
-        41 |42|  43 44 45 46  |47| 48
-           +--+ +-----------+ +--+
-        49  50  |51 52 53 54|  55  56
-                +-----------+
-        57  58   59 60 61 62   63  64
-    """
+    help = "Half6 generator"
 
     NR_IGNORE = (1, 2, 3, 4, 5, 6, 7, 8,
                  9, 16, 17, 24, 25, 32, 33, 40, 41, 48, 49, 56,
@@ -84,8 +69,6 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('--verbose', action='store_true')
-        parser.add_argument('--interval', nargs=1, help='Interval in minutes (default: 15) for saving progress board')
-        parser.add_argument('--start', nargs=1, help="Minimum 4x4 board number to start with")
 
     def _count_2x2(self, nr, unused_nrs):
         # get the sides
@@ -259,18 +242,19 @@ class Command(BaseCommand):
 
                 if count == 0:
                     # found a dead end
-                    # self.stdout.write(' [%s] less than %s options for %s' % (work_nr, nr))
+                    # self.stdout.write(' [%s] no options for %s' % (work_nr, nr))
                     return True
         # for
         return False
 
-    def _count_important(self, work_nr):
+    def _count_important(self, work_nr, important=None):
         self._count_freedom_cache = dict()
 
-        important = [
-            10, 11, 12, 13, 14, 15,
-            18, 23, 26, 31, 34, 39, 42, 47,
-            50, 51, 52, 53, 54, 55]
+        if not important:
+            important = [
+                10, 11, 12, 13, 14, 15,
+                18, 23, 26, 31, 34, 39, 42, 47,
+                50, 51, 52, 53, 54, 55]
 
         # start with the neighbours so we can quickly find a dead-end
         nrs = list(self.neighbours[work_nr])
@@ -297,7 +281,7 @@ class Command(BaseCommand):
 
                 if count == 0:
                     # found a dead end
-                    # self.stdout.write(' [%s] less than %s options for %s' % (work_nr, nr))
+                    self.stdout.write(' [%s] no options for %s' % (work_nr, nr))
                     return True
         # for
         return False
@@ -537,7 +521,7 @@ class Command(BaseCommand):
 
         todo = qset.count()
         for p in qset:
-            self.stdout.write('%s[%s] %s left' % (" " * len(self.board_solve_order), nr, todo))
+            # self.stdout.write('%s[%s] %s left' % (" " * len(self.board_solve_order), nr, todo))
             yield p
             todo -= 1
 
@@ -924,8 +908,90 @@ class Command(BaseCommand):
 
         self._save_board6x6()
 
-        remaining_sides = [1, 2, 3, 4]
-        self._find_6x6_next(remaining_sides)
+        # iterate over the first Half6
+        unused_nrs0 = [nr for nr in self.board_unused_nrs if nr > 60]       # skip borders
+        unused_nrs0.append(255)     # hint for [15]
+        unused_nrs = set(unused_nrs0)
+        for half1 in (Half6
+                      .objects
+                      .filter(processor=self.my_processor,
+                              based_on_4x4=self.based_on,
+                              type=12)
+                      .filter(nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs,
+                              nr5__in=unused_nrs, nr6__in=unused_nrs, nr7__in=unused_nrs, nr8__in=unused_nrs,
+                              nr9__in=unused_nrs, nr10__in=unused_nrs, nr11__in=unused_nrs, nr12__in=unused_nrs,
+                              nr13__in=unused_nrs, nr14__in=unused_nrs, nr15__in=unused_nrs, nr16__in=unused_nrs,
+                              nr17__in=unused_nrs, nr18__in=unused_nrs, nr19__in=unused_nrs, nr20__in=unused_nrs,
+                              nr21__in=unused_nrs, nr22__in=unused_nrs, nr23__in=unused_nrs, nr24__in=unused_nrs,
+                              nr25__in=unused_nrs, nr26__in=unused_nrs, nr27__in=unused_nrs, nr28__in=unused_nrs,
+                              nr29__in=unused_nrs, nr30__in=unused_nrs, nr31__in=unused_nrs, nr32__in=unused_nrs,
+                              nr33__in=unused_nrs, nr34__in=unused_nrs, nr35__in=unused_nrs, nr36__in=unused_nrs)):
+
+            print('half1=%s' % half1.pk)
+
+            # iterate over de second Half6
+            used_nrs1 = (half1.nr1, half1.nr2, half1.nr3, half1.nr4, half1.nr5, half1.nr6, half1.nr7, half1.nr8,
+                         half1.nr9, half1.nr10, half1.nr11, half1.nr12, half1.nr13, half1.nr14, half1.nr15, half1.nr16,
+                         half1.nr17, half1.nr18, half1.nr19, half1.nr20, half1.nr21, half1.nr22, half1.nr23,
+                         half1.nr24, half1.nr25, half1.nr26, half1.nr27, half1.nr28, half1.nr29, half1.nr30,
+                         half1.nr31, half1.nr32, half1.nr33, half1.nr34, half1.nr35, half1.nr36)
+            unused_nrs1 = [nr for nr in unused_nrs0 if nr not in used_nrs1]
+            unused_nrs1.append(181)     # hint for [50]
+            unused_nrs = set(unused_nrs1)
+
+            for half2 in (Half6
+                          .objects
+                          .filter(processor=self.my_processor,
+                                  based_on_4x4=self.based_on,
+                                  type=34)
+                          .filter(nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs,
+                                  nr5__in=unused_nrs, nr6__in=unused_nrs, nr7__in=unused_nrs, nr8__in=unused_nrs,
+                                  nr9__in=unused_nrs, nr10__in=unused_nrs, nr11__in=unused_nrs, nr12__in=unused_nrs,
+                                  nr13__in=unused_nrs, nr14__in=unused_nrs, nr15__in=unused_nrs, nr16__in=unused_nrs,
+                                  nr17__in=unused_nrs, nr18__in=unused_nrs, nr19__in=unused_nrs, nr20__in=unused_nrs,
+                                  nr21__in=unused_nrs, nr22__in=unused_nrs, nr23__in=unused_nrs, nr24__in=unused_nrs,
+                                  nr25__in=unused_nrs, nr26__in=unused_nrs, nr27__in=unused_nrs, nr28__in=unused_nrs,
+                                  nr29__in=unused_nrs, nr30__in=unused_nrs, nr31__in=unused_nrs, nr32__in=unused_nrs,
+                                  nr33__in=unused_nrs, nr34__in=unused_nrs, nr35__in=unused_nrs, nr36__in=unused_nrs)):
+
+                print('half2=%s' % half2.pk)
+
+                block1 = Block2x8.objects.get(pk=half1.p1)
+                block2 = Block2x8.objects.get(pk=half1.p2)
+                block3 = Block2x8.objects.get(pk=half2.p1)
+                block4 = Block2x8.objects.get(pk=half2.p2)
+
+                # place all pieces for half1 and half2
+                self._board_fill_nr(11, Piece2x2.objects.get(nr=block1.p1))
+                self._board_fill_nr(12, Piece2x2.objects.get(nr=block1.p2))
+                self._board_fill_nr(13, Piece2x2.objects.get(nr=block1.p3))
+                self._board_fill_nr(14, Piece2x2.objects.get(nr=block1.p4))
+                self._board_fill_nr(15, Piece2x2.objects.get(nr=half1.c1))
+                self._board_fill_nr(23, Piece2x2.objects.get(nr=block2.p1))
+                self._board_fill_nr(31, Piece2x2.objects.get(nr=block2.p2))
+                self._board_fill_nr(39, Piece2x2.objects.get(nr=block2.p3))
+                self._board_fill_nr(47, Piece2x2.objects.get(nr=block2.p4))
+
+                self._board_fill_nr(54, Piece2x2.objects.get(nr=block3.p1))
+                self._board_fill_nr(53, Piece2x2.objects.get(nr=block3.p2))
+                self._board_fill_nr(52, Piece2x2.objects.get(nr=block3.p3))
+                self._board_fill_nr(51, Piece2x2.objects.get(nr=block3.p4))
+                self._board_fill_nr(50, Piece2x2.objects.get(nr=half2.c1))
+                self._board_fill_nr(42, Piece2x2.objects.get(nr=block4.p1))
+                self._board_fill_nr(34, Piece2x2.objects.get(nr=block4.p2))
+                self._board_fill_nr(26, Piece2x2.objects.get(nr=block4.p3))
+                self._board_fill_nr(18, Piece2x2.objects.get(nr=block4.p4))
+
+                self._count_all(1)
+                self._save_board6x6()
+
+                for nr in (11, 12, 13, 14, 15, 23, 31, 39, 47, 54, 53, 52, 51, 50, 42, 34, 26, 18):
+                    self._board_free_nr(nr)
+                # for
+            # for
+        # for
+
+        # find the final corners
 
     def _generate_2x8_side1(self, avoid_nrs):
         big_side = [self.side_nr2reverse[self.board[nr].side1] for nr in self.NRS_4X4_SIDE1]
@@ -1311,20 +1377,222 @@ class Command(BaseCommand):
 
         return True
 
+    def _generate_half6_c12(self):
+        # find combinations + add corner
+        self.stdout.write('[INFO] Starting search for Half6 1-2')
+        found = 0
+
+        # iterate through the Block2x8 for each side, then add corners
+        big_side1 = [self.side_nr2reverse[self.board[nr].side1] for nr in self.NRS_4X4_SIDE1]
+        big_side2 = [self.side_nr2reverse[self.board[nr].side2] for nr in self.NRS_4X4_SIDE2]
+
+        for c1 in self._iter_for_nr(15, 0):
+            self._board_fill_nr(15, c1)
+
+            block1_exp_s2 = self.side_nr2reverse[c1.side4]
+            block2_exp_s1 = self.side_nr2reverse[c1.side3]
+
+            unused_nrs0 = [nr for nr in self.board_unused_nrs[:] if nr > 60]        # skip borders
+            unused_nrs = set(unused_nrs0)
+            for block1 in (Block2x8
+                           .objects
+                           .filter(processor=self.my_processor,
+                                   type=1,
+                                   side2=block1_exp_s2,
+                                   b1=big_side1[0], b2=big_side1[1], b3=big_side1[2], b4=big_side1[3])
+                           .filter(nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs,
+                                   nr5__in=unused_nrs, nr6__in=unused_nrs, nr7__in=unused_nrs, nr8__in=unused_nrs,
+                                   nr9__in=unused_nrs, nr10__in=unused_nrs, nr11__in=unused_nrs, nr12__in=unused_nrs,
+                                   nr13__in=unused_nrs, nr14__in=unused_nrs, nr15__in=unused_nrs, nr16__in=unused_nrs)):
+
+                # place the 4 pieces
+                self._board_fill_nr(11, Piece2x2.objects.get(nr=block1.p1))
+                self._board_fill_nr(12, Piece2x2.objects.get(nr=block1.p2))
+                self._board_fill_nr(13, Piece2x2.objects.get(nr=block1.p3))
+                self._board_fill_nr(14, Piece2x2.objects.get(nr=block1.p4))
+
+                # iterate through the Block2x8 for side2
+                unused_nrs1 = [nr for nr in self.board_unused_nrs[:] if nr > 60]  # skip borders
+                unused_nrs = set(unused_nrs1)
+                for block2 in (Block2x8
+                               .objects
+                               .filter(processor=self.my_processor,
+                                       type=2,
+                                       side1=block2_exp_s1,
+                                       b1=big_side2[0], b2=big_side2[1], b3=big_side2[2], b4=big_side2[3])
+                               .filter(nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs,
+                                       nr5__in=unused_nrs, nr6__in=unused_nrs, nr7__in=unused_nrs, nr8__in=unused_nrs,
+                                       nr9__in=unused_nrs, nr10__in=unused_nrs, nr11__in=unused_nrs,
+                                       nr12__in=unused_nrs, nr13__in=unused_nrs, nr14__in=unused_nrs,
+                                       nr15__in=unused_nrs, nr16__in=unused_nrs)):
+
+                    # place the 4 pieces
+                    self._board_fill_nr(23, Piece2x2.objects.get(nr=block2.p1))
+                    self._board_fill_nr(31, Piece2x2.objects.get(nr=block2.p2))
+                    self._board_fill_nr(39, Piece2x2.objects.get(nr=block2.p3))
+                    self._board_fill_nr(47, Piece2x2.objects.get(nr=block2.p4))
+
+                    half = Half6(
+                                processor=self.my_processor,
+                                based_on_4x4=self.based_on,
+                                type=12,
+                                b1=big_side1[0], b2=big_side1[1], b3=big_side1[2], b4=big_side1[3],
+                                b5=big_side2[0], b6=big_side2[1], b7=big_side2[2], b8=big_side2[3],
+                                p1=block1.pk,
+                                p2=block2.pk,
+                                c1=c1.nr,
+                                nr1=block1.nr1, nr2=block1.nr2, nr3=block1.nr3, nr4=block1.nr4,
+                                nr5=block1.nr5, nr6=block1.nr6, nr7=block1.nr7, nr8=block1.nr8,
+                                nr9=block1.nr9, nr10=block1.nr10, nr11=block1.nr11, nr12=block1.nr12,
+                                nr13=block1.nr13, nr14=block1.nr14, nr15=block1.nr15, nr16=block1.nr16,
+                                nr17=block2.nr1, nr18=block2.nr2, nr19=block2.nr3, nr20=block2.nr4,
+                                nr21=block2.nr5, nr22=block2.nr6, nr23=block2.nr7, nr24=block2.nr8,
+                                nr25=block2.nr9, nr26=block2.nr10, nr27=block2.nr11, nr28=block2.nr12,
+                                nr29=block2.nr13, nr30=block2.nr14, nr31=block2.nr15, nr32=block2.nr16,
+                                nr33=c1.nr1, nr34=c1.nr2, nr35=c1.nr3, nr36=c1.nr4)     # nr34 = hint (255)
+                    half.save()
+                    found += 1
+                    if found % 100 == 0:
+                        print(found)
+
+                    self._board_free_nr(47)
+                    self._board_free_nr(39)
+                    self._board_free_nr(31)
+                    self._board_free_nr(23)
+
+                    if found > 500:
+                        break
+                # for
+
+                self._board_free_nr(14)
+                self._board_free_nr(13)
+                self._board_free_nr(12)
+                self._board_free_nr(11)
+
+                if found > 500:
+                    break
+            # for
+
+            self._board_free_nr(15)
+
+            if found > 500:
+                break
+        # for
+
+        print('[INFO] Found %s' % found)
+
+    def _generate_half6_c34(self):
+        # find combinations + add corner
+        self.stdout.write('[INFO] Starting search for Half6 3-4')
+        found = 0
+
+        # iterate through the Block2x8 for each side, then add corners
+        big_side3 = [self.side_nr2reverse[self.board[nr].side3] for nr in self.NRS_4X4_SIDE3]
+        big_side4 = [self.side_nr2reverse[self.board[nr].side4] for nr in self.NRS_4X4_SIDE4]
+
+        # start with the corner on position 50
+        for c1 in self._iter_for_nr(50, 0):
+            self._board_fill_nr(50, c1)
+
+            block2_exp_s3 = self.side_nr2reverse[c1.side1]
+            block1_exp_s4 = self.side_nr2reverse[c1.side2]
+
+            # iterate through the Block2x8 for side3
+            unused_nrs0 = [nr for nr in self.board_unused_nrs[:] if nr > 60]        # skip borders
+            unused_nrs = set(unused_nrs0)
+            for block1 in (Block2x8
+                           .objects
+                           .filter(processor=self.my_processor,
+                                   type=3,
+                                   side4=block1_exp_s4,
+                                   b1=big_side3[0], b2=big_side3[1], b3=big_side3[2], b4=big_side3[3])
+                           .filter(nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs,
+                                   nr5__in=unused_nrs, nr6__in=unused_nrs, nr7__in=unused_nrs, nr8__in=unused_nrs,
+                                   nr9__in=unused_nrs, nr10__in=unused_nrs, nr11__in=unused_nrs, nr12__in=unused_nrs,
+                                   nr13__in=unused_nrs, nr14__in=unused_nrs, nr15__in=unused_nrs, nr16__in=unused_nrs)):
+
+                # place the 4 pieces
+                self._board_fill_nr(54, Piece2x2.objects.get(nr=block1.p1))
+                self._board_fill_nr(53, Piece2x2.objects.get(nr=block1.p2))
+                self._board_fill_nr(52, Piece2x2.objects.get(nr=block1.p3))
+                self._board_fill_nr(51, Piece2x2.objects.get(nr=block1.p4))
+
+                # iterate through the Block2x8 for side4
+                unused_nrs1 = [nr for nr in self.board_unused_nrs[:] if nr > 60]  # skip borders
+                unused_nrs = set(unused_nrs1)
+                for block2 in (Block2x8
+                               .objects
+                               .filter(processor=self.my_processor,
+                                       type=4,
+                                       side3=block2_exp_s3,
+                                       b1=big_side4[0], b2=big_side4[1], b3=big_side4[2], b4=big_side4[3])
+                               .filter(nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs,
+                                       nr5__in=unused_nrs, nr6__in=unused_nrs, nr7__in=unused_nrs, nr8__in=unused_nrs,
+                                       nr9__in=unused_nrs, nr10__in=unused_nrs, nr11__in=unused_nrs,
+                                       nr12__in=unused_nrs, nr13__in=unused_nrs, nr14__in=unused_nrs,
+                                       nr15__in=unused_nrs, nr16__in=unused_nrs)):
+
+                    # place the 4 pieces
+                    self._board_fill_nr(42, Piece2x2.objects.get(nr=block2.p1))
+                    self._board_fill_nr(34, Piece2x2.objects.get(nr=block2.p2))
+                    self._board_fill_nr(26, Piece2x2.objects.get(nr=block2.p3))
+                    self._board_fill_nr(18, Piece2x2.objects.get(nr=block2.p4))
+
+                    half = Half6(
+                                processor=self.my_processor,
+                                based_on_4x4=self.based_on,
+                                type=34,
+                                b1=big_side3[0], b2=big_side3[1], b3=big_side3[2], b4=big_side3[3],
+                                b5=big_side4[0], b6=big_side4[1], b7=big_side4[2], b8=big_side4[3],
+                                p1=block1.pk,
+                                p2=block2.pk,
+                                c1=c1.nr,
+                                nr1=block1.nr1, nr2=block1.nr2, nr3=block1.nr3, nr4=block1.nr4,
+                                nr5=block1.nr5, nr6=block1.nr6, nr7=block1.nr7, nr8=block1.nr8,
+                                nr9=block1.nr9, nr10=block1.nr10, nr11=block1.nr11, nr12=block1.nr12,
+                                nr13=block1.nr13, nr14=block1.nr14, nr15=block1.nr15, nr16=block1.nr16,
+                                nr17=block2.nr1, nr18=block2.nr2, nr19=block2.nr3, nr20=block2.nr4,
+                                nr21=block2.nr5, nr22=block2.nr6, nr23=block2.nr7, nr24=block2.nr8,
+                                nr25=block2.nr9, nr26=block2.nr10, nr27=block2.nr11, nr28=block2.nr12,
+                                nr29=block2.nr13, nr30=block2.nr14, nr31=block2.nr15, nr32=block2.nr16,
+                                nr33=c1.nr1, nr34=c1.nr2, nr35=c1.nr3, nr36=c1.nr4)     # nr35 = hint: 181
+                    half.save()
+                    found += 1
+                    if found % 100 == 0:
+                        print(found)
+
+                    self._board_free_nr(18)
+                    self._board_free_nr(26)
+                    self._board_free_nr(34)
+                    self._board_free_nr(42)
+
+                    if found > 500:
+                        break
+                # for
+
+                self._board_free_nr(51)
+                self._board_free_nr(52)
+                self._board_free_nr(53)
+                self._board_free_nr(54)
+
+                if found > 500:
+                    break
+            # for
+
+            self._board_free_nr(50)
+
+            if found > 500:
+                break
+        # for
+
+        print('[INFO] Found %s' % found)
+
     def handle(self, *args, **options):
 
         if options['verbose']:
             self.verbose += 1
 
-        if options['interval']:
-            self.interval_mins = int(options['interval'][0])
-        self.stdout.write('[INFO] Progress interval is %s minutes' % self.interval_mins)
-
-        if options['start']:
-            min_4x4_pk = int(options['start'][0])
-        else:
-            min_4x4_pk = 1
-
+        min_4x4_pk = 1
         self.stdout.write('[INFO] my_processor is %s' % self.my_processor)
 
         while True:
@@ -1342,12 +1610,17 @@ class Command(BaseCommand):
                 sol.save(update_fields=['processor'])
 
                 self.load_board_4x4(sol)
+                for nr in range(1, 64 + 1):
+                    self.board_must_have[nr] = list()
+                # for
+
                 if self._generate_2x8_blocks():
+                    self._generate_half6_c12()
+                    self._generate_half6_c34()
                     self.find_6x6()
 
                 sol.is_processed = True
                 sol.save(update_fields=['is_processed'])
-
             else:
                 self.stdout.write('[INFO] Waiting for new 4x4 (press Ctrl+C to abort)')
                 time.sleep(60)

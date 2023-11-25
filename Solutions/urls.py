@@ -35,6 +35,14 @@ urlpatterns = [
     path('view6x6/<nr>/',
          views.Show6x6View.as_view(),
          name='show-6x6'),
+
+    path('half6/auto/',
+         views.Half6AutoView.as_view(),
+         name='auto-show-half6'),
+
+    path('half6/<nr>/',
+         views.Half6View.as_view(),
+         name='show-half6'),
 ]
 
 

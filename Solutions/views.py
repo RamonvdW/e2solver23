@@ -9,8 +9,8 @@ from django.urls import reverse
 from django.views.generic import TemplateView
 from django.templatetags.static import static
 from BasePieces.models import BasePiece
-from Pieces2x2.models import Piece2x2, TwoSides
-from Solutions.models import Solution, Solution4x4, Solution6x6
+from Pieces2x2.models import Piece2x2, Block2x8, TwoSides
+from Solutions.models import Solution, Solution4x4, Solution6x6, Half6
 from types import SimpleNamespace
 
 TEMPLATE_VIEW = 'solutions/show.dtl'
@@ -80,7 +80,7 @@ def _calc_neighbours():
 
 
 def _fill_sol(sol):
-    neighbours = _calc_neighbours()
+    # neighbours = _calc_neighbours()
 
     sol.p2x2s = list()
 
@@ -105,7 +105,7 @@ def _fill_sol(sol):
         field_nr = 'nr%s' % nr
         field_note = 'note%s' % nr
 
-        p2x2 = _get_2x2(getattr(sol, field_nr), getattr(sol, field_note))
+        p2x2 = _get_2x2(getattr(sol, field_nr), getattr(sol, field_note, None))
         sol.p2x2s.append(p2x2)
 
         # side_is_open = [None, ]
@@ -188,6 +188,34 @@ class ShowView(TemplateView):
         return context
 
 
+class ShowAutoView(TemplateView):
+
+    template_name = TEMPLATE_VIEW
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        sol = Solution.objects.order_by('-nr').first()       # highest first
+        if sol:
+            context['solution'] = sol
+            _fill_sol(sol)
+
+            nr = sol.nr
+            if nr > 100:
+                context['url_prev100'] = reverse('Solutions:show', kwargs={'nr': nr-100})
+            if nr > 10:
+                context['url_prev10'] = reverse('Solutions:show', kwargs={'nr': nr-10})
+            if nr > 1:
+                context['url_prev1'] = reverse('Solutions:show', kwargs={'nr': nr-1})
+
+        context['auto_reload'] = True
+
+        context['title'] = 'Solution'
+
+        return context
+
+
 class Show4x4View(TemplateView):
 
     template_name = TEMPLATE_VIEW
@@ -227,6 +255,44 @@ class Show4x4View(TemplateView):
         context['url_next100'] = reverse('Solutions:show-4x4', kwargs={'nr': nr+100})
 
         context['url_auto'] = reverse('Solutions:auto-show-4x4')
+
+        context['title'] = 'Solution 4x4'
+
+        return context
+
+
+class Show4x4AutoView(TemplateView):
+
+    template_name = TEMPLATE_VIEW
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        sol = Solution4x4.objects.order_by('-pk').first()       # highest first
+        if sol:
+            sol.nr = sol.pk
+            for nr in range(1, 64+1):
+                # add the missing pieces
+                if nr not in (19, 20, 21, 22,
+                              27, 28, 29, 30,
+                              35, 36, 37, 38,
+                              43, 44, 45, 46):
+                    nr_str = 'nr%s' % nr
+                    setattr(sol, nr_str, 0)
+            # for
+            context['solution'] = sol
+            _fill_sol(sol)
+
+            nr = sol.nr
+            if nr > 100:
+                context['url_prev100'] = reverse('Solutions:show-4x4', kwargs={'nr': nr-100})
+            if nr > 10:
+                context['url_prev10'] = reverse('Solutions:show-4x4', kwargs={'nr': nr-10})
+            if nr > 1:
+                context['url_prev1'] = reverse('Solutions:show-4x4', kwargs={'nr': nr-1})
+
+        context['auto_reload'] = True
 
         context['title'] = 'Solution 4x4'
 
@@ -291,72 +357,6 @@ class Show6x6View(TemplateView):
         return context
 
 
-class ShowAutoView(TemplateView):
-
-    template_name = TEMPLATE_VIEW
-
-    def get_context_data(self, **kwargs):
-        """ called by the template system to get the context data for the template """
-        context = super().get_context_data(**kwargs)
-
-        sol = Solution.objects.order_by('-nr').first()       # highest first
-        if sol:
-            context['solution'] = sol
-            _fill_sol(sol)
-
-            nr = sol.nr
-            if nr > 100:
-                context['url_prev100'] = reverse('Solutions:show', kwargs={'nr': nr-100})
-            if nr > 10:
-                context['url_prev10'] = reverse('Solutions:show', kwargs={'nr': nr-10})
-            if nr > 1:
-                context['url_prev1'] = reverse('Solutions:show', kwargs={'nr': nr-1})
-
-        context['auto_reload'] = True
-
-        context['title'] = 'Solution'
-
-        return context
-
-
-class Show4x4AutoView(TemplateView):
-
-    template_name = TEMPLATE_VIEW
-
-    def get_context_data(self, **kwargs):
-        """ called by the template system to get the context data for the template """
-        context = super().get_context_data(**kwargs)
-
-        sol = Solution4x4.objects.order_by('-pk').first()       # highest first
-        if sol:
-            sol.nr = sol.pk
-            for nr in range(1, 64+1):
-                # add the missing pieces
-                if nr not in (19, 20, 21, 22,
-                              27, 28, 29, 30,
-                              35, 36, 37, 38,
-                              43, 44, 45, 46):
-                    nr_str = 'nr%s' % nr
-                    setattr(sol, nr_str, 0)
-            # for
-            context['solution'] = sol
-            _fill_sol(sol)
-
-            nr = sol.nr
-            if nr > 100:
-                context['url_prev100'] = reverse('Solutions:show-4x4', kwargs={'nr': nr-100})
-            if nr > 10:
-                context['url_prev10'] = reverse('Solutions:show-4x4', kwargs={'nr': nr-10})
-            if nr > 1:
-                context['url_prev1'] = reverse('Solutions:show-4x4', kwargs={'nr': nr-1})
-
-        context['auto_reload'] = True
-
-        context['title'] = 'Solution 4x4'
-
-        return context
-
-
 class Show6x6AutoView(TemplateView):
 
     template_name = TEMPLATE_VIEW
@@ -405,5 +405,149 @@ class Show6x6AutoView(TemplateView):
 
         return context
 
+
+class Half6View(TemplateView):
+
+    template_name = TEMPLATE_VIEW
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        try:
+            nr = int(kwargs['nr'][:10])      # afkappen voor de veiligheid
+        except ValueError:
+            raise Http404('Not found')
+
+        half = Half6.objects.filter(pk=nr).first()       # highest first
+        if half:
+            block1 = Block2x8.objects.get(pk=half.p1)
+            block2 = Block2x8.objects.get(pk=half.p2)
+
+            if half.type == 12:
+                sol = SimpleNamespace(
+                            based_on_4x4=half.based_on_4x4,
+                            nr11=block1.p1,
+                            nr12=block1.p2,
+                            nr13=block1.p3,
+                            nr14=block1.p4,
+                            nr15=half.c1,
+                            nr23=block2.p1,
+                            nr31=block2.p2,
+                            nr39=block2.p3,
+                            nr47=block2.p4)
+            else:
+                sol = SimpleNamespace(
+                            based_on_4x4=half.based_on_4x4,
+                            nr54=block1.p1,
+                            nr53=block1.p2,
+                            nr52=block1.p3,
+                            nr51=block1.p4,
+                            nr50=half.c1,
+                            nr42=block2.p1,
+                            nr34=block2.p2,
+                            nr26=block2.p3,
+                            nr18=block2.p4)
+
+            for nr in range(1, 64+1):
+                nr_str = 'nr%s' % nr
+                if getattr(sol, nr_str, None) is None:
+                    setattr(sol, nr_str, 0)
+            # for
+
+            context['solution'] = sol
+            _fill_sol(sol)
+
+            context['based_on'] = '4x4 nr %s' % half.based_on_4x4
+
+            nr = half.pk
+            if nr > 100:
+                context['url_prev100'] = reverse('Solutions:show-half6', kwargs={'nr': nr-100})
+            if nr > 10:
+                context['url_prev10'] = reverse('Solutions:show-half6', kwargs={'nr': nr-10})
+            if nr > 1:
+                context['url_prev1'] = reverse('Solutions:show-half6', kwargs={'nr': nr-1})
+
+            pks = list(Half6.objects.filter(based_on_4x4=half.based_on_4x4).order_by('pk').values_list('pk', flat=True))
+            idx = pks.index(half.pk)
+            if idx > 0:
+                context['url_prev4x4'] = reverse('Solutions:show-half6', kwargs={'nr': pks[idx - 1]})
+            if idx < len(pks) - 1:
+                context['url_next4x4'] = reverse('Solutions:show-half6', kwargs={'nr': pks[idx + 1]})
+
+        context['url_auto'] = reverse('Solutions:auto-show-half6')
+
+        context['title'] = 'Half6'
+
+        return context
+
+
+class Half6AutoView(TemplateView):
+
+    template_name = TEMPLATE_VIEW
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        half = Half6.objects.order_by('-pk').first()       # highest first
+        if half:
+            block1 = Block2x8.objects.get(pk=half.p1)
+            block2 = Block2x8.objects.get(pk=half.p2)
+
+            if half.type == 12:
+                sol = SimpleNamespace(
+                            based_on_4x4=half.based_on_4x4,
+                            nr11=block1.p1,
+                            nr12=block1.p2,
+                            nr13=block1.p3,
+                            nr14=block1.p4,
+                            nr15=half.c1,
+                            nr23=block2.p1,
+                            nr31=block2.p2,
+                            nr39=block2.p3,
+                            nr47=block2.p4)
+            else:
+                sol = SimpleNamespace(
+                            based_on_4x4=half.based_on_4x4,
+                            nr54=block1.p1,
+                            nr53=block1.p2,
+                            nr52=block1.p3,
+                            nr51=block1.p4,
+                            nr50=half.c1,
+                            nr42=block2.p1,
+                            nr34=block2.p2,
+                            nr26=block2.p3,
+                            nr18=block2.p4)
+
+            for nr in range(1, 64+1):
+                nr_str = 'nr%s' % nr
+                if getattr(sol, nr_str, None) is None:
+                    setattr(sol, nr_str, 0)
+            # for
+
+            context['solution'] = sol
+            _fill_sol(sol)
+
+            context['based_on'] = '4x4 nr %s' % half.based_on_4x4
+
+            nr = half.pk
+            if nr > 100:
+                context['url_prev100'] = reverse('Solutions:show-half6', kwargs={'nr': nr-100})
+            if nr > 10:
+                context['url_prev10'] = reverse('Solutions:show-half6', kwargs={'nr': nr-10})
+            if nr > 1:
+                context['url_prev1'] = reverse('Solutions:show-half6', kwargs={'nr': nr-1})
+
+            pks = list(Half6.objects.filter(based_on_4x4=half.based_on_4x4).order_by('pk').values_list('pk', flat=True))
+            idx = pks.index(half.pk)
+            if idx > 0:
+                context['url_prev4x4'] = reverse('Solutions:show-half6', kwargs={'nr': pks[idx-1]})
+
+        context['auto_reload'] = True
+
+        context['title'] = 'Half6'
+
+        return context
 
 # end of file

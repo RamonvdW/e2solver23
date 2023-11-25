@@ -288,5 +288,4 @@ class Block2x8(models.Model):
         ]
 
 
-
 # end of file

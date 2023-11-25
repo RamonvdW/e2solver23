@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import admin
-from Solutions.models import Solution, Solution4x4, Solution6x6     # State
+from Solutions.models import Solution, Solution4x4, Solution6x6, Half6
 
 
 class AdminSolution6x6(admin.ModelAdmin):
@@ -21,5 +21,6 @@ class AdminSolution4x4(admin.ModelAdmin):
 admin.site.register(Solution)
 admin.site.register(Solution4x4, AdminSolution6x6)
 admin.site.register(Solution6x6, AdminSolution6x6)
+admin.site.register(Half6)
 
 # end of file
