@@ -935,6 +935,7 @@ class Command(BaseCommand):
                          half1.nr17, half1.nr18, half1.nr19, half1.nr20, half1.nr21, half1.nr22, half1.nr23,
                          half1.nr24, half1.nr25, half1.nr26, half1.nr27, half1.nr28, half1.nr29, half1.nr30,
                          half1.nr31, half1.nr32, half1.nr33, half1.nr34, half1.nr35, half1.nr36)
+
             unused_nrs1 = [nr for nr in unused_nrs0 if nr not in used_nrs1]
             unused_nrs1.append(181)     # hint for [50]
             unused_nrs = set(unused_nrs1)
@@ -1460,8 +1461,8 @@ class Command(BaseCommand):
                     self._board_free_nr(31)
                     self._board_free_nr(23)
 
-                    if found > 500:
-                        break
+                    # if found > 500:
+                    #     break
                 # for
 
                 self._board_free_nr(14)
@@ -1469,14 +1470,14 @@ class Command(BaseCommand):
                 self._board_free_nr(12)
                 self._board_free_nr(11)
 
-                if found > 500:
-                    break
+                # if found > 500:
+                #     break
             # for
 
             self._board_free_nr(15)
 
-            if found > 500:
-                break
+            # if found > 500:
+            #     break
         # for
 
         print('[INFO] Found %s' % found)
@@ -1566,8 +1567,8 @@ class Command(BaseCommand):
                     self._board_free_nr(34)
                     self._board_free_nr(42)
 
-                    if found > 500:
-                        break
+                    # if found > 500:
+                    #     break
                 # for
 
                 self._board_free_nr(51)
@@ -1575,14 +1576,14 @@ class Command(BaseCommand):
                 self._board_free_nr(53)
                 self._board_free_nr(54)
 
-                if found > 500:
-                    break
+                # if found > 500:
+                #     break
             # for
 
             self._board_free_nr(50)
 
-            if found > 500:
-                break
+            # if found > 500:
+            #     break
         # for
 
         print('[INFO] Found %s' % found)
