@@ -927,7 +927,7 @@ class Command(BaseCommand):
                               nr29__in=unused_nrs, nr30__in=unused_nrs, nr31__in=unused_nrs, nr32__in=unused_nrs,
                               nr33__in=unused_nrs, nr34__in=unused_nrs, nr35__in=unused_nrs, nr36__in=unused_nrs)):
 
-            print('half1=%s' % half1.pk)
+            # print('half1=%s' % half1.pk)
 
             # iterate over de second Half6
             used_nrs1 = (half1.nr1, half1.nr2, half1.nr3, half1.nr4, half1.nr5, half1.nr6, half1.nr7, half1.nr8,
@@ -955,7 +955,7 @@ class Command(BaseCommand):
                                   nr29__in=unused_nrs, nr30__in=unused_nrs, nr31__in=unused_nrs, nr32__in=unused_nrs,
                                   nr33__in=unused_nrs, nr34__in=unused_nrs, nr35__in=unused_nrs, nr36__in=unused_nrs)):
 
-                print('half2=%s' % half2.pk)
+                # print('half2=%s' % half2.pk)
 
                 block1 = Block2x8.objects.get(pk=half1.p1)
                 block2 = Block2x8.objects.get(pk=half1.p2)
@@ -983,8 +983,13 @@ class Command(BaseCommand):
                 self._board_fill_nr(26, Piece2x2.objects.get(nr=block4.p3))
                 self._board_fill_nr(18, Piece2x2.objects.get(nr=block4.p4))
 
-                self._count_all(1)
-                self._save_board6x6()
+                # verify a solution is possible for positions 10 and 55
+                count10, _, _ = self._count_2x2(10, self.board_unused_nrs)
+                count55, _, _ = self._count_2x2(55, self.board_unused_nrs)
+
+                if count10 > 0 and count55 > 0:
+                    self._count_all(1)
+                    self._save_board6x6()
 
                 for nr in (11, 12, 13, 14, 15, 23, 31, 39, 47, 54, 53, 52, 51, 50, 42, 34, 26, 18):
                     self._board_free_nr(nr)
@@ -1461,28 +1466,33 @@ class Command(BaseCommand):
                     self._board_fill_nr(39, Piece2x2.objects.get(nr=block2.p3))
                     self._board_fill_nr(47, Piece2x2.objects.get(nr=block2.p4))
 
-                    half = Half6(
-                                processor=self.my_processor,
-                                based_on_4x4=self.based_on,
-                                type=12,
-                                b1=big_side1[0], b2=big_side1[1], b3=big_side1[2], b4=big_side1[3],
-                                b5=big_side2[0], b6=big_side2[1], b7=big_side2[2], b8=big_side2[3],
-                                p1=block1.pk,
-                                p2=block2.pk,
-                                c1=c1.nr,
-                                nr1=block1.nr1, nr2=block1.nr2, nr3=block1.nr3, nr4=block1.nr4,
-                                nr5=block1.nr5, nr6=block1.nr6, nr7=block1.nr7, nr8=block1.nr8,
-                                nr9=block1.nr9, nr10=block1.nr10, nr11=block1.nr11, nr12=block1.nr12,
-                                nr13=block1.nr13, nr14=block1.nr14, nr15=block1.nr15, nr16=block1.nr16,
-                                nr17=block2.nr1, nr18=block2.nr2, nr19=block2.nr3, nr20=block2.nr4,
-                                nr21=block2.nr5, nr22=block2.nr6, nr23=block2.nr7, nr24=block2.nr8,
-                                nr25=block2.nr9, nr26=block2.nr10, nr27=block2.nr11, nr28=block2.nr12,
-                                nr29=block2.nr13, nr30=block2.nr14, nr31=block2.nr15, nr32=block2.nr16,
-                                nr33=c1.nr1, nr34=c1.nr2, nr35=c1.nr3, nr36=c1.nr4)     # nr34 = hint (255)
-                    half.save()
-                    found += 1
-                    if found % 100 == 0:
-                        print(found)
+                    # verify a solution is possible for positions 10 and 55
+                    count10, _, _ = self._count_2x2(10, self.board_unused_nrs)
+                    count55, _, _ = self._count_2x2(55, self.board_unused_nrs)
+
+                    if count10 > 0 and count55 > 0:
+                        half = Half6(
+                                    processor=self.my_processor,
+                                    based_on_4x4=self.based_on,
+                                    type=12,
+                                    b1=big_side1[0], b2=big_side1[1], b3=big_side1[2], b4=big_side1[3],
+                                    b5=big_side2[0], b6=big_side2[1], b7=big_side2[2], b8=big_side2[3],
+                                    p1=block1.pk,
+                                    p2=block2.pk,
+                                    c1=c1.nr,
+                                    nr1=block1.nr1, nr2=block1.nr2, nr3=block1.nr3, nr4=block1.nr4,
+                                    nr5=block1.nr5, nr6=block1.nr6, nr7=block1.nr7, nr8=block1.nr8,
+                                    nr9=block1.nr9, nr10=block1.nr10, nr11=block1.nr11, nr12=block1.nr12,
+                                    nr13=block1.nr13, nr14=block1.nr14, nr15=block1.nr15, nr16=block1.nr16,
+                                    nr17=block2.nr1, nr18=block2.nr2, nr19=block2.nr3, nr20=block2.nr4,
+                                    nr21=block2.nr5, nr22=block2.nr6, nr23=block2.nr7, nr24=block2.nr8,
+                                    nr25=block2.nr9, nr26=block2.nr10, nr27=block2.nr11, nr28=block2.nr12,
+                                    nr29=block2.nr13, nr30=block2.nr14, nr31=block2.nr15, nr32=block2.nr16,
+                                    nr33=c1.nr1, nr34=c1.nr2, nr35=c1.nr3, nr36=c1.nr4)     # nr34 = hint (255)
+                        half.save()
+                        found += 1
+                        if found % 100 == 0:
+                            print(found)
 
                     self._board_free_nr(47)
                     self._board_free_nr(39)
@@ -1567,28 +1577,33 @@ class Command(BaseCommand):
                     self._board_fill_nr(26, Piece2x2.objects.get(nr=block2.p3))
                     self._board_fill_nr(18, Piece2x2.objects.get(nr=block2.p4))
 
-                    half = Half6(
-                                processor=self.my_processor,
-                                based_on_4x4=self.based_on,
-                                type=34,
-                                b1=big_side3[0], b2=big_side3[1], b3=big_side3[2], b4=big_side3[3],
-                                b5=big_side4[0], b6=big_side4[1], b7=big_side4[2], b8=big_side4[3],
-                                p1=block1.pk,
-                                p2=block2.pk,
-                                c1=c1.nr,
-                                nr1=block1.nr1, nr2=block1.nr2, nr3=block1.nr3, nr4=block1.nr4,
-                                nr5=block1.nr5, nr6=block1.nr6, nr7=block1.nr7, nr8=block1.nr8,
-                                nr9=block1.nr9, nr10=block1.nr10, nr11=block1.nr11, nr12=block1.nr12,
-                                nr13=block1.nr13, nr14=block1.nr14, nr15=block1.nr15, nr16=block1.nr16,
-                                nr17=block2.nr1, nr18=block2.nr2, nr19=block2.nr3, nr20=block2.nr4,
-                                nr21=block2.nr5, nr22=block2.nr6, nr23=block2.nr7, nr24=block2.nr8,
-                                nr25=block2.nr9, nr26=block2.nr10, nr27=block2.nr11, nr28=block2.nr12,
-                                nr29=block2.nr13, nr30=block2.nr14, nr31=block2.nr15, nr32=block2.nr16,
-                                nr33=c1.nr1, nr34=c1.nr2, nr35=c1.nr3, nr36=c1.nr4)     # nr35 = hint: 181
-                    half.save()
-                    found += 1
-                    if found % 100 == 0:
-                        print(found)
+                    # verify a solution is possible for positions 10 and 55
+                    count10, _, _ = self._count_2x2(10, self.board_unused_nrs)
+                    count55, _, _ = self._count_2x2(55, self.board_unused_nrs)
+
+                    if count10 > 0 and count55 > 0:
+                        half = Half6(
+                                    processor=self.my_processor,
+                                    based_on_4x4=self.based_on,
+                                    type=34,
+                                    b1=big_side3[0], b2=big_side3[1], b3=big_side3[2], b4=big_side3[3],
+                                    b5=big_side4[0], b6=big_side4[1], b7=big_side4[2], b8=big_side4[3],
+                                    p1=block1.pk,
+                                    p2=block2.pk,
+                                    c1=c1.nr,
+                                    nr1=block1.nr1, nr2=block1.nr2, nr3=block1.nr3, nr4=block1.nr4,
+                                    nr5=block1.nr5, nr6=block1.nr6, nr7=block1.nr7, nr8=block1.nr8,
+                                    nr9=block1.nr9, nr10=block1.nr10, nr11=block1.nr11, nr12=block1.nr12,
+                                    nr13=block1.nr13, nr14=block1.nr14, nr15=block1.nr15, nr16=block1.nr16,
+                                    nr17=block2.nr1, nr18=block2.nr2, nr19=block2.nr3, nr20=block2.nr4,
+                                    nr21=block2.nr5, nr22=block2.nr6, nr23=block2.nr7, nr24=block2.nr8,
+                                    nr25=block2.nr9, nr26=block2.nr10, nr27=block2.nr11, nr28=block2.nr12,
+                                    nr29=block2.nr13, nr30=block2.nr14, nr31=block2.nr15, nr32=block2.nr16,
+                                    nr33=c1.nr1, nr34=c1.nr2, nr35=c1.nr3, nr36=c1.nr4)     # nr35 = hint: 181
+                        half.save()
+                        found += 1
+                        if found % 100 == 0:
+                            print(found)
 
                     self._board_free_nr(18)
                     self._board_free_nr(26)
