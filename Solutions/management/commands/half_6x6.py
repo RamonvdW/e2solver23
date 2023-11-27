@@ -1665,7 +1665,7 @@ class Command(BaseCommand):
                         self._generate_half6_c34()
                         self.find_6x6()
                 except KeyboardInterrupt:
-                    self.stdout.write('[WARNING] Interrupted')
+                    # warning for closed stdout!
                     sol.processor = 0
                     sol.save(update_fields=['processor'])
                     do_quit = True
@@ -1680,5 +1680,8 @@ class Command(BaseCommand):
                 self.stdout.write('[INFO] Waiting for new 4x4 (press Ctrl+C to abort)')
                 time.sleep(60)
         # while
+
+        # warning for closed stdout..
+        self.stdout.write('[WARNING] Interrupted')
 
 # end of file
