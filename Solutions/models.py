@@ -480,7 +480,7 @@ class Half6(models.Model):
 
     # was this 6x6 processed further into an 8x8?
     processor = models.PositiveIntegerField(default=0)
-    is_processed = models.BooleanField(default=False)
+    is_processed = models.BooleanField(default=False)       # TODO: not needed
 
     based_on_4x4 = models.PositiveBigIntegerField()
 

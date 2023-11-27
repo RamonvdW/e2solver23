@@ -1624,7 +1624,8 @@ class Command(BaseCommand):
         min_4x4_pk = 1
         self.stdout.write('[INFO] my_processor is %s' % self.my_processor)
 
-        while True:
+        do_quit = False
+        while not do_quit:
             sol = (Solution4x4
                    .objects
                    .filter(is_processed=False,
@@ -1643,13 +1644,23 @@ class Command(BaseCommand):
                     self.board_must_have[nr] = list()
                 # for
 
-                if self._generate_2x8_blocks():
-                    self._generate_half6_c12()
-                    self._generate_half6_c34()
-                    self.find_6x6()
+                try:
+                    if self._generate_2x8_blocks():
+                        self._generate_half6_c12()
+                        self._generate_half6_c34()
+                        self.find_6x6()
+                except KeyboardInterrupt:
+                    self.stdout.write('[WARNING] Interrupted')
+                    sol.processor = 0
+                    sol.save(update_fields=['processor'])
+                    do_quit = True
+                else:
+                    sol.is_processed = True
+                    sol.save(update_fields=['is_processed'])
 
-                sol.is_processed = True
-                sol.save(update_fields=['is_processed'])
+                # clean up
+                Half6.objects.filter(processor=self.my_processor).delete()
+                Block2x8.objects.filter(processor=self.my_processor).delete()
             else:
                 self.stdout.write('[INFO] Waiting for new 4x4 (press Ctrl+C to abort)')
                 time.sleep(60)
