@@ -68,6 +68,9 @@
 
     </table>
 
+    <br><br>
+    <p>{{ solution.hint_nrs }}</p>
+
     <!--
     <br><br>
 

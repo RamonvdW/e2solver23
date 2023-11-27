@@ -9,6 +9,7 @@ from django.urls import reverse
 from django.views.generic import TemplateView
 from django.templatetags.static import static
 from BasePieces.models import BasePiece
+from BasePieces.hints import HINT_NRS, CENTER_NR
 from Pieces2x2.models import Piece2x2, Block2x8, TwoSides
 from Solutions.models import Solution, Solution4x4, Solution6x6, Half6
 from types import SimpleNamespace
@@ -101,12 +102,19 @@ def _fill_sol(sol):
         # for
     # for
 
+    hint_nrs = list()
     for nr in range(1, 64 + 1):
         field_nr = 'nr%s' % nr
         field_note = 'note%s' % nr
 
         p2x2 = _get_2x2(getattr(sol, field_nr), getattr(sol, field_note, None))
         sol.p2x2s.append(p2x2)
+
+        if not p2x2.is_empty:
+            for base_nr in (p2x2.nr1, p2x2.nr2, p2x2.nr3, p2x2.nr4):
+                if base_nr in HINT_NRS or base_nr == CENTER_NR:
+                    hint_nrs.append(base_nr)
+            # for
 
         # side_is_open = [None, ]
         # for other_nr in neighbours[nr]:
@@ -149,6 +157,9 @@ def _fill_sol(sol):
     #     sol.s1_counts.append(tup)
     # # for
     # sol.s1_counts.sort()
+
+    hint_nrs.sort()
+    sol.hint_nrs = ", ".join([str(nr) for nr in hint_nrs])
 
     for nr in range(8, 66 + 1, 8):
         sol.p2x2s[nr - 1].break_after = True
