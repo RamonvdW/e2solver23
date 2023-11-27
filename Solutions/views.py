@@ -280,7 +280,7 @@ class Show4x4AutoView(TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        sol = Solution4x4.objects.order_by('-pk').first()       # highest first
+        sol = Solution4x4.objects.latest('pk')
         if sol:
             sol.nr = sol.pk
             for nr in range(1, 64+1):
@@ -376,7 +376,7 @@ class Show6x6AutoView(TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        sol = Solution6x6.objects.order_by('-pk').first()       # highest first
+        sol = Solution6x6.objects.latest('pk')
         if sol:
             sol.nr = sol.pk
             for nr in range(1, 64+1):
@@ -437,6 +437,7 @@ class Half6View(TemplateView):
 
             if half.type == 12:
                 sol = SimpleNamespace(
+                            nr=half.pk,
                             based_on_4x4=half.based_on_4x4,
                             nr11=block1.p1,
                             nr12=block1.p2,
@@ -449,6 +450,7 @@ class Half6View(TemplateView):
                             nr47=block2.p4)
             else:
                 sol = SimpleNamespace(
+                            nr=half.pk,
                             based_on_4x4=half.based_on_4x4,
                             nr54=block1.p1,
                             nr53=block1.p2,
@@ -501,13 +503,14 @@ class Half6AutoView(TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        half = Half6.objects.order_by('-pk').first()       # highest first
+        half = Half6.objects.latest('pk')
         if half:
             block1 = Block2x8.objects.get(pk=half.p1)
             block2 = Block2x8.objects.get(pk=half.p2)
 
             if half.type == 12:
                 sol = SimpleNamespace(
+                            nr=half.pk,
                             based_on_4x4=half.based_on_4x4,
                             nr11=block1.p1,
                             nr12=block1.p2,
@@ -520,6 +523,7 @@ class Half6AutoView(TemplateView):
                             nr47=block2.p4)
             else:
                 sol = SimpleNamespace(
+                            nr=half.pk,
                             based_on_4x4=half.based_on_4x4,
                             nr54=block1.p1,
                             nr53=block1.p2,

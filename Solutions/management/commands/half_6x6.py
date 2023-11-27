@@ -995,6 +995,12 @@ class Command(BaseCommand):
         # find the final corners
 
     def _generate_2x8_side1(self, avoid_nrs):
+        # side4 must match a potential nr10 piece side2
+        exp_side4 = [self.side_nr2reverse[side]
+                     for side in Piece2x2.objects.filter(nr1=208).distinct('side2').values_list('side2', flat=True)]
+        # side2 must match a potential nr15 piece side4
+        exp_side2 = [self.side_nr2reverse[side]
+                     for side in Piece2x2.objects.filter(nr2=255).distinct('side4').values_list('side4', flat=True)]
         big_side = [self.side_nr2reverse[self.board[nr].side1] for nr in self.NRS_4X4_SIDE1]
         always = {nr: 0 for nr in range(1, 256+1)}
         count = 0
@@ -1007,7 +1013,7 @@ class Command(BaseCommand):
                                              nr3__in=unused_nrs, nr4__in=unused_nrs))
 
         for p1 in p2x2s:
-            if p1.side3 == big_side[0]:
+            if p1.side3 == big_side[0] and p1.side4 in exp_side4:
                 unused_nrs1 = [nr for nr in unused_nrs0 if nr not in (p1.nr1, p1.nr2, p1.nr3, p1.nr4)]
                 unused_nrs = set(unused_nrs1)
                 p2_exp_s4 = self.side_nr2reverse[p1.side2]
@@ -1029,8 +1035,9 @@ class Command(BaseCommand):
                                 p4_exp_s4 = self.side_nr2reverse[p3.side2]
 
                                 for p4 in p2x2s:
-                                    if (p4.side3 == big_side[3] and p4.side4 == p4_exp_s4 and p4.nr1 in unused_nrs
-                                            and p4.nr2 in unused_nrs and p4.nr3 in unused_nrs and p4.nr4 in unused_nrs):
+                                    if (p4.side3 == big_side[3] and p4.side4 == p4_exp_s4 and p4.side2 in exp_side2
+                                            and p4.nr1 in unused_nrs and p4.nr2 in unused_nrs and p4.nr3 in unused_nrs
+                                            and p4.nr4 in unused_nrs):
 
                                         block = Block2x8(
                                                         processor=self.my_processor,
@@ -1078,6 +1085,12 @@ class Command(BaseCommand):
         return count, paxat
 
     def _generate_2x8_side2(self, avoid_nrs):
+        # side1 must match a potential nr15 piece side3
+        exp_side1 = [self.side_nr2reverse[side]
+                     for side in Piece2x2.objects.filter(nr2=255).distinct('side3').values_list('side3', flat=True)]
+        # side3 must match a potential nr55 piece side1
+        exp_side3 = [self.side_nr2reverse[side]
+                     for side in Piece2x2.objects.filter(nr4=249).distinct('side1').values_list('side1', flat=True)]
         big_side = [self.side_nr2reverse[self.board[nr].side2] for nr in self.NRS_4X4_SIDE2]
         always = {nr: 0 for nr in range(1, 256+1)}
         count = 0
@@ -1091,7 +1104,7 @@ class Command(BaseCommand):
                                              nr3__in=unused_nrs, nr4__in=unused_nrs))
 
         for p1 in p2x2s:
-            if p1.side4 == big_side[0]:
+            if p1.side4 == big_side[0] and p1.side1 in exp_side1:
 
                 unused_nrs1 = [nr for nr in unused_nrs0 if nr not in (p1.nr1, p1.nr2, p1.nr3, p1.nr4)]
                 unused_nrs = set(unused_nrs1)
@@ -1114,8 +1127,9 @@ class Command(BaseCommand):
                                 p4_exp_s1 = self.side_nr2reverse[p3.side3]
 
                                 for p4 in p2x2s:
-                                    if (p4.side4 == big_side[3] and p4.side1 == p4_exp_s1 and p4.nr1 in unused_nrs
-                                            and p4.nr2 in unused_nrs and p4.nr3 in unused_nrs and p4.nr4 in unused_nrs):
+                                    if (p4.side4 == big_side[3] and p4.side1 == p4_exp_s1 and p4.side3 in exp_side3
+                                            and p4.nr1 in unused_nrs and p4.nr2 in unused_nrs and p4.nr3 in unused_nrs
+                                            and p4.nr4 in unused_nrs):
 
                                         block = Block2x8(
                                                         processor=self.my_processor,
@@ -1163,6 +1177,12 @@ class Command(BaseCommand):
         return count, paxat
 
     def _generate_2x8_side3(self, avoid_nrs):
+        # side2 must match a potential nr55 piece side4
+        exp_side2 = [self.side_nr2reverse[side]
+                     for side in Piece2x2.objects.filter(nr4=249).distinct('side4').values_list('side4', flat=True)]
+        # side4 must match a potential nr50 piece side2
+        exp_side4 = [self.side_nr2reverse[side]
+                     for side in Piece2x2.objects.filter(nr3=181).distinct('side2').values_list('side2', flat=True)]
         big_side = [self.side_nr2reverse[self.board[nr].side3] for nr in self.NRS_4X4_SIDE3]
         always = {nr: 0 for nr in range(1, 256+1)}
         count = 0
@@ -1176,7 +1196,7 @@ class Command(BaseCommand):
                                              nr3__in=unused_nrs, nr4__in=unused_nrs))
 
         for p1 in p2x2s:
-            if p1.side1 == big_side[0]:
+            if p1.side1 == big_side[0] and p1.side2 in exp_side2:
 
                 unused_nrs1 = [nr for nr in unused_nrs0 if nr not in (p1.nr1, p1.nr2, p1.nr3, p1.nr4)]
                 unused_nrs = set(unused_nrs1)
@@ -1199,8 +1219,9 @@ class Command(BaseCommand):
                                 p4_exp_s2 = self.side_nr2reverse[p3.side4]
 
                                 for p4 in p2x2s:
-                                    if (p4.side1 == big_side[3] and p4.side2 == p4_exp_s2 and p4.nr1 in unused_nrs
-                                            and p4.nr2 in unused_nrs and p4.nr3 in unused_nrs and p4.nr4 in unused_nrs):
+                                    if (p4.side1 == big_side[3] and p4.side2 == p4_exp_s2 and p4.side4 in exp_side4
+                                            and p4.nr1 in unused_nrs and p4.nr2 in unused_nrs and p4.nr3 in unused_nrs
+                                            and p4.nr4 in unused_nrs):
 
                                         block = Block2x8(
                                                         processor=self.my_processor,
@@ -1248,6 +1269,12 @@ class Command(BaseCommand):
         return count, paxat
 
     def _generate_2x8_side4(self, avoid_nrs):
+        # side1 must match a potential nr10 piece side3
+        exp_side1 = [self.side_nr2reverse[side]
+                     for side in Piece2x2.objects.filter(nr1=208).distinct('side3').values_list('side3', flat=True)]
+        # side3 must match a potential nr50 piece side1
+        exp_side3 = [self.side_nr2reverse[side]
+                     for side in Piece2x2.objects.filter(nr3=181).distinct('side1').values_list('side1', flat=True)]
         big_side = [self.side_nr2reverse[self.board[nr].side4] for nr in self.NRS_4X4_SIDE4]
         always = {nr: 0 for nr in range(1, 256+1)}
         count = 0
@@ -1260,7 +1287,7 @@ class Command(BaseCommand):
                                              nr3__in=unused_nrs, nr4__in=unused_nrs))
 
         for p1 in p2x2s:
-            if p1.side2 == big_side[0]:
+            if p1.side2 == big_side[0] and p1.side3 in exp_side3:
 
                 unused_nrs1 = [nr for nr in unused_nrs0 if nr not in (p1.nr1, p1.nr2, p1.nr3, p1.nr4)]
                 unused_nrs = set(unused_nrs1)
@@ -1283,8 +1310,9 @@ class Command(BaseCommand):
                                 p4_exp_s3 = self.side_nr2reverse[p3.side1]
 
                                 for p4 in p2x2s:
-                                    if (p4.side2 == big_side[3] and p4.side3 == p4_exp_s3 and p4.nr1 in unused_nrs
-                                            and p4.nr2 in unused_nrs and p4.nr3 in unused_nrs and p4.nr4 in unused_nrs):
+                                    if (p4.side2 == big_side[3] and p4.side3 == p4_exp_s3 and p4.side1 in exp_side1
+                                            and p4.nr1 in unused_nrs and p4.nr2 in unused_nrs and p4.nr3 in unused_nrs
+                                            and p4.nr4 in unused_nrs):
 
                                         block = Block2x8(
                                                         processor=self.my_processor,
