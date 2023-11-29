@@ -912,7 +912,6 @@ class Command(BaseCommand):
                     # warning for closed stdout!
                     sol.processor = 0
                     sol.save(update_fields=['processor'])
-                    do_quit = True                          # TODO: tijdelijk
                 else:
                     sol.is_processed = True
                     sol.save(update_fields=['is_processed'])
