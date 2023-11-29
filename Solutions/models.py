@@ -602,4 +602,76 @@ class Half6(models.Model):
     objects = models.Manager()  # for the editor only
 
 
+class Quart6(models.Model):
+
+    """ Quart of a 6x6 outer ring
+        Made for a specific 4x4, so the inner ring is not stored
+
+
+         c1    p2                 p1    c1
+           +--+--+               +--+--+
+           |10|11|               |14|15|
+           +--+--+               +--+--+
+        p1 |18|                     |23| p2
+           +--+ type10       type15 +--+
+
+           +--+ type50       type55 +--+
+        p2 |42|                     |47| p1
+           +--+--+               +--+--+
+           |50|51|               |54|55|
+           +--+--+               +--+--+
+         c1    p1                 p2    c1
+    """
+
+    # created by which task?
+    processor = models.PositiveIntegerField(default=0)
+
+    based_on_4x4 = models.PositiveBigIntegerField()
+
+    # 10, 15, 50 or 55
+    type = models.PositiveSmallIntegerField()
+
+    # composite pieces making up this quart
+    p1 = models.PositiveIntegerField()      # Piece2x2
+    c1 = models.PositiveIntegerField()      # Piece2x2 with hint
+    p2 = models.PositiveIntegerField()      # Piece2x2
+
+    # base pieces making up this quart
+    # (only intended for filtering)
+    nr1 = models.PositiveSmallIntegerField()
+    nr2 = models.PositiveSmallIntegerField()
+    nr3 = models.PositiveSmallIntegerField()
+    nr4 = models.PositiveSmallIntegerField()
+
+    nr5 = models.PositiveSmallIntegerField()
+    nr6 = models.PositiveSmallIntegerField()
+    nr7 = models.PositiveSmallIntegerField()
+    nr8 = models.PositiveSmallIntegerField()
+
+    nr9 = models.PositiveSmallIntegerField()
+    nr10 = models.PositiveSmallIntegerField()
+    nr11 = models.PositiveSmallIntegerField()
+    nr12 = models.PositiveSmallIntegerField()
+
+    class Meta:
+        verbose_name = verbose_name_plural = 'Quart6'
+
+        indexes = [
+            models.Index(fields=['nr1']),
+            models.Index(fields=['nr2']),
+            models.Index(fields=['nr3']),
+            models.Index(fields=['nr4']),
+            models.Index(fields=['nr5']),
+            models.Index(fields=['nr6']),
+            models.Index(fields=['nr7']),
+            models.Index(fields=['nr8']),
+            models.Index(fields=['nr9']),
+            models.Index(fields=['nr10']),
+            models.Index(fields=['nr11']),
+            models.Index(fields=['nr12']),
+        ]
+
+    objects = models.Manager()  # for the editor only
+
+
 # end of file

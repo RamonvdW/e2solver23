@@ -43,6 +43,14 @@ urlpatterns = [
     path('half6/<nr>/',
          views.Half6View.as_view(),
          name='show-half6'),
+
+    path('quart6/auto/',
+         views.Quart6AutoView.as_view(),
+         name='auto-show-quart6'),
+
+    path('quart6/<nr>/',
+         views.Quart6View.as_view(),
+         name='show-quart6'),
 ]
 
 

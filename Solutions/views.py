@@ -11,7 +11,7 @@ from django.templatetags.static import static
 from BasePieces.models import BasePiece
 from BasePieces.hints import HINT_NRS, CENTER_NR
 from Pieces2x2.models import Piece2x2, Block2x8, TwoSides
-from Solutions.models import Solution, Solution4x4, Solution6x6, Half6
+from Solutions.models import Solution, Solution4x4, Solution6x6, Half6, Quart6
 from types import SimpleNamespace
 
 TEMPLATE_VIEW = 'solutions/show.dtl'
@@ -31,11 +31,7 @@ def _get_2x2(nr, note):
 
         piece.is_empty = True
         if note:
-            piece.note = '2x2: ' + note.replace(' ', '\n1x1: {').replace(',', ', ')
-            if ',' in note:
-                piece.note += '}'
-            else:
-                piece.note = piece.note.replace('{', '')
+            piece.note = '2x2: ' + note.replace(' ', '\n').replace(')\n', ')\n1x1: ').replace('max\n', 'max ').replace(',', ', ')
     else:
         piece = Piece2x2.objects.get(nr=nr)
 
@@ -80,6 +76,53 @@ def _calc_neighbours():
     return neighbours
 
 
+def _check_hints(sol):
+    p_nr10 = p_nr15 = p_nr50 = p_nr55 = None
+    base0 = list(range(60, 256+1))
+    for p in sol.p2x2s:
+        if not p.is_empty:
+            base0.remove(p.nr1)
+            base0.remove(p.nr2)
+            base0.remove(p.nr3)
+            base0.remove(p.nr4)
+        else:
+            if p.nr == 10:
+                p_nr10 = p
+            elif p.nr == 15:
+                p_nr15 = p
+            elif p.nr == 50:
+                p_nr50 = p
+            elif p.nr == 55:
+                p_nr55 = p
+    # for
+
+    for base_nr in (208, 255, 181, 249):
+        if base_nr in base0:
+            base0.remove(base_nr)
+    # for
+    base0 = frozenset(base0)
+
+    if p_nr10:
+        base2 = frozenset(Piece2x2.objects.filter(nr1=208).distinct('nr2').values_list('nr2', flat=True))
+        base3 = frozenset(Piece2x2.objects.filter(nr1=208).distinct('nr3').values_list('nr3', flat=True))
+        p_nr10.note += "\n{%s, %s}" % (len(base0.intersection(base2)), len(base0.intersection(base3)))
+
+    if p_nr15:
+        base1 = frozenset(Piece2x2.objects.filter(nr2=255).distinct('nr1').values_list('nr1', flat=True))
+        base4 = frozenset(Piece2x2.objects.filter(nr2=255).distinct('nr4').values_list('nr4', flat=True))
+        p_nr15.note += "\n{%s, %s}" % (len(base0.intersection(base1)), len(base0.intersection(base4)))
+
+    if p_nr50:
+        base1 = frozenset(Piece2x2.objects.filter(nr3=181).distinct('nr1').values_list('nr1', flat=True))
+        base4 = frozenset(Piece2x2.objects.filter(nr3=181).distinct('nr4').values_list('nr4', flat=True))
+        p_nr50.note += "\n{%s, %s}" % (len(base0.intersection(base1)), len(base0.intersection(base4)))
+
+    if p_nr55:
+        base2 = frozenset(Piece2x2.objects.filter(nr4=249).distinct('nr2').values_list('nr2', flat=True))
+        base3 = frozenset(Piece2x2.objects.filter(nr4=249).distinct('nr3').values_list('nr3', flat=True))
+        p_nr55.note += "\n{%s, %s}" % (len(base0.intersection(base2)), len(base0.intersection(base3)))
+
+
 def _fill_sol(sol):
     # neighbours = _calc_neighbours()
 
@@ -115,6 +158,8 @@ def _fill_sol(sol):
                 if base_nr in HINT_NRS or base_nr == CENTER_NR:
                     hint_nrs.append(base_nr)
             # for
+        else:
+            p2x2.nr = nr
 
         # side_is_open = [None, ]
         # for other_nr in neighbours[nr]:
@@ -181,6 +226,7 @@ class ShowView(TemplateView):
 
         context['solution'] = sol = Solution.objects.get(nr=nr)
         _fill_sol(sol)
+        _check_hints(sol)
 
         if nr > 100:
             context['url_prev100'] = reverse('Solutions:show', kwargs={'nr': nr-100})
@@ -211,6 +257,7 @@ class ShowAutoView(TemplateView):
         if sol:
             context['solution'] = sol
             _fill_sol(sol)
+            _check_hints(sol)
 
             nr = sol.nr
             if nr > 100:
@@ -253,6 +300,7 @@ class Show4x4View(TemplateView):
                 setattr(sol, nr_str, 0)
         # for
         _fill_sol(sol)
+        _check_hints(sol)
 
         nr = sol.nr
         if nr > 100:
@@ -294,6 +342,7 @@ class Show4x4AutoView(TemplateView):
             # for
             context['solution'] = sol
             _fill_sol(sol)
+            _check_hints(sol)
 
             nr = sol.nr
             if nr > 100:
@@ -340,6 +389,7 @@ class Show6x6View(TemplateView):
                 setattr(sol, nr_str, 0)
         # for
         _fill_sol(sol)
+        _check_hints(sol)
 
         context['based_on'] = '4x4 nr %s' % sol.based_on_4x4
 
@@ -376,7 +426,11 @@ class Show6x6AutoView(TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        sol = Solution6x6.objects.latest('pk')
+        try:
+            sol = Solution6x6.objects.latest('pk')
+        except Solution6x6.DoesNotExist:
+            sol = None
+
         if sol:
             sol.nr = sol.pk
             for nr in range(1, 64+1):
@@ -394,6 +448,7 @@ class Show6x6AutoView(TemplateView):
             # for
             context['solution'] = sol
             _fill_sol(sol)
+            _check_hints(sol)
 
             context['based_on'] = '4x4 nr %s' % sol.based_on_4x4
 
@@ -470,6 +525,7 @@ class Half6View(TemplateView):
 
             context['solution'] = sol
             _fill_sol(sol)
+            _check_hints(sol)
 
             context['based_on'] = '4x4 nr %s' % half.based_on_4x4
 
@@ -503,7 +559,11 @@ class Half6AutoView(TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        half = Half6.objects.latest('pk')
+        try:
+            half = Half6.objects.latest('pk')
+        except Half6.DoesNotExist:
+            half = None
+
         if half:
             block1 = Block2x8.objects.get(pk=half.p1)
             block2 = Block2x8.objects.get(pk=half.p2)
@@ -543,6 +603,7 @@ class Half6AutoView(TemplateView):
 
             context['solution'] = sol
             _fill_sol(sol)
+            _check_hints(sol)
 
             context['based_on'] = '4x4 nr %s' % half.based_on_4x4
 
@@ -562,6 +623,137 @@ class Half6AutoView(TemplateView):
         context['auto_reload'] = True
 
         context['title'] = 'Half6'
+
+        return context
+
+
+class Quart6View(TemplateView):
+
+    template_name = TEMPLATE_VIEW
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        try:
+            nr = int(kwargs['nr'][:10])      # afkappen voor de veiligheid
+        except ValueError:
+            raise Http404('Not found')
+
+        quart = Quart6.objects.filter(pk=nr).first()       # highest first
+        if quart:
+            if quart.type == 10:
+                nrs = (18, 10, 11)
+            elif quart.type == 15:
+                nrs = (14, 15, 23)
+            elif quart.type == 50:
+                nrs = (51, 50, 42)
+            elif quart.type == 55:
+                nrs = (47, 55, 54)
+            else:
+                nrs = (1, 2, 3)
+
+            sol = SimpleNamespace(
+                        nr=quart.pk,
+                        based_on_4x4=quart.based_on_4x4)
+
+            setattr(sol, 'nr%s' % nrs[0], quart.p1)
+            setattr(sol, 'nr%s' % nrs[1], quart.c1)
+            setattr(sol, 'nr%s' % nrs[2], quart.p2)
+
+            for nr in range(1, 64+1):
+                nr_str = 'nr%s' % nr
+                if getattr(sol, nr_str, None) is None:
+                    setattr(sol, nr_str, 0)
+            # for
+
+            context['solution'] = sol
+            _fill_sol(sol)
+
+            context['based_on'] = '4x4 nr %s' % quart.based_on_4x4
+
+            nr = quart.pk
+            if nr > 100:
+                context['url_prev100'] = reverse('Solutions:show-quart6', kwargs={'nr': nr-100})
+            if nr > 10:
+                context['url_prev10'] = reverse('Solutions:show-quart6', kwargs={'nr': nr-10})
+            if nr > 1:
+                context['url_prev1'] = reverse('Solutions:show-quart6', kwargs={'nr': nr-1})
+
+            pks = list(Quart6.objects.filter(based_on_4x4=quart.based_on_4x4).order_by('pk').values_list('pk', flat=True))
+            idx = pks.index(quart.pk)
+            if idx > 0:
+                context['url_prev4x4'] = reverse('Solutions:show-quart6', kwargs={'nr': pks[idx - 1]})
+            if idx < len(pks) - 1:
+                context['url_next4x4'] = reverse('Solutions:show-quart6', kwargs={'nr': pks[idx + 1]})
+
+        context['url_auto'] = reverse('Solutions:auto-show-quart6')
+
+        context['title'] = 'Quart6'
+
+        return context
+
+
+class Quart6AutoView(TemplateView):
+
+    template_name = TEMPLATE_VIEW
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        try:
+            quart = Quart6.objects.latest('pk')
+        except Quart6.DoesNotExist:
+            quart = None
+
+        if quart:
+            if quart.type == 10:
+                nrs = (18, 10, 11)
+            elif quart.type == 15:
+                nrs = (14, 15, 23)
+            elif quart.type == 50:
+                nrs = (51, 50, 42)
+            elif quart.type == 55:
+                nrs = (47, 55, 54)
+            else:
+                nrs = (1, 2, 3)
+
+            sol = SimpleNamespace(
+                        nr=quart.pk,
+                        based_on_4x4=quart.based_on_4x4)
+
+            setattr(sol, 'nr%s' % nrs[0], quart.p1)
+            setattr(sol, 'nr%s' % nrs[1], quart.c1)
+            setattr(sol, 'nr%s' % nrs[2], quart.p2)
+
+            for nr in range(1, 64+1):
+                nr_str = 'nr%s' % nr
+                if getattr(sol, nr_str, None) is None:
+                    setattr(sol, nr_str, 0)
+            # for
+
+            context['solution'] = sol
+            _fill_sol(sol)
+
+            context['based_on'] = '4x4 nr %s' % quart.based_on_4x4
+
+            nr = quart.pk
+            if nr > 100:
+                context['url_prev100'] = reverse('Solutions:show-quart6', kwargs={'nr': nr-100})
+            if nr > 10:
+                context['url_prev10'] = reverse('Solutions:show-quart6', kwargs={'nr': nr-10})
+            if nr > 1:
+                context['url_prev1'] = reverse('Solutions:show-quart6', kwargs={'nr': nr-1})
+
+            pks = list(Quart6.objects.filter(based_on_4x4=quart.based_on_4x4).order_by('pk').values_list('pk', flat=True))
+            idx = pks.index(quart.pk)
+            if idx > 0:
+                context['url_prev4x4'] = reverse('Solutions:show-quart6', kwargs={'nr': pks[idx-1]})
+
+        context['auto_reload'] = True
+
+        context['title'] = 'Quart6'
 
         return context
 
