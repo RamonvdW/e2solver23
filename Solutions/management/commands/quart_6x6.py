@@ -552,7 +552,7 @@ class Command(BaseCommand):
 
             field_nr = 'nr%s' % nr
             p_nr = getattr(sol, field_nr)
-            p = Piece2x2.objects.get(nr=p_nr)       # TODO: get all with 1 query
+            p = Piece2x2.objects.get(nr=p_nr)       # FUTURE: get all with 1 query
             self._board_fill_nr(nr, p)
         # for
 
@@ -568,100 +568,306 @@ class Command(BaseCommand):
 
         self._count_all(1)
 
-    def _fill_quart_gaps_52_53(self):
-        self._count_all(1)
-        self._save_board6x6()
+    # def _fill_quart_gaps_52_53(self):
+    #     self._count_all(1)
+    #     self._save_board6x6()
+    #
+    #     for p52 in self._iter_for_nr(52):
+    #         self._board_fill_nr(52, p52)
+    #
+    #         for p53 in self._iter_for_nr(53):
+    #             self._board_fill_nr(53, p53)
+    #
+    #             # FOUND a 6x6 solution!
+    #             self.stdout.write('[INFO] PARTY TIME!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+    #             self._count_all(1)
+    #             self._save_board6x6()
+    #
+    #             self._board_free_nr(53)
+    #         # for
+    #
+    #         self._board_free_nr(52)
+    #     # for
+    #
+    # def _fill_quart_gaps_31_39(self):
+    #     self._count_all(1)
+    #     self._save_board6x6()
+    #
+    #     for p31 in self._iter_for_nr(31):
+    #         self._board_fill_nr(31, p31)
+    #
+    #         for p39 in self._iter_for_nr(39):
+    #             self._board_fill_nr(39, p39)
+    #
+    #             # verify a solution is possible
+    #             count52, _, _ = self._count_2x2(52, self.board_unused_nrs)
+    #             count53, _, _ = self._count_2x2(53, self.board_unused_nrs)
+    #
+    #             if count52 > 0 and count53 > 0:
+    #                 self._fill_quart_gaps_52_53()
+    #
+    #             self._board_free_nr(39)
+    #         # for
+    #
+    #         self._board_free_nr(31)
+    #     # for
+    #
+    # def _fill_quart_gaps_26_34(self):
+    #     self._count_all(1)
+    #     self._save_board6x6()
+    #
+    #     for p26 in self._iter_for_nr(26):
+    #         self._board_fill_nr(26, p26)
+    #
+    #         for p34 in self._iter_for_nr(34):
+    #             self._board_fill_nr(34, p34)
+    #
+    #             # verify a solution is possible
+    #             count31, _, _ = self._count_2x2(31, self.board_unused_nrs)
+    #             count39, _, _ = self._count_2x2(39, self.board_unused_nrs)
+    #             count52, _, _ = self._count_2x2(52, self.board_unused_nrs)
+    #             count53, _, _ = self._count_2x2(53, self.board_unused_nrs)
+    #
+    #             if count31 > 0 and count39 > 0 and count52 > 0 and count53 > 0:
+    #                 self._fill_quart_gaps_31_39()
+    #
+    #             self._board_free_nr(34)
+    #         # for
+    #
+    #         self._board_free_nr(26)
+    #     # for
+    #
+    # def _fill_quart_gaps_12_13(self):
+    #     # self._count_all(1)
+    #     # self._save_board6x6()
+    #
+    #     for p12 in self._iter_for_nr(12):
+    #         self._board_fill_nr(12, p12)
+    #
+    #         for p13 in self._iter_for_nr(13):
+    #             self._board_fill_nr(13, p13)
+    #
+    #             # verify a solution is possible
+    #             count26, _, _ = self._count_2x2(26, self.board_unused_nrs)
+    #             count31, _, _ = self._count_2x2(31, self.board_unused_nrs)
+    #             count34, _, _ = self._count_2x2(34, self.board_unused_nrs)
+    #             count39, _, _ = self._count_2x2(39, self.board_unused_nrs)
+    #             count52, _, _ = self._count_2x2(52, self.board_unused_nrs)
+    #             count53, _, _ = self._count_2x2(53, self.board_unused_nrs)
+    #
+    #             if count26 > 0 and count31 > 0 and count34 > 0 and count39 > 0 and count52 > 0 and count53 > 0:
+    #                 self._fill_quart_gaps_26_34()
+    #
+    #             self._board_free_nr(13)
+    #             # for
+    #
+    #         self._board_free_nr(12)
+    #     # for
+    #
+    # def find_6x6a(self):
+    #     self.stdout.write('[INFO] Start solving')
+    #
+    #     for nr in range(1, 64+1):
+    #         self.board_must_have[nr] = list()
+    #     # for
+    #
+    #     self._save_board6x6()
+    #
+    #     # iterate over the first Half6
+    #     unused_nrs0 = [nr for nr in self.board_unused_nrs if nr > 60]       # skip borders
+    #     unused_nrs0.append(208)
+    #     unused_nrs = set(unused_nrs0)
+    #     for quart1 in (Quart6
+    #                    .objects
+    #                    .filter(processor=self.my_processor,
+    #                            based_on_4x4=self.based_on,
+    #                            type=10)
+    #                    .filter(nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs,
+    #                            nr5__in=unused_nrs, nr6__in=unused_nrs, nr7__in=unused_nrs, nr8__in=unused_nrs,
+    #                            nr9__in=unused_nrs, nr10__in=unused_nrs, nr11__in=unused_nrs, nr12__in=unused_nrs)):
+    #
+    #         # print('quart1=%s' % quart1.pk)
+    #
+    #         # place the pieces
+    #         self._board_fill_nr(18, Piece2x2.objects.get(nr=quart1.p1))
+    #         self._board_fill_nr(10, Piece2x2.objects.get(nr=quart1.c1))
+    #         self._board_fill_nr(11, Piece2x2.objects.get(nr=quart1.p2))
+    #
+    #         # verify a solution is possible
+    #         count12, _, _ = self._count_2x2(12, self.board_unused_nrs)
+    #         count26, _, _ = self._count_2x2(26, self.board_unused_nrs)
+    #         if count12 > 0 and count26 > 0:
+    #
+    #             # iterate over the second Quart6
+    #             used_nrs1 = (quart1.nr1, quart1.nr2, quart1.nr3, quart1.nr4,
+    #                          quart1.nr5, quart1.nr6, quart1.nr7, quart1.nr8,
+    #                          quart1.nr9, quart1.nr10, quart1.nr11, quart1.nr12)
+    #
+    #             unused_nrs1 = [nr for nr in unused_nrs0 if nr not in used_nrs1]
+    #             unused_nrs1.append(255)
+    #             unused_nrs = set(unused_nrs1)
+    #
+    #             for quart2 in (Quart6
+    #                            .objects
+    #                            .filter(processor=self.my_processor,
+    #                                    based_on_4x4=self.based_on,
+    #                                    type=15)
+    #                            .filter(nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs,
+    #                                    nr5__in=unused_nrs, nr6__in=unused_nrs, nr7__in=unused_nrs, nr8__in=unused_nrs,
+    #                                    nr9__in=unused_nrs, nr10__in=unused_nrs, nr11__in=unused_nrs, nr12__in=unused_nrs)):
+    #
+    #                 # print('quart2=%s' % quart2.pk)
+    #
+    #                 # place the pieces
+    #                 self._board_fill_nr(14, Piece2x2.objects.get(nr=quart2.p1))
+    #                 self._board_fill_nr(15, Piece2x2.objects.get(nr=quart2.c1))
+    #                 self._board_fill_nr(23, Piece2x2.objects.get(nr=quart2.p2))
+    #
+    #                 count12, _, _ = self._count_2x2(12, self.board_unused_nrs)
+    #                 count13, _, _ = self._count_2x2(13, self.board_unused_nrs)
+    #                 count26, _, _ = self._count_2x2(26, self.board_unused_nrs)
+    #                 count31, _, _ = self._count_2x2(31, self.board_unused_nrs)
+    #                 if count12 > 0 and count13 > 0 and count26 > 0 and count31 > 0:
+    #
+    #                     # iterate over the third Quart6
+    #                     used_nrs2 = (quart2.nr1, quart2.nr2, quart2.nr3, quart2.nr4,
+    #                                  quart2.nr5, quart2.nr6, quart2.nr7, quart2.nr8,
+    #                                  quart2.nr9, quart2.nr10, quart2.nr11, quart2.nr12)
+    #
+    #                     unused_nrs2 = [nr for nr in unused_nrs1 if nr not in used_nrs2]
+    #                     unused_nrs2.append(181)
+    #                     unused_nrs = set(unused_nrs2)
+    #
+    #                     for quart3 in (Quart6
+    #                                    .objects
+    #                                    .filter(processor=self.my_processor,
+    #                                            based_on_4x4=self.based_on,
+    #                                            type=50)
+    #                                    .filter(nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs,
+    #                                            nr5__in=unused_nrs, nr6__in=unused_nrs, nr7__in=unused_nrs, nr8__in=unused_nrs,
+    #                                            nr9__in=unused_nrs, nr10__in=unused_nrs, nr11__in=unused_nrs, nr12__in=unused_nrs)):
+    #
+    #                         # print('quart3=%s' % quart3.pk)
+    #
+    #                         # place the pieces
+    #                         self._board_fill_nr(51, Piece2x2.objects.get(nr=quart3.p1))
+    #                         self._board_fill_nr(50, Piece2x2.objects.get(nr=quart3.c1))
+    #                         self._board_fill_nr(42, Piece2x2.objects.get(nr=quart3.p2))
+    #
+    #                         count12, _, _ = self._count_2x2(12, self.board_unused_nrs)
+    #                         count13, _, _ = self._count_2x2(13, self.board_unused_nrs)
+    #                         count26, _, _ = self._count_2x2(26, self.board_unused_nrs)
+    #                         count31, _, _ = self._count_2x2(31, self.board_unused_nrs)
+    #                         count34, _, _ = self._count_2x2(34, self.board_unused_nrs)
+    #                         count52, _, _ = self._count_2x2(52, self.board_unused_nrs)
+    #                         if count12 > 0 and count13 > 0 and count26 > 0 and count31 > 0 and count34 > 0 and count52 > 0:
+    #
+    #                             # iterate over the fourth Quart6
+    #                             used_nrs3 = (quart3.nr1, quart3.nr2, quart3.nr3, quart3.nr4,
+    #                                          quart3.nr5, quart3.nr6, quart3.nr7, quart3.nr8,
+    #                                          quart3.nr9, quart3.nr10, quart3.nr11, quart3.nr12)
+    #
+    #                             unused_nrs3 = [nr for nr in unused_nrs2 if nr not in used_nrs3]
+    #                             unused_nrs3.append(249)
+    #                             unused_nrs = set(unused_nrs3)
+    #
+    #                             for quart4 in (Quart6
+    #                                            .objects
+    #                                            .filter(processor=self.my_processor,
+    #                                                    based_on_4x4=self.based_on,
+    #                                                    type=55)
+    #                                            .filter(nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs,
+    #                                                    nr5__in=unused_nrs, nr6__in=unused_nrs, nr7__in=unused_nrs, nr8__in=unused_nrs,
+    #                                                    nr9__in=unused_nrs, nr10__in=unused_nrs, nr11__in=unused_nrs, nr12__in=unused_nrs)):
+    #
+    #                                 # place the pieces
+    #                                 self._board_fill_nr(47, Piece2x2.objects.get(nr=quart4.p1))
+    #                                 self._board_fill_nr(55, Piece2x2.objects.get(nr=quart4.c1))
+    #                                 self._board_fill_nr(54, Piece2x2.objects.get(nr=quart4.p2))
+    #
+    #                                 # verify a solution is possible
+    #                                 count12, _, _ = self._count_2x2(12, self.board_unused_nrs)
+    #                                 count13, _, _ = self._count_2x2(13, self.board_unused_nrs)
+    #                                 count26, _, _ = self._count_2x2(26, self.board_unused_nrs)
+    #                                 count31, _, _ = self._count_2x2(31, self.board_unused_nrs)
+    #                                 count34, _, _ = self._count_2x2(34, self.board_unused_nrs)
+    #                                 count39, _, _ = self._count_2x2(39, self.board_unused_nrs)
+    #                                 count52, _, _ = self._count_2x2(52, self.board_unused_nrs)
+    #                                 count53, _, _ = self._count_2x2(53, self.board_unused_nrs)
+    #
+    #                                 if count12 > 0 and count13 > 0 and count26 > 0 and count31 > 0 and count34 > 0 and count39 > 0 and count52 > 0 and count53 > 0:
+    #                                     self._fill_quart_gaps_12_13()
+    #
+    #                                 self._board_free_nr(54)
+    #                                 self._board_free_nr(55)
+    #                                 self._board_free_nr(47)
+    #                             # for
+    #
+    #                         self._board_free_nr(42)
+    #                         self._board_free_nr(50)
+    #                         self._board_free_nr(51)
+    #                     # for
+    #
+    #                 self._board_free_nr(23)
+    #                 self._board_free_nr(15)
+    #                 self._board_free_nr(14)
+    #             # for
+    #
+    #         self._board_free_nr(11)
+    #         self._board_free_nr(10)
+    #         self._board_free_nr(18)
+    #     # for
+    #
 
-        for p52 in self._iter_for_nr(52):
-            self._board_fill_nr(52, p52)
+    def _fill_quart(self, hint_nr, nr_p1, nr_c, nr_p2, nr_m1, nr_m2, nr_chk1, nr_chk2):
+        unused_nrs = [nr for nr in self.board_unused_nrs if nr > 60]       # skip borders
+        unused_nrs.append(hint_nr)
+        unused_nrs = set(unused_nrs)
 
-            for p53 in self._iter_for_nr(53):
-                self._board_fill_nr(53, p53)
+        # iterate over the first Half6
+        for quart in (Quart6
+                      .objects
+                      .filter(processor=self.my_processor,
+                              based_on_4x4=self.based_on,
+                              type=nr_c)
+                      .filter(nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs,
+                              nr5__in=unused_nrs, nr6__in=unused_nrs, nr7__in=unused_nrs, nr8__in=unused_nrs,
+                              nr9__in=unused_nrs, nr10__in=unused_nrs, nr11__in=unused_nrs, nr12__in=unused_nrs)):
 
-                # FOUND a 6x6 solution!
-                self.stdout.write('[INFO] PARTY TIME!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-                self._count_all(1)
-                self._save_board6x6()
+            # place the pieces
+            self._board_fill_nr(nr_p1, Piece2x2.objects.get(nr=quart.p1))
+            self._board_fill_nr(nr_c,  Piece2x2.objects.get(nr=quart.c1))
+            self._board_fill_nr(nr_p2, Piece2x2.objects.get(nr=quart.p2))
 
-                self._board_free_nr(53)
-            # for
+            # cement the piece in place
+            for m1 in self._iter_for_nr(nr_m1):
+                self._board_fill_nr(nr_m1, m1)
 
-            self._board_free_nr(52)
-        # for
+                for m2 in self._iter_for_nr(nr_m2):
+                    self._board_fill_nr(nr_m2, m2)
 
-    def _fill_quart_gaps_31_39(self):
-        self._count_all(1)
-        self._save_board6x6()
+                    if nr_chk1 > 0:
+                        count1, _, _ = self._count_2x2(nr_chk1, self.board_unused_nrs)
+                    else:
+                        count1 = 1
 
-        for p31 in self._iter_for_nr(31):
-            self._board_fill_nr(31, p31)
+                    if nr_chk2 > 0:
+                        count2, _, _ = self._count_2x2(nr_chk2, self.board_unused_nrs)
+                    else:
+                        count2 = 1
 
-            for p39 in self._iter_for_nr(39):
-                self._board_fill_nr(39, p39)
+                    if count1 > 0 and count2 > 0:
+                        yield quart
 
-                # verify a solution is possible
-                count52, _, _ = self._count_2x2(52, self.board_unused_nrs)
-                count53, _, _ = self._count_2x2(53, self.board_unused_nrs)
-
-                if count52 > 0 and count53 > 0:
-                    self._fill_quart_gaps_52_53()
-
-                self._board_free_nr(39)
-            # for
-
-            self._board_free_nr(31)
-        # for
-
-    def _fill_quart_gaps_26_34(self):
-        self._count_all(1)
-        self._save_board6x6()
-
-        for p26 in self._iter_for_nr(26):
-            self._board_fill_nr(26, p26)
-
-            for p34 in self._iter_for_nr(34):
-                self._board_fill_nr(34, p34)
-
-                # verify a solution is possible
-                count31, _, _ = self._count_2x2(31, self.board_unused_nrs)
-                count39, _, _ = self._count_2x2(39, self.board_unused_nrs)
-                count52, _, _ = self._count_2x2(52, self.board_unused_nrs)
-                count53, _, _ = self._count_2x2(53, self.board_unused_nrs)
-
-                if count31 > 0 and count39 > 0 and count52 > 0 and count53 > 0:
-                    self._fill_quart_gaps_31_39()
-
-                self._board_free_nr(34)
-            # for
-
-            self._board_free_nr(26)
-        # for
-
-    def _fill_quart_gaps_12_13(self):
-        # self._count_all(1)
-        # self._save_board6x6()
-
-        for p12 in self._iter_for_nr(12):
-            self._board_fill_nr(12, p12)
-
-            for p13 in self._iter_for_nr(13):
-                self._board_fill_nr(13, p13)
-
-                # verify a solution is possible
-                count26, _, _ = self._count_2x2(26, self.board_unused_nrs)
-                count31, _, _ = self._count_2x2(31, self.board_unused_nrs)
-                count34, _, _ = self._count_2x2(34, self.board_unused_nrs)
-                count39, _, _ = self._count_2x2(39, self.board_unused_nrs)
-                count52, _, _ = self._count_2x2(52, self.board_unused_nrs)
-                count53, _, _ = self._count_2x2(53, self.board_unused_nrs)
-
-                if count26 > 0 and count31 > 0 and count34 > 0 and count39 > 0 and count52 > 0 and count53 > 0:
-                    self._fill_quart_gaps_26_34()
-
-                self._board_free_nr(13)
+                    self._board_free_nr(nr_m2)
                 # for
 
-            self._board_free_nr(12)
+                self._board_free_nr(nr_m1)
+            # for
+
+            self._board_free_nr(nr_p2)
+            self._board_free_nr(nr_c)
+            self._board_free_nr(nr_p1)
         # for
 
     def find_6x6(self):
@@ -673,149 +879,24 @@ class Command(BaseCommand):
 
         self._save_board6x6()
 
-        # iterate over the first Half6
-        unused_nrs0 = [nr for nr in self.board_unused_nrs if nr > 60]       # skip borders
-        unused_nrs0.append(208)
-        unused_nrs = set(unused_nrs0)
-        for quart1 in (Quart6
-                       .objects
-                       .filter(processor=self.my_processor,
-                               based_on_4x4=self.based_on,
-                               type=10)
-                       .filter(nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs,
-                               nr5__in=unused_nrs, nr6__in=unused_nrs, nr7__in=unused_nrs, nr8__in=unused_nrs,
-                               nr9__in=unused_nrs, nr10__in=unused_nrs, nr11__in=unused_nrs, nr12__in=unused_nrs)):
+        for q1 in self._fill_quart(208, 18, 10, 11, 26, 12, 13, 34):
+            self._count_all(1)
+            self._save_board6x6()
 
-            # print('quart1=%s' % quart1.pk)
+            for q2 in self._fill_quart(255, 14, 15, 23, 13, 31, 34, 39):
+                self._count_all(1)
+                self._save_board6x6()
 
-            # place the pieces
-            self._board_fill_nr(18, Piece2x2.objects.get(nr=quart1.p1))
-            self._board_fill_nr(10, Piece2x2.objects.get(nr=quart1.c1))
-            self._board_fill_nr(11, Piece2x2.objects.get(nr=quart1.p2))
+                for q3 in self._fill_quart(181, 51, 50, 42, 34, 52, 39, 53):
+                    self._count_all(1)
+                    self._save_board6x6()
 
-            # verify a solution is possible
-            count12, _, _ = self._count_2x2(12, self.board_unused_nrs)
-            count26, _, _ = self._count_2x2(26, self.board_unused_nrs)
-            if count12 > 0 and count26 > 0:
-
-                # iterate over the second Quart6
-                used_nrs1 = (quart1.nr1, quart1.nr2, quart1.nr3, quart1.nr4,
-                             quart1.nr5, quart1.nr6, quart1.nr7, quart1.nr8,
-                             quart1.nr9, quart1.nr10, quart1.nr11, quart1.nr12)
-
-                unused_nrs1 = [nr for nr in unused_nrs0 if nr not in used_nrs1]
-                unused_nrs1.append(255)
-                unused_nrs = set(unused_nrs1)
-
-                for quart2 in (Quart6
-                               .objects
-                               .filter(processor=self.my_processor,
-                                       based_on_4x4=self.based_on,
-                                       type=15)
-                               .filter(nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs,
-                                       nr5__in=unused_nrs, nr6__in=unused_nrs, nr7__in=unused_nrs, nr8__in=unused_nrs,
-                                       nr9__in=unused_nrs, nr10__in=unused_nrs, nr11__in=unused_nrs, nr12__in=unused_nrs)):
-
-                    # print('quart2=%s' % quart2.pk)
-
-                    # place the pieces
-                    self._board_fill_nr(14, Piece2x2.objects.get(nr=quart2.p1))
-                    self._board_fill_nr(15, Piece2x2.objects.get(nr=quart2.c1))
-                    self._board_fill_nr(23, Piece2x2.objects.get(nr=quart2.p2))
-
-                    count12, _, _ = self._count_2x2(12, self.board_unused_nrs)
-                    count13, _, _ = self._count_2x2(13, self.board_unused_nrs)
-                    count26, _, _ = self._count_2x2(26, self.board_unused_nrs)
-                    count31, _, _ = self._count_2x2(31, self.board_unused_nrs)
-                    if count12 > 0 and count13 > 0 and count26 > 0 and count31 > 0:
-
-                        # iterate over the third Quart6
-                        used_nrs2 = (quart2.nr1, quart2.nr2, quart2.nr3, quart2.nr4,
-                                     quart2.nr5, quart2.nr6, quart2.nr7, quart2.nr8,
-                                     quart2.nr9, quart2.nr10, quart2.nr11, quart2.nr12)
-
-                        unused_nrs2 = [nr for nr in unused_nrs1 if nr not in used_nrs2]
-                        unused_nrs2.append(181)
-                        unused_nrs = set(unused_nrs2)
-
-                        for quart3 in (Quart6
-                                       .objects
-                                       .filter(processor=self.my_processor,
-                                               based_on_4x4=self.based_on,
-                                               type=50)
-                                       .filter(nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs,
-                                               nr5__in=unused_nrs, nr6__in=unused_nrs, nr7__in=unused_nrs, nr8__in=unused_nrs,
-                                               nr9__in=unused_nrs, nr10__in=unused_nrs, nr11__in=unused_nrs, nr12__in=unused_nrs)):
-
-                            # print('quart3=%s' % quart3.pk)
-
-                            # place the pieces
-                            self._board_fill_nr(51, Piece2x2.objects.get(nr=quart3.p1))
-                            self._board_fill_nr(50, Piece2x2.objects.get(nr=quart3.c1))
-                            self._board_fill_nr(42, Piece2x2.objects.get(nr=quart3.p2))
-
-                            count12, _, _ = self._count_2x2(12, self.board_unused_nrs)
-                            count13, _, _ = self._count_2x2(13, self.board_unused_nrs)
-                            count26, _, _ = self._count_2x2(26, self.board_unused_nrs)
-                            count31, _, _ = self._count_2x2(31, self.board_unused_nrs)
-                            count34, _, _ = self._count_2x2(34, self.board_unused_nrs)
-                            count52, _, _ = self._count_2x2(52, self.board_unused_nrs)
-                            if count12 > 0 and count13 > 0 and count26 > 0 and count31 > 0 and count34 > 0 and count52 > 0:
-
-                                # iterate over the fourth Quart6
-                                used_nrs3 = (quart3.nr1, quart3.nr2, quart3.nr3, quart3.nr4,
-                                             quart3.nr5, quart3.nr6, quart3.nr7, quart3.nr8,
-                                             quart3.nr9, quart3.nr10, quart3.nr11, quart3.nr12)
-
-                                unused_nrs3 = [nr for nr in unused_nrs2 if nr not in used_nrs3]
-                                unused_nrs3.append(249)
-                                unused_nrs = set(unused_nrs3)
-
-                                for quart4 in (Quart6
-                                               .objects
-                                               .filter(processor=self.my_processor,
-                                                       based_on_4x4=self.based_on,
-                                                       type=55)
-                                               .filter(nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs,
-                                                       nr5__in=unused_nrs, nr6__in=unused_nrs, nr7__in=unused_nrs, nr8__in=unused_nrs,
-                                                       nr9__in=unused_nrs, nr10__in=unused_nrs, nr11__in=unused_nrs, nr12__in=unused_nrs)):
-
-                                    # place the pieces
-                                    self._board_fill_nr(47, Piece2x2.objects.get(nr=quart4.p1))
-                                    self._board_fill_nr(55, Piece2x2.objects.get(nr=quart4.c1))
-                                    self._board_fill_nr(54, Piece2x2.objects.get(nr=quart4.p2))
-
-                                    # verify a solution is possible
-                                    count12, _, _ = self._count_2x2(12, self.board_unused_nrs)
-                                    count13, _, _ = self._count_2x2(13, self.board_unused_nrs)
-                                    count26, _, _ = self._count_2x2(26, self.board_unused_nrs)
-                                    count31, _, _ = self._count_2x2(31, self.board_unused_nrs)
-                                    count34, _, _ = self._count_2x2(34, self.board_unused_nrs)
-                                    count39, _, _ = self._count_2x2(39, self.board_unused_nrs)
-                                    count52, _, _ = self._count_2x2(52, self.board_unused_nrs)
-                                    count53, _, _ = self._count_2x2(53, self.board_unused_nrs)
-
-                                    if count12 > 0 and count13 > 0 and count26 > 0 and count31 > 0 and count34 > 0 and count39 > 0 and count52 > 0 and count53 > 0:
-                                        self._fill_quart_gaps_12_13()
-
-                                    self._board_free_nr(54)
-                                    self._board_free_nr(55)
-                                    self._board_free_nr(47)
-                                # for
-
-                            self._board_free_nr(42)
-                            self._board_free_nr(50)
-                            self._board_free_nr(51)
-                        # for
-
-                    self._board_free_nr(23)
-                    self._board_free_nr(15)
-                    self._board_free_nr(14)
+                    for q4 in self._fill_quart(249, 47, 55, 54, 39, 53, 0, 0):
+                        self._count_all(1)
+                        self._save_board6x6()
+                    # for
                 # for
-
-            self._board_free_nr(11)
-            self._board_free_nr(10)
-            self._board_free_nr(18)
+            # for
         # for
 
     def _generate_quart6(self, p1_nr, c_nr, p2_nr):
