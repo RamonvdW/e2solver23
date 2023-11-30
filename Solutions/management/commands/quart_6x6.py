@@ -638,8 +638,8 @@ class Command(BaseCommand):
         # for
 
     def _fill_quart_gaps_12_13(self):
-        self._count_all(1)
-        self._save_board6x6()
+        # self._count_all(1)
+        # self._save_board6x6()
 
         for p12 in self._iter_for_nr(12):
             self._board_fill_nr(12, p12)
