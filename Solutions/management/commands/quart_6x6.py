@@ -899,64 +899,69 @@ class Command(BaseCommand):
             # for
         # for
 
-    def _generate_quart6(self, p1_nr, c_nr, p2_nr):
+    def _generate_quart6(self, nr_p1, nr_c, nr_p2, nr_m1, nr_m2):
         count = 0
         bulk = list()
-        for c1 in self._iter_for_nr(c_nr):
-            self._board_fill_nr(c_nr, c1)
+        for c1 in self._iter_for_nr(nr_c):
+            self._board_fill_nr(nr_c, c1)
 
-            for p1 in self._iter_for_nr(p1_nr):
-                self._board_fill_nr(p1_nr, p1)
+            for p1 in self._iter_for_nr(nr_p1):
+                self._board_fill_nr(nr_p1, p1)
 
-                for p2 in self._iter_for_nr(p2_nr):
-                    self._board_fill_nr(p2_nr, p2)
+                for p2 in self._iter_for_nr(nr_p2):
+                    self._board_fill_nr(nr_p2, p2)
 
-                    quart = Quart6(
-                                processor=self.my_processor,
-                                based_on_4x4=self.based_on,
-                                type=c_nr,
-                                p1=p1.pk,
-                                c1=c1.pk,
-                                p2=p2.pk,
-                                nr1=p1.nr1,
-                                nr2=p1.nr2,
-                                nr3=p1.nr3,
-                                nr4=p1.nr4,
-                                nr5=c1.nr1,
-                                nr6=c1.nr2,
-                                nr7=c1.nr3,
-                                nr8=c1.nr4,
-                                nr9=p2.nr1,
-                                nr10=p2.nr2,
-                                nr11=p2.nr3,
-                                nr12=p2.nr4)
+                    count1, _, _ = self._count_2x2(nr_m1, self.board_unused_nrs)
+                    count2, _, _ = self._count_2x2(nr_m2, self.board_unused_nrs)
+                    # print(c1.nr, p1.pk, p2.pk, '->', count1, count2)
 
-                    bulk.append(quart)
-                    if len(bulk) >= 5000:
-                        count += len(bulk)
-                        print('Quart6 type %s: %s' % (c_nr, count))
-                        Quart6.objects.bulk_create(bulk)
-                        bulk = list()
+                    if count1 > 0 and count2 > 0:
+                        quart = Quart6(
+                                    processor=self.my_processor,
+                                    based_on_4x4=self.based_on,
+                                    type=nr_c,
+                                    p1=p1.pk,
+                                    c1=c1.pk,
+                                    p2=p2.pk,
+                                    nr1=p1.nr1,
+                                    nr2=p1.nr2,
+                                    nr3=p1.nr3,
+                                    nr4=p1.nr4,
+                                    nr5=c1.nr1,
+                                    nr6=c1.nr2,
+                                    nr7=c1.nr3,
+                                    nr8=c1.nr4,
+                                    nr9=p2.nr1,
+                                    nr10=p2.nr2,
+                                    nr11=p2.nr3,
+                                    nr12=p2.nr4)
 
-                    self._board_free_nr(p2_nr)
+                        bulk.append(quart)
+                        if len(bulk) >= 500:
+                            count += len(bulk)
+                            print('Quart6 type %s: %s' % (nr_c, count))
+                            Quart6.objects.bulk_create(bulk)
+                            bulk = list()
+
+                    self._board_free_nr(nr_p2)
                 # for
 
-                self._board_free_nr(p1_nr)
+                self._board_free_nr(nr_p1)
             # for
 
-            self._board_free_nr(c_nr)
+            self._board_free_nr(nr_c)
         # for
 
         if len(bulk) > 0:
             count += len(bulk)
-            print('Quart6 type %s: %s' % (c_nr, count))
+            print('Quart6 type %s: %s' % (nr_c, count))
             Quart6.objects.bulk_create(bulk)
 
     def _generate_all_quart6(self):
-        self._generate_quart6(18, 10, 11)
-        self._generate_quart6(14, 15, 23)
-        self._generate_quart6(51, 50, 42)
-        self._generate_quart6(47, 55, 54)
+        self._generate_quart6(18, 10, 11, 26, 12)
+        self._generate_quart6(14, 15, 23, 13, 31)
+        self._generate_quart6(51, 50, 42, 34, 52)
+        self._generate_quart6(47, 55, 54, 39, 53)
 
     def handle(self, *args, **options):
 
