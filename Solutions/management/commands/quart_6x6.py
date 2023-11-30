@@ -851,7 +851,7 @@ class Command(BaseCommand):
                                 nr12=p2.nr4)
 
                     bulk.append(quart)
-                    if len(bulk) >= 500:
+                    if len(bulk) >= 5000:
                         count += len(bulk)
                         print('Quart6 type %s: %s' % (c_nr, count))
                         Quart6.objects.bulk_create(bulk)
