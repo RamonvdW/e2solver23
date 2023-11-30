@@ -644,7 +644,7 @@ class Command(BaseCommand):
         for p12 in self._iter_for_nr(12):
             self._board_fill_nr(12, p12)
 
-            for p13 in self._iter_for_nr(12):
+            for p13 in self._iter_for_nr(13):
                 self._board_fill_nr(13, p13)
 
                 # verify a solution is possible
