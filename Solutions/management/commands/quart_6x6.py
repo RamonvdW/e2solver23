@@ -672,38 +672,39 @@ class Command(BaseCommand):
         qset = qset.filter(nr1__in=unused_nrs).filter(nr2__in=unused_nrs).filter(nr3__in=unused_nrs).filter(nr4__in=unused_nrs)
 
         for nr in nrs:
-            s1, s2, s3, s4 = self._get_sides(nr)
-            qset2 = qset
+            if nr:
+                s1, s2, s3, s4 = self._get_sides(nr)
+                qset2 = qset
 
-            if s1 and s2 and not s3 and not s4:
-                # s1-s2
-                qset2 = qset2.filter(side1=s1, side2=s2)
+                if s1 and s2 and not s3 and not s4:
+                    # s1-s2
+                    qset2 = qset2.filter(side1=s1, side2=s2)
 
-            elif not s1 and s2 and s3 and not s4:
-                # s2-s3
-                qset2 = qset2.filter(side2=s2, side3=s3)
+                elif not s1 and s2 and s3 and not s4:
+                    # s2-s3
+                    qset2 = qset2.filter(side2=s2, side3=s3)
 
-            elif not s1 and not s2 and s3 and s4:
-                # s3-s4
-                qset2 = qset2.filter(side3=s3, side4=s4)
+                elif not s1 and not s2 and s3 and s4:
+                    # s3-s4
+                    qset2 = qset2.filter(side3=s3, side4=s4)
 
-            elif s1 and not s2 and not s3 and s4:
-                # s4-s1
-                qset2 = qset2.filter(side4=s4, side1=s1)
+                elif s1 and not s2 and not s3 and s4:
+                    # s4-s1
+                    qset2 = qset2.filter(side4=s4, side1=s1)
 
-            else:
-                if s1:
-                    qset2 = qset2.filter(side1=s1)
-                if s2:
-                    qset2 = qset2.filter(side2=s2)
-                if s3:
-                    qset2 = qset2.filter(side3=s3)
-                if s4:
-                    qset2 = qset2.filter(side4=s4)
+                else:
+                    if s1:
+                        qset2 = qset2.filter(side1=s1)
+                    if s2:
+                        qset2 = qset2.filter(side2=s2)
+                    if s3:
+                        qset2 = qset2.filter(side3=s3)
+                    if s4:
+                        qset2 = qset2.filter(side4=s4)
 
-            first = qset2.first()
-            if first is None:
-                return False
+                first = qset2.first()
+                if first is None:
+                    return False
         # for
         return True
 
@@ -1007,21 +1008,26 @@ class Command(BaseCommand):
             self.board_must_have[nr] = list()
         # for
 
-        self._save_board6x6()
+        # gap count: 48
+        # self._save_board6x6()
 
         for q1 in self._fill_quart(208, 18, 10, 11, 26, 12, 13, 34):
-            self._count_all(1)
-            self._save_board6x6()
+            # gap count: 43
+            # self._count_all(1)
+            # self._save_board6x6()
 
             for q2 in self._fill_quart(255, 14, 15, 23, 13, 31, 34, 39):
-                self._count_all(1)
-                self._save_board6x6()
+                # gap count: 38
+                # self._count_all(1)
+                # self._save_board6x6()
 
-                for q3 in self._fill_quart(181, 51, 50, 42, 34, 52, 39, 53):
+                for q3 in self._fill_quart(249, 47, 55, 54, 39, 53, 52, 34):
+                    # gap count: 33
                     self._count_all(1)
                     self._save_board6x6()
 
-                    for q4 in self._fill_quart(249, 47, 55, 54, 39, 53, 0, 0):
+                    for q4 in self._fill_quart(181, 51, 50, 42, 34, 52, None, None):
+                        # gap count: 28
                         self._count_all(1)
                         self._save_board6x6()
                     # for
