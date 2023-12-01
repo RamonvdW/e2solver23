@@ -568,6 +568,145 @@ class Command(BaseCommand):
 
         self._count_all(1)
 
+    def _can_fill_any(self, nr, unused_nrs):
+        # get the sides
+        s1, s2, s3, s4 = self._get_sides(nr)
+        p1 = p2 = p3 = p4 = None
+        x1 = x2 = x3 = x4 = None
+
+        if nr in P_CORNER:
+            if nr == 1:
+                s1 = s4 = self.rev_border
+            elif nr == 8:
+                s1 = s2 = self.rev_border
+            elif nr == 57:
+                s3 = s4 = self.rev_border
+            else:
+                s2 = s3 = self.rev_border
+
+        elif nr in P_BORDER:
+            if nr < 9:
+                s1 = self.rev_border
+                x2 = self.rev_border
+                x4 = self.rev_border
+
+            elif nr > 57:
+                x2 = self.rev_border
+                s3 = self.rev_border
+                x4 = self.rev_border
+
+            elif nr & 1 == 1:
+                x1 = self.rev_border
+                x3 = self.rev_border
+                s4 = self.rev_border
+
+            else:
+                x1 = self.rev_border
+                s2 = self.rev_border
+                x3 = self.rev_border
+
+        else:
+            x1 = x2 = x3 = x4 = self.rev_border
+
+            if nr in P_HINTS:
+                if nr == 10:
+                    p1 = 208
+                elif nr == 15:
+                    p2 = 255
+                elif nr == 36:
+                    p2 = 139
+                elif nr == 50:
+                    p3 = 181
+                elif nr == 55:
+                    p4 = 249
+
+        qset = Piece2x2.objects.all()
+
+        if s1:
+            qset = qset.filter(side1=s1)
+        elif x1:
+            qset = qset.exclude(side1=x1)
+
+        if s2:
+            qset = qset.filter(side2=s2)
+        elif x2:
+            qset = qset.exclude(side2=x2)
+
+        if s3:
+            qset = qset.filter(side3=s3)
+        elif x3:
+            qset = qset.exclude(side3=x3)
+
+        if s4:
+            qset = qset.filter(side4=s4)
+        elif x4:
+            qset = qset.exclude(side4=x4)
+
+        if p1:
+            qset = qset.filter(nr1=p1)
+        else:
+            qset = qset.filter(nr1__in=unused_nrs)
+
+        if p2:
+            qset = qset.filter(nr2=p2)
+        else:
+            qset = qset.filter(nr2__in=unused_nrs)
+
+        if p3:
+            qset = qset.filter(nr3=p3)
+        else:
+            qset = qset.filter(nr3__in=unused_nrs)
+
+        if p4:
+            qset = qset.filter(nr4=p4)
+        else:
+            qset = qset.filter(nr4__in=unused_nrs)
+
+        first = qset.first()
+        can_fill = first is not None
+
+        return can_fill
+
+    def _can_fill_nrs(self, unused_nrs, nrs):
+        qset = Piece2x2.objects.all()
+        qset = qset.filter(nr1__in=unused_nrs).filter(nr2__in=unused_nrs).filter(nr3__in=unused_nrs).filter(nr4__in=unused_nrs)
+
+        for nr in nrs:
+            s1, s2, s3, s4 = self._get_sides(nr)
+            qset2 = qset
+
+            if s1 and s2 and not s3 and not s4:
+                # s1-s2
+                qset2 = qset2.filter(side1=s1, side2=s2)
+
+            elif not s1 and s2 and s3 and not s4:
+                # s2-s3
+                qset2 = qset2.filter(side2=s2, side3=s3)
+
+            elif not s1 and not s2 and s3 and s4:
+                # s3-s4
+                qset2 = qset2.filter(side3=s3, side4=s4)
+
+            elif s1 and not s2 and not s3 and s4:
+                # s4-s1
+                qset2 = qset2.filter(side4=s4, side1=s1)
+
+            else:
+                if s1:
+                    qset2 = qset2.filter(side1=s1)
+                if s2:
+                    qset2 = qset2.filter(side2=s2)
+                if s3:
+                    qset2 = qset2.filter(side3=s3)
+                if s4:
+                    qset2 = qset2.filter(side4=s4)
+
+            first = qset2.first()
+            if first is None:
+                return False
+        # for
+        return True
+
     # def _fill_quart_gaps_52_53(self):
     #     self._count_all(1)
     #     self._save_board6x6()
@@ -846,17 +985,8 @@ class Command(BaseCommand):
                 for m2 in self._iter_for_nr(nr_m2):
                     self._board_fill_nr(nr_m2, m2)
 
-                    if nr_chk1 > 0:
-                        count1, _, _ = self._count_2x2(nr_chk1, self.board_unused_nrs)
-                    else:
-                        count1 = 1
-
-                    if nr_chk2 > 0:
-                        count2, _, _ = self._count_2x2(nr_chk2, self.board_unused_nrs)
-                    else:
-                        count2 = 1
-
-                    if count1 > 0 and count2 > 0:
+                    unused_nrs = [nr for nr in self.board_unused_nrs if nr > 60]  # skip borders
+                    if self._can_fill_nrs(unused_nrs, (nr_chk1, nr_chk2)):
                         yield quart
 
                     self._board_free_nr(nr_m2)
@@ -911,11 +1041,7 @@ class Command(BaseCommand):
                 for p2 in self._iter_for_nr(nr_p2):
                     self._board_fill_nr(nr_p2, p2)
 
-                    count1, _, _ = self._count_2x2(nr_m1, self.board_unused_nrs)
-                    count2, _, _ = self._count_2x2(nr_m2, self.board_unused_nrs)
-                    # print(c1.nr, p1.pk, p2.pk, '->', count1, count2)
-
-                    if count1 > 0 and count2 > 0:
+                    if self._can_fill_nrs(self.board_unused_nrs, (nr_m1, nr_m2)):
                         quart = Quart6(
                                     processor=self.my_processor,
                                     based_on_4x4=self.based_on,
@@ -937,7 +1063,7 @@ class Command(BaseCommand):
                                     nr12=p2.nr4)
 
                         bulk.append(quart)
-                        if len(bulk) >= 500:
+                        if len(bulk) >= 250:
                             count += len(bulk)
                             print('Quart6 type %s: %s' % (nr_c, count))
                             Quart6.objects.bulk_create(bulk)
