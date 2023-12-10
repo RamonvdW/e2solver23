@@ -4,10 +4,11 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.contrib import admin
-from Solutions.models import Solution
+from django.apps import AppConfig
 
 
-admin.site.register(Solution)
+class Partial6x6Config(AppConfig):
+    default_auto_field = 'django.db.models.BigAutoField'
+    name = 'Partial6x6'
 
 # end of file

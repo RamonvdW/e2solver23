@@ -5,9 +5,8 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import admin
-from Solutions.models import Solution
+from Partial6x6.models import Partial6x6
 
-
-admin.site.register(Solution)
+admin.site.register(Partial6x6)
 
 # end of file

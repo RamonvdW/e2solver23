@@ -11,10 +11,10 @@ from django.templatetags.static import static
 from BasePieces.models import BasePiece
 from BasePieces.hints import HINT_NRS, CENTER_NR
 from Pieces2x2.models import Piece2x2
-from Solutions.models import Solution
+from Partial4x4.models import Partial4x4, NRS_PARTIAL_4X4
 from types import SimpleNamespace
 
-TEMPLATE_VIEW = 'solutions/show.dtl'
+TEMPLATE_VIEW = 'partial4x4/show.dtl'
 
 rot2transform = {
     # rotations are counter-clockwise, but CSS rotation are clockwise
@@ -25,6 +25,10 @@ rot2transform = {
 }
 
 
+nr2img = dict()           # [base_nr] = image path
+nr2piece2x2 = dict()      # [nr] = Piece2x2
+
+
 def _get_2x2(nr, note):
     if nr == 0:
         piece = SimpleNamespace()
@@ -33,19 +37,28 @@ def _get_2x2(nr, note):
         if note:
             piece.note = '2x2: ' + note.replace(' ', '\n').replace(')\n', ')\n1x1: ').replace('max\n', 'max ').replace(',', ', ')
     else:
-        piece = Piece2x2.objects.get(nr=nr)
+        if len(nr2img) == 0:
+            for base_nr in range(1, 256+1):
+                nr2img[base_nr] = static('pieces/%s.png' % base_nr)
+            # for
 
-        piece.is_empty = False
+        try:
+            piece = nr2piece2x2[nr]
+        except KeyError:
+            piece = Piece2x2.objects.get(nr=nr)
+            piece.is_empty = False
 
-        piece.img1 = static('pieces/%s.png' % piece.nr1)
-        piece.img2 = static('pieces/%s.png' % piece.nr2)
-        piece.img3 = static('pieces/%s.png' % piece.nr3)
-        piece.img4 = static('pieces/%s.png' % piece.nr4)
+            piece.img1 = nr2img[piece.nr1]
+            piece.img2 = nr2img[piece.nr2]
+            piece.img3 = nr2img[piece.nr3]
+            piece.img4 = nr2img[piece.nr4]
 
-        piece.transform1 = rot2transform[piece.rot1]
-        piece.transform2 = rot2transform[piece.rot2]
-        piece.transform3 = rot2transform[piece.rot3]
-        piece.transform4 = rot2transform[piece.rot4]
+            piece.transform1 = rot2transform[piece.rot1]
+            piece.transform2 = rot2transform[piece.rot2]
+            piece.transform3 = rot2transform[piece.rot3]
+            piece.transform4 = rot2transform[piece.rot4]
+
+            nr2piece2x2[nr] = piece
 
     return piece
 
@@ -76,54 +89,16 @@ def _calc_neighbours():
     return neighbours
 
 
-def _check_hints(sol):
-    p_nr10 = p_nr15 = p_nr50 = p_nr55 = None
-    base0 = list(range(60, 256+1))
-    for p in sol.p2x2s:
-        if not p.is_empty:
-            base0.remove(p.nr1)
-            base0.remove(p.nr2)
-            base0.remove(p.nr3)
-            base0.remove(p.nr4)
-        else:
-            if p.nr == 10:
-                p_nr10 = p
-            elif p.nr == 15:
-                p_nr15 = p
-            elif p.nr == 50:
-                p_nr50 = p
-            elif p.nr == 55:
-                p_nr55 = p
-    # for
-
-    for base_nr in (208, 255, 181, 249):
-        if base_nr in base0:
-            base0.remove(base_nr)
-    # for
-    base0 = frozenset(base0)
-
-    if p_nr10:
-        base2 = frozenset(Piece2x2.objects.filter(nr1=208).distinct('nr2').values_list('nr2', flat=True))
-        base3 = frozenset(Piece2x2.objects.filter(nr1=208).distinct('nr3').values_list('nr3', flat=True))
-        p_nr10.note += "\n{%s, %s}" % (len(base0.intersection(base2)), len(base0.intersection(base3)))
-
-    if p_nr15:
-        base1 = frozenset(Piece2x2.objects.filter(nr2=255).distinct('nr1').values_list('nr1', flat=True))
-        base4 = frozenset(Piece2x2.objects.filter(nr2=255).distinct('nr4').values_list('nr4', flat=True))
-        p_nr15.note += "\n{%s, %s}" % (len(base0.intersection(base1)), len(base0.intersection(base4)))
-
-    if p_nr50:
-        base1 = frozenset(Piece2x2.objects.filter(nr3=181).distinct('nr1').values_list('nr1', flat=True))
-        base4 = frozenset(Piece2x2.objects.filter(nr3=181).distinct('nr4').values_list('nr4', flat=True))
-        p_nr50.note += "\n{%s, %s}" % (len(base0.intersection(base1)), len(base0.intersection(base4)))
-
-    if p_nr55:
-        base2 = frozenset(Piece2x2.objects.filter(nr4=249).distinct('nr2').values_list('nr2', flat=True))
-        base3 = frozenset(Piece2x2.objects.filter(nr4=249).distinct('nr3').values_list('nr3', flat=True))
-        p_nr55.note += "\n{%s, %s}" % (len(base0.intersection(base2)), len(base0.intersection(base3)))
-
-
 def _fill_sol(sol):
+    sol.nr = sol.pk
+
+    for nr in range(1, 64 + 1):
+        # add the missing pieces
+        if nr not in NRS_PARTIAL_4X4:
+            nr_str = 'nr%s' % nr
+            setattr(sol, nr_str, 0)
+    # for
+
     neighbours = _calc_neighbours()
 
     sol.p2x2s = list()
@@ -202,15 +177,12 @@ def _fill_sol(sol):
     # for
     sol.s1_counts.sort()
 
-    hint_nrs.sort()
-    sol.hint_nrs = ", ".join([str(nr) for nr in hint_nrs])
-
     for nr in range(8, 66 + 1, 8):
         sol.p2x2s[nr - 1].break_after = True
     # for
 
 
-class ShowView(TemplateView):
+class ShowPart4x4View(TemplateView):
 
     template_name = TEMPLATE_VIEW
 
@@ -223,28 +195,24 @@ class ShowView(TemplateView):
         except ValueError:
             raise Http404('Not found')
 
-        context['solution'] = sol = Solution.objects.get(nr=nr)
+        sol = Partial4x4.objects.get(pk=nr)
+
+        context['solution'] = sol
         _fill_sol(sol)
-        _check_hints(sol)
 
-        if nr > 100:
-            context['url_prev100'] = reverse('Solutions:show', kwargs={'nr': nr-100})
-        if nr > 10:
-            context['url_prev10'] = reverse('Solutions:show', kwargs={'nr': nr-10})
-        if nr > 1:
-            context['url_prev1'] = reverse('Solutions:show', kwargs={'nr': nr-1})
-        context['url_next1'] = reverse('Solutions:show', kwargs={'nr': nr+1})
-        context['url_next10'] = reverse('Solutions:show', kwargs={'nr': nr+10})
-        context['url_next100'] = reverse('Solutions:show', kwargs={'nr': nr+100})
+        next_sol = Partial4x4.objects.filter(pk__gt=sol.pk).order_by('pk').first()
+        prev_sol = Partial4x4.objects.filter(pk__lt=sol.pk).order_by('pk').last()
+        if next_sol:
+            context['url_next'] = reverse('Partial4x4:show', kwargs={'nr': next_sol.pk})
+        if prev_sol:
+            context['url_prev'] = reverse('Partial4x4:show', kwargs={'nr': prev_sol.pk})
 
-        context['url_auto'] = reverse('Solutions:auto-show')
-
-        context['title'] = 'Solution'
+        context['url_auto'] = reverse('Partial4x4:auto')
 
         return context
 
 
-class ShowAutoView(TemplateView):
+class ShowPart4x4AutoView(TemplateView):
 
     template_name = TEMPLATE_VIEW
 
@@ -252,26 +220,21 @@ class ShowAutoView(TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        sol = Solution.objects.order_by('-nr').first()       # highest first
+        sol = Partial4x4.objects.latest('pk')
         if sol:
             context['solution'] = sol
             _fill_sol(sol)
-            _check_hints(sol)
 
-            nr = sol.nr
-            if nr > 100:
-                context['url_prev100'] = reverse('Solutions:show', kwargs={'nr': nr-100})
-            if nr > 10:
-                context['url_prev10'] = reverse('Solutions:show', kwargs={'nr': nr-10})
-            if nr > 1:
-                context['url_prev1'] = reverse('Solutions:show', kwargs={'nr': nr-1})
+            next_sol = Partial4x4.objects.filter(pk__gt=sol.pk).order_by('pk').first()
+            prev_sol = Partial4x4.objects.filter(pk__lt=sol.pk).order_by('pk').last()
+            if next_sol:
+                context['url_next'] = reverse('Partial4x4:show', kwargs={'nr': next_sol.pk})
+            if prev_sol:
+                context['url_prev'] = reverse('Partial4x4:show', kwargs={'nr': prev_sol.pk})
 
         context['auto_reload'] = True
 
-        context['title'] = 'Solution'
-
         return context
-
 
 
 # end of file

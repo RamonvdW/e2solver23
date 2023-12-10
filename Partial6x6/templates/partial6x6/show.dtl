@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title }}</title>
+    <style>
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+            padding: 0;
+            text-align: center;
+            font-size: 15px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>{{ title }}</h1>
+
+    <table style="margin-left:auto; margin-right:auto; border:0">
+        <tr style="border:0">
+
+            <td style="border:0">
+                <!-- solution -->
+                <table style="margin:10px">
+                    <thead>
+                        <tr>
+                            <td>{% if url_prev %}<a href="{{ url_prev }}">Prev</a>{% endif %}</td>
+                            <th colspan="6">Nr {{ solution.nr }} at {{ solution.when }}</th>
+                            <td>{% if url_next %}<a href="{{ url_next }}">Next</a>{% endif %}</td>
+                        </tr>
+                        {% if based_on %}
+                            <tr>
+                                <td>{% if url_prev4x4 %}<a href="{{ url_prev4x4 }}">Prev</a>{% endif %}</td>
+                                <td colspan="6">Based on {{ based_on }}</td>
+                                <td>{% if url_next4x4 %}<a href="{{ url_next4x4 }}">Next</a>{% endif %}</td>
+                            </tr>
+                        {% endif %}
+                    </thead>
+
+                    <tr>
+                        {% for piece in solution.p2x2s %}
+                            <td>
+                                {% if piece.is_empty %}
+                                    <div style="width:80px; height:80px">{{ piece.note|linebreaksbr }}</div>
+                                {% else %}
+                                    <div style="display:flex">
+                                        <img src="{{ piece.img1 }}" width=40 height=40 style="transform: {{ piece.transform1 }}">
+                                        <img src="{{ piece.img2 }}" width=40 height=40  style="transform: {{ piece.transform2 }}">
+                                    </div>
+                                    <div style="display:flex">
+                                        <img src="{{ piece.img3 }}" width=40 height=40  style="transform: {{ piece.transform3 }}">
+                                        <img src="{{ piece.img4 }}" width=40 height=40  style="transform: {{ piece.transform4 }}">
+                                    </div>
+                                {% endif %}
+                            </td>
+                            {% if piece.break_after %}
+                                </tr>
+                                <tr>
+                            {% endif %}
+
+                        {% endfor %}
+                    </tr>
+                </table>
+            </td>
+
+            <td style="border:0">
+                <!-- open sides usage -->
+                <table style="margin-left:10px">
+                    <thead>
+                        <tr>
+                            <th style="padding:5px">Side</th>
+                            <th style="padding:5px">Max</th>
+                            <th style="padding:5px">Closed</th>
+                            <th style="padding:5px">Open</th>
+                            <th style="padding:5px">Left</th>
+                        </tr>
+                    </thead>
+                    {% for s_nr, s_open, s_used, s_max, s_left in solution.s1_counts %}
+                        <tr{% if s_nr in "AEIQMX" %} style="background:lightgray"{% endif %}>
+                            <td style="padding:5px">{{ s_nr }}</td>
+                            <td style="padding:5px">{{ s_max }}</td>
+                            <td style="padding:5px">{{ s_used }}</td>
+                            <td style="padding:5px">{{ s_open }}</td>
+                            <td style="padding:5px">{{ s_left }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </td>
+
+        </tr>
+    </table>
+
+
+    {% if auto_reload %}
+        <script>
+            setTimeout(function(){
+                window.location.reload();
+            }, 15*1000);        // 15 seconds
+        </script>
+    {% endif %}
+
+</body>
+</html>

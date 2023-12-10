@@ -5,19 +5,19 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.urls import path
-from Solutions import views
+from Partial4x4 import views
 
-app_name = 'Solutions'
+app_name = 'Partial4x4'
 
-# base = /solutions/
+# base = /4x4/
 
 urlpatterns = [
     path('view/auto/',
-         views.ShowAutoView.as_view(),
-         name='auto-show'),
+         views.ShowPart4x4AutoView.as_view(),
+         name='auto'),
 
     path('view/<nr>/',
-         views.ShowView.as_view(),
+         views.ShowPart4x4View.as_view(),
          name='show'),
 ]
 

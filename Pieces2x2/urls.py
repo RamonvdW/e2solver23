@@ -9,7 +9,7 @@ from Pieces2x2 import views
 
 app_name = 'Pieces2x2'
 
-# base = /pieces2x2/
+# base = /2x2/
 
 urlpatterns = [
     path('view/<nr>/',
