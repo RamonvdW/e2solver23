@@ -16,7 +16,7 @@
 
 <body>
 
-    <h1>{{ title }}</h1>
+    <h1>Solution8x8</h1>
 
     <p>
         {% if url_prev100 %}<a style="margin:10px" href="{{ url_prev100 }}">-100</a>{%  else %}<span style="margin:10px">-100</span>{% endif %}
@@ -28,71 +28,90 @@
         {% if url_auto    %}<a style="margin:10px" href="{{ url_auto    }}">auto</a>{% endif %}
     </p>
 
-    <table style="margin-left:auto; margin-right:auto">
-        <thead>
-            <tr>
-                <th colspan="8">Nr {{ solution.nr }} at {{ solution.when }}</th>
-            </tr>
-            {% if based_on %}
-                <tr>
-                    <td>{% if url_prev4x4 %}<a href="{{ url_prev4x4 }}">Prev</a>{% endif %}</td>
-                    <td colspan="6">Based on {{ based_on }}</td>
-                    <td>{% if url_next4x4 %}<a href="{{ url_next4x4 }}">Next</a>{% endif %}</td>
-                </tr>
-            {% endif %}
-        </thead>
+    <table style="margin-left:auto; margin-right:auto; border:0">
+        <tr style="border:0; vertical-align:top">
 
-        <tr>
-            {% for piece in solution.p2x2s %}
-                <td>
-                    {% if piece.is_empty %}
-                        <div style="width:80px; height:80px">{{ piece.note|linebreaksbr }}</div>
-                    {% else %}
-                        <div style="display:flex">
-                            <img src="{{ piece.img1 }}" width=40 height=40 style="transform: {{ piece.transform1 }}">
-                            <img src="{{ piece.img2 }}" width=40 height=40  style="transform: {{ piece.transform2 }}">
-                        </div>
-                        <div style="display:flex">
-                            <img src="{{ piece.img3 }}" width=40 height=40  style="transform: {{ piece.transform3 }}">
-                            <img src="{{ piece.img4 }}" width=40 height=40  style="transform: {{ piece.transform4 }}">
-                        </div>
-                    {% endif %}
-                </td>
-                {% if piece.break_after %}
-                    </tr>
+            <td style="border:0">
+                <!-- solution -->
+                <table>
+                    <thead>
+                        <tr>
+                            <td colspan="8">Nr {{ solution.nr }} at {{ solution.when }}<br>Based on {{ based_on }}</td>
+                        </tr>
+                    </thead>
+
                     <tr>
-                {% endif %}
+                        {% for piece in solution.p2x2s %}
+                            <td>
+                                {% if piece.is_empty %}
+                                    <div style="width:80px; height:80px">{{ piece.note|linebreaksbr }}</div>
+                                {% else %}
+                                    <div style="display:flex">
+                                        <img src="{{ piece.img1 }}" width=40 height=40 style="transform: {{ piece.transform1 }}">
+                                        <img src="{{ piece.img2 }}" width=40 height=40  style="transform: {{ piece.transform2 }}">
+                                    </div>
+                                    <div style="display:flex">
+                                        <img src="{{ piece.img3 }}" width=40 height=40  style="transform: {{ piece.transform3 }}">
+                                        <img src="{{ piece.img4 }}" width=40 height=40  style="transform: {{ piece.transform4 }}">
+                                    </div>
+                                {% endif %}
+                            </td>
+                            {% if piece.break_after %}
+                                </tr>
+                                <tr>
+                            {% endif %}
 
-            {% endfor %}
+                        {% endfor %}
+                    </tr>
+                </table>
+            </td>
+
+            <td style="border:0">
+                <!-- open sides usage -->
+                <table style="margin-left:10px">
+                    <thead>
+                        <tr>
+                            <th style="padding:5px">Side</th>
+                            <th style="padding:5px">Max</th>
+                            <th style="padding:5px">Closed</th>
+                            <th style="padding:5px">Open</th>
+                            <th style="padding:5px">Left</th>
+                        </tr>
+                    </thead>
+                    {% for s_nr, s_open, s_used, s_max, s_left in solution.s1_counts %}
+                        <tr{% if s_nr in "AEIQMX" %} style="background:lightgray"{% endif %}>
+                            <td style="padding:5px">{{ s_nr }}</td>
+                            <td style="padding:5px">{{ s_max }}</td>
+                            <td style="padding:5px">{{ s_used }}</td>
+                            <td style="padding:5px">{{ s_open }}</td>
+                            <td style="padding:5px">{{ s_left }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </td>
+
+            <td style="border:0">
+                <!-- open sides usage -->
+                <table style="margin-left:10px">
+                    <thead>
+                        <tr>
+                            <th style="padding:5px">TwoSide</th>
+                            <th style="padding:5px">Open</th>
+                            <th style="padding:5px">Left</th>
+                        </tr>
+                    </thead>
+                    {% for s_nr, s_open, s_left, is_border in solution.s2_counts %}
+                        <tr{% if is_border %} style="background:lightgray"{% endif %}>
+                            <td style="padding:5px">{{ s_nr }}</td>
+                            <td style="padding:5px">{{ s_open }}</td>
+                            <td style="padding:5px">{{ s_left }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </td>
         </tr>
-
     </table>
 
-    <br><br>
-    <p>{{ solution.hint_nrs }}</p>
-
-    <br><br>
-
-    <table style="margin-left:auto; margin-right:auto">
-        <thead>
-            <tr>
-                <th style="padding:5px">Side</th>
-                <th style="padding:5px">Max</th>
-                <th style="padding:5px">Closed</th>
-                <th style="padding:5px">Open</th>
-                <th style="padding:5px">Left</th>
-            </tr>
-        </thead>
-        {% for s_nr, s_open, s_used, s_max, s_left in solution.s1_counts %}
-            <tr>
-                <td style="padding:5px">{{ s_nr }}</td>
-                <td style="padding:5px">{{ s_max }}</td>
-                <td style="padding:5px">{{ s_used }}</td>
-                <td style="padding:5px">{{ s_open }}</td>
-                <td style="padding:5px">{{ s_left }}</td>
-            </tr>
-        {% endfor %}
-    </table>
 
     {% if auto_reload %}
         <script>

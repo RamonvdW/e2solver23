@@ -6,12 +6,21 @@
 
 from django.db import models
 
+NRS_ADDED_IN_8X8 = (1, 2, 3, 4, 5, 6, 7, 8,
+                    9, 16,
+                    17, 24,
+                    25, 32,
+                    33, 40,
+                    41, 48,
+                    49, 56,
+                    57, 58, 59, 60, 61, 62, 63, 64)
+
 P_CORNER = (1, 8, 57, 64)
 P_BORDER = (2, 3, 4, 5, 6, 7,  16, 24, 32, 40, 48, 56,  9, 17, 25, 33, 41, 49,  58, 59, 60, 61, 62, 63)
 P_HINTS = (10, 15, 36, 50, 55)
 
 
-class Solution(models.Model):
+class Solution8x8(models.Model):
 
     """ A solution contains up to 64 Piece2x2
 
@@ -37,14 +46,9 @@ class Solution(models.Model):
         55.p4 = 249
     """
 
-    nr = models.PositiveIntegerField(primary_key=True)      # max = 2147483647
-
     when = models.DateTimeField(auto_now_add=True)
 
-    state = models.PositiveBigIntegerField()
-
-    # aantal velden niet gevuld
-    gap_count = models.PositiveSmallIntegerField()
+    based_on_6x6 = models.PositiveBigIntegerField()
 
     # 2x2 pieces used to build up this piece
     nr1 = models.PositiveIntegerField()
@@ -127,52 +131,22 @@ class Solution(models.Model):
     note7 = models.CharField(max_length=30, default='', blank=True)
     note8 = models.CharField(max_length=30, default='', blank=True)
     note9 = models.CharField(max_length=30, default='', blank=True)
-    note10 = models.CharField(max_length=30, default='', blank=True)
-    note11 = models.CharField(max_length=30, default='', blank=True)
-    note12 = models.CharField(max_length=30, default='', blank=True)
-    note13 = models.CharField(max_length=30, default='', blank=True)
-    note14 = models.CharField(max_length=30, default='', blank=True)
-    note15 = models.CharField(max_length=30, default='', blank=True)
+
     note16 = models.CharField(max_length=30, default='', blank=True)
     note17 = models.CharField(max_length=30, default='', blank=True)
-    note18 = models.CharField(max_length=30, default='', blank=True)
-    note19 = models.CharField(max_length=30, default='', blank=True)
-    note20 = models.CharField(max_length=30, default='', blank=True)
-    note21 = models.CharField(max_length=30, default='', blank=True)
-    note22 = models.CharField(max_length=30, default='', blank=True)
-    note23 = models.CharField(max_length=30, default='', blank=True)
+
     note24 = models.CharField(max_length=30, default='', blank=True)
     note25 = models.CharField(max_length=30, default='', blank=True)
-    note26 = models.CharField(max_length=30, default='', blank=True)
-    note27 = models.CharField(max_length=30, default='', blank=True)
-    note28 = models.CharField(max_length=30, default='', blank=True)
-    note29 = models.CharField(max_length=30, default='', blank=True)
-    note30 = models.CharField(max_length=30, default='', blank=True)
-    note31 = models.CharField(max_length=30, default='', blank=True)
+
     note32 = models.CharField(max_length=30, default='', blank=True)
     note33 = models.CharField(max_length=30, default='', blank=True)
-    note34 = models.CharField(max_length=30, default='', blank=True)
-    note35 = models.CharField(max_length=30, default='', blank=True)
-    note36 = models.CharField(max_length=30, default='', blank=True)
-    note37 = models.CharField(max_length=30, default='', blank=True)
-    note38 = models.CharField(max_length=30, default='', blank=True)
-    note39 = models.CharField(max_length=30, default='', blank=True)
+
     note40 = models.CharField(max_length=30, default='', blank=True)
     note41 = models.CharField(max_length=30, default='', blank=True)
-    note42 = models.CharField(max_length=30, default='', blank=True)
-    note43 = models.CharField(max_length=30, default='', blank=True)
-    note44 = models.CharField(max_length=30, default='', blank=True)
-    note45 = models.CharField(max_length=30, default='', blank=True)
-    note46 = models.CharField(max_length=30, default='', blank=True)
-    note47 = models.CharField(max_length=30, default='', blank=True)
+
     note48 = models.CharField(max_length=30, default='', blank=True)
     note49 = models.CharField(max_length=30, default='', blank=True)
-    note50 = models.CharField(max_length=30, default='', blank=True)
-    note51 = models.CharField(max_length=30, default='', blank=True)
-    note52 = models.CharField(max_length=30, default='', blank=True)
-    note53 = models.CharField(max_length=30, default='', blank=True)
-    note54 = models.CharField(max_length=30, default='', blank=True)
-    note55 = models.CharField(max_length=30, default='', blank=True)
+
     note56 = models.CharField(max_length=30, default='', blank=True)
     note57 = models.CharField(max_length=30, default='', blank=True)
     note58 = models.CharField(max_length=30, default='', blank=True)
@@ -184,7 +158,7 @@ class Solution(models.Model):
     note64 = models.CharField(max_length=30, default='', blank=True)
 
     class Meta:
-        verbose_name = 'Solution'
+        verbose_name = 'Solution8x8'
 
     objects = models.Manager()  # for the editor only
 

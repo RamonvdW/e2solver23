@@ -5,9 +5,9 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import admin
-from Solutions.models import Solution
+from Solutions.models import Solution8x8
 
 
-admin.site.register(Solution)
+admin.site.register(Solution8x8)
 
 # end of file

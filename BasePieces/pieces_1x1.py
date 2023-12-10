@@ -13,7 +13,7 @@ PIECES = [
     "AQXX",     # number 1
     "AEXX",
     "IQXX",
-    "QIXX",
+    "QIXX",     # last corner
     "BAXA",
     "JIXA",
     "FAXA",
@@ -267,5 +267,8 @@ PIECES = [
     "PVTV",
     "UVHV",
 ]
+
+EXTERNAL_BORDER = "X"
+INTERNAL_BORDER_SIDES = "AEIMQ"
 
 # end of file

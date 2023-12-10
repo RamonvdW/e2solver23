@@ -9,9 +9,10 @@ from django.urls import reverse
 from django.views.generic import TemplateView
 from django.templatetags.static import static
 from BasePieces.models import BasePiece
-from BasePieces.hints import HINT_NRS, CENTER_NR
-from Pieces2x2.models import Piece2x2
-from Solutions.models import Solution
+from BasePieces.pieces_1x1 import INTERNAL_BORDER_SIDES
+from Pieces2x2.models import Piece2x2, TwoSides
+from Pieces2x2.helpers import NRS_BORDER
+from Solutions.models import Solution8x8
 from types import SimpleNamespace
 
 TEMPLATE_VIEW = 'solutions/show.dtl'
@@ -27,9 +28,7 @@ rot2transform = {
 
 def _get_2x2(nr, note):
     if nr == 0:
-        piece = SimpleNamespace()
-
-        piece.is_empty = True
+        piece = SimpleNamespace(nr=0, is_empty=True)
         if note:
             piece.note = '2x2: ' + note.replace(' ', '\n').replace(')\n', ')\n1x1: ').replace('max\n', 'max ').replace(',', ', ')
     else:
@@ -76,58 +75,7 @@ def _calc_neighbours():
     return neighbours
 
 
-def _check_hints(sol):
-    p_nr10 = p_nr15 = p_nr50 = p_nr55 = None
-    base0 = list(range(60, 256+1))
-    for p in sol.p2x2s:
-        if not p.is_empty:
-            base0.remove(p.nr1)
-            base0.remove(p.nr2)
-            base0.remove(p.nr3)
-            base0.remove(p.nr4)
-        else:
-            if p.nr == 10:
-                p_nr10 = p
-            elif p.nr == 15:
-                p_nr15 = p
-            elif p.nr == 50:
-                p_nr50 = p
-            elif p.nr == 55:
-                p_nr55 = p
-    # for
-
-    for base_nr in (208, 255, 181, 249):
-        if base_nr in base0:
-            base0.remove(base_nr)
-    # for
-    base0 = frozenset(base0)
-
-    if p_nr10:
-        base2 = frozenset(Piece2x2.objects.filter(nr1=208).distinct('nr2').values_list('nr2', flat=True))
-        base3 = frozenset(Piece2x2.objects.filter(nr1=208).distinct('nr3').values_list('nr3', flat=True))
-        p_nr10.note += "\n{%s, %s}" % (len(base0.intersection(base2)), len(base0.intersection(base3)))
-
-    if p_nr15:
-        base1 = frozenset(Piece2x2.objects.filter(nr2=255).distinct('nr1').values_list('nr1', flat=True))
-        base4 = frozenset(Piece2x2.objects.filter(nr2=255).distinct('nr4').values_list('nr4', flat=True))
-        p_nr15.note += "\n{%s, %s}" % (len(base0.intersection(base1)), len(base0.intersection(base4)))
-
-    if p_nr50:
-        base1 = frozenset(Piece2x2.objects.filter(nr3=181).distinct('nr1').values_list('nr1', flat=True))
-        base4 = frozenset(Piece2x2.objects.filter(nr3=181).distinct('nr4').values_list('nr4', flat=True))
-        p_nr50.note += "\n{%s, %s}" % (len(base0.intersection(base1)), len(base0.intersection(base4)))
-
-    if p_nr55:
-        base2 = frozenset(Piece2x2.objects.filter(nr4=249).distinct('nr2').values_list('nr2', flat=True))
-        base3 = frozenset(Piece2x2.objects.filter(nr4=249).distinct('nr3').values_list('nr3', flat=True))
-        p_nr55.note += "\n{%s, %s}" % (len(base0.intersection(base2)), len(base0.intersection(base3)))
-
-
-def _fill_sol(sol):
-    neighbours = _calc_neighbours()
-
-    sol.p2x2s = list()
-
+def _sol_add_stats_1x1(sol, neighbours):
     s1_open = dict()         # ["side"] = count
     s1_used = dict()         # ["side"] = count
     s1_max = dict()          # ["side"] = count
@@ -145,22 +93,13 @@ def _fill_sol(sol):
         # for
     # for
 
-    hint_nrs = list()
     for nr in range(1, 64 + 1):
         field_nr = 'nr%s' % nr
         field_note = 'note%s' % nr
 
         p2x2 = _get_2x2(getattr(sol, field_nr), getattr(sol, field_note, None))
-        sol.p2x2s.append(p2x2)
 
-        if p2x2.is_empty:
-            p2x2.nr = nr
-        else:
-            for base_nr in (p2x2.nr1, p2x2.nr2, p2x2.nr3, p2x2.nr4):
-                if base_nr in HINT_NRS or base_nr == CENTER_NR:
-                    hint_nrs.append(base_nr)
-            # for
-
+        if not p2x2.is_empty:
             side_is_open = [None, ]
             for other_nr in neighbours[nr]:
                 if other_nr > 0:
@@ -202,8 +141,105 @@ def _fill_sol(sol):
     # for
     sol.s1_counts.sort()
 
-    hint_nrs.sort()
-    sol.hint_nrs = ", ".join([str(nr) for nr in hint_nrs])
+
+def _sol_add_stats_2x2(sol, neighbours):
+
+    empty_locs = list()
+    unused_nrs = list(range(1, 256+1))
+
+    for p in sol.p2x2s:
+        if p.is_empty:
+            empty_locs.append(p.loc)
+        else:
+            unused_nrs.remove(p.nr1)
+            unused_nrs.remove(p.nr2)
+            unused_nrs.remove(p.nr3)
+            unused_nrs.remove(p.nr4)
+    # for
+
+    # print('empty_locs: %s' % repr(empty_locs))
+    # print('unused_nrs: %s' % repr(unused_nrs))
+
+    s2_open = dict()        # [side_nr] = count
+    for p in sol.p2x2s:
+        if not p.is_empty:
+            nrs = neighbours[p.loc]
+            side_nrs = list()
+
+            # side1
+            if nrs[0] in empty_locs:
+                side_nrs.append(p.side1)
+
+            # side2
+            if nrs[1] in empty_locs:
+                side_nrs.append(p.side2)
+
+            # side3
+            if nrs[2] in empty_locs:
+                side_nrs.append(p.side3)
+
+            # side4
+            if nrs[3] in empty_locs:
+                side_nrs.append(p.side4)
+
+            for side_nr in side_nrs:
+                try:
+                    s2_open[side_nr] += 1
+                except KeyError:
+                    s2_open[side_nr] = 1
+    # for
+
+    two2nr = dict()                 # [two sides] = two side nr
+    side_nr_is_border = dict()      # [two side nr] = True/False
+    side_nr2reverse = dict()        # [two side nr] = reverse two side nr
+    for two in TwoSides.objects.all():
+        two2nr[two.two_sides] = two.nr
+        side_nr_is_border[two.nr] = ((two.two_sides[0] in INTERNAL_BORDER_SIDES) or
+                                     (two.two_sides[1] in INTERNAL_BORDER_SIDES))
+    # for
+    for two_sides, nr in two2nr.items():
+        two_rev = two_sides[1] + two_sides[0]
+        rev_nr = two2nr[two_rev]
+        side_nr2reverse[nr] = rev_nr
+    # for
+
+    side_border = two2nr['XX']
+
+    qset = Piece2x2.objects.filter(nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs)
+
+    sol.s2_counts = list()
+    for side_nr, c_open in s2_open.items():
+        is_border = side_nr_is_border[side_nr]
+        rev_nr = side_nr2reverse[side_nr]
+
+        # all rotation variants exist, so just count 1 side
+        c_left = qset.filter(side1=rev_nr, side3=side_border).count()
+
+        tup = (side_nr, c_open, c_left, is_border)
+        sol.s2_counts.append(tup)
+    # for
+
+    sol.s2_counts.sort()
+
+
+def _fill_sol(sol):
+    sol.nr = sol.pk
+
+    neighbours = _calc_neighbours()
+
+    _sol_add_stats_1x1(sol, neighbours)
+
+    sol.p2x2s = list()
+    for nr in range(1, 64 + 1):
+        field_nr = 'nr%s' % nr
+        field_note = 'note%s' % nr
+
+        p2x2 = _get_2x2(getattr(sol, field_nr), getattr(sol, field_note, None))
+        p2x2.loc = nr
+        sol.p2x2s.append(p2x2)
+    # for
+
+    _sol_add_stats_2x2(sol, neighbours)
 
     for nr in range(8, 66 + 1, 8):
         sol.p2x2s[nr - 1].break_after = True
@@ -223,9 +259,10 @@ class ShowView(TemplateView):
         except ValueError:
             raise Http404('Not found')
 
-        context['solution'] = sol = Solution.objects.get(nr=nr)
+        context['solution'] = sol = Solution8x8.objects.get(pk=nr)
         _fill_sol(sol)
-        _check_hints(sol)
+
+        context['based_on'] = '6x6 nr %s' % sol.based_on_6x6
 
         if nr > 100:
             context['url_prev100'] = reverse('Solutions:show', kwargs={'nr': nr-100})
@@ -252,13 +289,14 @@ class ShowAutoView(TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        sol = Solution.objects.order_by('-nr').first()       # highest first
+        sol = Solution8x8.objects.order_by('pk').last()
         if sol:
             context['solution'] = sol
             _fill_sol(sol)
-            _check_hints(sol)
 
-            nr = sol.nr
+            context['based_on'] = '6x6 nr %s' % sol.based_on_6x6
+
+            nr = sol.pk
             if nr > 100:
                 context['url_prev100'] = reverse('Solutions:show', kwargs={'nr': nr-100})
             if nr > 10:

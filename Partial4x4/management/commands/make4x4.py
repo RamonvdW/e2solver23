@@ -88,7 +88,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('--verbose', action='store_true')
-        parser.add_argument('--start', nargs=1, help='Start with this Piece4x4 number')
+        parser.add_argument('--start', nargs=1, help='Start with this Piece2x2 number')
 
     def _count_2x2(self, nr, unused_nrs):
         # get the sides

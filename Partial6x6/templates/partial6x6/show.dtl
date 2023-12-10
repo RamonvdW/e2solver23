@@ -19,24 +19,17 @@
     <h1>{{ title }}</h1>
 
     <table style="margin-left:auto; margin-right:auto; border:0">
-        <tr style="border:0">
+        <tr style="border:0; vertical-align:top">
 
             <td style="border:0">
                 <!-- solution -->
-                <table style="margin:10px">
+                <table>
                     <thead>
                         <tr>
                             <td>{% if url_prev %}<a href="{{ url_prev }}">Prev</a>{% endif %}</td>
-                            <th colspan="6">Nr {{ solution.nr }} at {{ solution.when }}</th>
+                            <td colspan="6">Nr {{ solution.nr }} at {{ solution.when }}<br>Based on {{ based_on }}</td>
                             <td>{% if url_next %}<a href="{{ url_next }}">Next</a>{% endif %}</td>
                         </tr>
-                        {% if based_on %}
-                            <tr>
-                                <td>{% if url_prev4x4 %}<a href="{{ url_prev4x4 }}">Prev</a>{% endif %}</td>
-                                <td colspan="6">Based on {{ based_on }}</td>
-                                <td>{% if url_next4x4 %}<a href="{{ url_next4x4 }}">Next</a>{% endif %}</td>
-                            </tr>
-                        {% endif %}
                     </thead>
 
                     <tr>
