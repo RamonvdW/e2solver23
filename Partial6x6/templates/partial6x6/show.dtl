@@ -85,6 +85,9 @@
         </tr>
     </table>
 
+    {% if url_auto %}
+        <p><a href="{{ url_auto }}">auto</a></p>
+    {% endif %}
 
     {% if auto_reload %}
         <script>

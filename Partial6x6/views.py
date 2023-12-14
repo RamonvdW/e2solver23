@@ -212,7 +212,7 @@ class ShowPart6x6View(TemplateView):
         if prev_sol:
             context['url_prev'] = reverse('Partial6x6:show', kwargs={'nr': prev_sol.pk})
 
-        context['url_auto'] = reverse('Solutions:auto-show-6x6')
+        context['url_auto'] = reverse('Partial6x6:auto-show-6x6')
 
         context['title'] = 'Partial6x6'
 
@@ -305,7 +305,7 @@ class Quart6View(TemplateView):
             if prev_sol:
                 context['url_prev'] = reverse('Partial6x6:show-quart6', kwargs={'nr': prev_sol.pk})
 
-        context['url_auto'] = reverse('Solutions:auto-show-quart6')
+        context['url_auto'] = reverse('Partial6x6:auto-show-quart6')
 
         context['title'] = 'Quart6'
 

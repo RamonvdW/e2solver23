@@ -828,12 +828,17 @@ class Command(BaseCommand):
             Quart6.objects.bulk_create(bulk)
 
         print('Quart6 type %s: %s (reject1 %s, reject2 %s)' % (nr_c, count, reject1_count, reject2_count))
+        return count
 
     def _generate_all_quart6(self):
-        self._generate_quart6(18, 10, 11, (26, 12))
-        self._generate_quart6(14, 15, 23, (13, 31))
-        self._generate_quart6(51, 50, 42, (34, 52))
-        self._generate_quart6(47, 55, 54, (39, 53))
+        count = self._generate_quart6(18, 10, 11, (26, 12))
+        if count > 0:
+            count = self._generate_quart6(14, 15, 23, (13, 31))
+        if count > 0:
+            count =self._generate_quart6(51, 50, 42, (34, 52))
+        if count > 0:
+            count = self._generate_quart6(47, 55, 54, (39, 53))
+        return count
 
     def handle(self, *args, **options):
 
@@ -865,8 +870,10 @@ class Command(BaseCommand):
                 self.load_partial4x4(sol16)
 
                 try:
-                    self._generate_all_quart6()
-                    self.find_6x6()
+                    count = self._generate_all_quart6()
+                    if count > 0:
+                        # manage to generate quart6 for all four corners
+                        self.find_6x6()
                 except KeyboardInterrupt:
                     # warning for closed stdout!
                     sol16.processor = 0
