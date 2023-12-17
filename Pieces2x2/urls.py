@@ -19,6 +19,10 @@ urlpatterns = [
     path('options/',
          views.OptionsView.as_view(),
          name='options'),
+
+    path('options/<nr>/',
+         views.OptionsView.as_view(),
+         name='options-nr'),
 ]
 
 

@@ -94,8 +94,36 @@ class OptionsView(TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        processor = 0
+        processors = list(TwoSideOptions
+                          .objects
+                          .distinct('processor')
+                          .order_by('processor')
+                          .values_list('processor', flat=True))
+        if len(processors) == 0:
+            processors.append(0)
+
+        if 'nr' in kwargs:
+            processor = kwargs['nr']
+            if processor in ('auto', 'last'):
+                processor = processors[-1]
+            else:
+                processor = int(processor)
+        else:
+            processor = processors[-1]
+
         context['processor'] = processor
+
+        try:
+            idx = processors.index(processor)
+        except ValueError:
+            # not in the list
+            pass
+        else:
+            if idx > 0:
+                context['url_prev'] = reverse('Pieces2x2:options-nr', kwargs={'nr': processors[idx - 1]})
+            if idx < len(processors) - 1:
+                context['url_next'] = reverse('Pieces2x2:options-nr', kwargs={'nr': processors[idx + 1]})
+        context['url_last'] = reverse('Pieces2x2:options')
 
         segment2count = dict()  # [segment] = int
         for segment in range(256):

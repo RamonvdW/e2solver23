@@ -7,9 +7,10 @@
 from django.contrib import admin
 from Pieces2x2.models import TwoSide, TwoSideOptions, Piece2x2, Block2x8
 
+
 class TwoSideOptionsAdmin(admin.ModelAdmin):
 
-    list_filter = ('segment',)
+    list_filter = ('processor', 'segment')
 
 
 admin.site.register(TwoSide)

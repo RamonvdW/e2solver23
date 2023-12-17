@@ -18,37 +18,42 @@ echo "[INFO] Creating all TwoSideOptions"
 ./manage.* init_segments --confirm
 
 echo "[INFO] Reduction 1"
-./manage.* eval_loc_1 2
-./manage.* eval_loc_1 9
-./manage.* eval_loc_1 7
-./manage.* eval_loc_1 16
-./manage.* eval_loc_1 49
-./manage.* eval_loc_1 58
-./manage.* eval_loc_1 56
-./manage.* eval_loc_1 63
+./manage.* dup_segments 1
+./manage.* eval_loc_1 1 2 
+./manage.* eval_loc_1 1 9 
+./manage.* eval_loc_1 1 7 
+./manage.* eval_loc_1 1 16
+./manage.* eval_loc_1 1 49
+./manage.* eval_loc_1 1 58
+./manage.* eval_loc_1 1 56
+./manage.* eval_loc_1 1 63
 
 echo "[INFO] Reduction 4 in the corners"
-./manage.* eval_loc_4 --commit 1
-./manage.* eval_loc_4 --commit 2 
-./manage.* eval_loc_4 --commit 9
+./manage.* dup_segments 2
+./manage.* eval_loc_4 --commit 2 1
+./manage.* eval_loc_4 --commit 2 7
+./manage.* eval_loc_4 --commit 2 49
+./manage.* eval_loc_4 --commit 2 55
 
-./manage.* eval_loc_4 --commit 7
-./manage.* eval_loc_4 --commit 6
-./manage.* eval_loc_4 --commit 15
+./manage.* dup_segments 3
+./manage.* eval_loc_4 --commit 3 2
+./manage.* eval_loc_4 --commit 3 9
 
-./manage.* eval_loc_4 --commit 49
-./manage.* eval_loc_4 --commit 50
-./manage.* eval_loc_4 --commit 41
+./manage.* eval_loc_4 --commit 3 6
+./manage.* eval_loc_4 --commit 3 15
 
-./manage.* eval_loc_4 --commit 55
-./manage.* eval_loc_4 --commit 54
-./manage.* eval_loc_4 --commit 47
+./manage.* eval_loc_4 --commit 3 50
+./manage.* eval_loc_4 --commit 3 41
+
+./manage.* eval_loc_4 --commit 3 54
+./manage.* eval_loc_4 --commit 3 47
 
 echo "[INFO] Reduction 4 attempts"
-./manage.* eval_loc_4 --commit 10
-./manage.* eval_loc_4 --commit 14
-./manage.* eval_loc_4 --commit 42
-./manage.* eval_loc_4 --commit 46
+./manage.* dup_segments 4
+./manage.* eval_loc_4 --commit 4 10
+./manage.* eval_loc_4 --commit 4 14
+./manage.* eval_loc_4 --commit 4 42
+./manage.* eval_loc_4 --commit 4 46
 
 # end of file
 

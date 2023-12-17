@@ -9,7 +9,7 @@
             border-collapse: collapse;
             padding: 0;
             text-align: center;
-            font-size: 15px;
+            font-size: 20px;
         }
     </style>
 </head>
@@ -26,7 +26,21 @@
                 <table>
                     <thead>
                         <tr>
-                            <td colspan="17">Processor: {{ processor }}</td>
+                            <td colspan="4">
+                                {% if url_prev %}
+                                    <a href="{{ url_prev }}">PREV</a>
+                                {% endif %}
+                            </td>
+
+                            <td colspan="9">Processor: {{ processor }}</td>
+
+                            <td colspan="4">
+                                {% if url_next %}
+                                    <a href="{{ url_next }}">NEXT</a>
+                                {% elif url_last %}
+                                    <a href="{{ url_last }}">LAST</a>
+                                {% endif %}
+                            </td>
                         </tr>
                     </thead>
 

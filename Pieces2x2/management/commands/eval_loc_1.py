@@ -35,6 +35,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         # parser.add_argument('--verbose', action='store_true')
+        parser.add_argument('processor', nargs=1, type=int, help='Processor number to use')
         parser.add_argument('loc', nargs=1, type=int, help='Location on board (1..64)')
 
     def _reverse_sides(self, options):
@@ -71,7 +72,9 @@ class Command(BaseCommand):
             self.stderr.write('[ERROR] Invalid location')
             return
 
-        self.stdout.write('[INFO] Location: %s' % self.loc)
+        self.processor = options['processor'][0]
+
+        self.stdout.write('[INFO] Location: %s; processor=%s' % (self.loc, self.processor))
 
         side1_options = self._get_side_options(1)
         side2_options = self._get_side_options(2)
