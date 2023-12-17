@@ -11,7 +11,7 @@ from django.templatetags.static import static
 from BasePieces.models import BasePiece
 from BasePieces.hints import HINT_NRS, CENTER_NR
 from Pieces2x2.models import Piece2x2
-from Partial6x6.models import Quart6, Partial6x6, NRS_PARTIAL_6X6, P_CORNER, P_BORDER, P_HINTS
+from Partial6x6.models import Quart6, Partial6x6, NRS_PARTIAL_6X6
 from types import SimpleNamespace
 
 TEMPLATE_VIEW = 'partial6x6/show.dtl'

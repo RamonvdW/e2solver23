@@ -6,7 +6,7 @@
 
 from django.core.management.base import BaseCommand
 from BasePieces.hints import ALL_HINT_NRS
-from Pieces2x2.models import TwoSides, Piece2x2
+from Pieces2x2.models import TwoSide, Piece2x2
 from Partial4x4.models import Partial4x4, NRS_PARTIAL_4X4
 from Solutions.models import P_CORNER, P_BORDER, P_HINTS
 
@@ -54,10 +54,10 @@ class Command(BaseCommand):
 
         self._calc_neighbours()
 
-        self.rev_border = TwoSides.objects.get(two_sides='XX').nr
+        self.twoside_border = TwoSide.objects.get(two_sides='XX').nr
         self.side_nr2reverse = dict()
         two2nr = dict()
-        for two in TwoSides.objects.all():
+        for two in TwoSide.objects.all():
             two2nr[two.two_sides] = two.nr
         # for
         for two_sides, nr in two2nr.items():
@@ -98,37 +98,37 @@ class Command(BaseCommand):
 
         if nr in P_CORNER:
             if nr == 1:
-                s1 = s4 = self.rev_border
+                s1 = s4 = self.twoside_border
             elif nr == 8:
-                s1 = s2 = self.rev_border
+                s1 = s2 = self.twoside_border
             elif nr == 57:
-                s3 = s4 = self.rev_border
+                s3 = s4 = self.twoside_border
             else:
-                s2 = s3 = self.rev_border
+                s2 = s3 = self.twoside_border
 
         elif nr in P_BORDER:
             if nr < 9:
-                s1 = self.rev_border
-                x2 = self.rev_border
-                x4 = self.rev_border
+                s1 = self.twoside_border
+                x2 = self.twoside_border
+                x4 = self.twoside_border
 
             elif nr > 57:
-                x2 = self.rev_border
-                s3 = self.rev_border
-                x4 = self.rev_border
+                x2 = self.twoside_border
+                s3 = self.twoside_border
+                x4 = self.twoside_border
 
             elif nr & 1 == 1:
-                x1 = self.rev_border
-                x3 = self.rev_border
-                s4 = self.rev_border
+                x1 = self.twoside_border
+                x3 = self.twoside_border
+                s4 = self.twoside_border
 
             else:
-                x1 = self.rev_border
-                s2 = self.rev_border
-                x3 = self.rev_border
+                x1 = self.twoside_border
+                s2 = self.twoside_border
+                x3 = self.twoside_border
 
         else:
-            x1 = x2 = x3 = x4 = self.rev_border
+            x1 = x2 = x3 = x4 = self.twoside_border
 
             if nr in P_HINTS:
                 if nr == 10:
@@ -342,37 +342,37 @@ class Command(BaseCommand):
 
         if nr in P_CORNER:
             if nr == 1:
-                s1 = s4 = self.rev_border
+                s1 = s4 = self.twoside_border
             elif nr == 8:
-                s1 = s2 = self.rev_border
+                s1 = s2 = self.twoside_border
             elif nr == 57:
-                s3 = s4 = self.rev_border
+                s3 = s4 = self.twoside_border
             else:
-                s2 = s3 = self.rev_border
+                s2 = s3 = self.twoside_border
 
         elif nr in P_BORDER:
             if nr < 9:
-                s1 = self.rev_border
-                x2 = self.rev_border
-                x4 = self.rev_border
+                s1 = self.twoside_border
+                x2 = self.twoside_border
+                x4 = self.twoside_border
 
             elif nr > 57:
-                x2 = self.rev_border
-                s3 = self.rev_border
-                x4 = self.rev_border
+                x2 = self.twoside_border
+                s3 = self.twoside_border
+                x4 = self.twoside_border
 
             elif nr & 1 == 1:
-                x1 = self.rev_border
-                x3 = self.rev_border
-                s4 = self.rev_border
+                x1 = self.twoside_border
+                x3 = self.twoside_border
+                s4 = self.twoside_border
 
             else:
-                x1 = self.rev_border
-                s2 = self.rev_border
-                x3 = self.rev_border
+                x1 = self.twoside_border
+                s2 = self.twoside_border
+                x3 = self.twoside_border
 
         else:
-            x1 = x2 = x3 = x4 = self.rev_border
+            x1 = x2 = x3 = x4 = self.twoside_border
 
             if nr in P_HINTS:
                 if nr == 10:

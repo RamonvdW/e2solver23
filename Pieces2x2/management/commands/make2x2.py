@@ -6,7 +6,7 @@
 
 from django.core.management.base import BaseCommand
 from BasePieces.models import BasePiece
-from Pieces2x2.models import TwoSides, Piece2x2
+from Pieces2x2.models import TwoSide, Piece2x2
 
 
 class Command(BaseCommand):
@@ -105,7 +105,7 @@ class Command(BaseCommand):
         except KeyError:
             nr = self.two_sides_nr + 1
             self.two_sides_nr = nr
-            TwoSides(
+            TwoSide(
                  nr=nr,
                  two_sides=two_sides).save()
             self.two_sides[two_sides] = nr
@@ -118,7 +118,7 @@ class Command(BaseCommand):
 
         self.stdout.write('[INFO] Deleting old pieces')
         Piece2x2.objects.all().delete()
-        TwoSides.objects.all().delete()
+        TwoSide.objects.all().delete()
 
         self.stdout.write('[INFO] Generating all 2x2 including rotation variants')
 

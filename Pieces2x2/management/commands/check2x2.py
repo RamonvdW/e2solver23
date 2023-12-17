@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from Pieces2x2.models import TwoSides, Piece2x2
+from Pieces2x2.models import TwoSide, Piece2x2
 
 
 class Command(BaseCommand):
@@ -32,7 +32,7 @@ class Command(BaseCommand):
                      side 3
         """
 
-        border = TwoSides.objects.get(two_sides='XX')
+        border = TwoSide.objects.get(two_sides='XX')
 
         c1 = Piece2x2.objects.filter(side1=border.nr).count()
         c2 = Piece2x2.objects.filter(side2=border.nr).count()

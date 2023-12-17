@@ -29,34 +29,51 @@
     55.p4 = 249
 """
 
-NRS_CORNER = (1, 8, 57, 64)
+LOC_CORNERS = (1, 8, 57, 64)
 
-NRS_BORDER = (2, 3, 4, 5, 6, 7, 16, 24, 32, 40, 48, 56, 9, 17, 25, 33, 41, 49, 58, 59, 60, 61, 62, 63)
+LOC_BORDERS = (2, 3, 4, 5, 6, 7, 16, 24, 32, 40, 48, 56, 9, 17, 25, 33, 41, 49, 58, 59, 60, 61, 62, 63)
 
-NRS_HINTS = (10, 15, 36, 50, 55)
+LOC_HINTS = (10, 15, 36, 50, 55)
 
-NRS_NEIGHBOURS = dict()     # [nr] = (nr on side1, nr on side2, nr on side3, nr on side4)
+LOC_NEIGHBOURS = dict()     # [nr] = (nr on side1, nr on side2, nr on side3, nr on side4)
 
 
 for nr in range(1, 64+1):
-    NRS_NEIGHBOURS[nr] = (nr - 8, nr + 1, nr + 8, nr - 1)       # side 1, 2, 3, 4
+    LOC_NEIGHBOURS[nr] = (nr - 8, nr + 1, nr + 8, nr - 1)       # side 1, 2, 3, 4
 # for
 
 # redo the corners
-NRS_NEIGHBOURS[1] = (0, 1 + 1, 1 + 8, 0)
-NRS_NEIGHBOURS[8] = (0, 0, 8 + 8, 8 - 1)
-NRS_NEIGHBOURS[57] = (57 - 8, 57 + 1, 0, 0)
-NRS_NEIGHBOURS[64] = (64 - 8, 0, 0, 64 - 1)
+LOC_NEIGHBOURS[1] = (0, 1 + 1, 1 + 8, 0)
+LOC_NEIGHBOURS[8] = (0, 0, 8 + 8, 8 - 1)
+LOC_NEIGHBOURS[57] = (57 - 8, 57 + 1, 0, 0)
+LOC_NEIGHBOURS[64] = (64 - 8, 0, 0, 64 - 1)
 
 # redo for the borders
 for nr in range(2, 7+1):
-    NRS_NEIGHBOURS[nr] = (0, nr + 1, nr + 8, nr - 1)
+    LOC_NEIGHBOURS[nr] = (0, nr + 1, nr + 8, nr - 1)
 for nr in range(9, 49+1, 8):
-    NRS_NEIGHBOURS[nr] = (nr - 8, nr + 1, nr + 8, 0)
+    LOC_NEIGHBOURS[nr] = (nr - 8, nr + 1, nr + 8, 0)
 for nr in range(16, 56+1, 8):
-    NRS_NEIGHBOURS[nr] = (nr - 8, 0, nr + 8, nr - 1)
+    LOC_NEIGHBOURS[nr] = (nr - 8, 0, nr + 8, nr - 1)
 for nr in range(58, 63+1):
-    NRS_NEIGHBOURS[nr] = (nr - 8, nr + 1, 0, nr - 1)
+    LOC_NEIGHBOURS[nr] = (nr - 8, nr + 1, 0, nr - 1)
+
+
+def calc_segment(loc, side):
+    """
+        Convert a location and side into a segment number
+
+        location: 1..64
+        side: 1, 2, 3, 4 starting at top, clockwise (1=top, 3=bottom, etc.)
+    """
+    if side == 1:
+        return loc
+    if side == 3:
+        return loc + 8
+    if side == 4:
+        return 128 + loc
+    # if side == 2:
+    return 128 + loc + 1
 
 
 # end of file

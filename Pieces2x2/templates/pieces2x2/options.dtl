@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title }}</title>
+    <style>
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+            padding: 0;
+            text-align: center;
+            font-size: 15px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Options</h1>
+
+    <table style="margin-left:auto; margin-right:auto; border:0">
+        <tr style="border:0; vertical-align:top">
+            <td style="border:0">
+
+                <!-- options -->
+                <table>
+                    <thead>
+                        <tr>
+                            <td colspan="17">Processor: {{ processor }}</td>
+                        </tr>
+                    </thead>
+
+                    <tr>
+                        {% for sq in squares %}
+                            {% if sq.loc %}
+                                <td style="background: lightgray; color: #808080; height:40px; width:40px">{{  sq.loc }}</td>
+                            {% elif sq.count %}
+                                <td style="background: hsl({{ sq.hue }}, 100%, 50%)">
+                                    <div{% if sq.transform %} style="transform: {{ sq.transform }}"{% endif %}>{{ sq.count }}</div>
+                                </td>
+                            {% else %}
+                                <td style="background: #606060; width:20px; height:20px"></td>
+                            {% endif %}
+
+                            {% if sq.break_after %}
+                                </tr>
+                                <tr>
+                            {% endif %}
+
+                        {% endfor %}
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+
+    {% if auto_reload %}
+        <script>
+            setTimeout(function(){
+                window.location.reload();
+            }, 15*1000);        // 15 seconds
+        </script>
+    {% endif %}
+
+</body>
+</html>

@@ -35,6 +35,7 @@ INTERNAL_IPS = []
 # Application definition
 INSTALLED_APPS = [
     'BasePieces',
+    'Edges4x4',
     'Pieces2x2',
     'Partial4x4',
     'Partial6x6',
@@ -108,7 +109,6 @@ WSGI_APPLICATION = 'SiteMain.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'OPTIONS': { 'options': '-c search_path=your_db_schema'},   # not needed below PostgreSQL version 15
         'NAME': 'your_db_name',
         'USER': 'your_db_user',
         'PASSWORD': 'your_db_password',

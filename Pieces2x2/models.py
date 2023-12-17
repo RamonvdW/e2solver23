@@ -7,7 +7,7 @@
 from django.db import models
 
 
-class TwoSides(models.Model):
+class TwoSide(models.Model):
 
     """ a side consisting of 2 consecutive base pieces
 
@@ -26,6 +26,24 @@ class TwoSides(models.Model):
         verbose_name = verbose_name_plural = 'Two sides'
 
     objects = models.Manager()  # for the editor only
+
+
+class TwoSideOptions(models.Model):
+    """
+        For each Piece2x2 location track which possible TwoSide remain a possibility.
+
+        Options are removed when a search concludes there is no solution given for that TwoSide.
+    """
+
+    # which instance does this belong to?
+    processor = models.PositiveIntegerField(default=0)
+
+    # line segment around the 64 locations
+    # in total 72 + 66 = 138 segments exists (due to acceptable overlap of the left and right borders)
+    segment = models.PositiveSmallIntegerField()        # max 32767
+
+    # reference to a TwoSide, of which 460 exist
+    two_side = models.PositiveSmallIntegerField()       # max 32767
 
 
 # TODO: Beware that Piece2x2 might be a subset with the hint pieces, used to generate the corners 4x4

@@ -10,8 +10,7 @@ from django.views.generic import TemplateView
 from django.templatetags.static import static
 from BasePieces.models import BasePiece
 from BasePieces.pieces_1x1 import INTERNAL_BORDER_SIDES
-from Pieces2x2.models import Piece2x2, TwoSides
-from Pieces2x2.helpers import NRS_BORDER
+from Pieces2x2.models import Piece2x2, TwoSide
 from Solutions.models import Solution8x8
 from types import SimpleNamespace
 
@@ -192,7 +191,7 @@ def _sol_add_stats_2x2(sol, neighbours):
     two2nr = dict()                 # [two sides] = two side nr
     side_nr_is_border = dict()      # [two side nr] = True/False
     side_nr2reverse = dict()        # [two side nr] = reverse two side nr
-    for two in TwoSides.objects.all():
+    for two in TwoSide.objects.all():
         two2nr[two.two_sides] = two.nr
         side_nr_is_border[two.nr] = ((two.two_sides[0] in INTERNAL_BORDER_SIDES) or
                                      (two.two_sides[1] in INTERNAL_BORDER_SIDES))
@@ -309,7 +308,6 @@ class ShowAutoView(TemplateView):
         context['title'] = 'Solution'
 
         return context
-
 
 
 # end of file

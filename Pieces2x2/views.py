@@ -8,15 +8,18 @@ from django.http import Http404
 from django.urls import reverse
 from django.views.generic import TemplateView
 from django.templatetags.static import static
-from Pieces2x2.models import Piece2x2
+from Pieces2x2.models import Piece2x2, TwoSideOptions
+from Pieces2x2.helpers import calc_segment
+from types import SimpleNamespace
 
 
-TEMPLATE_VIEW = 'pieces2x2/show.dtl'
+TEMPLATE_SHOW = 'pieces2x2/show.dtl'
+TEMPLATE_OPTIONS = 'pieces2x2/options.dtl'
 
 
 class ShowView(TemplateView):
 
-    template_name = TEMPLATE_VIEW
+    template_name = TEMPLATE_SHOW
 
     rot2transform = {
         # rotations are counter-clockwise, but CSS rotation are clockwise
@@ -70,6 +73,88 @@ class ShowView(TemplateView):
         # for
 
         return context
+
+
+class OptionsView(TemplateView):
+
+    template_name = TEMPLATE_OPTIONS
+
+    def _calc_hue(self, count):
+        if count == 289:
+            return 200
+
+        # max_count = 289
+        # count2hue_multiplier = 120 / max_count
+        return int(count * (120 / 289))
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        processor = 0
+        context['processor'] = processor
+
+        segment2count = dict()  # [segment] = int
+        for segment in range(256):
+            segment2count[segment] = 0
+        # for
+        for option in TwoSideOptions.objects.filter(processor=processor):
+            segment2count[option.segment] += 1
+        # for
+
+        squares = dict()    # [(x,y)] = SimpleNamespace
+        for y in range(16+1):
+            transform = ''
+            if y & 1 == 1:  # odd row
+                transform = 'rotate(90deg)'
+
+            for x in range(16+1):
+                squares[(x, y)] = SimpleNamespace(break_after=False, transform=transform)
+            # for
+            squares[(16, y)].break_after = True
+        # for
+
+        x = 1
+        y = 1
+        for loc in range(1, 64+1):
+            squares[(x, y)].loc = loc
+
+            segment = calc_segment(loc, 1)
+            count = segment2count[segment]
+            squares[(x, y-1)].count = count
+            squares[(x, y-1)].hue = self._calc_hue(count)
+
+            segment = calc_segment(loc, 2)
+            count = segment2count[segment]
+            squares[(x+1, y)].count = count
+            squares[(x+1, y)].hue = self._calc_hue(count)
+
+            segment = calc_segment(loc, 3)
+            count = segment2count[segment]
+            squares[(x, y+1)].count = count
+            squares[(x, y+1)].hue = self._calc_hue(count)
+
+            segment = calc_segment(loc, 4)
+            count = segment2count[segment]
+            squares[(x-1, y)].count = count
+            squares[(x-1, y)].hue = self._calc_hue(count)
+
+            x += 2
+            if x > 16:
+                x = 1
+                y += 2
+        # for
+
+        context['squares'] = sq_list = list()
+        for y in range(16 + 1):
+            for x in range(16 + 1):
+                square = squares[(x, y)]
+                sq_list.append(square)
+            # for
+        # for
+
+        return context
+
 
 
 # end of file

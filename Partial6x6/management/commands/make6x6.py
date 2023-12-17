@@ -6,8 +6,8 @@
 
 from django.core.management.base import BaseCommand
 from BasePieces.hints import ALL_HINT_NRS
-from Pieces2x2.models import TwoSides, Piece2x2
-from Pieces2x2.helpers import NRS_CORNER, NRS_BORDER, NRS_HINTS, NRS_NEIGHBOURS
+from Pieces2x2.models import TwoSide, Piece2x2
+from Pieces2x2.helpers import LOC_CORNERS, LOC_BORDERS, LOC_HINTS, LOC_NEIGHBOURS
 from Partial4x4.models import Partial4x4, NRS_PARTIAL_4X4
 from Partial6x6.models import Partial6x6, Quart6, NRS_PARTIAL_6X6
 import time
@@ -29,10 +29,10 @@ class Command(BaseCommand):
         self.interval_mins = 15
         self.my_processor = int(time.time() - 946684800.0)     # seconds since Jan 1, 2000
 
-        self.two_border = TwoSides.objects.get(two_sides='XX').nr
+        self.two_border = TwoSide.objects.get(two_sides='XX').nr
         self.side_nr2reverse = dict()
         two2nr = dict()
-        for two in TwoSides.objects.all():
+        for two in TwoSide.objects.all():
             two2nr[two.two_sides] = two.nr
         # for
         for two_sides, nr in two2nr.items():
@@ -51,7 +51,7 @@ class Command(BaseCommand):
         p1 = p2 = p3 = p4 = None
         x1 = x2 = x3 = x4 = None
 
-        if nr in NRS_CORNER:
+        if nr in LOC_CORNERS:
             if nr == 1:
                 s1 = s4 = self.two_border
             elif nr == 8:
@@ -61,7 +61,7 @@ class Command(BaseCommand):
             else:
                 s2 = s3 = self.two_border
 
-        elif nr in NRS_BORDER:
+        elif nr in LOC_BORDERS:
             if nr < 9:
                 s1 = self.two_border
                 x2 = self.two_border
@@ -85,7 +85,7 @@ class Command(BaseCommand):
         else:
             x1 = x2 = x3 = x4 = self.two_border
 
-            if nr in NRS_HINTS:
+            if nr in LOC_HINTS:
                 # has_hint = True
                 if nr == 10:
                     p1 = 208
@@ -253,7 +253,7 @@ class Command(BaseCommand):
         self.board_solve_order.append(nr)
 
     def _get_sides(self, nr):
-        nr1, nr2, nr3, nr4 = NRS_NEIGHBOURS[nr]
+        nr1, nr2, nr3, nr4 = LOC_NEIGHBOURS[nr]
 
         s1 = s2 = s3 = s4 = None
 
@@ -286,7 +286,7 @@ class Command(BaseCommand):
         x1 = x2 = x3 = x4 = self.two_border
         p1 = p2 = p3 = p4 = None
 
-        if nr in NRS_HINTS:
+        if nr in LOC_HINTS:
             if nr == 10:
                 p1 = 208
             elif nr == 15:
