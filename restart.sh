@@ -48,12 +48,16 @@ echo "[INFO] Reduction 4 in the corners"
 ./manage.* eval_loc_4 --commit 3 54
 ./manage.* eval_loc_4 --commit 3 47
 
-echo "[INFO] Reduction 4 attempts"
+echo "[INFO] Reduce center"
 ./manage.* dup_segments 4
-./manage.* eval_loc_4 --commit 4 10
-./manage.* eval_loc_4 --commit 4 14
-./manage.* eval_loc_4 --commit 4 42
-./manage.* eval_loc_4 --commit 4 46
+./manage.* eval_loc_4 --commit 4 28
+
+echo "[INFO] Reduction 4 attempts"
+./manage.* dup_segments 5
+./manage.* eval_loc_4 --commit 5 10
+./manage.* eval_loc_4 --commit 5 14
+./manage.* eval_loc_4 --commit 5 42
+./manage.* eval_loc_4 --commit 5 46
 
 # end of file
 

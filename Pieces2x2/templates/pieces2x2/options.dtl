@@ -68,6 +68,7 @@
         </tr>
     </table>
 
+    <p>Total options remaining: {{ total_options }}</p>
 
     {% if auto_reload %}
         <script>

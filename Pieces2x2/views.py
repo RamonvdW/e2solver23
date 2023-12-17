@@ -87,8 +87,8 @@ class OptionsView(TemplateView):
 
         # max_count = 289
         # count2hue_multiplier = 120 / max_count
-        hue = int(count * (120 / 289))
-        return 120 - hue        # low number = green, higher number = red
+        hue = int(count * (100 / 289))
+        return 100 - hue        # low number = green, higher number = red
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -132,6 +132,8 @@ class OptionsView(TemplateView):
         for option in TwoSideOptions.objects.filter(processor=processor):
             segment2count[option.segment] += 1
         # for
+
+        context['total_options'] = sum(segment2count.values())
 
         squares = dict()    # [(x,y)] = SimpleNamespace
         for y in range(16+1):

@@ -11,7 +11,7 @@ from Pieces2x2.helpers import calc_segment, LOC_HINTS
 
 class Command(BaseCommand):
 
-    help = "Eval a possible reduction in TwoSideOptions for a square of locations"
+    help = "Eval a possible reduction in TwoSideOptions for a square of 4 locations"
 
     """
               s0          s1
@@ -174,7 +174,8 @@ class Command(BaseCommand):
         """
         segment = calc_segment(self.locs[0], 2)
         sides = self.side_options[3]
-        self.stdout.write('[INFO] Checking %s options in segment %s' % (len(sides), segment))
+        todo = len(sides)
+        self.stdout.write('[INFO] Checking %s options in segment %s' % (todo, segment))
         for side in sides:
             p0_exp_s2 = side
             p1_exp_s4 = self.twoside2reverse[side]
@@ -202,6 +203,9 @@ class Command(BaseCommand):
 
             if not found:
                 self._reduce(segment, side)
+
+            todo -= 1
+            self.stdout.write('[INFO] Remaining: %s/%s' % (todo, len(sides)))
         # for
 
     def _reduce_s5(self):
@@ -218,7 +222,8 @@ class Command(BaseCommand):
         """
         segment = calc_segment(self.locs[0], 3)
         sides = self.side_options[5]
-        self.stdout.write('[INFO] Checking %s options in segment %s' % (len(sides), segment))
+        todo = len(sides)
+        self.stdout.write('[INFO] Checking %s options in segment %s' % (todo, segment))
         for side in sides:
             p0_exp_s3 = self.twoside2reverse[side]
             p2_exp_s1 = side
@@ -262,7 +267,8 @@ class Command(BaseCommand):
         """
         segment = calc_segment(self.locs[1], 3)
         sides = self.side_options[6]
-        self.stdout.write('[INFO] Checking %s options in segment %s' % (len(sides), segment))
+        todo = len(sides)
+        self.stdout.write('[INFO] Checking %s options in segment %s' % (todo, segment))
         for side in sides:
             p1_exp_s3 = self.twoside2reverse[side]
             p3_exp_s1 = side
@@ -290,6 +296,9 @@ class Command(BaseCommand):
 
             if not found:
                 self._reduce(segment, side)
+
+            todo -= 1
+            self.stdout.write('[INFO] Remaining: %s/%s' % (todo, len(sides)))
         # for
 
     def _reduce_s8(self):
@@ -306,7 +315,8 @@ class Command(BaseCommand):
         """
         segment = calc_segment(self.locs[2], 2)
         sides = self.side_options[8]
-        self.stdout.write('[INFO] Checking %s options in segment %s' % (len(sides), segment))
+        todo = len(sides)
+        self.stdout.write('[INFO] Checking %s options in segment %s' % (todo, segment))
         for side in sides:
             p2_exp_s2 = side
             p3_exp_s4 = self.twoside2reverse[side]
@@ -334,6 +344,9 @@ class Command(BaseCommand):
 
             if not found:
                 self._reduce(segment, side)
+
+            todo -= 1
+            self.stdout.write('[INFO] Remaining: %s/%s' % (todo, len(sides)))
         # for
 
     def handle(self, *args, **options):
@@ -358,6 +371,7 @@ class Command(BaseCommand):
             self.stderr.write('[ERROR] Invalid location')
             return
         self.locs = (loc, loc + 1, loc + 8, loc + 9)
+        self.stdout.write('[INFO] Locations: %s' % repr(self.locs))
 
         self.processor = options['processor'][0]
         self.stdout.write('[INFO] Processor=%s' % self.processor)
