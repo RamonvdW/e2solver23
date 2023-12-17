@@ -1,15 +1,18 @@
 #!/bin/sh
 
-echo "[INFO] Creating empty database"
-sudo -u postgres dropdb --if-exists e2
-sudo -u postgres dropdb --if-exists test_e2 || exit 1   # avoid problems with next test run
-sudo -u postgres createdb -E UTF8 e2 || exit 1
-sudo -u postgres psql -d e2 -q -c 'GRANT CREATE ON SCHEMA public TO e2app'
+if [ "$1" == "--clean" ]
+then
+    echo "[INFO] Creating empty database"
+    sudo -u postgres dropdb --if-exists e2
+    sudo -u postgres dropdb --if-exists test_e2 || exit 1   # avoid problems with next test run
+    sudo -u postgres createdb -E UTF8 e2 || exit 1
+    sudo -u postgres psql -d e2 -q -c 'GRANT CREATE ON SCHEMA public TO e2app'
 
-./manage.* migrate
+    ./manage.* migrate
 
-echo "[INFO] Creating all Piece2x2"
-./manage.* make2x2
+    echo "[INFO] Creating all Piece2x2"
+    ./manage.* make2x2
+fi
 
 echo "[INFO] Creating all TwoSideOptions"
 ./manage.* init_segments --confirm
