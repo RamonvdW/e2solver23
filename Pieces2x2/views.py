@@ -79,13 +79,16 @@ class OptionsView(TemplateView):
 
     template_name = TEMPLATE_OPTIONS
 
-    def _calc_hue(self, count):
+    @staticmethod
+    def _calc_hue(count):
         if count == 289:
-            return 200
+            # hanging out at maximum
+            return 200  # blue
 
         # max_count = 289
         # count2hue_multiplier = 120 / max_count
-        return int(count * (120 / 289))
+        hue = int(count * (120 / 289))
+        return 120 - hue        # low number = green, higher number = red
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
