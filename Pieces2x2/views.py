@@ -90,6 +90,32 @@ class OptionsView(TemplateView):
         hue = int(count * (100 / 289))
         return 100 - hue        # low number = green, higher number = red
 
+    def _compare_pre(self, processor, prev_processor):
+        segment2count = dict()       # [segment] = int
+        prev_segment2count = dict()  # [segment] = int
+        for segment in range(256):
+            segment2count[segment] = 0
+            prev_segment2count[segment] = 0
+        # for
+        for option in TwoSideOptions.objects.filter(processor=processor):
+            segment2count[option.segment] += 1
+        # for
+        for option in TwoSideOptions.objects.filter(processor=prev_processor):
+            prev_segment2count[option.segment] += 1
+        # for
+
+        segments = list(segment2count.keys())
+        segments.sort()
+        compare = list()
+        for segment in segments:
+            count1 = segment2count[segment]
+            count2 = prev_segment2count[segment]
+            if count1 != count2:
+                tup = (segment, count1, count2, count1 - count2)
+                compare.append(tup)
+        # for
+        return compare
+
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
@@ -121,6 +147,7 @@ class OptionsView(TemplateView):
         else:
             if idx > 0:
                 context['url_prev'] = reverse('Pieces2x2:options-nr', kwargs={'nr': processors[idx - 1]})
+                context['compare'] = self._compare_pre(processor, processors[idx - 1])
             if idx < len(processors) - 1:
                 context['url_next'] = reverse('Pieces2x2:options-nr', kwargs={'nr': processors[idx + 1]})
         context['url_last'] = reverse('Pieces2x2:options')
@@ -135,6 +162,7 @@ class OptionsView(TemplateView):
 
         context['total_options'] = sum(segment2count.values())
 
+        # initialize matrix
         squares = dict()    # [(x,y)] = SimpleNamespace
         for y in range(16+1):
             transform = ''
@@ -147,6 +175,12 @@ class OptionsView(TemplateView):
             squares[(16, y)].break_after = True
         # for
 
+        try:
+            highlight_segments = [segment for segment, _, _, _ in context['compare']]
+        except KeyError:
+            highlight_segments = list()
+
+        # fill in each loc with surrounding segments
         x = 1
         y = 1
         for loc in range(1, 64+1):
@@ -155,21 +189,25 @@ class OptionsView(TemplateView):
             segment = calc_segment(loc, 1)
             count = segment2count[segment]
             squares[(x, y-1)].count = count
+            squares[(x, y-1)].highlight = segment in highlight_segments
             squares[(x, y-1)].hue = self._calc_hue(count)
 
             segment = calc_segment(loc, 2)
             count = segment2count[segment]
             squares[(x+1, y)].count = count
+            squares[(x+1, y)].highlight = segment in highlight_segments
             squares[(x+1, y)].hue = self._calc_hue(count)
 
             segment = calc_segment(loc, 3)
             count = segment2count[segment]
             squares[(x, y+1)].count = count
+            squares[(x, y+1)].highlight = segment in highlight_segments
             squares[(x, y+1)].hue = self._calc_hue(count)
 
             segment = calc_segment(loc, 4)
             count = segment2count[segment]
             squares[(x-1, y)].count = count
+            squares[(x-1, y)].highlight = segment in highlight_segments
             squares[(x-1, y)].hue = self._calc_hue(count)
 
             x += 2
@@ -178,6 +216,7 @@ class OptionsView(TemplateView):
                 y += 2
         # for
 
+        # pack the matrix into an array
         context['squares'] = sq_list = list()
         for y in range(16 + 1):
             for x in range(16 + 1):
@@ -187,7 +226,6 @@ class OptionsView(TemplateView):
         # for
 
         return context
-
 
 
 # end of file

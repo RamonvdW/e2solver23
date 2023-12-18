@@ -47,9 +47,9 @@
                     <tr>
                         {% for sq in squares %}
                             {% if sq.loc %}
-                                <td style="background: lightgray; color: #808080; height:40px; width:40px">{{  sq.loc }}</td>
+                                <td style="background: lightgray; color: #808080; height:40px; width:40px">{{ sq.loc }}</td>
                             {% elif sq.count %}
-                                <td style="background: hsl({{ sq.hue }}, 100%, 50%)">
+                                <td style="background: hsl({{ sq.hue }}, 100%, 50%);{% if sq.highlight %}background:white{% endif %}">
                                     <div{% if sq.transform %} style="transform: {{ sq.transform }}"{% endif %}>{{ sq.count }}</div>
                                 </td>
                             {% else %}
@@ -65,6 +65,29 @@
                     </tr>
                 </table>
             </td>
+
+            <td style="border:0">
+                <!-- open sides usage -->
+                <table style="margin-left:10px">
+                    <thead>
+                        <tr>
+                            <th style="padding:5px">Segment</th>
+                            <th style="padding:5px">Prev</th>
+                            <th style="padding:5px">Now</th>
+                            <th style="padding:5px">Diff</th>
+                        </tr>
+                    </thead>
+                    {% for segment, count1, count2, diff in compare %}
+                        <tr>
+                            <td style="padding:5px">{{ segment }}</td>
+                            <td style="padding:5px">{{ count2 }}</td>
+                            <td style="padding:5px">{{ count1 }}</td>
+                            <td style="padding:5px">{{ diff }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </td>
+
         </tr>
     </table>
 
