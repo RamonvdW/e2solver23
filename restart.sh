@@ -19,38 +19,38 @@ echo "[INFO] Creating all TwoSideOptions"
 
 echo "[INFO] Reduction 1"
 ./manage.* dup_segments 1
-./manage.* eval_loc_1 1 2 
-./manage.* eval_loc_1 1 9 
-./manage.* eval_loc_1 1 7 
-./manage.* eval_loc_1 1 16
-./manage.* eval_loc_1 1 49
-./manage.* eval_loc_1 1 58
-./manage.* eval_loc_1 1 56
-./manage.* eval_loc_1 1 63
+./manage.* eval_loc_1 1 2       # effect: -21
+./manage.* eval_loc_1 1 9       # effect: -12
+./manage.* eval_loc_1 1 7       # effect: -22
+./manage.* eval_loc_1 1 16      # effect: -17
+./manage.* eval_loc_1 1 49      # effect: -28
+./manage.* eval_loc_1 1 58      # effect: -23
+./manage.* eval_loc_1 1 56      # effect: -23
+./manage.* eval_loc_1 1 63      # effect: -29
 
 echo "[INFO] Reduction 4 in the corners"
 ./manage.* dup_segments 2
-./manage.* eval_loc_4 --commit 2 1
-./manage.* eval_loc_4 --commit 2 7
-./manage.* eval_loc_4 --commit 2 49
-./manage.* eval_loc_4 --commit 2 55
+#./manage.* eval_loc_4 --commit 2 1     # effect: 0
+#./manage.* eval_loc_4 --commit 2 7     # effect: 0
+./manage.* eval_loc_4 --commit 2 49     # effect: -1
+./manage.* eval_loc_4 --commit 2 55     # effect: -1
 
-./manage.* dup_segments 3
-./manage.* eval_loc_4 --commit 3 2
-./manage.* eval_loc_4 --commit 3 9
+#./manage.* dup_segments 3
+#./manage.* eval_loc_4 --commit 3 2      # effect: 0
+#./manage.* eval_loc_4 --commit 3 9      # effect: 0
 
-./manage.* eval_loc_4 --commit 3 6
-./manage.* eval_loc_4 --commit 3 15
+#./manage.* eval_loc_4 --commit 3 6      # effect: 0
+#./manage.* eval_loc_4 --commit 3 15     # effect: 0
 
-./manage.* eval_loc_4 --commit 3 50
-./manage.* eval_loc_4 --commit 3 41
+#./manage.* eval_loc_4 --commit 3 50     # effect: 0
+#./manage.* eval_loc_4 --commit 3 41     # effect: 0
 
-./manage.* eval_loc_4 --commit 3 54
-./manage.* eval_loc_4 --commit 3 47
+#./manage.* eval_loc_4 --commit 3 54     # effect: 0
+#./manage.* eval_loc_4 --commit 3 47     # effect: 0
 
 echo "[INFO] Reduce center"
-./manage.* dup_segments 4
-./manage.* eval_loc_4 --commit 4 28
+#./manage.* dup_segments 4
+#./manage.* eval_loc_4 --commit 4 28     # effect: 0
 
 echo "[INFO] Reduction 4 attempts"
 ./manage.* dup_segments 5

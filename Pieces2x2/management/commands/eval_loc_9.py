@@ -7,6 +7,7 @@
 from django.core.management.base import BaseCommand
 from Pieces2x2.models import TwoSide, TwoSideOptions, Piece2x2
 from Pieces2x2.helpers import calc_segment
+import time
 
 
 class Command(BaseCommand):
@@ -85,10 +86,11 @@ class Command(BaseCommand):
         self.board_order = list()   # solve order (for popping)
         self.board_unused = list()
         self.p_nrs_order = list()
+        self.prev_tick = 0
 
     def add_arguments(self, parser):
         parser.add_argument('processor', nargs=1, type=int, help='Processor number to use')
-        parser.add_argument('loc', nargs=1, type=int, help='Location on board (10..55)')
+        parser.add_argument('loc', nargs=1, type=int, help='Top-left location on board (1..46)')
         parser.add_argument('--commit', action='store_true')
 
     def _calc_unused0(self):
@@ -227,7 +229,7 @@ class Command(BaseCommand):
                                        nr4__in=self.board_unused)
 
         p_nr_counts = list()
-        for p_nr in range(8+1):
+        for p_nr in range(9):
             if self.board[p_nr] is None:
                 # empty position on the board
                 s1, s2, s3, s4 = self.side_nrs[p_nr]
@@ -266,8 +268,16 @@ class Command(BaseCommand):
         self.p_nrs_order = [tup[-1] for tup in p_nr_counts]
         self.stdout.write('[INFO] p_nr order: %s' % repr(self.p_nrs_order))
 
-    def __select_p_nr(self):
+    def _select_p_nr(self):
         # decide which position on the board has the fewest options
+
+        # follow previous solve order
+        for p_nr in self.p_nrs_order:
+            if self.board[p_nr] is None:
+                return p_nr, False
+        # for
+
+        # decide the next best position on the board to solve
 
         qset = Piece2x2.objects.filter(nr1__in=self.board_unused,
                                        nr2__in=self.board_unused,
@@ -276,7 +286,7 @@ class Command(BaseCommand):
 
         has_zero = False
         p_nr_counts = list()
-        for p_nr in range(8+1):
+        for p_nr in range(9):
             if self.board[p_nr] is None:
                 # empty position on the board
                 s1, s2, s3, s4 = self.side_nrs[p_nr]
@@ -311,29 +321,25 @@ class Command(BaseCommand):
                 p_nr_counts.append(tup)
 
                 if count == 0:
-                    has_zero = True
-                    break
-        # for
+                    # dead end
+                    # self.stdout.write('[DEBUG] No options for %s' % p_nr)
+                    return -1, True
 
-        if not has_zero:
-            p_nr_counts.sort()  # smallest first
-            print(repr(p_nr_counts))
-            tup = p_nr_counts[0]
-            p_nr = tup[1]
-        else:
-            p_nr = -1
-
-        return p_nr, has_zero
-
-    def _select_p_nr(self):
-        for p_nr in self.p_nrs_order:
-            if self.board[p_nr] is None:
+                # self.stdout.write('[INFO] Added %s' % p_nr)
+                self.p_nrs_order.append(p_nr)
                 return p_nr, False
         # for
-        return -1, True     # should not get here
+
+        # niets kunnen kiezen
+        self.stdout.write('[DEBUG] select_p_nr failure')
+        return -1, True
 
     def _find_recurse(self):
-        # print(repr([self.locs[idx] for idx in self.board_order]))
+        tick = time.monotonic()
+        if tick - self.prev_tick > 5:
+            print('(%s) %s' % (len(self.board_order), repr([self.locs[idx] for idx in self.board_order])))
+            self.prev_tick = tick
+
         if len(self.board_order) == 9:
             return True
 
@@ -382,6 +388,7 @@ class Command(BaseCommand):
         sides = self.side_options[s_nr]
         todo = len(sides)
         self.stdout.write('[INFO] Checking %s options in segment %s' % (len(sides), segment))
+        self.p_nrs_order = list()       # allow deciding optimal order anew
         for side in sides:
             # place the first piece
             s1, s2, s3, s4 = self.side_nrs[p_nr]
@@ -413,6 +420,7 @@ class Command(BaseCommand):
 
             todo -= 1
             self.stdout.write('[INFO] Remaining: %s/%s' % (todo, len(sides)))
+            self.prev_tick = time.monotonic()
         # for
 
     def handle(self, *args, **options):
@@ -437,12 +445,16 @@ class Command(BaseCommand):
             self.do_commit = True
 
         loc = options['loc'][0]
-        if loc < 10 or loc > 55 or loc in (17, 25, 33, 41, 49, 16, 24, 32, 40, 48):
+        if loc < 1 or loc > 46 or loc in (7, 8,
+                                          15, 16,
+                                          23, 24,
+                                          31, 32,
+                                          39, 40):
             self.stderr.write('[ERROR] Invalid location')
             return
-        self.locs = (loc - 9, loc - 8, loc - 7,
-                     loc - 1, loc + 0, loc + 1,
-                     loc + 7, loc + 8, loc + 9)
+        self.locs = (loc + 0, loc + 1, loc + 2,
+                     loc + 8, loc + 9, loc + 10,
+                     loc + 16, loc + 17, loc + 18)
         self.stdout.write('[INFO] Locations: %s' % repr(self.locs))
 
         self.processor = options['processor'][0]
@@ -454,32 +466,24 @@ class Command(BaseCommand):
         self._get_side_options()
         # self.stdout.write('%s' % ", ".join([str(len(opt)) for opt in self.side_options]))
 
-        self._decide_p_nr_order()
+        self.prev_tick = time.monotonic()
 
         self._find_reduce(4, 1, 8)
         self._find_reduce(4, 2, 12)
         self._find_reduce(4, 3, 15)
         self._find_reduce(4, 4, 11)
 
-        if len(self.side_options[4]) < 100:
-            self._find_reduce(1, 4, 4)
-        if len(self.side_options[5]) < 100:
-            self._find_reduce(1, 2, 5)
+        self._find_reduce(1, 4, 4)
+        self._find_reduce(1, 2, 5)
 
-        if len(self.side_options[7]) < 100:
-            self._find_reduce(3, 1, 7)
-        if len(self.side_options[14]) < 100:
-            self._find_reduce(3, 3, 14)
+        self._find_reduce(3, 1, 7)
+        self._find_reduce(3, 3, 14)
 
-        if len(self.side_options[9]) < 100:
-            self._find_reduce(5, 1, 9)
-        if len(self.side_options[16]) < 100:
-            self._find_reduce(5, 3, 16)
+        self._find_reduce(5, 1, 9)
+        self._find_reduce(5, 3, 16)
 
-        if len(self.side_options[18]) < 100:
-            self._find_reduce(7, 4, 18)
-        if len(self.side_options[19]) < 100:
-            self._find_reduce(7, 2, 19)
+        self._find_reduce(7, 4, 18)
+        self._find_reduce(7, 2, 19)
 
         if self.reductions == 0:
             self.stdout.write('[INFO] No reductions')

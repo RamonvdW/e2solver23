@@ -370,7 +370,8 @@ class Command(BaseCommand):
         if loc < 1 or loc > 55 or loc in (8, 16, 24, 32, 40, 48):
             self.stderr.write('[ERROR] Invalid location')
             return
-        self.locs = (loc, loc + 1, loc + 8, loc + 9)
+        self.locs = (loc, loc + 1,
+                     loc + 8, loc + 9)
         self.stdout.write('[INFO] Locations: %s' % repr(self.locs))
 
         self.processor = options['processor'][0]
