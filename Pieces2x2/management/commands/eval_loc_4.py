@@ -6,7 +6,7 @@
 
 from django.core.management.base import BaseCommand
 from Pieces2x2.models import TwoSide, TwoSideOptions, Piece2x2
-from Pieces2x2.helpers import calc_segment, LOC_HINTS
+from Pieces2x2.helpers import calc_segment
 
 
 class Command(BaseCommand):

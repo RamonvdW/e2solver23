@@ -55,38 +55,32 @@ class Command(BaseCommand):
 
         self.do_commit = False
 
-        self.neighbours = dict()    # [p_nr] = [p_nr on side1..4 or -1 if no neighbour]
-        self.neighbours[0] = (-1, 1, 3, -1)
-        self.neighbours[1] = (-1, 2, 4, 0)
-        self.neighbours[2] = (-1, -1, 5, 1)
-        self.neighbours[3] = (0, 4, 6, -1)
-        self.neighbours[4] = (1, 3, 5, 7)
-        self.neighbours[5] = (2, -1, 8, 4)
-        self.neighbours[6] = (3, 7, -1, -1)
-        self.neighbours[7] = (4, 8, -1, 6)
-        self.neighbours[8] = (5, -1, -1, 7)
+        # [p_nr] = [p_nr on side1..4 or -1 if no neighbour]
+        self.neighbours: dict[int, tuple] = {0: (-1, 1, 3, -1),
+                                             1: (-1, 2, 4, 0),
+                                             2: (-1, -1, 5, 1),
+                                             3: (0, 4, 6, -1),
+                                             4: (1, 5, 7, 3),
+                                             5: (2, -1, 8, 4),
+                                             6: (3, 7, -1, -1),
+                                             7: (4, 8, -1, 6),
+                                             8: (5, -1, -1, 7)}
 
-        self.side_nrs = dict()      # [p_nr] = [4 side nrs]
-        self.side_nrs[0] = (0, 4, 7, 3)
-        self.side_nrs[1] = (1, 5, 8, 4)
-        self.side_nrs[2] = (2, 6, 9, 5)
-        self.side_nrs[3] = (7, 11, 14, 10)
-        self.side_nrs[4] = (8, 12, 15, 11)
-        self.side_nrs[5] = (9, 13, 16, 12)
-        self.side_nrs[6] = (14, 18, 21, 17)
-        self.side_nrs[7] = (15, 19, 22, 18)
-        self.side_nrs[8] = (16, 20, 23, 19)
+        # [p_nr] = [4 side nr]
+        self.side_nrs: dict[int, tuple] = {0: (0, 4, 7, 3),
+                                           1: (1, 5, 8, 4),
+                                           2: (2, 6, 9, 5),
+                                           3: (7, 11, 14, 10),
+                                           4: (8, 12, 15, 11),
+                                           5: (9, 13, 16, 12),
+                                           6: (14, 18, 21, 17),
+                                           7: (15, 19, 22, 18),
+                                           8: (16, 20, 23, 19)}
 
-        self.board = dict()          # [0..8] = None or Piece2x2 with side1/2/3/4
-        self.board[0] = None
-        self.board[1] = None
-        self.board[2] = None
-        self.board[3] = None
-        self.board[4] = None
-        self.board[5] = None
-        self.board[6] = None
-        self.board[7] = None
-        self.board[8] = None
+        # [0..8] = None or Piece2x2 with side1/2/3/4
+        self.board: dict[int, Piece2x2 | None] = {0: None, 1: None, 2: None,
+                                                  3: None, 4: None, 5: None,
+                                                  6: None, 7: None, 8: None}
 
         self.board_order = list()   # solve order (for popping)
         self.board_unused = list()
@@ -186,7 +180,7 @@ class Command(BaseCommand):
 
         self.side_options_rev = [self._reverse_sides(s) for s in self.side_options]
 
-    def _board_place(self, p_nr, p2x2):
+    def _board_place(self, p_nr: int, p2x2):
         self.board_order.append(p_nr)
         self.board[p_nr] = p2x2
         self.board_unused.remove(p2x2.nr1)
@@ -201,24 +195,19 @@ class Command(BaseCommand):
         self.board[p_nr] = None
         self.board_unused.extend([p2x2.nr1, p2x2.nr2, p2x2.nr3, p2x2.nr4])
 
-    @staticmethod
-    def _iter(unused1, options_side1, options_side2, options_side3, options_side4):
+    def _iter(self, options_side1, options_side2, options_side3, options_side4):
+        unused = self.board_unused
         for p in (Piece2x2
                   .objects
                   .filter(side1__in=options_side1,
                           side2__in=options_side2,
                           side3__in=options_side3,
                           side4__in=options_side4,
-                          nr1__in=unused1,
-                          nr2__in=unused1,
-                          nr3__in=unused1,
-                          nr4__in=unused1)):
-            unused2 = unused1[:]
-            unused2.remove(p.nr1)
-            unused2.remove(p.nr2)
-            unused2.remove(p.nr3)
-            unused2.remove(p.nr4)
-            yield p, unused2
+                          nr1__in=unused,
+                          nr2__in=unused,
+                          nr3__in=unused,
+                          nr4__in=unused)):
+            yield p
         # for
 
     def _reduce(self, segment, two_side):
@@ -344,7 +333,7 @@ class Command(BaseCommand):
         return -1, True     # should not get here
 
     def _find_recurse(self):
-        #print(repr([self.locs[idx] for idx in self.board_order]))
+        # print(repr([self.locs[idx] for idx in self.board_order]))
         if len(self.board_order) == 9:
             return True
 
@@ -377,7 +366,7 @@ class Command(BaseCommand):
             if p:
                 options_side4 = [self.twoside2reverse[p.side2]]
 
-        for p, _ in self._iter(self.board_unused, options_side1, options_side2, options_side3, options_side4):
+        for p in self._iter(options_side1, options_side2, options_side3, options_side4):
             self._board_place(p_nr, p)
             found = self._find_recurse()
             self._board_pop()
@@ -411,7 +400,7 @@ class Command(BaseCommand):
                 options_side4 = [self.twoside2reverse[side]]
 
             found = False
-            for p, _ in self._iter(self.board_unused, options_side1, options_side2, options_side3, options_side4):
+            for p in self._iter(options_side1, options_side2, options_side3, options_side4):
                 self._board_place(p_nr, p)
                 found = self._find_recurse()
                 self._board_pop()
