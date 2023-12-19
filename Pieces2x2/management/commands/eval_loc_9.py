@@ -4,8 +4,9 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+from django.utils import timezone
 from django.core.management.base import BaseCommand
-from Pieces2x2.models import TwoSide, TwoSideOptions, Piece2x2
+from Pieces2x2.models import TwoSide, TwoSideOptions, Piece2x2, EvalProgress
 from Pieces2x2.helpers import calc_segment
 import time
 
@@ -87,6 +88,7 @@ class Command(BaseCommand):
         self.board_unused = list()
         self.p_nrs_order = list()
         self.prev_tick = 0
+        self.progress = None
 
     def add_arguments(self, parser):
         parser.add_argument('processor', nargs=1, type=int, help='Processor number to use')
@@ -336,9 +338,13 @@ class Command(BaseCommand):
 
     def _find_recurse(self):
         tick = time.monotonic()
-        if tick - self.prev_tick > 5:
-            print('(%s) %s' % (len(self.board_order), repr([self.locs[idx] for idx in self.board_order])))
+        if tick - self.prev_tick > 30:
             self.prev_tick = tick
+            msg = '(%s) %s' % (len(self.board_order), repr([self.locs[idx] for idx in self.board_order]))
+            print(msg)
+            self.progress.solve_order = msg
+            self.progress.updated = timezone.now()
+            self.progress.save(update_fields=['solve_order', 'updated'])
 
         if len(self.board_order) == 9:
             return True
@@ -389,7 +395,17 @@ class Command(BaseCommand):
         todo = len(sides)
         self.stdout.write('[INFO] Checking %s options in segment %s' % (len(sides), segment))
         self.p_nrs_order = list()       # allow deciding optimal order anew
+
+        self.progress.segment = segment
+        self.progress.todo_count = todo
+        self.progress.save(update_fields=['segment', 'todo_count'])
+
         for side in sides:
+            # update the progress record in the database
+            self.progress.left_count = todo
+            self.progress.updated = timezone.now()
+            self.progress.save(update_fields=['left_count', 'updated'])
+
             # place the first piece
             s1, s2, s3, s4 = self.side_nrs[p_nr]
             options_side1 = self.side_options[s1]
@@ -468,22 +484,38 @@ class Command(BaseCommand):
 
         self.prev_tick = time.monotonic()
 
-        self._find_reduce(4, 1, 8)
-        self._find_reduce(4, 2, 12)
-        self._find_reduce(4, 3, 15)
-        self._find_reduce(4, 4, 11)
+        self.progress = EvalProgress(
+                        eval_size=9,
+                        eval_loc=self.locs[0],
+                        processor=self.processor,
+                        segment=0,
+                        todo_count=0,
+                        left_count=0,
+                        solve_order='',
+                        updated=timezone.now())
+        self.progress.save()
 
-        self._find_reduce(1, 4, 4)
-        self._find_reduce(1, 2, 5)
+        try:
+            self._find_reduce(4, 1, 8)
+            self._find_reduce(4, 2, 12)
+            self._find_reduce(4, 3, 15)
+            self._find_reduce(4, 4, 11)
 
-        self._find_reduce(3, 1, 7)
-        self._find_reduce(3, 3, 14)
+            self._find_reduce(1, 4, 4)
+            self._find_reduce(1, 2, 5)
 
-        self._find_reduce(5, 1, 9)
-        self._find_reduce(5, 3, 16)
+            self._find_reduce(3, 1, 7)
+            self._find_reduce(3, 3, 14)
 
-        self._find_reduce(7, 4, 18)
-        self._find_reduce(7, 2, 19)
+            self._find_reduce(5, 1, 9)
+            self._find_reduce(5, 3, 16)
+
+            self._find_reduce(7, 4, 18)
+            self._find_reduce(7, 2, 19)
+        except KeyboardInterrupt:
+            pass
+
+        self.progress.delete()
 
         if self.reductions == 0:
             self.stdout.write('[INFO] No reductions')

@@ -46,6 +46,30 @@ class TwoSideOptions(models.Model):
     two_side = models.PositiveSmallIntegerField()       # max 32767
 
 
+class EvalProgress(models.Model):
+
+    # size of the evaluator: 4, 9, 16, etc.
+    eval_size = models.PositiveSmallIntegerField()        # max 32767
+
+    # top-left board location
+    eval_loc = models.PositiveSmallIntegerField()         # max 32767
+
+    # which TwoSideOptions is being updated?
+    processor = models.PositiveIntegerField()
+
+    # working on which segment?
+    segment = models.PositiveSmallIntegerField()        # max 32767
+
+    # how many options left to evaluate in this segment?
+    todo_count = models.PositiveSmallIntegerField()     # max 32767
+    left_count = models.PositiveSmallIntegerField()     # max 32767
+
+    solve_order = models.CharField(max_length=128)
+
+    # last updated
+    updated = models.DateTimeField()
+
+
 # TODO: Beware that Piece2x2 might be a subset with the hint pieces, used to generate the corners 4x4
 
 class Piece2x2(models.Model):

@@ -8,7 +8,7 @@ from django.http import Http404
 from django.urls import reverse
 from django.views.generic import TemplateView
 from django.templatetags.static import static
-from Pieces2x2.models import Piece2x2, TwoSideOptions
+from Pieces2x2.models import Piece2x2, TwoSideOptions, EvalProgress
 from Pieces2x2.helpers import calc_segment
 from types import SimpleNamespace
 
@@ -116,6 +116,77 @@ class OptionsView(TemplateView):
         # for
         return compare
 
+    def _make_squares(self, segment2count, highlight_segments):
+        # initialize matrix
+        squares = dict()    # [(x,y)] = SimpleNamespace
+        for y in range(16+1):
+            transform = ''
+            if y & 1 == 1:  # odd row
+                transform = 'rotate(90deg)'
+
+            for x in range(16+1):
+                squares[(x, y)] = SimpleNamespace(break_after=False, transform=transform)
+            # for
+            squares[(16, y)].break_after = True
+        # for
+
+        # fill in each loc with surrounding segments
+        x = 1
+        y = 1
+        for loc in range(1, 64+1):
+            squares[(x, y)].loc = loc
+
+            segment = calc_segment(loc, 1)
+            count = segment2count[segment]
+            squares[(x, y-1)].count = count
+            squares[(x, y-1)].highlight = segment in highlight_segments
+            squares[(x, y-1)].hue = self._calc_hue(count)
+
+            segment = calc_segment(loc, 2)
+            count = segment2count[segment]
+            squares[(x+1, y)].count = count
+            squares[(x+1, y)].highlight = segment in highlight_segments
+            squares[(x+1, y)].hue = self._calc_hue(count)
+
+            segment = calc_segment(loc, 3)
+            count = segment2count[segment]
+            squares[(x, y+1)].count = count
+            squares[(x, y+1)].highlight = segment in highlight_segments
+            squares[(x, y+1)].hue = self._calc_hue(count)
+
+            segment = calc_segment(loc, 4)
+            count = segment2count[segment]
+            squares[(x-1, y)].count = count
+            squares[(x-1, y)].highlight = segment in highlight_segments
+            squares[(x-1, y)].hue = self._calc_hue(count)
+
+            x += 2
+            if x > 16:
+                x = 1
+                y += 2
+        # for
+
+        # pack the matrix into an array
+        sq_list = list()
+        for y in range(16 + 1):
+            for x in range(16 + 1):
+                square = squares[(x, y)]
+                sq_list.append(square)
+            # for
+        # for
+
+        return sq_list
+
+    @staticmethod
+    def _get_progress(processor):
+        objs = EvalProgress.objects.filter(processor=processor).order_by('eval_size', 'eval_loc')
+        for obj in objs:
+            obj.updated_str = obj.updated.strftime("%Y-%m-%d %H:%M")
+            obj.done_count = obj.todo_count - obj.left_count
+        # for
+
+        return objs
+
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
@@ -159,71 +230,17 @@ class OptionsView(TemplateView):
         for option in TwoSideOptions.objects.filter(processor=processor):
             segment2count[option.segment] += 1
         # for
-
         context['total_options'] = sum(segment2count.values())
-
-        # initialize matrix
-        squares = dict()    # [(x,y)] = SimpleNamespace
-        for y in range(16+1):
-            transform = ''
-            if y & 1 == 1:  # odd row
-                transform = 'rotate(90deg)'
-
-            for x in range(16+1):
-                squares[(x, y)] = SimpleNamespace(break_after=False, transform=transform)
-            # for
-            squares[(16, y)].break_after = True
-        # for
 
         try:
             highlight_segments = [segment for segment, _, _, _ in context['compare']]
         except KeyError:
             highlight_segments = list()
+        context['squares'] = self._make_squares(segment2count, highlight_segments)
 
-        # fill in each loc with surrounding segments
-        x = 1
-        y = 1
-        for loc in range(1, 64+1):
-            squares[(x, y)].loc = loc
+        context['progress'] = self._get_progress(processor)
 
-            segment = calc_segment(loc, 1)
-            count = segment2count[segment]
-            squares[(x, y-1)].count = count
-            squares[(x, y-1)].highlight = segment in highlight_segments
-            squares[(x, y-1)].hue = self._calc_hue(count)
-
-            segment = calc_segment(loc, 2)
-            count = segment2count[segment]
-            squares[(x+1, y)].count = count
-            squares[(x+1, y)].highlight = segment in highlight_segments
-            squares[(x+1, y)].hue = self._calc_hue(count)
-
-            segment = calc_segment(loc, 3)
-            count = segment2count[segment]
-            squares[(x, y+1)].count = count
-            squares[(x, y+1)].highlight = segment in highlight_segments
-            squares[(x, y+1)].hue = self._calc_hue(count)
-
-            segment = calc_segment(loc, 4)
-            count = segment2count[segment]
-            squares[(x-1, y)].count = count
-            squares[(x-1, y)].highlight = segment in highlight_segments
-            squares[(x-1, y)].hue = self._calc_hue(count)
-
-            x += 2
-            if x > 16:
-                x = 1
-                y += 2
-        # for
-
-        # pack the matrix into an array
-        context['squares'] = sq_list = list()
-        for y in range(16 + 1):
-            for x in range(16 + 1):
-                square = squares[(x, y)]
-                sq_list.append(square)
-            # for
-        # for
+        context['auto_reload'] = True
 
         return context
 

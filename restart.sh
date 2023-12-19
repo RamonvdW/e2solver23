@@ -53,11 +53,27 @@ echo "[INFO] Reduce center"
 #./manage.* eval_loc_4 --commit 4 28     # effect: 0
 
 echo "[INFO] Reduction 4 attempts"
-./manage.* dup_segments 5
-./manage.* eval_loc_4 --commit 5 10
-./manage.* eval_loc_4 --commit 5 14
-./manage.* eval_loc_4 --commit 5 42
-./manage.* eval_loc_4 --commit 5 46
+./manage.* dup_segments 4
+./manage.* eval_loc_4 --commit 4 10
+./manage.* eval_loc_4 --commit 4 14
+./manage.* eval_loc_4 --commit 4 42
+./manage.* eval_loc_4 --commit 4 46
+
+echo "[INFO] Reduction 9 attempts"
+./manage.* dup_segments 9
+./manage.* eval_loc_9 --commit 9 1
+./manage.* eval_loc_9 --commit 9 6
+./manage.* eval_loc_9 --commit 9 41
+./manage.* eval_loc_9 --commit 9 46
+
+echo "[INFO] Reduction 16 attempts"
+./manage.* dup_segments 16
+./manage,* eval_loc_16 --commmit 16 1
+./manage,* eval_loc_16 --commmit 16 5
+./manage,* eval_loc_16 --commmit 16 33
+./manage,* eval_loc_16 --commmit 16 37
+./manage,* eval_loc_16 --commmit 16 19
+
 
 # end of file
 

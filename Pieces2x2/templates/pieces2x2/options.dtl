@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ title }}</title>
     <style>
         table, th, td {
@@ -63,6 +64,10 @@
 
                         {% endfor %}
                     </tr>
+
+                    <tr>
+                        <td colspan="17">Total options remaining: {{ total_options }}</td>
+                    </tr>
                 </table>
             </td>
 
@@ -91,7 +96,32 @@
         </tr>
     </table>
 
-    <p>Total options remaining: {{ total_options }}</p>
+    <br>
+    <br>
+    <br>
+
+    <table style="margin-left:auto; margin-right:auto">
+        <thead>
+            <tr>
+                <th style="padding:5px">Size</th>
+                <th style="padding:5px">Top-left</th>
+                <th style="padding:5px">Segment</th>
+                <th style="padding:5px">Progress</th>
+                <th style="padding:5px">Updated</th>
+                <th style="padding:5px">Solve order</th>
+            </tr>
+        </thead>
+        {% for obj in progress %}
+            <tr>
+                <td style="padding:5px">{{ obj.eval_size }}</td>
+                <td style="padding:5px">{{ obj.eval_loc }}</td>
+                <td style="padding:5px">{{ obj.segment }}</td>
+                <td style="padding:5px">{{ obj.done_count }} / {{ obj.todo_count }}</td>
+                <td style="padding:5px">{{ obj.updated_str }}</td>
+                <td style="padding:5px">{{ obj.solve_order }}</td>
+            </tr>
+        {% endfor %}
+    </table>
 
     {% if auto_reload %}
         <script>
