@@ -68,11 +68,11 @@ echo "[INFO] Reduction 9 attempts"
 
 echo "[INFO] Reduction 16 attempts"
 ./manage.* dup_segments 16
-./manage,* eval_loc_16 --commmit 16 1
-./manage,* eval_loc_16 --commmit 16 5
-./manage,* eval_loc_16 --commmit 16 33
-./manage,* eval_loc_16 --commmit 16 37
-./manage,* eval_loc_16 --commmit 16 19
+#./manage,* eval_loc_16 --commmit 16 1
+#./manage,* eval_loc_16 --commmit 16 5
+#./manage,* eval_loc_16 --commmit 16 33
+#./manage,* eval_loc_16 --commmit 16 37
+#./manage,* eval_loc_16 --commmit 16 19
 
 
 # end of file
