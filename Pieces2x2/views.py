@@ -179,6 +179,17 @@ class OptionsView(TemplateView):
 
     def _get_segments(self, progress):
         if progress.eval_size == 4:
+            """
+                      s0          s1
+                    +----+      +----+
+                s2  | p0 |  s3  | p1 |  s4
+                    +----+      +----+
+                      s5          s6
+                    +----+      +----+
+                s7  | p2 |  s8  | p3 |  s9
+                    +----+      +----+
+                     s10         s11
+            """
             locs = (progress.eval_loc + 0, progress.eval_loc + 1,
                     progress.eval_loc + 8, progress.eval_loc + 9)
 
@@ -190,9 +201,24 @@ class OptionsView(TemplateView):
             s_nrs = (3, 5, 6, 8)
 
         elif progress.eval_size == 9:
+            """
+                      s0          s1          s2 
+                    +----+      +----+      +----+
+                s3  | p0 |  s4  | p1 |  s5  | p2 |  s6 
+                    +----+      +----+      +----+
+                      s7          s8          s9
+                    +----+      +----+      +----+
+                s10 | p3 |  s11 | p4 |  s12 | p5 |  s13
+                    +----+      +----+      +----+
+                      s14         s15        s16
+                    +----+      +----+      +----+
+                s17 | p6 |  s18 | p7 |  s19 | p8 |  s20
+                    +----+      +----+      +----+
+                      s21         s22         s23
+            """
             locs = (progress.eval_loc + 0, progress.eval_loc + 1, progress.eval_loc + 2,
                     progress.eval_loc + 8, progress.eval_loc + 9, progress.eval_loc + 10,
-                    progress.eval_loc + 16, progress.eval_loc + 17, progress.eval_loc + 19)
+                    progress.eval_loc + 16, progress.eval_loc + 17, progress.eval_loc + 18)
 
             side_nrs = {0: (0, 4, 7, 3),
                         1: (1, 5, 8, 4),
