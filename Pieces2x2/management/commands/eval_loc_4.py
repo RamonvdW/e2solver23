@@ -251,6 +251,9 @@ class Command(BaseCommand):
 
             if not found:
                 self._reduce(segment, side)
+
+            todo -= 1
+            self.stdout.write('[INFO] Remaining: %s/%s' % (todo, len(sides)))
         # for
 
     def _reduce_s6(self):

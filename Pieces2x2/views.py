@@ -177,12 +177,93 @@ class OptionsView(TemplateView):
 
         return sq_list
 
-    @staticmethod
-    def _get_progress(processor):
+    def _get_segments(self, progress):
+        if progress.eval_size == 4:
+            locs = (progress.eval_loc + 0, progress.eval_loc + 1,
+                    progress.eval_loc + 8, progress.eval_loc + 9)
+
+            side_nrs = {0: (0, 3, 5, 2),
+                        1: (1, 4, 6, 3),
+                        2: (5, 8, 10, 7),
+                        3: (6, 9, 11, 8)}
+
+            s_nrs = (3, 5, 6, 8)
+
+        elif progress.eval_size == 9:
+            locs = (progress.eval_loc + 0, progress.eval_loc + 1, progress.eval_loc + 2,
+                    progress.eval_loc + 8, progress.eval_loc + 9, progress.eval_loc + 10,
+                    progress.eval_loc + 16, progress.eval_loc + 17, progress.eval_loc + 19)
+
+            side_nrs = {0: (0, 4, 7, 3),
+                        1: (1, 5, 8, 4),
+                        2: (2, 6, 9, 5),
+                        3: (7, 11, 14, 10),
+                        4: (8, 12, 15, 11),
+                        5: (9, 13, 16, 12),
+                        6: (14, 18, 21, 17),
+                        7: (15, 19, 22, 18),
+                        8: (16, 20, 23, 19)}
+
+            s_nrs = (8, 12, 15, 11,
+                     4, 5,
+                     7, 14,
+                     9, 16,
+                     18, 19)
+
+        elif progress.eval_size == 16:
+            locs = (progress.eval_loc + 0, progress.eval_loc + 1, progress.eval_loc + 2, progress.eval_loc + 3,
+                    progress.eval_loc + 8, progress.eval_loc + 9, progress.eval_loc + 10, progress.eval_loc + 11,
+                    progress.eval_loc + 16, progress.eval_loc + 17, progress.eval_loc + 18, progress.eval_loc + 19,
+                    progress.eval_loc + 24, progress.eval_loc + 25, progress.eval_loc + 26, progress.eval_loc + 27)
+
+            side_nrs = {0: (0, 5, 9, 4),
+                        1: (1, 6, 10, 5),
+                        2: (2, 7, 11, 6),
+                        3: (3, 8, 12, 7),
+                        4: (9, 14, 18, 13),
+                        5: (10, 15, 19, 14),
+                        6: (11, 16, 20, 15),
+                        7: (12, 17, 21, 16),
+                        8: (18, 23, 27, 22),
+                        9: (19, 24, 28, 23),
+                        10: (20, 25, 29, 24),
+                        11: (21, 26, 30, 25),
+                        12: (27, 32, 36, 31),
+                        13: (28, 33, 37, 32),
+                        14: (29, 34, 38, 33),
+                        15: (30, 35, 39, 34)}
+
+            s_nrs = (5, 6, 7,
+                     9, 10, 11, 12,
+                     14, 15, 16,
+                     18, 19, 20, 21,
+                     23, 24, 25,
+                     27, 28, 29, 30,
+                     32, 33, 34)
+
+        else:
+            locs = (progress.eval_loc,)
+            side_nrs = {0: (0, 1, 2, 3)}
+            s_nrs = (0, 1, 2, 3)
+
+        # calculate the segments
+        segments = dict()
+        for p_nr, ps_nrs in side_nrs.items():
+            segments[ps_nrs[0]] = calc_segment(locs[p_nr], 1)
+            segments[ps_nrs[1]] = calc_segment(locs[p_nr], 2)
+            segments[ps_nrs[2]] = calc_segment(locs[p_nr], 3)
+            segments[ps_nrs[3]] = calc_segment(locs[p_nr], 4)
+        # for
+
+        segments_todo = [segments[s_nr] for s_nr in s_nrs]
+        return segments_todo
+
+    def _get_progress(self, processor):
         objs = EvalProgress.objects.filter(processor=processor).order_by('eval_size', 'eval_loc')
         for obj in objs:
             obj.updated_str = obj.updated.strftime("%Y-%m-%d %H:%M")
             obj.done_count = obj.todo_count - obj.left_count
+            obj.segments_todo = self._get_segments(obj)
         # for
 
         return objs
