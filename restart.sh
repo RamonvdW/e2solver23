@@ -48,23 +48,23 @@ echo "[INFO] Reduction 4 in the corners"
 #./manage.* eval_loc_4 --commit 3 54     # effect: 0
 #./manage.* eval_loc_4 --commit 3 47     # effect: 0
 
-echo "[INFO] Reduce center"
+#echo "[INFO] Reduce center"
 #./manage.* dup_segments 4
 #./manage.* eval_loc_4 --commit 4 28     # effect: 0
 
-echo "[INFO] Reduction 4 attempts"
-./manage.* dup_segments 4
-./manage.* eval_loc_4 --commit 4 10
-./manage.* eval_loc_4 --commit 4 14
-./manage.* eval_loc_4 --commit 4 42
-./manage.* eval_loc_4 --commit 4 46
+#echo "[INFO] Reduction 4 attempts"
+#./manage.* dup_segments 4
+#./manage.* eval_loc_4 --commit 4 10     # effect: 0
+#./manage.* eval_loc_4 --commit 4 14     # effect: 0
+#./manage.* eval_loc_4 --commit 4 42     # effect: 0
+#./manage.* eval_loc_4 --commit 4 46     # effect: 0
 
-echo "[INFO] Reduction 9 attempts"
-./manage.* dup_segments 9
-./manage.* eval_loc_9 --commit 9 1
-./manage.* eval_loc_9 --commit 9 6
-./manage.* eval_loc_9 --commit 9 41
-./manage.* eval_loc_9 --commit 9 46
+#echo "[INFO] Reduction 9 attempts"
+#./manage.* dup_segments 9
+#./manage.* eval_loc_9 --commit 9 1      # effect: 0
+#./manage.* eval_loc_9 --commit 9 6      # effect: 0
+#./manage.* eval_loc_9 --commit 9 41     # effect: 0
+#./manage.* eval_loc_9 --commit 9 46     # effect: 0
 
 echo "[INFO] Reduction 16 attempts"
 ./manage.* dup_segments 16
