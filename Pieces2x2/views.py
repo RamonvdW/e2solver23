@@ -6,6 +6,7 @@
 
 from django.http import Http404
 from django.urls import reverse
+from django.utils import timezone
 from django.views.generic import TemplateView
 from django.templatetags.static import static
 from Pieces2x2.models import Piece2x2, TwoSideOptions, EvalProgress
@@ -287,7 +288,7 @@ class OptionsView(TemplateView):
     def _get_progress(self, processor):
         objs = EvalProgress.objects.filter(processor=processor).order_by('eval_size', 'eval_loc')
         for obj in objs:
-            obj.updated_str = obj.updated.strftime("%Y-%m-%d %H:%M")
+            obj.updated_str = timezone.localtime(obj.updated).strftime("%Y-%m-%d %H:%M")
             obj.done_count = obj.todo_count - obj.left_count
             obj.segments_todo = self._get_segments(obj)
         # for
