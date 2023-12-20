@@ -49,12 +49,12 @@ class Command(BaseCommand):
 
         self.unused0 = list()
 
-        self.do_commit = False
+        self.do_commit = True
 
     def add_arguments(self, parser):
         parser.add_argument('processor', nargs=1, type=int, help='Processor number to use')
         parser.add_argument('loc', nargs=1, type=int, help='Location on board (1..55)')
-        parser.add_argument('--commit', action='store_true')
+        parser.add_argument('--dryrun', action='store_true')
 
     def _calc_unused0(self):
         self.unused0 = list(range(1, 256+1))
@@ -366,8 +366,8 @@ class Command(BaseCommand):
                  s10         s11
         """
 
-        if options['commit']:
-            self.do_commit = True
+        if options['dryrun']:
+            self.do_commit = False
 
         loc = options['loc'][0]
         if loc < 1 or loc > 55 or loc in (8, 16, 24, 32, 40, 48):

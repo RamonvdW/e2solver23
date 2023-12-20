@@ -55,7 +55,7 @@ class Command(BaseCommand):
 
         self.unused0 = list()
 
-        self.do_commit = False
+        self.do_commit = True
 
         # [p_nr] = [p_nr on side1..4 or -1 if no neighbour]
         self.neighbours: dict[int, tuple] = {0: (-1, 1, 3, -1),
@@ -93,7 +93,7 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('processor', nargs=1, type=int, help='Processor number to use')
         parser.add_argument('loc', nargs=1, type=int, help='Top-left location on board (1..46)')
-        parser.add_argument('--commit', action='store_true')
+        parser.add_argument('--dryrun', action='store_true')
 
     def _calc_unused0(self):
         self.unused0 = list(range(1, 256+1))
@@ -286,7 +286,6 @@ class Command(BaseCommand):
                                        nr3__in=self.board_unused,
                                        nr4__in=self.board_unused)
 
-        has_zero = False
         p_nr_counts = list()
         for p_nr in range(9):
             if self.board[p_nr] is None:
@@ -326,11 +325,15 @@ class Command(BaseCommand):
                     # dead end
                     # self.stdout.write('[DEBUG] No options for %s' % p_nr)
                     return -1, True
-
-                # self.stdout.write('[INFO] Added %s' % p_nr)
-                self.p_nrs_order.append(p_nr)
-                return p_nr, False
         # for
+
+        # take the lowest
+        if len(p_nr_counts) > 0:
+            p_nr_counts.sort()       # lowest first
+            p_nr = p_nr_counts[0][-1]
+            # self.stdout.write('[INFO] Added %s' % p_nr)
+            self.p_nrs_order.append(p_nr)
+            return p_nr, False
 
         # niets kunnen kiezen
         self.stdout.write('[DEBUG] select_p_nr failure')
@@ -457,8 +460,8 @@ class Command(BaseCommand):
                   s21         s22         s23
         """
 
-        if options['commit']:
-            self.do_commit = True
+        if options['dryrun']:
+            self.do_commit = False
 
         loc = options['loc'][0]
         if loc < 1 or loc > 46 or loc in (7, 8,
