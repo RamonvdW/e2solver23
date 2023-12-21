@@ -56,6 +56,7 @@ class Command(BaseCommand):
         # for
 
         self.processor = 0
+        self.segment = 0
         self.locs = (0, 0)                  # p0..p8
         self.segment_options = dict()       # [segment] = side_options
         self.side_options = ([], [])        # s0..s23
