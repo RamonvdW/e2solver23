@@ -278,41 +278,8 @@ class OptionsView(TemplateView):
                     loc + 24, loc + 25, loc + 26, loc + 27, loc + 28,
                     loc + 32, loc + 33, loc + 34, loc + 35, loc + 36)
 
-            side_nrs = {0: (0, 6, 11, 5),
-                        1: (1, 7, 12, 6),
-                        2: (2, 8, 13, 7),
-                        3: (3, 9, 14, 8),
-                        4: (4, 10, 15, 9),
-                        5: (11, 17, 22, 16),
-                        6: (12, 18, 23, 17),
-                        7: (13, 19, 24, 18),
-                        8: (14, 20, 25, 19),
-                        9: (15, 21, 26, 20),
-                        10: (22, 28, 33, 27),
-                        11: (23, 28, 34, 28),
-                        12: (24, 30, 35, 29),
-                        13: (25, 31, 36, 30),
-                        14: (26, 32, 37, 31),
-                        15: (33, 39, 44, 38),
-                        16: (34, 40, 45, 39),
-                        17: (35, 41, 46, 40),
-                        18: (36, 42, 47, 41),
-                        19: (37, 43, 48, 42),
-                        20: (44, 50, 55, 49),
-                        21: (45, 51, 56, 50),
-                        22: (46, 52, 57, 51),
-                        23: (47, 53, 58, 52),
-                        24: (48, 54, 59, 53)}
-
-            s_nrs = (6, 7, 8, 9,
-                     11, 12, 13, 14, 15,
-                     17, 18, 19, 20,
-                     22, 23, 24, 25, 26,
-                     28, 29, 30, 31,
-                     33, 34, 35, 36, 37,
-                     39, 40, 41, 42,
-                     44, 45, 46, 47, 48,
-                     50, 51, 52, 53)
+            side_nrs = None
+            s_nrs = None
 
         else:
             locs = (progress.eval_loc,)
@@ -320,15 +287,18 @@ class OptionsView(TemplateView):
             s_nrs = (0, 1, 2, 3)
 
         # calculate the segments
-        segments = dict()
-        for p_nr, ps_nrs in side_nrs.items():
-            segments[ps_nrs[0]] = calc_segment(locs[p_nr], 1)
-            segments[ps_nrs[1]] = calc_segment(locs[p_nr], 2)
-            segments[ps_nrs[2]] = calc_segment(locs[p_nr], 3)
-            segments[ps_nrs[3]] = calc_segment(locs[p_nr], 4)
-        # for
+        if side_nrs is not None:
+            segments = dict()
+            for p_nr, ps_nrs in side_nrs.items():
+                segments[ps_nrs[0]] = calc_segment(locs[p_nr], 1)
+                segments[ps_nrs[1]] = calc_segment(locs[p_nr], 2)
+                segments[ps_nrs[2]] = calc_segment(locs[p_nr], 3)
+                segments[ps_nrs[3]] = calc_segment(locs[p_nr], 4)
+            # for
+            segments_todo = [segments[s_nr] for s_nr in s_nrs]
+        else:
+            segments_todo = None
 
-        segments_todo = [segments[s_nr] for s_nr in s_nrs]
         return segments_todo
 
     def _get_progress(self, processor):

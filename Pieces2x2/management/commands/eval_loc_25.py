@@ -57,6 +57,7 @@ class Command(BaseCommand):
 
         self.processor = 0
         self.locs = (0, 0)                  # p0..p8
+        self.segment_options = dict()       # [segment] = side_options
         self.side_options = ([], [])        # s0..s23
         self.side_options_rev = ([], [])    # s0..s23
         self.reductions = 0
@@ -158,6 +159,7 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('processor', nargs=1, type=int, help='Processor number to use')
         parser.add_argument('loc', nargs=1, type=int, help='Top-left location on board (1..37)')
+        parser.add_argument('segment', nargs=1, type=int, help='Segment to work on (1..72, 129..193)')
         parser.add_argument('--dryrun', action='store_true')
 
     def _calc_unused0(self):
@@ -300,6 +302,77 @@ class Command(BaseCommand):
                              s55, s56, s57, s58, s59]
 
         self.side_options_rev = [self._reverse_sides(s) for s in self.side_options]
+
+        self.segment_options[calc_segment(self.locs[0], 1)] = s0
+        self.segment_options[calc_segment(self.locs[1], 1)] = s1
+        self.segment_options[calc_segment(self.locs[2], 1)] = s2
+        self.segment_options[calc_segment(self.locs[3], 1)] = s3
+        self.segment_options[calc_segment(self.locs[4], 1)] = s4
+
+        self.segment_options[calc_segment(self.locs[0], 4)] = s5
+        self.segment_options[calc_segment(self.locs[0], 2)] = s6
+        self.segment_options[calc_segment(self.locs[1], 2)] = s7
+        self.segment_options[calc_segment(self.locs[2], 2)] = s8
+        self.segment_options[calc_segment(self.locs[3], 2)] = s9
+        self.segment_options[calc_segment(self.locs[4], 2)] = s10
+
+        self.segment_options[calc_segment(self.locs[5], 1)] = s11
+        self.segment_options[calc_segment(self.locs[6], 1)] = s12
+        self.segment_options[calc_segment(self.locs[7], 1)] = s13
+        self.segment_options[calc_segment(self.locs[8], 1)] = s14
+        self.segment_options[calc_segment(self.locs[9], 1)] = s15
+
+        self.segment_options[calc_segment(self.locs[5], 4)] = s16
+        self.segment_options[calc_segment(self.locs[5], 2)] = s17
+        self.segment_options[calc_segment(self.locs[6], 2)] = s18
+        self.segment_options[calc_segment(self.locs[7], 2)] = s19
+        self.segment_options[calc_segment(self.locs[8], 2)] = s20
+        self.segment_options[calc_segment(self.locs[9], 2)] = s21
+
+        self.segment_options[calc_segment(self.locs[10], 1)] = s22
+        self.segment_options[calc_segment(self.locs[11], 1)] = s23
+        self.segment_options[calc_segment(self.locs[12], 1)] = s24
+        self.segment_options[calc_segment(self.locs[13], 1)] = s25
+        self.segment_options[calc_segment(self.locs[14], 1)] = s26
+
+        self.segment_options[calc_segment(self.locs[10], 4)] = s27
+        self.segment_options[calc_segment(self.locs[10], 2)] = s28
+        self.segment_options[calc_segment(self.locs[11], 2)] = s29
+        self.segment_options[calc_segment(self.locs[12], 2)] = s30
+        self.segment_options[calc_segment(self.locs[13], 2)] = s31
+        self.segment_options[calc_segment(self.locs[14], 2)] = s32
+
+        self.segment_options[calc_segment(self.locs[15], 1)] = s33
+        self.segment_options[calc_segment(self.locs[16], 1)] = s34
+        self.segment_options[calc_segment(self.locs[17], 1)] = s35
+        self.segment_options[calc_segment(self.locs[18], 1)] = s36
+        self.segment_options[calc_segment(self.locs[19], 1)] = s37
+
+        self.segment_options[calc_segment(self.locs[15], 4)] = s38
+        self.segment_options[calc_segment(self.locs[15], 2)] = s39
+        self.segment_options[calc_segment(self.locs[16], 2)] = s40
+        self.segment_options[calc_segment(self.locs[17], 2)] = s41
+        self.segment_options[calc_segment(self.locs[18], 2)] = s42
+        self.segment_options[calc_segment(self.locs[19], 2)] = s43
+
+        self.segment_options[calc_segment(self.locs[20], 1)] = s44
+        self.segment_options[calc_segment(self.locs[21], 1)] = s45
+        self.segment_options[calc_segment(self.locs[22], 1)] = s46
+        self.segment_options[calc_segment(self.locs[23], 1)] = s47
+        self.segment_options[calc_segment(self.locs[24], 1)] = s48
+
+        self.segment_options[calc_segment(self.locs[20], 4)] = s49
+        self.segment_options[calc_segment(self.locs[20], 2)] = s50
+        self.segment_options[calc_segment(self.locs[21], 2)] = s51
+        self.segment_options[calc_segment(self.locs[22], 2)] = s52
+        self.segment_options[calc_segment(self.locs[23], 2)] = s53
+        self.segment_options[calc_segment(self.locs[24], 2)] = s54
+
+        self.segment_options[calc_segment(self.locs[20], 3)] = s55
+        self.segment_options[calc_segment(self.locs[21], 3)] = s56
+        self.segment_options[calc_segment(self.locs[22], 3)] = s57
+        self.segment_options[calc_segment(self.locs[23], 3)] = s58
+        self.segment_options[calc_segment(self.locs[24], 3)] = s59
 
     def _board_place(self, p_nr: int, p2x2):
         self.board_order.append(p_nr)
@@ -463,14 +536,22 @@ class Command(BaseCommand):
 
         return False
 
-    def _find_reduce(self, p_nr, side_n, s_nr):
-        segment = calc_segment(self.locs[p_nr], side_n)
-        sides = self.side_options[s_nr]
-        todo = len(sides)
-        self.stdout.write('[INFO] Checking %s options in segment %s' % (len(sides), segment))
-        self.p_nrs_order = list()       # allow deciding optimal order anew
+    @staticmethod
+    def _segment_to_loc(segment):
+        """ reverse of calc_segment """
+        if segment > 128:
+            return segment - 129, 2
+        else:
+            return segment, 1
 
-        self.progress.segment = segment
+    def _find_reduce(self):
+        sides = self.segment_options[self.segment]
+        todo = len(sides)
+        self.stdout.write('[INFO] Checking %s options in segment %s' % (len(sides), self.segment))
+        self.p_nrs_order = list()       # allow deciding optimal order anew
+        loc, side_n = self._segment_to_loc(self.segment)
+        p_nr = self.locs.index(loc)
+
         self.progress.todo_count = todo
         self.progress.save(update_fields=['segment', 'todo_count'])
 
@@ -506,7 +587,7 @@ class Command(BaseCommand):
             # for
 
             if not found:
-                self._reduce(segment, side)
+                self._reduce(self.segment, side)
 
             todo -= 1
             self.stdout.write('[INFO] Remaining: %s/%s' % (todo, len(sides)))
@@ -541,6 +622,9 @@ class Command(BaseCommand):
         if options['dryrun']:
             self.do_commit = False
 
+        self.processor = options['processor'][0]
+        self.stdout.write('[INFO] Processor: %s' % self.processor)
+
         loc = options['loc'][0]
         if loc < 1 or loc > 28 or loc in (5, 6, 7, 8,
                                           13, 14, 15, 16,
@@ -554,8 +638,8 @@ class Command(BaseCommand):
                      loc + 32, loc + 33, loc + 34, loc + 35, loc + 36)
         self.stdout.write('[INFO] Locations: %s' % repr(self.locs))
 
-        self.processor = options['processor'][0]
-        self.stdout.write('[INFO] Processor=%s' % self.processor)
+        self.segment = options['segment'][0]
+        self.stdout.write('[INFO] Segment: %s' % self.segment)
 
         self._calc_unused0()
         self.board_unused = self.unused0[:]
@@ -569,7 +653,7 @@ class Command(BaseCommand):
                         eval_size=25,
                         eval_loc=self.locs[0],
                         processor=self.processor,
-                        segment=0,
+                        segment=self.segment,
                         todo_count=0,
                         left_count=0,
                         solve_order='',
@@ -577,55 +661,7 @@ class Command(BaseCommand):
         self.progress.save()
 
         try:
-            self._find_reduce(0, 2, 6)
-            self._find_reduce(1, 2, 7)
-            self._find_reduce(2, 2, 8)
-            self._find_reduce(3, 2, 9)
-
-            self._find_reduce(5, 1, 11)
-            self._find_reduce(6, 1, 12)
-            self._find_reduce(7, 1, 13)
-            self._find_reduce(8, 1, 14)
-            self._find_reduce(9, 1, 15)
-
-            self._find_reduce(5, 2, 17)
-            self._find_reduce(6, 2, 18)
-            self._find_reduce(7, 2, 19)
-            self._find_reduce(8, 2, 20)
-
-            self._find_reduce(10, 1, 22)
-            self._find_reduce(11, 1, 23)
-            self._find_reduce(12, 1, 24)
-            self._find_reduce(13, 1, 25)
-            self._find_reduce(14, 1, 26)
-
-            self._find_reduce(10, 2, 28)
-            self._find_reduce(11, 2, 29)
-            self._find_reduce(12, 2, 30)
-            self._find_reduce(13, 2, 31)
-
-            self._find_reduce(15, 1, 33)
-            self._find_reduce(16, 1, 34)
-            self._find_reduce(17, 1, 35)
-            self._find_reduce(18, 1, 36)
-            self._find_reduce(19, 1, 37)
-
-            self._find_reduce(15, 2, 39)
-            self._find_reduce(16, 2, 40)
-            self._find_reduce(17, 2, 41)
-            self._find_reduce(18, 2, 42)
-
-            self._find_reduce(20, 1, 44)
-            self._find_reduce(21, 1, 45)
-            self._find_reduce(22, 1, 46)
-            self._find_reduce(23, 1, 47)
-            self._find_reduce(24, 1, 48)
-
-            self._find_reduce(20, 2, 50)
-            self._find_reduce(21, 2, 51)
-            self._find_reduce(22, 2, 52)
-            self._find_reduce(23, 2, 53)
-
+            self._find_reduce()
         except KeyboardInterrupt:
             pass
 

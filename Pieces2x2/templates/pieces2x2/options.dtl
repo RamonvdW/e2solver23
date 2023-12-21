@@ -115,7 +115,7 @@
             <tr>
                 <td style="padding:5px">{{ obj.eval_size }}</td>
                 <td style="padding:5px">{{ obj.eval_loc }}</td>
-                <td style="padding:5px">{% for seg in obj.segments_todo %}{% if seg == obj.segment %}<b>{{ seg }}</b>{% else %}{{ seg }}{% endif %}, {% endfor %}</td>
+                <td style="padding:5px">{% if obj.segments_todo %}{% for seg in obj.segments_todo %}{% if seg == obj.segment %}<b>{{ seg }}</b>{% else %}{{ seg }}{% endif %}, {% endfor %}{% else %}{{ obj.segment }}{% endif %}</td>
                 <td style="padding:5px">{{ obj.done_count }} / {{ obj.todo_count }}</td>
                 <td style="padding:5px">{{ obj.updated_str }}</td>
                 <td style="padding:5px">{{ obj.solve_order }}</td>
