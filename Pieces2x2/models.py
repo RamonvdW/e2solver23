@@ -64,7 +64,7 @@ class EvalProgress(models.Model):
     todo_count = models.PositiveSmallIntegerField()     # max 32767
     left_count = models.PositiveSmallIntegerField()     # max 32767
 
-    solve_order = models.CharField(max_length=128)
+    solve_order = models.CharField(max_length=250)
 
     # last updated
     updated = models.DateTimeField()

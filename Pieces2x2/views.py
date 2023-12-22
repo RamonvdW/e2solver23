@@ -313,7 +313,7 @@ class OptionsView(TemplateView):
         return segments_todo
 
     def _get_progress(self, processor):
-        objs = EvalProgress.objects.filter(processor=processor).order_by('eval_size', 'eval_loc')
+        objs = EvalProgress.objects.filter(processor=processor).order_by('eval_size', 'eval_loc', 'segment')
         for obj in objs:
             obj.updated_str = timezone.localtime(obj.updated).strftime("%Y-%m-%d %H:%M")
             obj.done_count = obj.todo_count - obj.left_count
