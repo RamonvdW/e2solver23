@@ -134,7 +134,14 @@ def _sol_add_stats_1x1(sol, neighbours):
     for s1, s_max in s1_max.items():
         s_open = s1_open[s1]
         s_used = s1_used[s1]
-        s_left = s_max - s_used - s_open*2
+
+        if s1 == 'X':
+            # special handling for the border
+            s_used = s_open
+            s_open = 64 - s_open
+            s_left = s_open
+        else:
+            s_left = s_max - s_used - s_open*2
         tup = (s1, s_open, s_used, s_max, s_left)
         sol.s1_counts.append(tup)
     # for
@@ -150,10 +157,11 @@ def _sol_add_stats_2x2(sol, neighbours):
         if p.is_empty:
             empty_locs.append(p.loc)
         else:
-            unused_nrs.remove(p.nr1)
-            unused_nrs.remove(p.nr2)
-            unused_nrs.remove(p.nr3)
-            unused_nrs.remove(p.nr4)
+            for nr in (p.nr1, p.nr2, p.nr3, p.nr4):
+                try:
+                    unused_nrs.remove(nr)
+                except ValueError:
+                    print('Double used nr: %s' % nr)
     # for
 
     # print('empty_locs: %s' % repr(empty_locs))
@@ -202,7 +210,7 @@ def _sol_add_stats_2x2(sol, neighbours):
         side_nr2reverse[nr] = rev_nr
     # for
 
-    side_border = two2nr['XX']
+    #side_border = two2nr['XX']
 
     qset = Piece2x2.objects.filter(nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs)
 
@@ -212,7 +220,7 @@ def _sol_add_stats_2x2(sol, neighbours):
         rev_nr = side_nr2reverse[side_nr]
 
         # all rotation variants exist, so just count 1 side
-        c_left = qset.filter(side1=rev_nr, side3=side_border).count()
+        c_left = qset.filter(side1=rev_nr).count()  #, side3=side_border).count()
 
         tup = (side_nr, c_open, c_left, is_border)
         sol.s2_counts.append(tup)

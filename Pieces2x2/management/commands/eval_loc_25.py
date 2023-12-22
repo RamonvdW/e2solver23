@@ -67,7 +67,7 @@ class Command(BaseCommand):
 
         self.do_commit = True
 
-        # [p_nr] = [p_nr on side1..4 or -1 if no neighbour]
+        # [p_nr] = [p_nr on side1..4 or -1 if border or -2 if no neighbour]
         self.neighbours: dict[int, tuple] = {0: (-1, 1, 5, -1),
                                              1: (-1, 2, 6, 0),
                                              2: (-1, 3, 7, 1),
