@@ -270,27 +270,8 @@ class OptionsView(TemplateView):
                      27, 28, 29, 30,
                      32, 33, 34)
 
-        elif progress.eval_size == 25:
-            loc = progress.eval_loc
-            locs = (loc + 0, loc + 1, loc + 2, loc + 3, loc + 4,
-                    loc + 8, loc + 9, loc + 10, loc + 11, loc + 12,
-                    loc + 16, loc + 17, loc + 18, loc + 19, loc + 20,
-                    loc + 24, loc + 25, loc + 26, loc + 27, loc + 28,
-                    loc + 32, loc + 33, loc + 34, loc + 35, loc + 36)
-
-            side_nrs = None
-            s_nrs = None
-
-        elif progress.eval_size == 36 and progress.eval_loc == 1:
-            locs = (1, 2, 3, 6, 7, 8,
-                    9, 10, 11, 14, 15, 16,
-                    17, 18, 19, 22, 23, 24,
-                    41, 42, 43, 46, 47, 48,
-                    49, 50, 51, 54, 55, 56,
-                    57, 58, 59, 62, 63, 64)
-
-            side_nrs = None
-            s_nrs = None
+        elif progress.eval_size in (25, 36, 48):
+            locs = side_nrs = s_nrs = None
 
         else:
             locs = (progress.eval_loc,)

@@ -68,18 +68,21 @@ echo "[INFO] Reduction 4 in the corners"
 
 echo "[INFO] Reduction 16 attempts"
 ./manage.* dup_segments 16
-#screen -S 16a -dn ./manage,* eval_loc_16 16 1
+#screen -S 16a -dn ./manage,* eval_loc_16 16 1      # effect: 0
 #screen -S 16a -dn ./manage,* eval_loc_16 16 5
-#screen -S 16a -dn ./manage,* eval_loc_16 16 33
-#screen -S 16a -dn ./manage,* eval_loc_16 16 37
+#screen -S 16a -dn ./manage,* eval_loc_16 16 9
+#screen -S 16a -dn ./manage,* eval_loc_16 16 12
 #screen -S 16a -dn ./manage,* eval_loc_16 16 19
+#screen -S 16a -dn ./manage,* eval_loc_16 16 33     # effect: 0
+#screen -S 16a -dn ./manage,* eval_loc_16 16 36
+#screen -S 16a -dn ./manage,* eval_loc_16 16 37
 
 echo "[INFO] Reduction 25 attempts"
 ./manage.* dup_segments 25
-#screen -S 25a -dn ./manage.* eval_loc_25 25 1
-#screen -S 25b -dn ./manage.* eval_loc_25 25 4
-#screen -S 25c -dn ./manage.* eval_loc_25 25 25
-#screen -S 25d -dn ./manage.* eval_loc_25 25 28
+#screen -S 25a -dn ./manage.* eval_loc_25 25 1 18
+#screen -S 25a -dn ./manage.* eval_loc_25 25 1 139
+#screen -S 25c -dn ./manage.* eval_loc_25 25 19 37
+#screen -S 25d -dn ./manage.* eval_loc_25 25 19 157
 
 echo "[INFO] Reduction corners 9 attempts"
 ./manage.* dup_segments 36
@@ -92,6 +95,16 @@ echo "[INFO] Reduction corners 9 attempts"
 #screen -S c4a -dn ./manage.* eval_corners_9 36 186
 #screen -S c4b -dn ./manage.* eval_corners_9 36 57
 
+echo "[INFO] Reduction ring1 attempts"
+./manage.* dup_segments 28      # 4x7 = 28
+#screen -S r1a -dn ./manage.* eval_ring1 28 11
+#screen -S r1a -dn ./manage.* eval_ring1 28 14
+#screen -S r1a -dn ./manage.* eval_ring1 28 152
+#screen -S r1a -dn ./manage.* eval_ring1 28 176
+#screen -S r1a -dn ./manage.* eval_ring1 28 62
+#screen -S r1a -dn ./manage.* eval_ring1 28 59
+#screen -S r1a -dn ./manage.* eval_ring1 28 170
+#screen -S r1a -dn ./manage.* eval_ring1 28 146
 
 # end of file
 

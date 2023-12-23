@@ -13,9 +13,13 @@ class TwoSideOptionsAdmin(admin.ModelAdmin):
     list_filter = ('processor', 'segment')
 
 
+class ProgressAdmin(admin.ModelAdmin):
+    list_filter = ('eval_size',)
+
+
 admin.site.register(TwoSide)
 admin.site.register(TwoSideOptions,TwoSideOptionsAdmin)
-admin.site.register(EvalProgress)
+admin.site.register(EvalProgress, ProgressAdmin)
 admin.site.register(Piece2x2)
 
 # end of file
