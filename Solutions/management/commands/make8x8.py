@@ -168,9 +168,6 @@ class Command(BaseCommand):
                            nr3__in=unused_nrs,
                            nr4__in=unused_nrs)
 
-        if nr == 60:
-            print('[60] s1..4=%s,%s,%s,%s, x1..4=%s,%s,%s,%s' % (s1, s2, s3, s4, x1, x2, x3, x4))
-
         count = qset.count()
 
         if count > 0:

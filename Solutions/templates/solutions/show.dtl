@@ -37,7 +37,7 @@
                 <table>
                     <thead>
                         <tr>
-                            <td colspan="8">Nr {{ solution.nr }} at {{ solution.when }}<br>Based on {{ based_on }}</td>
+                            <td colspan="8">Nr {{ solution.nr }} at {{ solution.when }}<!--<br>Based on {{ based_on }}--></td>
                         </tr>
                     </thead>
 

@@ -10,7 +10,7 @@
             border-collapse: collapse;
             padding: 0;
             text-align: center;
-            font-size: 20px;
+            font-size: 16px;
         }
     </style>
 </head>
@@ -48,13 +48,13 @@
                     <tr>
                         {% for sq in squares %}
                             {% if sq.loc %}
-                                <td style="background: lightgray; color: #808080; height:40px; width:40px">{{ sq.loc }}</td>
+                                <td style="background: lightgray; color: #808080; height:30px; width:30px">{{ sq.loc }}</td>
                             {% elif sq.count %}
                                 <td style="background: hsl({{ sq.hue }}, 100%, 50%);{% if sq.highlight %}background:white{% endif %}">
                                     <div{% if sq.transform %} style="transform: {{ sq.transform }}"{% endif %}>{{ sq.count }}</div>
                                 </td>
                             {% else %}
-                                <td style="background: #606060; width:20px; height:20px"></td>
+                                <td style="background: #606060; width:15px; height:15px"></td>
                             {% endif %}
 
                             {% if sq.break_after %}
@@ -76,18 +76,18 @@
                 <table style="margin-left:10px">
                     <thead>
                         <tr>
-                            <th style="padding:5px">Segment</th>
-                            <th style="padding:5px">Prev</th>
-                            <th style="padding:5px">Now</th>
-                            <th style="padding:5px">Diff</th>
+                            <th style="padding:3px">Segment</th>
+                            <th style="padding:3px">Prev</th>
+                            <th style="padding:3px">Now</th>
+                            <th style="padding:3px">Diff</th>
                         </tr>
                     </thead>
                     {% for segment, count1, count2, diff in compare %}
                         <tr>
-                            <td style="padding:5px">{{ segment }}</td>
-                            <td style="padding:5px">{{ count2 }}</td>
-                            <td style="padding:5px">{{ count1 }}</td>
-                            <td style="padding:5px">{{ diff }}</td>
+                            <td style="padding:3px">{{ segment }}</td>
+                            <td style="padding:3px">{{ count2 }}</td>
+                            <td style="padding:3px">{{ count1 }}</td>
+                            <td style="padding:3px">{{ diff }}</td>
                         </tr>
                     {% endfor %}
                 </table>
@@ -103,22 +103,22 @@
     <table style="margin-left:auto; margin-right:auto">
         <thead>
             <tr>
-                <th style="padding:5px">Size</th>
-                <th style="padding:5px">Top-left</th>
-                <th style="padding:5px">Segment</th>
-                <th style="padding:5px">Progress</th>
-                <th style="padding:5px">Updated</th>
-                <th style="padding:5px">Solve order</th>
+                <th style="padding:3px">Size</th>
+                <th style="padding:3px">Top-left</th>
+                <th style="padding:3px">Segment</th>
+                <th style="padding:3px">Progress</th>
+                <th style="padding:3px">Updated</th>
+                <th style="padding:3px">Solve order</th>
             </tr>
         </thead>
         {% for obj in progress %}
             <tr>
-                <td style="padding:5px">{{ obj.eval_size }}</td>
-                <td style="padding:5px">{{ obj.eval_loc }}</td>
-                <td style="padding:5px">{% if obj.segments_todo %}{% for seg in obj.segments_todo %}{% if seg == obj.segment %}<b>{{ seg }}</b>{% else %}{{ seg }}{% endif %}, {% endfor %}{% else %}{{ obj.segment }}{% endif %}</td>
-                <td style="padding:5px">{{ obj.done_count }} / {{ obj.todo_count }}</td>
-                <td style="padding:5px">{{ obj.updated_str }}</td>
-                <td style="padding:5px">{{ obj.solve_order }}</td>
+                <td style="padding:3px">{{ obj.eval_size }}</td>
+                <td style="padding:3px">{{ obj.eval_loc }}</td>
+                <td style="padding:3px">{% if obj.segments_todo %}{% for seg in obj.segments_todo %}{% if seg == obj.segment %}<b>{{ seg }}</b>{% else %}{{ seg }}{% endif %}, {% endfor %}{% else %}{{ obj.segment }}{% endif %}</td>
+                <td style="padding:3px">{{ obj.done_count }} / {{ obj.todo_count }}</td>
+                <td style="padding:3px">{{ obj.updated_str }}</td>
+                <td style="padding:3px">{{ obj.solve_order }}</td>
             </tr>
         {% endfor %}
     </table>

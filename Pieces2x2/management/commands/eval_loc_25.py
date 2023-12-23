@@ -8,6 +8,8 @@ from django.utils import timezone
 from django.core.management.base import BaseCommand
 from Pieces2x2.models import TwoSide, TwoSideOptions, Piece2x2, EvalProgress
 from Pieces2x2.helpers import calc_segment
+from Solutions.models import Solution8x8
+import datetime
 import time
 
 
@@ -58,9 +60,9 @@ class Command(BaseCommand):
         self.processor = 0
         self.segment = 0
         self.locs = (0, 0)                  # p0..p8
-        self.segment_options = dict()       # [segment] = side_options
         self.side_options = ([], [])        # s0..s23
         self.side_options_rev = ([], [])    # s0..s23
+        self.segment_options = dict()       # [segment] = side_options
         self.reductions = 0
 
         self.unused0 = list()
@@ -157,11 +159,39 @@ class Command(BaseCommand):
         self.prev_tick = 0
         self.progress = None
 
+        self.progress_15min = -1
+
     def add_arguments(self, parser):
         parser.add_argument('processor', nargs=1, type=int, help='Processor number to use')
         parser.add_argument('loc', nargs=1, type=int, help='Top-left location on board (1..37)')
         parser.add_argument('segment', nargs=1, type=int, help='Segment to work on (1..72, 129..193)')
         parser.add_argument('--dryrun', action='store_true')
+
+    def _check_progress_15min(self):
+        # returns True when it is time to do a 15min-interval report
+        minute = datetime.datetime.now().minute
+        curr_15min = int(minute / 15) % 4
+        if curr_15min != self.progress_15min:
+            next_15min = (curr_15min + 1) % 4
+            self.progress_15min = next_15min
+            return True
+        return False
+
+    def _save_progress_solution(self):
+        sol = Solution8x8(based_on_6x6=0)
+        for loc in range(1, 64+1):
+            field_str = 'nr%s' % loc
+            setattr(sol, field_str, 0)
+        # for
+        for nr in range(25):
+            loc = self.locs[nr]
+            p2x2 = self.board[nr]
+            if p2x2:
+                field_str = 'nr%s' % loc
+                setattr(sol, field_str, p2x2.nr)
+        # for
+        sol.save()
+        print('[INFO] Saved progress solution: pk=%s' % sol.pk)
 
     def _calc_unused0(self):
         self.unused0 = list(range(1, 256+1))
@@ -415,6 +445,46 @@ class Command(BaseCommand):
                 qset.delete()
             self.reductions += 1
 
+    def _check_open_ends(self):
+        return True
+        #  verify each twoside open end can still be solved
+        twoside_open = list()
+        empty_nrs = [nr
+                     for nr in range(25)
+                     if not self.board[nr]]
+        empty_nrs.append(-2)        # internal open
+        for p_nr in range(25):
+            p2x2 = self.board[p_nr]
+            if p2x2:
+                neighs = self.neighbours[p_nr]
+
+                if neighs[0] in empty_nrs:
+                    twoside_open.append(p2x2.side1)
+                if neighs[1] in empty_nrs:
+                    twoside_open.append(p2x2.side2)
+                if neighs[2] in empty_nrs:
+                    twoside_open.append(p2x2.side3)
+                if neighs[3] in empty_nrs:
+                    twoside_open.append(p2x2.side4)
+        # for
+
+        qset = Piece2x2.objects.filter(nr1__in=self.board_unused, nr2__in=self.board_unused,
+                                       nr3__in=self.board_unused, nr4__in=self.board_unused)
+        # counts = dict()
+        for side in set(twoside_open):
+            # ensure we have a Piece2x2 that can connect to this side
+            side_rev = self.twoside2reverse[side]
+            p2x2 = qset.filter(side1=side_rev).first()
+            if not p2x2:
+                # no solution
+                # print('[DEBUG] check_open_ends: out of options for side: %s' % repr(side))
+                return False
+            # counts[side] = qset.filter(side1=side_rev).count()
+        # for
+
+        # print('[DEBUG] check_open_ends: all good: %s' % repr(counts))
+        return True
+
     def _select_p_nr(self):
         # decide which position on the board has the fewest options
 
@@ -489,12 +559,14 @@ class Command(BaseCommand):
         if tick - self.prev_tick > 30:
             self.prev_tick = tick
             msg = '(%s) %s' % (len(self.board_order), repr([self.locs[idx] for idx in self.board_order]))
-            print(msg)
+            # print(msg)
             self.progress.solve_order = msg
             self.progress.updated = timezone.now()
             self.progress.save(update_fields=['solve_order', 'updated'])
 
         if len(self.board_order) == 25:
+            if self._check_progress_15min():
+                self._save_progress_solution()
             return True
 
         # decide which p_nr to continue with
@@ -528,7 +600,12 @@ class Command(BaseCommand):
 
         for p in self._iter(options_side1, options_side2, options_side3, options_side4):
             self._board_place(p_nr, p)
-            found = self._find_recurse()
+
+            if self._check_open_ends():
+                found = self._find_recurse()
+            else:
+                found = False
+
             self._board_pop()
 
             if found:

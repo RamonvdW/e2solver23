@@ -69,7 +69,7 @@ class Command(BaseCommand):
         self.locs = (0, 0)                  # p0..p8
         self.side_options = ([], [])        # s0..s23
         self.side_options_rev = ([], [])    # s0..s23
-        self.segment_options = dict()
+        self.segment_options = dict()       # [segment] = side_options
         self.reductions = 0
 
         self.unused0 = list()
