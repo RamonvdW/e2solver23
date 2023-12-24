@@ -446,7 +446,6 @@ class Command(BaseCommand):
             self.reductions += 1
 
     def _check_open_ends(self):
-        return True
         #  verify each twoside open end can still be solved
         twoside_open = list()
         empty_nrs = [nr

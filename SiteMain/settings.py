@@ -101,6 +101,11 @@ TEMPLATES = [
 ]
 
 
+# avoid conflicts with other Django applications
+SESSION_COOKIE_NAME = 'e2_session_id'
+CSRF_COOKIE_NAME = 'e2_csrf_token'
+
+
 # point out location of WSGI application for django runserver command
 WSGI_APPLICATION = 'SiteMain.wsgi.application'
 

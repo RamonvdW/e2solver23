@@ -8,7 +8,7 @@
         table, th, td {
             border: 1px solid black;
             border-collapse: collapse;
-            padding: 0;
+            padding: 5px;
             text-align: center;
             font-size: 15px;
         }
@@ -41,19 +41,19 @@
                         </tr>
                     </thead>
 
-                    <tr>
+                    <tr style="padding:0">
                         {% for piece in solution.p2x2s %}
-                            <td>
+                            <td style="padding:0">
                                 {% if piece.is_empty %}
                                     <div style="width:80px; height:80px">{{ piece.note|linebreaksbr }}</div>
                                 {% else %}
                                     <div style="display:flex">
                                         <img src="{{ piece.img1 }}" width=40 height=40 style="transform: {{ piece.transform1 }}">
-                                        <img src="{{ piece.img2 }}" width=40 height=40  style="transform: {{ piece.transform2 }}">
+                                        <img src="{{ piece.img2 }}" width=40 height=40 style="transform: {{ piece.transform2 }}">
                                     </div>
                                     <div style="display:flex">
-                                        <img src="{{ piece.img3 }}" width=40 height=40  style="transform: {{ piece.transform3 }}">
-                                        <img src="{{ piece.img4 }}" width=40 height=40  style="transform: {{ piece.transform4 }}">
+                                        <img src="{{ piece.img3 }}" width=40 height=40 style="transform: {{ piece.transform3 }}">
+                                        <img src="{{ piece.img4 }}" width=40 height=40 style="transform: {{ piece.transform4 }}">
                                     </div>
                                 {% endif %}
                             </td>
@@ -113,6 +113,23 @@
         </tr>
     </table>
 
+    {% if chains %}
+        <div style="margin-left:auto; margin-right:auto">
+            <table>
+                {% for nr1, nr8, c2_sides2, c3_sides2, c4_sides2, p5_count, c6_sides4, c7_sides4 in chains %}
+                    <tr>
+                        <th>{{ nr1 }}..{{ nr8 }}</th>
+                        <td>{{ c2_sides2 }}</td>
+                        <td>{{ c3_sides2 }}</td>
+                        <td>{{ c4_sides2 }}</td>
+                        <td>{{ p5_count }}</td>
+                        <td>{{ c6_sides4 }}</td>
+                        <td>{{ c7_sides4 }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    {% endif %}
 
     {% if auto_reload %}
         <script>

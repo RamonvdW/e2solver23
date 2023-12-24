@@ -163,6 +163,7 @@ def _sol_add_stats_2x2(sol, neighbours):
                 except ValueError:
                     print('Double used nr: %s' % nr)
     # for
+    sol.unused = unused_nrs
 
     # print('empty_locs: %s' % repr(empty_locs))
     # print('unused_nrs: %s' % repr(unused_nrs))
@@ -253,6 +254,63 @@ def _fill_sol(sol):
     # for
 
 
+def _analyze_chains(sol):
+
+    two2nr = dict()                 # [two sides] = two side nr
+    side_nr2reverse = dict()        # [two side nr] = reverse two side nr
+    for two in TwoSide.objects.all():
+        two2nr[two.two_sides] = two.nr
+    # for
+    for two_sides, nr in two2nr.items():
+        two_rev = two_sides[1] + two_sides[0]
+        rev_nr = two2nr[two_rev]
+        side_nr2reverse[nr] = rev_nr
+    # for
+
+    qset = Piece2x2.objects.filter(nr1__in=sol.unused, nr2__in=sol.unused, nr3__in=sol.unused, nr4__in=sol.unused)
+
+    chains = list()
+
+    # left to right
+    for nr1, nr8 in ((9, 16), (17, 24), (25, 32), (33, 40), (41, 48), (49, 56)):
+        # 1
+        p1 = Piece2x2.objects.get(nr=getattr(sol, 'nr%s' % nr1))
+        p2_exp_s4 = side_nr2reverse[p1.side2]
+
+        # 2
+        p2_sides2 = list(qset.filter(side4=p2_exp_s4).distinct('side2').values_list('side2', flat=True))
+        p3_exp_s4 = [side_nr2reverse[s] for s in p2_sides2]
+
+        # 3
+        p3_sides2 = list(qset.filter(side4__in=p3_exp_s4).distinct('side2').values_list('side2', flat=True))
+        p4_exp_s4 = [side_nr2reverse[s] for s in p3_sides2]
+
+        # 4
+        p4_sides2 = list(qset.filter(side4__in=p4_exp_s4).distinct('side2').values_list('side2', flat=True))
+        p5_exp_s4 = [side_nr2reverse[s] for s in p4_sides2]
+
+        # 8
+        p8 = Piece2x2.objects.get(nr=getattr(sol, 'nr%s' % nr8))
+        p7_exp_s2 = side_nr2reverse[p8.side4]
+
+        # 7
+        p7_sides4 = list(qset.filter(side2=p7_exp_s2).distinct('side4').values_list('side4', flat=True))
+        p6_exp_s2 = [side_nr2reverse[s] for s in p7_sides4]
+
+        # 6
+        p6_sides4 = list(qset.filter(side2__in=p6_exp_s2).distinct('side4').values_list('side4', flat=True))
+        p5_exp_s2 = [side_nr2reverse[s] for s in p6_sides4]
+
+        # 4
+        p5_count = qset.filter(side2__in=p5_exp_s2, side4__in=p5_exp_s4).count()
+
+        chain = (nr1, nr8, len(p2_sides2), len(p3_sides2), len(p4_sides2), p5_count, len(p6_sides4), len(p7_sides4))
+        chains.append(chain)
+    # for
+
+    return chains
+
+
 class ShowView(TemplateView):
 
     template_name = TEMPLATE_VIEW
@@ -268,6 +326,7 @@ class ShowView(TemplateView):
 
         context['solution'] = sol = Solution8x8.objects.get(pk=nr)
         _fill_sol(sol)
+        # context['chains'] = _analyze_chains(sol)
 
         context['based_on'] = '6x6 nr %s' % sol.based_on_6x6
 
@@ -300,8 +359,9 @@ class ShowAutoView(TemplateView):
         if sol:
             context['solution'] = sol
             _fill_sol(sol)
+            # context['chains'] = _analyze_chains(sol)
 
-            context['based_on'] = '6x6 nr %s' % sol.based_on_6x6
+            #context['based_on'] = '6x6 nr %s' % sol.based_on_6x6
 
             nr = sol.pk
             if nr > 100:
