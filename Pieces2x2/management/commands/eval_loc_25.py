@@ -156,6 +156,7 @@ class Command(BaseCommand):
         self.board_order = list()   # solve order (for popping)
         self.board_unused = list()
         self.p_nrs_order = list()
+        self.requested_order = list()
         self.prev_tick = 0
         self.progress = None
 
@@ -166,6 +167,7 @@ class Command(BaseCommand):
         parser.add_argument('loc', nargs=1, type=int, help='Top-left location on board (1..37)')
         parser.add_argument('segment', nargs=1, type=int, help='Segment to work on (1..72, 129..193)')
         parser.add_argument('--dryrun', action='store_true')
+        parser.add_argument('order', nargs='*', type=int, help='Solving order (1..64), max %s' % len(self.locs))
 
     def _check_progress_15min(self):
         # returns True when it is time to do a 15min-interval report
@@ -183,7 +185,7 @@ class Command(BaseCommand):
             field_str = 'nr%s' % loc
             setattr(sol, field_str, 0)
         # for
-        for nr in range(25):
+        for nr in range(len(self.locs)):
             loc = self.locs[nr]
             p2x2 = self.board[nr]
             if p2x2:
@@ -445,14 +447,14 @@ class Command(BaseCommand):
                 qset.delete()
             self.reductions += 1
 
-    def _check_open_ends(self):
+    def _check_open_ends_1(self):
         #  verify each twoside open end can still be solved
         twoside_open = list()
         empty_nrs = [nr
-                     for nr in range(25)
+                     for nr in range(len(self.locs))
                      if not self.board[nr]]
         empty_nrs.append(-2)        # internal open
-        for p_nr in range(25):
+        for p_nr in range(len(self.locs)):
             p2x2 = self.board[p_nr]
             if p2x2:
                 neighs = self.neighbours[p_nr]
@@ -484,6 +486,50 @@ class Command(BaseCommand):
         # print('[DEBUG] check_open_ends: all good: %s' % repr(counts))
         return True
 
+    def _check_open_ends(self):
+        #  verify each location can still be filled
+        qset = Piece2x2.objects.filter(nr1__in=self.board_unused, nr2__in=self.board_unused,
+                                       nr3__in=self.board_unused, nr4__in=self.board_unused)
+
+        for p_nr in range(len(self.locs)):
+            if not self.board[p_nr]:
+                # empty position on the board
+                # check if it has neighbours that are filled
+                neighs = self.neighbours[p_nr]
+                qset2 = qset
+
+                if neighs[0] >= 0:
+                    # neighbour on side1
+                    p2x2 = self.board[neighs[0]]
+                    if p2x2:
+                        qset2 = qset2.filter(side1=self.twoside2reverse[p2x2.side3])
+
+                if neighs[1] >= 0:
+                    # neighbour on side2
+                    p2x2 = self.board[neighs[1]]
+                    if p2x2:
+                        qset2 = qset2.filter(side2=self.twoside2reverse[p2x2.side4])
+
+                if neighs[2] >= 0:
+                    # neighbour on side3
+                    p2x2 = self.board[neighs[2]]
+                    if p2x2:
+                        qset2 = qset2.filter(side3=self.twoside2reverse[p2x2.side1])
+
+                if neighs[3] >= 0:
+                    # neighbour on side4
+                    p2x2 = self.board[neighs[3]]
+                    if p2x2:
+                        qset2 = qset2.filter(side4=self.twoside2reverse[p2x2.side2])
+
+                if qset2.first() is None:
+                    # no solution
+                    return False
+        # for
+
+        # all good
+        return True
+
     def _select_p_nr(self):
         # decide which position on the board has the fewest options
 
@@ -501,7 +547,7 @@ class Command(BaseCommand):
                                        nr4__in=self.board_unused)
 
         p_nr_counts = list()
-        for p_nr in range(25):
+        for p_nr in range(len(self.locs)):
             if self.board[p_nr] is None:
                 # empty position on the board
                 s1, s2, s3, s4 = self.side_nrs[p_nr]
@@ -563,7 +609,7 @@ class Command(BaseCommand):
             self.progress.updated = timezone.now()
             self.progress.save(update_fields=['solve_order', 'updated'])
 
-        if len(self.board_order) == 25:
+        if len(self.board_order) == len(self.locs):
             if self._check_progress_15min():
                 self._save_progress_solution()
             return True
@@ -625,7 +671,8 @@ class Command(BaseCommand):
         sides = self.segment_options[self.segment]
         todo = len(sides)
         self.stdout.write('[INFO] Checking %s options in segment %s' % (len(sides), self.segment))
-        self.p_nrs_order = list()       # allow deciding optimal order anew
+        self.p_nrs_order = self.requested_order[:]       # allow deciding optimal order anew
+
         loc, side_n = self._segment_to_loc(self.segment)
         p_nr = self.locs.index(loc)
 
@@ -717,6 +764,16 @@ class Command(BaseCommand):
 
         self.segment = options['segment'][0]
         self.stdout.write('[INFO] Segment: %s' % self.segment)
+
+        for loc in options['order']:
+            if loc not in self.locs:
+                self.stdout.write('[WARNING] Skipping invalid order: %s' % loc)
+            elif loc not in self.requested_order:
+                self.requested_order.append(self.locs.index(loc))
+            else:
+                self.stdout.write('[WARNING] Duplicate in requested order: %s' % loc)
+        # for
+        self.stdout.write('[INFO] Initial solve order: %s' % repr(self.requested_order))
 
         self._calc_unused0()
         self.board_unused = self.unused0[:]

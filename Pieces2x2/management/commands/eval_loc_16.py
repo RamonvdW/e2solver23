@@ -286,6 +286,50 @@ class Command(BaseCommand):
                 qset.delete()
             self.reductions += 1
 
+    def _check_open_ends(self):
+        #  verify each location can still be filled
+        qset = Piece2x2.objects.filter(nr1__in=self.board_unused, nr2__in=self.board_unused,
+                                       nr3__in=self.board_unused, nr4__in=self.board_unused)
+
+        for p_nr in range(len(self.locs)):
+            if not self.board[p_nr]:
+                # empty position on the board
+                # check if it has neighbours that are filled
+                neighs = self.neighbours[p_nr]
+                qset2 = qset
+
+                if neighs[0] >= 0:
+                    # neighbour on side1
+                    p2x2 = self.board[neighs[0]]
+                    if p2x2:
+                        qset2 = qset2.filter(side1=self.twoside2reverse[p2x2.side3])
+
+                if neighs[1] >= 0:
+                    # neighbour on side2
+                    p2x2 = self.board[neighs[1]]
+                    if p2x2:
+                        qset2 = qset2.filter(side2=self.twoside2reverse[p2x2.side4])
+
+                if neighs[2] >= 0:
+                    # neighbour on side3
+                    p2x2 = self.board[neighs[2]]
+                    if p2x2:
+                        qset2 = qset2.filter(side3=self.twoside2reverse[p2x2.side1])
+
+                if neighs[3] >= 0:
+                    # neighbour on side4
+                    p2x2 = self.board[neighs[3]]
+                    if p2x2:
+                        qset2 = qset2.filter(side4=self.twoside2reverse[p2x2.side2])
+
+                if qset2.first() is None:
+                    # no solution
+                    return False
+        # for
+
+        # all good
+        return True
+
     def _select_p_nr(self):
         # decide which position on the board has the fewest options
 
@@ -303,7 +347,7 @@ class Command(BaseCommand):
                                        nr4__in=self.board_unused)
 
         p_nr_counts = list()
-        for p_nr in range(16):
+        for p_nr in range(len(self.locs)):
             if self.board[p_nr] is None:
                 # empty position on the board
                 s1, s2, s3, s4 = self.side_nrs[p_nr]
@@ -365,7 +409,7 @@ class Command(BaseCommand):
             self.progress.updated = timezone.now()
             self.progress.save(update_fields=['solve_order', 'updated'])
 
-        if len(self.board_order) == 16:
+        if len(self.board_order) == len(self.locs):
             return True
 
         # decide which p_nr to continue with
@@ -399,7 +443,12 @@ class Command(BaseCommand):
 
         for p in self._iter(options_side1, options_side2, options_side3, options_side4):
             self._board_place(p_nr, p)
-            found = self._find_recurse()
+
+            if self._check_open_ends():
+                found = self._find_recurse()
+            else:
+                found = False
+
             self._board_pop()
 
             if found:

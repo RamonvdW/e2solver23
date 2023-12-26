@@ -51,6 +51,7 @@ echo "[INFO] Reduction 4 in the corners"
 #echo "[INFO] Reduce center"
 #./manage.* dup_segments 4
 #./manage.* eval_loc_4 4 28     # effect: 0
+#./manage.* eval_loc_4 4 36     # effect: 0
 
 #echo "[INFO] Reduction 4 attempts"
 #./manage.* dup_segments 4
@@ -65,17 +66,18 @@ echo "[INFO] Reduction 4 in the corners"
 #./manage.* eval_loc_9 9 6      # effect: 0
 #./manage.* eval_loc_9 9 41     # effect: 0
 #./manage.* eval_loc_9 9 46     # effect: 0
+./manage.* eval_loc_9 9 34
 
 echo "[INFO] Reduction 16 attempts"
 ./manage.* dup_segments 16
 #screen -S 16a -dn ./manage,* eval_loc_16 16 1      # effect: 0
-#screen -S 16a -dn ./manage,* eval_loc_16 16 5
-#screen -S 16a -dn ./manage,* eval_loc_16 16 9
-#screen -S 16a -dn ./manage,* eval_loc_16 16 12
-#screen -S 16a -dn ./manage,* eval_loc_16 16 19
+screen -S 16a -dn ./manage,* eval_loc_16 16 5
+screen -S 16a -dn ./manage,* eval_loc_16 16 9
+screen -S 16a -dn ./manage,* eval_loc_16 16 12
+screen -S 16a -dn ./manage,* eval_loc_16 16 19
 #screen -S 16a -dn ./manage,* eval_loc_16 16 33     # effect: 0
-#screen -S 16a -dn ./manage,* eval_loc_16 16 36
-#screen -S 16a -dn ./manage,* eval_loc_16 16 37
+screen -S 16a -dn ./manage,* eval_loc_16 16 36
+#screen -S 16a -dn ./manage,* eval_loc_16 16 37     # effect: 0
 
 echo "[INFO] Reduction 25 attempts"
 ./manage.* dup_segments 25
