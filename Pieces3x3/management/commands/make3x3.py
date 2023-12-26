@@ -33,7 +33,7 @@ class Command(BaseCommand):
         self.with_center = False
         self.with_sides = False
 
-        self.exclude_piece_nrs = ()
+        self.exclude_piece_nrs = list(range(1, 60+1))
         self.allow_hint_piece_nrs = (208, 255, 181, 249, 139)
 
     def _make_cache_base_with_side(self):

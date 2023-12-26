@@ -10,11 +10,11 @@
 # TODO: verify against own set
 
 PIECES = [
-    "AQXX",     # number 1
+    "AQXX",     # 1 = first corner
     "AEXX",
     "IQXX",
-    "QIXX",     # last corner
-    "BAXA",
+    "QIXX",     # 4 = last corner
+    "BAXA",     # 5 = first border
     "JIXA",
     "FAXA",
     "FMXA",
@@ -69,7 +69,7 @@ PIECES = [
     "PAXM",
     "PMXM",
     "UIXM",
-    "VQXM",
+    "VQXM",     # 60 = last border
     "FRBB",
     "NGBB",
     "JCBJ",
@@ -148,7 +148,7 @@ PIECES = [
     "PTJV",
     "TGRR",
     "FCRF",
-    "FKRF",     # piece 139
+    "FKRF",     # 139 = center hint
     "FLRF",
     "SURF",
     "OFRF",
@@ -265,7 +265,7 @@ PIECES = [
     "PTLH",
     "UPTP",
     "PVTV",
-    "UVHV",
+    "UVHV",     # 256 = last piece
 ]
 
 EXTERNAL_BORDER = "X"
