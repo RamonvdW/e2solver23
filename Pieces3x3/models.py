@@ -47,7 +47,6 @@ class Piece3x3(models.Model):
 
     nr = models.PositiveIntegerField(primary_key=True)      # max = 2147483647
 
-    is_border = models.BooleanField()
     has_hint = models.BooleanField()
 
     # side is a reference to a ThreeSide
@@ -168,7 +167,6 @@ class Piece3x3(models.Model):
         verbose_name_plural = 'Pieces 3x3'
 
         indexes = [
-            models.Index(fields=['is_border']),
             models.Index(fields=['has_hint']),
             models.Index(fields=['nr1']),
             models.Index(fields=['nr2']),
