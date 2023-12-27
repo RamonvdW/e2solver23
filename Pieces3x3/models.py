@@ -186,4 +186,9 @@ class Piece3x3(models.Model):
     objects = models.Manager()  # for the editor only
 
 
+class Make3x3Next(models.Model):
+
+    next_p1 = models.PositiveSmallIntegerField(default=61)
+
+
 # end of file

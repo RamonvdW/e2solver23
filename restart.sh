@@ -11,7 +11,7 @@ then
     ./manage.* migrate
 
     echo "[INFO] Creating all Piece2x2"
-    ./manage.* make2x2
+    ./manage.* make2x2_borders
 fi
 
 exit

@@ -5,8 +5,9 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
+from django.db import transaction
 from BasePieces.models import BasePiece
-from Pieces3x3.models import ThreeSide, Piece3x3
+from Pieces3x3.models import ThreeSide, Piece3x3, Make3x3Next
 
 ALL_HINT_NRS = (139, 181, 208, 249, 255)
 CENTER_HINT_NR = 139
@@ -42,10 +43,6 @@ class Command(BaseCommand):
 
         self.exclude_piece_nrs = list(range(1, 60+1))
         self.allow_hint_piece_nrs = (208, 255, 181, 249, 139)
-
-    def add_arguments(self, parser):
-        parser.add_argument('p1_nr', nargs=1, type=int,
-                            help='Start at base piece for position p1 (61..256 excluding 139, 181, 249, 255)')
 
     def _make_cache_base_with_side(self):
         all_sides = list()
@@ -325,10 +322,11 @@ class Command(BaseCommand):
         #     # for
         # ThreeSide.objects.all().delete()
 
-        p1_nr = options['p1_nr'][0]
-        if p1_nr < 61 or p1_nr > 256 or p1_nr in (139, 181, 249, 255):
-            self.stderr.write('[ERROR] p1_nr is out of range')
-            return
+        with transaction.atomic():                  # avoid concurrent update
+            obj = Make3x3Next.objects.select_for_update().first()
+            p1_nr = obj.next_p1
+            obj.next_p1 += 1
+            obj.save()
 
         self.stdout.write('[INFO] Generating 3x3 with rotation variants starting at p1=%s' % p1_nr)
 
