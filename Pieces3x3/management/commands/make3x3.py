@@ -43,6 +43,10 @@ class Command(BaseCommand):
         self.exclude_piece_nrs = list(range(1, 60+1))
         self.allow_hint_piece_nrs = (208, 255, 181, 249, 139)
 
+    def add_arguments(self, parser):
+        parser.add_argument('p1_nr', nargs=1, type=int,
+                            help='Start at base piece for position p1 (61..256 excluding 139, 181, 249, 255)')
+
     def _make_cache_base_with_side(self):
         all_sides = list()
         for piece in BasePiece.objects.exclude(nr__in=self.exclude_piece_nrs):
@@ -89,21 +93,34 @@ class Command(BaseCommand):
             return rot == 0
         return True
 
-    def _iter_piece1(self):
+    @staticmethod
+    def _iter_piece1(p1_nr):
         """ this generator is used for position 1 """
-        # only hint 208 is found on position 1, so exclude the rest
-        exclude_nrs = self.exclude_piece_nrs[:]
-        exclude_nrs.extend([139, 181, 249, 255])
-        for piece in BasePiece.objects.exclude(nr__in=self.exclude_piece_nrs):
-            # some pieces are known to require a specific rotation
-            if piece.nr == 208:
-                yield piece, 1
-            else:
-                yield piece, 0
-                yield piece, 1
-                yield piece, 2
-                yield piece, 3
-        # for
+        piece = BasePiece.objects.get(nr=p1_nr)
+        if p1_nr == 208:
+            # hint 208 is found on p1 in a specific rotation only
+            yield piece, 1
+        else:
+            # all 4 rotations
+            yield piece, 0
+            yield piece, 1
+            yield piece, 2
+            yield piece, 3
+
+        # # only hint 208 is found on position 1, so exclude the rest
+        # exclude_nrs = self.exclude_piece_nrs[:]
+        # exclude_nrs.extend([139, 181, 249, 255])
+        # for piece in BasePiece.objects.exclude(nr__in=self.exclude_piece_nrs):
+        #     # some pieces are known to require a specific rotation
+        #     if piece.nr == 208:
+        #         yield piece, 1
+        #     else:
+        #         # all 4 rotations
+        #         yield piece, 0
+        #         yield piece, 1
+        #         yield piece, 2
+        #         yield piece, 3
+        # # for
 
     def _iter_piece_with_side4(self, expected_side4, used_nrs):
         """ this generator is used for positions 2 and 3 """
@@ -144,7 +161,7 @@ class Command(BaseCommand):
             self.three_sides[three_sides] = nr
         return nr
 
-    def _iter_row1(self):
+    def _iter_row1(self, p1_nr):
         """
                       side 1
                    +---+---+---+
@@ -152,7 +169,7 @@ class Command(BaseCommand):
                    +---+---+---+
                        side 3
         """
-        for piece1, rot1 in self._iter_piece1():
+        for piece1, rot1 in self._iter_piece1(p1_nr):
             piece1_side2 = piece1.get_side(2, rot1)
 
             piece1_is_hint = piece1 in ALL_HINT_NRS
@@ -297,24 +314,29 @@ class Command(BaseCommand):
         self.stdout.write('[INFO] Filling caches')
         self._make_cache_base_with_side()
 
-        self.stdout.write('[INFO] Deleting old pieces')
-        last = Piece3x3.objects.order_by('pk').last()
-        if last:
-            last_pk = last.pk
-            pk = 1000000
-            while pk < last_pk:
-                Piece3x3.objects.filter(pk__lt=pk).delete()
-                pk += 1000000
-            # for
-        ThreeSide.objects.all().delete()
+        # self.stdout.write('[INFO] Deleting old pieces')
+        # last = Piece3x3.objects.order_by('pk').last()
+        # if last:
+        #     last_pk = last.pk
+        #     pk = 1000000
+        #     while pk < last_pk:
+        #         Piece3x3.objects.filter(pk__lt=pk).delete()
+        #         pk += 1000000
+        #     # for
+        # ThreeSide.objects.all().delete()
 
-        self.stdout.write('[INFO] Generating all 3x3 including rotation variants')
+        p1_nr = options['p1_nr'][0]
+        if p1_nr < 61 or p1_nr > 256 or p1_nr in (139, 181, 249, 255):
+            self.stderr.write('[ERROR] p1_nr is out of range')
+            return
+
+        self.stdout.write('[INFO] Generating 3x3 with rotation variants starting at p1=%s' % p1_nr)
 
         nr = 0
         print_nr = print_interval = 100000
 
         bulk = list()
-        for row1 in self._iter_row1():
+        for row1 in self._iter_row1(p1_nr):
             for row2 in self._iter_row2(row1):
                 for row3 in self._iter_row3(row1, row2):
 
@@ -344,7 +366,7 @@ class Command(BaseCommand):
 
                     nr += 1
                     piece = Piece3x3(
-                                    nr=nr,
+                                    # automatic numbering
                                     has_hint=has_hint,
                                     side1=self._get_three_sides_nr(piece1_side1, piece2_side1, piece3_side1),
                                     side2=self._get_three_sides_nr(piece3_side2, piece6_side2, piece9_side2),

@@ -14,6 +14,8 @@ then
     ./manage.* make2x2
 fi
 
+exit
+
 echo "[INFO] Creating all TwoSideOptions"
 ./manage.* init_segments --confirm
 

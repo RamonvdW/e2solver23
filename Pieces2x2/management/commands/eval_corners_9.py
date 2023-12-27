@@ -66,7 +66,12 @@ class Command(BaseCommand):
 
         self.processor = 0
         self.segment = 0
-        self.locs = (0, 0)                  # p0..p8
+        self.locs = (1, 2, 3, 6, 7, 8,
+                     9, 10, 11, 14, 15, 16,
+                     17, 18, 19, 22, 23, 24,
+                     41, 42, 43, 46, 47, 48,
+                     49, 50, 51, 54, 55, 56,
+                     57, 58, 59, 62, 63, 64)
         self.side_options = ([], [])        # s0..s23
         self.side_options_rev = ([], [])    # s0..s23
         self.segment_options = dict()       # [segment] = side_options
@@ -161,6 +166,7 @@ class Command(BaseCommand):
         self.board_order = list()   # solve order (for popping)
         self.board_unused = list()
         self.p_nrs_order = list()
+        self.requested_order = list()
         self.prev_tick = 0
         self.progress = None
 
@@ -170,6 +176,7 @@ class Command(BaseCommand):
         parser.add_argument('processor', nargs=1, type=int, help='Processor number to use')
         parser.add_argument('segment', nargs=1, type=int, help='Segment to work on (1..72, 129..193)')
         parser.add_argument('--dryrun', action='store_true')
+        parser.add_argument('order', nargs='*', type=int, help='Solving order (1..64), max %s' % len(self.locs))
 
     def _check_progress_15min(self):
         # returns True when it is time to do a 15min-interval report
@@ -749,19 +756,51 @@ class Command(BaseCommand):
 
         return False
 
-    @staticmethod
-    def _segment_to_loc(segment):
+    def _segment_to_loc(self, segment):
         """ reverse of calc_segment """
+
         if segment > 128:
-            return segment - 129, 2
+            # assume side = 2
+            loc2 = segment - 129
+            loc4 = segment - 128
+
+            if loc2 in self.locs and loc4 in self.locs:
+                # we can choose
+                if loc4 == self.requested_order[0]:
+                    loc2 = 99
+
+            if loc2 in self.locs:
+                return loc2, 2
+
+            # use side=4
+            if loc4 in self.locs:
+                return loc4, 4
         else:
-            return segment, 1
+            # assume side=1
+            loc1 = segment
+            loc3 = segment - 8
+
+            if loc1 in self.locs and loc3 in self.locs:
+                # we can choose
+                if loc3 == self.requested_order[0]:
+                    loc1 = 99
+
+            if loc1 in self.locs:
+                return loc1, 1
+
+            # use side=3
+            if loc3 in self.locs:
+                return loc3, 3
+
+        print('[ERROR] segment_to_loc failed for segment %s' % segment)
+        return -42
 
     def _find_reduce(self):
         sides = self.segment_options[self.segment]
         todo = len(sides)
         self.stdout.write('[INFO] Checking %s options in segment %s' % (len(sides), self.segment))
-        self.p_nrs_order = list()       # allow deciding optimal order anew
+        self.p_nrs_order = self.requested_order[:]       # allow deciding optimal order anew
+
         loc, side_n = self._segment_to_loc(self.segment)
         p_nr = self.locs.index(loc)
 
@@ -841,19 +880,23 @@ class Command(BaseCommand):
         if options['dryrun']:
             self.do_commit = False
 
-        self.locs = (1, 2, 3, 6, 7, 8,
-                     9, 10, 11, 14, 15, 16,
-                     17, 18, 19, 22, 23, 24,
-                     41, 42, 43, 46, 47, 48,
-                     49, 50, 51, 54, 55, 56,
-                     57, 58, 59, 62, 63, 64)
-        self.stdout.write('[INFO] Locations: %s' % repr(self.locs))
-
         self.processor = options['processor'][0]
         self.stdout.write('[INFO] Processor: %s' % self.processor)
 
         self.segment = options['segment'][0]
         self.stdout.write('[INFO] Segment: %s' % self.segment)
+
+        for loc in options['order']:
+            if loc not in self.locs:
+                self.stdout.write('[WARNING] Skipping invalid order: %s' % loc)
+            else:
+                p_nr = self.locs.index(loc)
+                if p_nr not in self.requested_order:
+                    self.requested_order.append(p_nr)
+                else:
+                    self.stdout.write('[WARNING] Duplicate in requested order: %s' % loc)
+        # for
+        self.stdout.write('[INFO] Initial solve order: %s' % repr(self.requested_order))
 
         self._calc_unused0()
         self.board_unused = self.unused0[:]

@@ -45,7 +45,7 @@ class Piece3x3(models.Model):
                    side 3
     """
 
-    nr = models.PositiveIntegerField(primary_key=True)      # max = 2147483647
+    nr = models.AutoField(primary_key=True)
 
     has_hint = models.BooleanField()
 
