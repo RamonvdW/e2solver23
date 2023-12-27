@@ -10,6 +10,9 @@ then
 
     ./manage.* migrate
 
+    echo "[INFO] Creating all ThreeSide"
+    ./manage.* make_3sides
+
     echo "[INFO] Creating all Piece2x2"
     ./manage.* make2x2_borders
 fi
