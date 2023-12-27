@@ -8,6 +8,7 @@ from django.core.management.base import BaseCommand
 from django.db import transaction
 from BasePieces.models import BasePiece
 from Pieces3x3.models import ThreeSide, Piece3x3, Make3x3Next
+import sys
 
 ALL_HINT_NRS = (139, 181, 208, 249, 255)
 CENTER_HINT_NR = 139
@@ -34,7 +35,6 @@ class Command(BaseCommand):
         super().__init__(**kwargs)
 
         self.three_sides = dict()       # ['XXX'] = nr
-        self.three_sides_nr = 0
 
         self.base_with_side1 = dict()   # [side] = [(piece, rot), ..]
         self.base_with_side2 = dict()   # [side] = [(piece, rot), ..]
@@ -78,6 +78,11 @@ class Command(BaseCommand):
             self.base_with_side2[piece.side4].append((piece, 2))
             self.base_with_side3[piece.side4].append((piece, 1))
             self.base_with_side4[piece.side4].append((piece, 0))
+        # for
+
+    def _load_three_sides(self):
+        for obj in ThreeSide.objects.all():
+            self.three_sides[obj.three_sides] = obj.nr
         # for
 
     @staticmethod
@@ -148,15 +153,12 @@ class Command(BaseCommand):
     def _get_three_sides_nr(self, side1, side2, side3):
         three_sides = side1 + side2 + side3
         try:
-            nr = self.three_sides[three_sides]
+            return self.three_sides[three_sides]
         except KeyError:
-            nr = self.three_sides_nr + 1
-            self.three_sides_nr = nr
-            ThreeSide(
-                 nr=nr,
-                 three_sides=three_sides).save()
-            self.three_sides[three_sides] = nr
-        return nr
+            pass
+
+        self.stderr.write('[ERROR] Missing ThreeSide for %s' % repr(three_sides))
+        sys.exit(1)
 
     def _iter_row1(self, p1_nr):
         """
@@ -308,6 +310,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
+        self._load_three_sides()
+
         self.stdout.write('[INFO] Filling caches')
         self._make_cache_base_with_side()
 
@@ -320,7 +324,6 @@ class Command(BaseCommand):
         #         Piece3x3.objects.filter(pk__lt=pk).delete()
         #         pk += 1000000
         #     # for
-        # ThreeSide.objects.all().delete()
 
         with transaction.atomic():                  # avoid concurrent update
             obj = Make3x3Next.objects.select_for_update().first()
@@ -328,7 +331,7 @@ class Command(BaseCommand):
             obj.next_p1 += 1
             obj.save()
 
-        self.stdout.write('[INFO] Generating 3x3 with rotation variants starting at p1=%s' % p1_nr)
+        self.stdout.write('[INFO] {%s} Generating 3x3 with rotation variants' % p1_nr)
 
         nr = 0
         print_nr = print_interval = 100000
@@ -396,7 +399,7 @@ class Command(BaseCommand):
 
                     if nr > print_nr:
                         print_nr += print_interval
-                        print(self.three_sides_nr, nr, piece1)
+                        print('{%s} %s' % (p1_nr, nr))
                 # for
             # for
         # for
@@ -404,6 +407,6 @@ class Command(BaseCommand):
         if len(bulk):
             Piece3x3.objects.bulk_create(bulk)
 
-        self.stdout.write('[INFO] Generated %s Piece3x3 (includes rotation variants)' % nr)
+        self.stdout.write('[INFO] {%s} Generated %s Piece3x3 (includes rotation variants)' % (p1_nr, nr))
 
 # end of file
