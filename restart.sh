@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 if [ "$1" == "--clean" ]
 then
@@ -10,14 +10,12 @@ then
 
     ./manage.* migrate
 
-    echo "[INFO] Creating all ThreeSide"
-    ./manage.* make_3sides
+    #echo "[INFO] Creating all ThreeSide"
+    #./manage.* make_3sides
 
     echo "[INFO] Creating all Piece2x2"
-    ./manage.* make2x2_borders
+    ./manage.* make2x2
 fi
-
-exit
 
 echo "[INFO] Creating all TwoSideOptions"
 ./manage.* init_segments --confirm
@@ -39,6 +37,8 @@ echo "[INFO] Reduction 4 in the corners"
 #./manage.* eval_loc_4 2 7     # effect: 0
 ./manage.* eval_loc_4 2 49     # effect: -1
 ./manage.* eval_loc_4 2 55     # effect: -1
+
+exit
 
 #./manage.* dup_segments 3
 #./manage.* eval_loc_4 3 2      # effect: 0

@@ -15,7 +15,7 @@ import time
 
 class Command(BaseCommand):
 
-    help = "Eval a possible reduction in TwoSideOptions for the first ring"
+    help = "Eval a possible reduction in TwoSideOptions for the first ring of 2x2"
 
     """
         +----+----+----+----+----+----+----+----+
@@ -36,52 +36,6 @@ class Command(BaseCommand):
         | 57 | 58 | 59 | 60 | 61 | 62 | 63 | 64 |
         +----+----+----+----+----+----+----+----+
     """
-
-    def _calc_neighbours(self):
-        neighbours = dict()
-
-        # order of the entries: side 1, 2, 3, 4
-        for nr in range(1, 64+1):
-            if nr in self.locs:
-                n = list()
-                col = (nr - 1) % 8
-                row = int((nr - 1) / 8)
-
-                # side 1
-                if row == 0:
-                    n.append(-1)    # outer border
-                elif nr - 8 in self.locs:
-                    n.append(nr - 8)
-                else:
-                    n.append(-2)    # inner gap
-
-                # side 2
-                if col == 7:
-                    n.append(-1)    # outer border
-                elif nr + 1 in self.locs:
-                    n.append(nr + 1)
-                else:
-                    n.append(-2)    # inner gap
-
-                # side 3
-                if row == 7:
-                    n.append(-1)    # outer border
-                elif nr + 8 in self.locs:
-                    n.append(nr + 8)
-                else:
-                    n.append(-2)    # inner gap
-
-                # side 4
-                if col == 0:
-                    n.append(-1)    # outer border
-                elif nr - 1 in self.locs:
-                    n.append(nr - 1)
-                else:
-                    n.append(-2)    # inner gap
-
-                neighbours[nr] = tuple(n)
-        # for
-        return neighbours
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -138,7 +92,7 @@ class Command(BaseCommand):
         self.board_unused = list()
         self.solve_order = list()
         self.requested_order = list()
-        self.prev_tick = 0
+        self.prev_tick = time.monotonic()
         self.progress = None
 
         self.progress_15min = -1
@@ -148,6 +102,52 @@ class Command(BaseCommand):
         parser.add_argument('segment', nargs=1, type=int, help='Segment to work on (1..72, 129..193)')
         parser.add_argument('--dryrun', action='store_true')
         parser.add_argument('order', nargs='*', type=int, help='Solving order (1..64), max %s' % len(self.locs))
+
+    def _calc_neighbours(self):
+        neighbours = dict()
+
+        # order of the entries: side 1, 2, 3, 4
+        for nr in range(1, 64+1):
+            if nr in self.locs:
+                n = list()
+                col = (nr - 1) % 8
+                row = int((nr - 1) / 8)
+
+                # side 1
+                if row == 0:
+                    n.append(-1)    # outer border
+                elif nr - 8 in self.locs:
+                    n.append(nr - 8)
+                else:
+                    n.append(-2)    # inner gap
+
+                # side 2
+                if col == 7:
+                    n.append(-1)    # outer border
+                elif nr + 1 in self.locs:
+                    n.append(nr + 1)
+                else:
+                    n.append(-2)    # inner gap
+
+                # side 3
+                if row == 7:
+                    n.append(-1)    # outer border
+                elif nr + 8 in self.locs:
+                    n.append(nr + 8)
+                else:
+                    n.append(-2)    # inner gap
+
+                # side 4
+                if col == 0:
+                    n.append(-1)    # outer border
+                elif nr - 1 in self.locs:
+                    n.append(nr - 1)
+                else:
+                    n.append(-2)    # inner gap
+
+                neighbours[nr] = tuple(n)
+        # for
+        return neighbours
 
     def _check_progress_15min(self):
         # returns True when it is time to do a 15min-interval report
@@ -372,7 +372,7 @@ class Command(BaseCommand):
 
     def _find_recurse(self):
         tick = time.monotonic()
-        if tick - self.prev_tick > 30:
+        if tick - self.prev_tick > 5:
             self.prev_tick = tick
             msg = '(%s) %s' % (len(self.board_order), repr(self.board_order))
             # print(msg)

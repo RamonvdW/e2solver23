@@ -35,11 +35,8 @@ INTERNAL_IPS = []
 # Application definition
 INSTALLED_APPS = [
     'BasePieces',
-    'Edges4x4',
     'Pieces2x2',
-    'Pieces3x3',
-    'Partial4x4',
-    'Partial6x6',
+    'Ring1',
     'Solutions',
     'django.contrib.admin',
     'django.contrib.staticfiles',   # gather static files from modules helper

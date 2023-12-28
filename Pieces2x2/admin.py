@@ -17,9 +17,14 @@ class ProgressAdmin(admin.ModelAdmin):
     list_filter = ('eval_size',)
 
 
+
+class Piece2x2Admin(admin.ModelAdmin):
+    list_filter = ('is_border', 'has_hint', 'side4')
+
+
 admin.site.register(TwoSide)
 admin.site.register(TwoSideOptions,TwoSideOptionsAdmin)
 admin.site.register(EvalProgress, ProgressAdmin)
-admin.site.register(Piece2x2)
+admin.site.register(Piece2x2, Piece2x2Admin)
 
 # end of file
