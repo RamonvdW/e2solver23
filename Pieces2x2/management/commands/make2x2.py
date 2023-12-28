@@ -268,7 +268,7 @@ class Command(BaseCommand):
                         piece = Piece2x2(
                                         nr=nr,
                                         is_border=(piece1_side4 == 'X' or piece1_side1 == 'X' or
-                                                   piece3_side2 == 'X' or piece3_side3 == 'X'),
+                                                   piece4_side2 == 'X' or piece4_side3 == 'X'),
                                         has_hint=piece1_is_hint or piece2_is_hint or piece3_is_hint or piece4_is_hint,
                                         side1=self._get_two_sides_nr(piece1.get_side(1, rot1), piece2.get_side(1, rot2)),
                                         side2=self._get_two_sides_nr(piece2.get_side(2, rot2), piece4.get_side(2, rot4)),
