@@ -8,6 +8,7 @@ from django.core.management.base import BaseCommand
 from Pieces2x2.models import TwoSide, TwoSideOptions, Piece2x2
 from Pieces2x2.helpers import calc_segment
 from Ring1.models import Ring1
+import time
 
 
 class Command(BaseCommand):
@@ -58,7 +59,9 @@ class Command(BaseCommand):
                      33, 40,
                      41, 48,
                      49, 56,
-                     57, 58, 59, 60, 61, 62, 63, 64)
+                     57, 58, 59, 60, 61, 62, 63, 64,
+                     10, 15, 50, 55,
+                     42, 51, 11, 18, 14, 23, 47, 54)
 
         # [loc] = [loc on side1..4 or -1 if border or -2 if neighbour is a gap]
         self.neighbours = self._calc_neighbours()
@@ -75,10 +78,10 @@ class Command(BaseCommand):
         self.unused0 = list(range(1, 256+1))
         # none of the hints are in Ring1
         self.unused0.remove(139)
-        self.unused0.remove(208)
-        self.unused0.remove(255)
-        self.unused0.remove(181)
-        self.unused0.remove(249)
+        # self.unused0.remove(208)      # needed for loc 10
+        # self.unused0.remove(255)      # needed for loc 15
+        # self.unused0.remove(181)      # needed for loc 50
+        # self.unused0.remove(249)      # needed for loc 55
 
         # [1..64] = None or Piece2x2 with side1/2/3/4
         self.board: dict[int, Piece2x2 | None] = {}
@@ -90,7 +93,7 @@ class Command(BaseCommand):
         self.board_unused = self.unused0[:]
         self.requested_order = list()
 
-        self.progress_15min = -1
+        self.prev_tick = time.monotonic()
 
         self.p10_sides = list()     # list of tuples: (side4, side1)
         self.p15_sides = list()     # list of tuples: (side1, side2)
@@ -234,8 +237,7 @@ class Command(BaseCommand):
     def _iter(self, options_side1, options_side2, options_side3, options_side4):
         qset = (Piece2x2
                 .objects
-                .filter(is_border=True,
-                        nr1__in=self.board_unused,
+                .filter(nr1__in=self.board_unused,
                         nr2__in=self.board_unused,
                         nr3__in=self.board_unused,
                         nr4__in=self.board_unused))
@@ -267,8 +269,7 @@ class Command(BaseCommand):
 
         # decide the next best position on the board to solve
 
-        qset = Piece2x2.objects.filter(is_border=True,
-                                       nr1__in=self.board_unused,
+        qset = Piece2x2.objects.filter(nr1__in=self.board_unused,
                                        nr2__in=self.board_unused,
                                        nr3__in=self.board_unused,
                                        nr4__in=self.board_unused)
@@ -285,33 +286,41 @@ class Command(BaseCommand):
                 options_side4 = self.segment_options_rev[seg4]
 
                 n1, n2, n3, n4 = self.neighbours[loc]
-                if n1 >= 0:
+                if n1 > 0:
                     p = self.board[n1]
                     if p:
                         options_side1 = [self.twoside2reverse[p.side3]]
-                if n2 >= 0:
+                if n2 > 0:
                     p = self.board[n2]
                     if p:
                         options_side2 = [self.twoside2reverse[p.side4]]
-                if n3 >= 0:
+                if n3 > 0:
                     p = self.board[n3]
                     if p:
                         options_side3 = [self.twoside2reverse[p.side1]]
-                if n4 >= 0:
+                if n4 > 0:
                     p = self.board[n4]
                     if p:
                         options_side4 = [self.twoside2reverse[p.side2]]
 
-                count = qset.filter(side1__in=options_side1,
-                                    side2__in=options_side2,
-                                    side3__in=options_side3,
-                                    side4__in=options_side4).count()
+                if loc in (10, 15, 50, 55):
+                    count = qset.filter(has_hint=True,
+                                        side1__in=options_side1,
+                                        side2__in=options_side2,
+                                        side3__in=options_side3,
+                                        side4__in=options_side4).count()
+                else:
+                    count = qset.filter(is_border=True,
+                                        side1__in=options_side1,
+                                        side2__in=options_side2,
+                                        side3__in=options_side3,
+                                        side4__in=options_side4).count()
                 tup = (count, loc)
                 loc_counts.append(tup)
 
                 if count == 0:
                     # dead end
-                    # self.stdout.write('[DEBUG] No options for %s' % p_nr)
+                    self.stdout.write('[DEBUG] No options for %s' % loc)
                     return -1, True
         # for
 
@@ -329,6 +338,12 @@ class Command(BaseCommand):
         return -1, True
 
     def _find_recurse(self):
+        tick = time.monotonic()
+        if tick - self.prev_tick > 10:
+            self.prev_tick = tick
+            msg = '(%s) %s' % (len(self.board_order), repr(self.board_order))
+            print(msg)
+
         if len(self.board_order) == len(self.locs):
             self._save_ring1()
             return
@@ -406,10 +421,10 @@ class Command(BaseCommand):
         # for
 
         if len(self.requested_order) == 0:
-            self.requested_order = [1, 2, 9,
-                                    8, 7, 16,
-                                    57, 49, 58,
-                                    64, 63, 56]
+            self.requested_order = [10, 2, 1, 9, 11, 3, 18, 17,
+                                    15, 7, 8, 16, 14, 6, 23, 24,
+                                    50, 49, 57, 58, 42, 41, 51, 59,
+                                    55, 56, 64, 63, 47, 48, 54, 62]
 
         self.stdout.write('[INFO] Initial solve order: %s' % repr(self.requested_order))
 
@@ -434,10 +449,11 @@ class Command(BaseCommand):
         p55_s2, p55_s3 = self.p55_sides[start55 - 1]
 
         try:
-            self._find_ring1(self.twoside2reverse[p10_s4], p10_s1,
-                             p15_s1, p15_s2,
-                             p55_s2, self.twoside2reverse[p55_s3],
-                             self.twoside2reverse[p50_s3], self.twoside2reverse[p50_s4])
+            self._find_ring1(
+                    self.twoside2reverse[p10_s4], p10_s1,
+                    p15_s1, p15_s2,
+                    p55_s2, self.twoside2reverse[p55_s3],
+                    self.twoside2reverse[p50_s3], self.twoside2reverse[p50_s4])
         except KeyboardInterrupt:
             pass
 

@@ -38,6 +38,78 @@ class Command(BaseCommand):
         parser.add_argument('processor', nargs=1, type=int, help='Processor number to use')
         parser.add_argument('loc', nargs=1, type=int, help='Location on board (1..64)')
 
+    def _get_unused(self):
+        unused0 = list(range(1, 256+1))
+
+        if self.loc != 36:
+            unused0.remove(139)
+
+        if self.loc != 10:
+            unused0.remove(208)
+
+        if self.loc != 15:
+            unused0.remove(255)
+
+        if self.loc != 50:
+            unused0.remove(181)
+
+        if self.loc != 55:
+            unused0.remove(249)
+
+        unused = unused0[:]
+
+        # load all the segments
+        seg2count = dict()
+        for options in TwoSideOptions.objects.filter(processor=self.processor):
+            try:
+                seg2count[options.segment] += 1
+            except KeyError:
+                seg2count[options.segment] = 1
+        # for
+
+        # check how many Piece2x2 fit each location
+        for loc in range(1, 64+1):
+            seg1 = calc_segment(loc, 1)
+            seg2 = calc_segment(loc, 2)
+            seg3 = calc_segment(loc, 3)
+            seg4 = calc_segment(loc, 4)
+
+            count1 = seg2count[seg1]
+            count2 = seg2count[seg2]
+            count3 = seg2count[seg3]
+            count4 = seg2count[seg4]
+
+            if count1 == 1 and count2 == 1 and count3 == 1 and count4 == 1:
+                # limited options on this location: get the Piece2x2
+                side1 = TwoSideOptions.objects.get(processor=self.processor, segment=seg1).two_side
+                side2 = TwoSideOptions.objects.get(processor=self.processor, segment=seg2).two_side
+                side3 = TwoSideOptions.objects.get(processor=self.processor, segment=seg3).two_side
+                side4 = TwoSideOptions.objects.get(processor=self.processor, segment=seg4).two_side
+
+                side3 = self.twoside2reverse[side3]
+                side4 = self.twoside2reverse[side4]
+
+                nrs = dict()
+                p2x2_count = 0
+                for p2x2 in Piece2x2.objects.filter(side1=side1, side2=side2, side3=side3, side4=side4,
+                                                    nr1__in=unused0, nr2__in=unused0, nr3__in=unused0, nr4__in=unused0):
+                    p2x2_count += 1
+                    for nr in (p2x2.nr1, p2x2.nr2, p2x2.nr3, p2x2.nr4):
+                        try:
+                            nrs[nr] += 1
+                        except KeyError:
+                            nrs[nr] = 1
+                    # for
+                # for
+                for nr, nr_count in nrs.items():
+                    if nr_count == p2x2_count:
+                        unused.remove(nr)
+                # for
+        # for
+
+        self.stdout.write('[INFO] %s base pieces in use' % (256 - len(unused)))
+        return unused
+
     def _reverse_sides(self, options):
         return [self.twoside2reverse[two_side] for two_side in options]
 
@@ -77,6 +149,8 @@ class Command(BaseCommand):
 
         self.stdout.write('[INFO] Location: %s; processor=%s' % (self.loc, self.processor))
 
+        unused = self._get_unused()
+
         side1_options = self._get_side_options(1)
         side2_options = self._get_side_options(2)
         side3_options = self._get_side_options(3)
@@ -94,9 +168,17 @@ class Command(BaseCommand):
                 .filter(side1__in=side1_options,
                         side2__in=side2_options,
                         side3__in=side3_options,
-                        side4__in=side4_options))
+                        side4__in=side4_options,
+                        nr1__in=unused,
+                        nr2__in=unused,
+                        nr3__in=unused,
+                        nr4__in=unused))
 
         self.stdout.write('[INFO] Number of Piece2x2: %s' % qset.count())
+
+        if qset.count() == 0:
+            self.stderr.write('[ERROR] Safety stop')
+            return
 
         side1_new = list(qset.distinct('side1').values_list('side1', flat=True))
         side2_new = list(qset.distinct('side2').values_list('side2', flat=True))
