@@ -54,6 +54,7 @@ class Command(BaseCommand):
             # sides 3 and 4 need to be reversed
             options = self._reverse_sides(options)
 
+        # print('segment %s options: %s' % (segment, repr(options)))
         return options
 
     def _reduce(self, segment, two_side, side_nr):

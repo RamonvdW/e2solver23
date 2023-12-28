@@ -206,28 +206,28 @@ class Command(BaseCommand):
         p10_sides4 = self.segment_options[138]
         p10_sides1 = self.segment_options[10]
         self.p10_sides = list(Piece2x2.objects
-                              .filter(side4__in=p10_sides4, side1__in=p10_sides1)
+                              .filter(side4__in=p10_sides4, side1__in=p10_sides1, has_hint=True, nr1=208)
                               .distinct('side4', 'side1')
                               .values_list('side4', 'side1'))
 
         p15_sides1 = self.segment_options[15]
         p15_sides2 = self.segment_options[144]
         self.p15_sides = list(Piece2x2.objects
-                              .filter(side1__in=p15_sides1, side2__in=p15_sides2)
+                              .filter(side1__in=p15_sides1, side2__in=p15_sides2, has_hint=True, nr2=255)
                               .distinct('side1', 'side2')
                               .values_list('side1', 'side2'))
 
         p55_sides2 = self.segment_options[184]
         p55_sides3 = self.segment_options_rev[63]
         self.p55_sides = list(Piece2x2.objects
-                              .filter(side2__in=p55_sides2, side3__in=p55_sides3)
+                              .filter(side2__in=p55_sides2, side3__in=p55_sides3, has_hint=True, nr4=249)
                               .distinct('side2', 'side3')
                               .values_list('side2', 'side3'))
 
         p50_sides3 = self.segment_options_rev[58]
         p50_sides4 = self.segment_options_rev[178]
         self.p50_sides = list(Piece2x2.objects
-                              .filter(side3__in=p50_sides3, side4__in=p50_sides4)
+                              .filter(side3__in=p50_sides3, side4__in=p50_sides4, has_hint=True, nr3=181)
                               .distinct('side3', 'side4')
                               .values_list('side3', 'side4'))
 
@@ -372,7 +372,7 @@ class Command(BaseCommand):
         # for
 
     def _find_ring1(self, seg138, seg10, seg15, seg144, seg184, seg63, seg58, seg178):
-        self.stdout.write('[INFO] Find ring1 starting with %s, %s, %s, %s, %s, %s, %s, %s' % (
+        self.stdout.write('[INFO] Find ring1 starting with 10=%s,%s, 15=%s,%s, 55=%s,%s, 50=%s,%s' % (
                             seg138, seg10, seg15, seg144, seg184, seg63, seg58, seg178))
 
         # load the limited segment options
@@ -434,10 +434,10 @@ class Command(BaseCommand):
         p55_s2, p55_s3 = self.p55_sides[start55 - 1]
 
         try:
-            self._find_ring1(p10_s4, p10_s1,
+            self._find_ring1(self.twoside2reverse[p10_s4], p10_s1,
                              p15_s1, p15_s2,
-                             p55_s2, p55_s3,
-                             p50_s3, p50_s4)
+                             p55_s2, self.twoside2reverse[p55_s3],
+                             self.twoside2reverse[p50_s3], self.twoside2reverse[p50_s4])
         except KeyboardInterrupt:
             pass
 
