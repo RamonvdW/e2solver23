@@ -87,42 +87,44 @@ class Command(BaseCommand):
 
         # check how many Piece2x2 fit each location
         for loc in range(1, 64+1):
-            seg1 = calc_segment(loc, 1)
-            seg2 = calc_segment(loc, 2)
-            seg3 = calc_segment(loc, 3)
-            seg4 = calc_segment(loc, 4)
+            if loc not in self.locs:                # avoid blocking an evaluation location
+                seg1 = calc_segment(loc, 1)
+                seg2 = calc_segment(loc, 2)
+                seg3 = calc_segment(loc, 3)
+                seg4 = calc_segment(loc, 4)
 
-            count1 = seg2count[seg1]
-            count2 = seg2count[seg2]
-            count3 = seg2count[seg3]
-            count4 = seg2count[seg4]
+                count1 = seg2count[seg1]
+                count2 = seg2count[seg2]
+                count3 = seg2count[seg3]
+                count4 = seg2count[seg4]
 
-            if count1 == 1 and count2 == 1 and count3 == 1 and count4 == 1:
-                # limited options on this location: get the Piece2x2
-                side1 = TwoSideOptions.objects.get(processor=self.processor, segment=seg1).two_side
-                side2 = TwoSideOptions.objects.get(processor=self.processor, segment=seg2).two_side
-                side3 = TwoSideOptions.objects.get(processor=self.processor, segment=seg3).two_side
-                side4 = TwoSideOptions.objects.get(processor=self.processor, segment=seg4).two_side
+                if count1 == 1 and count2 == 1 and count3 == 1 and count4 == 1:
+                    # limited options on this location: get the Piece2x2
+                    side1 = TwoSideOptions.objects.get(processor=self.processor, segment=seg1).two_side
+                    side2 = TwoSideOptions.objects.get(processor=self.processor, segment=seg2).two_side
+                    side3 = TwoSideOptions.objects.get(processor=self.processor, segment=seg3).two_side
+                    side4 = TwoSideOptions.objects.get(processor=self.processor, segment=seg4).two_side
 
-                side3 = self.twoside2reverse[side3]
-                side4 = self.twoside2reverse[side4]
+                    side3 = self.twoside2reverse[side3]
+                    side4 = self.twoside2reverse[side4]
 
-                nrs = dict()
-                p2x2_count = 0
-                for p2x2 in Piece2x2.objects.filter(side1=side1, side2=side2, side3=side3, side4=side4,
-                                                    nr1__in=unused0, nr2__in=unused0, nr3__in=unused0, nr4__in=unused0):
-                    p2x2_count += 1
-                    for nr in (p2x2.nr1, p2x2.nr2, p2x2.nr3, p2x2.nr4):
-                        try:
-                            nrs[nr] += 1
-                        except KeyError:
-                            nrs[nr] = 1
+                    nrs = dict()
+                    p2x2_count = 0
+                    for p2x2 in Piece2x2.objects.filter(side1=side1, side2=side2, side3=side3, side4=side4,
+                                                        nr1__in=unused0, nr2__in=unused0,
+                                                        nr3__in=unused0, nr4__in=unused0):
+                        p2x2_count += 1
+                        for nr in (p2x2.nr1, p2x2.nr2, p2x2.nr3, p2x2.nr4):
+                            try:
+                                nrs[nr] += 1
+                            except KeyError:
+                                nrs[nr] = 1
+                        # for
                     # for
-                # for
-                for nr, nr_count in nrs.items():
-                    if nr_count == p2x2_count:
-                        unused.remove(nr)
-                # for
+                    for nr, nr_count in nrs.items():
+                        if nr_count == p2x2_count:
+                            unused.remove(nr)
+                    # for
         # for
 
         self.stdout.write('[INFO] %s base pieces in use' % (256 - len(unused)))
@@ -235,13 +237,32 @@ class Command(BaseCommand):
             p0_exp_s2 = side
             p1_exp_s4 = self.twoside2reverse[side]
             found = False
-            for p0, unused1 in self._iter(self.unused0, self.side_options[0], [p0_exp_s2], self.side_options_rev[5], self.side_options_rev[2]):
+            for p0, unused1 in self._iter(self.unused0,
+                                          self.side_options[0],
+                                          [p0_exp_s2],
+                                          self.side_options_rev[5],
+                                          self.side_options_rev[2]):
                 p2_exp_s1 = self.twoside2reverse[p0.side3]
-                for p1, unused2 in self._iter(unused1, self.side_options[1], self.side_options[4], self.side_options_rev[6], [p1_exp_s4]):
+
+                for p1, unused2 in self._iter(unused1,
+                                              self.side_options[1],
+                                              self.side_options[4],
+                                              self.side_options_rev[6],
+                                              [p1_exp_s4]):
                     p3_exp_s1 = self.twoside2reverse[p1.side3]
-                    for p2, unused3 in self._iter(unused2, [p2_exp_s1], self.side_options[8], self.side_options_rev[10], self.side_options_rev[7]):
+
+                    for p2, unused3 in self._iter(unused2,
+                                                  [p2_exp_s1],
+                                                  self.side_options[8],
+                                                  self.side_options_rev[10],
+                                                  self.side_options_rev[7]):
                         p3_exp_s4 = self.twoside2reverse[p2.side2]
-                        for _ in self._iter(unused3, [p3_exp_s1], self.side_options[9], self.side_options_rev[11], [p3_exp_s4]):
+
+                        for _ in self._iter(unused3,
+                                            [p3_exp_s1],
+                                            self.side_options[9],
+                                            self.side_options_rev[11],
+                                            [p3_exp_s4]):
                             # found a combi of p0..p3
                             found = True
                             break
@@ -283,13 +304,32 @@ class Command(BaseCommand):
             p0_exp_s3 = self.twoside2reverse[side]
             p2_exp_s1 = side
             found = False
-            for p0, unused1 in self._iter(self.unused0, self.side_options[0], self.side_options[3], [p0_exp_s3], self.side_options_rev[2]):
+            for p0, unused1 in self._iter(self.unused0,
+                                          self.side_options[0],
+                                          self.side_options[3],
+                                          [p0_exp_s3],
+                                          self.side_options_rev[2]):
                 p1_exp_s4 = self.twoside2reverse[p0.side2]
-                for p2, unused2 in self._iter(unused1, [p2_exp_s1], self.side_options[8], self.side_options_rev[10], self.side_options_rev[7]):
+
+                for p2, unused2 in self._iter(unused1,
+                                              [p2_exp_s1],
+                                              self.side_options[8],
+                                              self.side_options_rev[10],
+                                              self.side_options_rev[7]):
                     p3_exp_s4 = self.twoside2reverse[p2.side2]
-                    for p1, unused3 in self._iter(unused2, self.side_options[1], self.side_options[4], self.side_options_rev[6], [p1_exp_s4]):
+
+                    for p1, unused3 in self._iter(unused2,
+                                                  self.side_options[1],
+                                                  self.side_options[4],
+                                                  self.side_options_rev[6],
+                                                  [p1_exp_s4]):
                         p3_exp_s1 = self.twoside2reverse[p1.side3]
-                        for _ in self._iter(unused3, [p3_exp_s1], self.side_options[9], self.side_options_rev[11], [p3_exp_s4]):
+
+                        for _ in self._iter(unused3,
+                                            [p3_exp_s1],
+                                            self.side_options[9],
+                                            self.side_options_rev[11],
+                                            [p3_exp_s4]):
                             # found a combi of p0..p3
                             found = True
                             break
@@ -331,13 +371,32 @@ class Command(BaseCommand):
             p1_exp_s3 = self.twoside2reverse[side]
             p3_exp_s1 = side
             found = False
-            for p1, unused1 in self._iter(self.unused0, self.side_options[1], self.side_options[4], [p1_exp_s3], self.side_options_rev[3]):
+            for p1, unused1 in self._iter(self.unused0,
+                                          self.side_options[1],
+                                          self.side_options[4],
+                                          [p1_exp_s3],
+                                          self.side_options_rev[3]):
                 p0_exp_s2 = self.twoside2reverse[p1.side4]
-                for p3, unused2 in self._iter(unused1, [p3_exp_s1], self.side_options[9], self.side_options_rev[11], self.side_options_rev[8]):
+
+                for p3, unused2 in self._iter(unused1,
+                                              [p3_exp_s1],
+                                              self.side_options[9],
+                                              self.side_options_rev[11],
+                                              self.side_options_rev[8]):
                     p2_exp_s2 = self.twoside2reverse[p3.side4]
-                    for p0, unused3 in self._iter(unused2, self.side_options[0], [p0_exp_s2], self.side_options_rev[5], self.side_options_rev[2]):
+
+                    for p0, unused3 in self._iter(unused2,
+                                                  self.side_options[0],
+                                                  [p0_exp_s2],
+                                                  self.side_options_rev[5],
+                                                  self.side_options_rev[2]):
                         p2_exp_s1 = self.twoside2reverse[p0.side3]
-                        for _ in self._iter(unused3, [p2_exp_s1], [p2_exp_s2], self.side_options_rev[10], self.side_options_rev[7]):
+
+                        for _ in self._iter(unused3,
+                                            [p2_exp_s1],
+                                            [p2_exp_s2],
+                                            self.side_options_rev[10],
+                                            self.side_options_rev[7]):
                             # found a combi of p0..p3
                             found = True
                             break
@@ -379,13 +438,32 @@ class Command(BaseCommand):
             p2_exp_s2 = side
             p3_exp_s4 = self.twoside2reverse[side]
             found = False
-            for p2, unused1 in self._iter(self.unused0, self.side_options[5], [p2_exp_s2], self.side_options_rev[10], self.side_options_rev[7]):
+            for p2, unused1 in self._iter(self.unused0,
+                                          self.side_options[5],
+                                          [p2_exp_s2],
+                                          self.side_options_rev[10],
+                                          self.side_options_rev[7]):
                 p0_exp_s3 = self.twoside2reverse[p2.side1]
-                for p3, unused2 in self._iter(unused1, self.side_options[6], self.side_options[9], self.side_options_rev[11], [p3_exp_s4]):
+
+                for p3, unused2 in self._iter(unused1,
+                                              self.side_options[6],
+                                              self.side_options[9],
+                                              self.side_options_rev[11],
+                                              [p3_exp_s4]):
                     p1_exp_s3 = self.twoside2reverse[p3.side1]
-                    for p0, unused3 in self._iter(unused2, self.side_options[0], self.side_options[3], [p0_exp_s3], self.side_options_rev[2]):
+
+                    for p0, unused3 in self._iter(unused2,
+                                                  self.side_options[0],
+                                                  self.side_options[3],
+                                                  [p0_exp_s3],
+                                                  self.side_options_rev[2]):
                         p1_exp_s4 = self.twoside2reverse[p0.side2]
-                        for _ in self._iter(unused3, self.side_options[1], self.side_options[4], [p1_exp_s3], [p1_exp_s4]):
+
+                        for _ in self._iter(unused3,
+                                            self.side_options[1],
+                                            self.side_options[4],
+                                            [p1_exp_s3],
+                                            [p1_exp_s4]):
                             # found a combi of p0..p3
                             found = True
                             break
