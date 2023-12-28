@@ -6,7 +6,7 @@ processor=$1
 
 scan1()
 {
-    echo "[SCAN PROGRESS] Ring1 scan1 $processor"
+    echo "[SCAN PROGRESS] Ring1 scan1 (loc_1) $processor"
     
     ./manage.* eval_loc_1 $processor 10
     ./manage.* eval_loc_1 $processor 11
@@ -32,7 +32,7 @@ scan1()
 
 scan2()
 {    
-    echo "[SCAN PROGRESS] Ring1 scan2 $processor"
+    echo "[SCAN PROGRESS] Ring1 scan2 (loc_4) $processor"
 
     ./manage.* eval_loc_4 $processor 1
     ./manage.* eval_loc_4 $processor 2
@@ -62,7 +62,7 @@ scan2()
 
 scan3()
 {
-    echo "[SCAN PROGRESS] Ring1 scan3 $processor"
+    echo "[SCAN PROGRESS] Ring1 scan3 (loc_1) $processor"
 
     ./manage.* eval_loc_1 $processor 19
     ./manage.* eval_loc_1 $processor 20
@@ -84,7 +84,7 @@ scan3()
 
 scan4()
 {
-    echo "[SCAN PROGRESS] Ring1 scan4 $processor"
+    echo "[SCAN PROGRESS] Ring1 scan4 (loc_4) $processor"
 
     ./manage.* eval_loc_4 $processor 10
     ./manage.* eval_loc_4 $processor 11
@@ -109,7 +109,7 @@ scan4()
 
 scan5()
 {
-    echo "[SCAN PROGRESS] Ring1 scan5 $processor"
+    echo "[SCAN PROGRESS] Ring1 scan5 (loc_4) $processor"
 
     ./manage.* eval_loc_4 $processor 19
     ./manage.* eval_loc_4 $processor 20
@@ -123,7 +123,7 @@ scan5()
 
 scan6()
 {
-    echo "[SCAN PROGRESS] Ring1 scan6 $processor"
+    echo "[SCAN PROGRESS] Ring1 scan6 (loc_9) $processor"
 
     ./manage.* eval_loc_9 $processor 1
     ./manage.* eval_loc_9 $processor 9
@@ -144,7 +144,7 @@ scan6()
 
 scan7 ()
 {
-    echo "[SCAN PROGRESS] Ring1 scan7 $processor"
+    echo "[SCAN PROGRESS] Ring1 scan7 (loc_9) $processor"
 
     ./manage.* eval_loc_9 $processor 3
     ./manage.* eval_loc_9 $processor 4
@@ -161,7 +161,7 @@ scan7 ()
 
 scan8 ()
 {
-    echo "[SCAN PROGRESS] Ring1 scan8 $processor"
+    echo "[SCAN PROGRESS] Ring1 scan8 (loc_9) $processor"
 
     ./manage.* eval_loc_9 $processor 10
     ./manage.* eval_loc_9 $processor 11
@@ -178,6 +178,40 @@ scan8 ()
     ./manage.* eval_loc_9 $processor 35
     ./manage.* eval_loc_9 $processor 36
     ./manage.* eval_loc_9 $processor 37
+}
+
+scan9()
+{
+    echo "[SCAN PROGRESS] Ring1 scan9 (loc_16) $processor"
+
+    ./manage.* eval_loc_16 $processor 1
+    ./manage.* eval_loc_16 $processor 5
+    ./manage.* eval_loc_16 $processor 33
+    ./manage.* eval_loc_16 $processor 37
+}
+
+scan10()
+{
+    echo "[SCAN PROGRESS] Ring1 scan9 (loc_16) $processor"
+
+    ./manage.* eval_loc_16 $processor 2
+    ./manage.* eval_loc_16 $processor 9
+    ./manage.* eval_loc_16 $processor 4
+    ./manage.* eval_loc_16 $processor 13
+    ./manage.* eval_loc_16 $processor 25
+    ./manage.* eval_loc_16 $processor 34
+    ./manage.* eval_loc_16 $processor 29
+    ./manage.* eval_loc_16 $processor 36
+}
+
+scan11()
+{
+    echo "[SCAN PROGRESS] Ring1 scan9 (loc_16) $processor"
+
+    ./manage.* eval_loc_16 $processor 10
+    ./manage.* eval_loc_16 $processor 12
+    ./manage.* eval_loc_16 $processor 26
+    ./manage.* eval_loc_16 $processor 28
 }
 
 prev_count=0
@@ -209,6 +243,15 @@ do
 
     count=$(./manage.* count_segments $processor)
     [ $count -eq $prev_count ] && scan8
+
+    count=$(./manage.* count_segments $processor)
+    [ $count -eq $prev_count ] && scan9
+
+    count=$(./manage.* count_segments $processor)
+    [ $count -eq $prev_count ] && scan10
+
+    count=$(./manage.* count_segments $processor)
+    [ $count -eq $prev_count ] && scan11
 
     count=$(./manage.* count_segments $processor)
 done
