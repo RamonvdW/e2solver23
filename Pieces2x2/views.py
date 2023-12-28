@@ -323,6 +323,11 @@ class OptionsView(TemplateView):
         else:
             processor = processors[-1]
 
+        if 'ref' in kwargs:
+            processor_ref = kwargs['ref']
+        else:
+            processor_ref = -1
+
         context['processor'] = processor
 
         try:
@@ -332,10 +337,15 @@ class OptionsView(TemplateView):
             pass
         else:
             if idx > 0:
-                context['url_prev'] = reverse('Pieces2x2:options-nr', kwargs={'nr': processors[idx - 1]})
-                context['compare'] = self._compare_pre(processor, processors[idx - 1])
+                if processor_ref == -1:
+                    processor_ref = processors[idx - 1]
+                context['compare'] = self._compare_pre(processor, processor_ref)
+
+                context['url_prev'] = reverse('Pieces2x2:options-nr-ref', kwargs={'nr': processors[idx - 1],
+                                                                                  'ref': processor_ref})
             if idx < len(processors) - 1:
-                context['url_next'] = reverse('Pieces2x2:options-nr', kwargs={'nr': processors[idx + 1]})
+                context['url_next'] = reverse('Pieces2x2:options-nr-ref', kwargs={'nr': processors[idx + 1],
+                                                                                  'ref': processor_ref})
         context['url_last'] = reverse('Pieces2x2:options')
 
         segment2count = dict()  # [segment] = int
