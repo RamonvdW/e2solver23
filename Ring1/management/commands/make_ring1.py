@@ -406,10 +406,10 @@ class Command(BaseCommand):
         # for
 
         if len(self.requested_order) == 0:
-            self.requested_order = (1, 2, 9,
+            self.requested_order = [1, 2, 9,
                                     8, 7, 16,
                                     57, 49, 58,
-                                    64, 63, 56)
+                                    64, 63, 56]
 
         self.stdout.write('[INFO] Initial solve order: %s' % repr(self.requested_order))
 
