@@ -67,70 +67,8 @@
                     </tr>
                 </table>
             </td>
-
-            <td style="border:0">
-                <!-- open sides usage -->
-                <table style="margin-left:10px">
-                    <thead>
-                        <tr>
-                            <th style="padding:5px">Side</th>
-                            <th style="padding:5px">Max</th>
-                            <th style="padding:5px">Closed</th>
-                            <th style="padding:5px">Open</th>
-                            <th style="padding:5px">Left</th>
-                        </tr>
-                    </thead>
-                    {% for s_nr, s_open, s_used, s_max, s_left in solution.s1_counts %}
-                        <tr{% if s_nr in "AEIQMX" %} style="background:lightgray"{% endif %}>
-                            <td style="padding:5px">{{ s_nr }}</td>
-                            <td style="padding:5px">{{ s_max }}</td>
-                            <td style="padding:5px">{{ s_used }}</td>
-                            <td style="padding:5px">{{ s_open }}</td>
-                            <td style="padding:5px">{{ s_left }}</td>
-                        </tr>
-                    {% endfor %}
-                </table>
-            </td>
-
-            <td style="border:0">
-                <!-- open sides usage -->
-                <table style="margin-left:10px">
-                    <thead>
-                        <tr>
-                            <th style="padding:5px">TwoSide</th>
-                            <th style="padding:5px">Open</th>
-                            <th style="padding:5px">Left</th>
-                        </tr>
-                    </thead>
-                    {% for s_nr, s_open, s_left, is_border in solution.s2_counts %}
-                        <tr{% if is_border %} style="background:lightgray"{% endif %}>
-                            <td style="padding:5px">{{ s_nr }}</td>
-                            <td style="padding:5px">{{ s_open }}</td>
-                            <td style="padding:5px">{{ s_left }}</td>
-                        </tr>
-                    {% endfor %}
-                </table>
-            </td>
         </tr>
     </table>
-
-    {% if chains %}
-        <div style="margin-left:auto; margin-right:auto">
-            <table>
-                {% for nr1, nr8, c2_sides2, c3_sides2, c4_sides2, p5_count, c6_sides4, c7_sides4 in chains %}
-                    <tr>
-                        <th>{{ nr1 }}..{{ nr8 }}</th>
-                        <td>{{ c2_sides2 }}</td>
-                        <td>{{ c3_sides2 }}</td>
-                        <td>{{ c4_sides2 }}</td>
-                        <td>{{ p5_count }}</td>
-                        <td>{{ c6_sides4 }}</td>
-                        <td>{{ c7_sides4 }}</td>
-                    </tr>
-                {% endfor %}
-            </table>
-        </div>
-    {% endif %}
 
     {% if auto_reload %}
         <script>

@@ -57,14 +57,16 @@ class ShowView(TemplateView):
             pass
         else:
             context['solution'] = ring1
-            ring1.p2x2 = list()
+            ring1.p2x2s = list()
 
             for p_nr in range(1, 64+1):
                 if p_nr in (1, 2, 3, 4, 5, 6, 7, 8,
                             9, 16, 17, 24, 25, 32, 33, 40, 41, 48, 49, 56, 57,
                             58, 59, 60, 61, 62, 63, 64):
 
-                    p2x2 = Piece2x2.objects.get(nr=p_nr)
+                    nr_str = 'nr%s' % p_nr
+                    nr = getattr(ring1, nr_str, 0)
+                    p2x2 = Piece2x2.objects.get(nr=nr)
 
                     p2x2.img1 = static('pieces/%s.png' % p2x2.nr1)
                     p2x2.img2 = static('pieces/%s.png' % p2x2.nr2)
@@ -81,7 +83,7 @@ class ShowView(TemplateView):
                     p2x2 = SimpleNamespace(is_empty=True,
                                            break_after=False)
 
-                ring1.p2x2.append(p2x2)
+                ring1.p2x2s.append(p2x2)
             # for
 
         return context

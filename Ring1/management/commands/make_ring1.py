@@ -102,6 +102,10 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('processor', nargs=1, type=int, help='Processor number to use')
+        parser.add_argument('start10', nargs=1, type=int, help='Start index for p10 (1..500)')
+        parser.add_argument('start15', nargs=1, type=int, help='Start index for p15 (1..500)')
+        parser.add_argument('start50', nargs=1, type=int, help='Start index for p50 (1..500)')
+        parser.add_argument('start55', nargs=1, type=int, help='Start index for p55 (1..500)')
         parser.add_argument('order', nargs='*', type=int, help='Solving order (1..64), max %s' % len(self.locs))
 
     def _calc_neighbours(self):
@@ -175,6 +179,7 @@ class Command(BaseCommand):
             setattr(ring, field, self.board[loc].nr)
         # for
         ring.save()
+        self.stdout.write('[INFO] Saved Ring1 with pk=%s' % ring.pk)
 
     def _query_segment_options(self, segment):
         """ Return the options remaining for a specific segment """
@@ -244,8 +249,8 @@ class Command(BaseCommand):
         if options_side4:
             qset = qset.filter(side4__in=options_side4)
 
-        todo = qset.count()
-        print('todo: %s' % todo)
+        # todo = qset.count()
+        # print('todo: %s' % todo)
 
         for p in qset:
             yield p
@@ -273,7 +278,7 @@ class Command(BaseCommand):
             if self.board[loc] is None:
                 # empty position on the board
                 seg1, seg2, seg3, seg4 = self.segment_nrs[loc]
-                print('loc=%s, segs=%s, %s, %s, %s' % (loc, seg1, seg2, seg3, seg4))
+                # print('loc=%s, segs=%s, %s, %s, %s' % (loc, seg1, seg2, seg3, seg4))
                 options_side1 = self.segment_options[seg1]
                 options_side2 = self.segment_options[seg2]
                 options_side3 = self.segment_options_rev[seg3]
@@ -319,12 +324,14 @@ class Command(BaseCommand):
             return loc, False
 
         # niets kunnen kiezen
-        self.stdout.write('[DEBUG] select_next_loc failed')
+        self.stdout.write('[ERROR] select_next_loc failed')
+        self.stdout.write('[DEBUG] solve_order = %s' % repr(self.board_order))
         return -1, True
 
     def _find_recurse(self):
         if len(self.board_order) == len(self.locs):
             self._save_ring1()
+            return
 
         # decide which loc to continue with
         loc, has_zero = self._select_next_loc()
@@ -337,9 +344,6 @@ class Command(BaseCommand):
         options_side2 = self.segment_options[seg2]
         options_side3 = self.segment_options_rev[seg3]
         options_side4 = self.segment_options_rev[seg4]
-        if loc == 16:
-            print('loc %s: seg1=%s (%s), seg2=%s (%s), seg3=%s (%s), seg4=%s (%s)' % (
-                loc, seg1, len(options_side1), seg2, repr(options_side2), seg3, len(options_side3), seg4, repr(options_side4)))
 
         n1, n2, n3, n4 = self.neighbours[loc]
         if n1 >= 0:
@@ -405,26 +409,28 @@ class Command(BaseCommand):
         self._get_segments_options()
         self._get_hint_sides()
 
-        # self.stdout.write('[INFO] p10_sides: %s' % len(self.p10_sides))
-        # self.stdout.write('[INFO] p15_sides: %s' % len(self.p15_sides))
-        # self.stdout.write('[INFO] p55_sides: %s' % len(self.p55_sides))
-        # self.stdout.write('[INFO] p50_sides: %s' % len(self.p50_sides))
+        start10 = options['start10'][0]
+        start15 = options['start15'][0]
+        start50 = options['start50'][0]
+        start55 = options['start55'][0]
+
+        self.stdout.write('[INFO] p10_sides: %s/%s' % (start10, len(self.p10_sides)))
+        self.stdout.write('[INFO] p15_sides: %s/%s' % (start15, len(self.p15_sides)))
+        self.stdout.write('[INFO] p50_sides: %s/%s' % (start50, len(self.p50_sides)))
+        self.stdout.write('[INFO] p55_sides: %s/%s' % (start55, len(self.p55_sides)))
         # self.stdout.write('[INFO] total: %s' % (
         #                   len(self.p10_sides) * len(self.p15_sides) * len(self.p55_sides) * len(self.p50_sides)))
 
+        p10_s4, p10_s1 = self.p10_sides[start10 - 1]
+        p15_s1, p15_s2 = self.p15_sides[start15 - 1]
+        p50_s3, p50_s4 = self.p50_sides[start50 - 1]
+        p55_s2, p55_s3 = self.p55_sides[start55 - 1]
+
         try:
-            for p10_s4, p10_s1 in self.p10_sides:
-                for p15_s1, p15_s2 in self.p15_sides:
-                    for p55_s2, p55_s3 in self.p55_sides:
-                        for p50_s3, p50_s4 in self.p50_sides:
-                            self._find_ring1(p10_s4, p10_s1,
-                                             p15_s1, p15_s2,
-                                             p55_s2, p55_s3,
-                                             p50_s3, p50_s4)
-                        # for
-                    # for
-                # for
-            # for
+            self._find_ring1(p10_s4, p10_s1,
+                             p15_s1, p15_s2,
+                             p55_s2, p55_s3,
+                             p50_s3, p50_s4)
         except KeyboardInterrupt:
             pass
 
