@@ -342,7 +342,7 @@ class Command(BaseCommand):
                                        nr4__in=self.board_unused)
 
         p_nr_counts = list()
-        for p_nr in range(9):
+        for p_nr in range(len(self.locs)):
             if self.board[p_nr] is None:
                 # empty position on the board
                 s1, s2, s3, s4 = self.side_nrs[p_nr]
@@ -404,7 +404,7 @@ class Command(BaseCommand):
             self.progress.updated = timezone.now()
             self.progress.save(update_fields=['solve_order', 'updated'])
 
-        if len(self.board_order) == 9:
+        if len(self.board_order) == len(self.locs):
             return True
 
         # decide which p_nr to continue with
