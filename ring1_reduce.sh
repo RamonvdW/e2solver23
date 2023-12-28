@@ -121,6 +121,65 @@ scan5()
     ./manage.* eval_loc_4 $processor 27
 }
 
+scan6()
+{
+    echo "[SCAN PROGRESS] Ring1 scan6 $processor"
+
+    ./manage.* eval_loc_9 $processor 1
+    ./manage.* eval_loc_9 $processor 9
+    ./manage.* eval_loc_9 $processor 2
+
+    ./manage.* eval_loc_9 $processor 6
+    ./manage.* eval_loc_9 $processor 5
+    ./manage.* eval_loc_9 $processor 14
+
+    ./manage.* eval_loc_9 $processor 46
+    ./manage.* eval_loc_9 $processor 38
+    ./manage.* eval_loc_9 $processor 45
+
+    ./manage.* eval_loc_9 $processor 41
+    ./manage.* eval_loc_9 $processor 33
+    ./manage.* eval_loc_9 $processor 42
+}
+
+scan7 ()
+{
+    echo "[SCAN PROGRESS] Ring1 scan7 $processor"
+
+    ./manage.* eval_loc_9 $processor 3
+    ./manage.* eval_loc_9 $processor 4
+
+    ./manage.* eval_loc_9 $processor 17
+    ./manage.* eval_loc_9 $processor 25
+
+    ./manage.* eval_loc_9 $processor 22
+    ./manage.* eval_loc_9 $processor 30
+
+    ./manage.* eval_loc_9 $processor 43
+    ./manage.* eval_loc_9 $processor 44
+}
+
+scan8 ()
+{
+    echo "[SCAN PROGRESS] Ring1 scan8 $processor"
+
+    ./manage.* eval_loc_9 $processor 10
+    ./manage.* eval_loc_9 $processor 11
+    ./manage.* eval_loc_9 $processor 12
+
+    ./manage.* eval_loc_9 $processor 13
+    ./manage.* eval_loc_9 $processor 21
+    ./manage.* eval_loc_9 $processor 29
+
+    ./manage.* eval_loc_9 $processor 18
+    ./manage.* eval_loc_9 $processor 26
+    ./manage.* eval_loc_9 $processor 34
+
+    ./manage.* eval_loc_9 $processor 35
+    ./manage.* eval_loc_9 $processor 36
+    ./manage.* eval_loc_9 $processor 37
+}
+
 prev_count=0
 count=$(./manage.* count_segments $processor)
 
@@ -142,6 +201,15 @@ do
     count=$(./manage.* count_segments $processor)
     [ $count -eq $prev_count ] && scan5
         
+    count=$(./manage.* count_segments $processor)
+    [ $count -eq $prev_count ] && scan6
+
+    count=$(./manage.* count_segments $processor)
+    [ $count -eq $prev_count ] && scan7
+
+    count=$(./manage.* count_segments $processor)
+    [ $count -eq $prev_count ] && scan8
+
     count=$(./manage.* count_segments $processor)
 done
 
