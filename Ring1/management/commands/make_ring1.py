@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -24,9 +24,9 @@ class Command(BaseCommand):
         | 17 |                             | 24 |
         +----+                             +----+
         | 25 |                             | 32 |
-        +----+                             +----+
-        | 33 |                             | 40 |
-        +----+                             +----+
+        +----+         +----+              +----+
+        | 33 |         | 36 |              | 40 |
+        +----+         +----+              +----+
         | 41 |                             | 48 |
         +----+                             +----+
         | 49 |                             | 56 |
@@ -61,7 +61,8 @@ class Command(BaseCommand):
                      49, 56,
                      57, 58, 59, 60, 61, 62, 63, 64,
                      10, 15, 50, 55,
-                     42, 51, 11, 18, 14, 23, 47, 54)
+                     42, 51, 11, 18, 14, 23, 47, 54,
+                     36)
 
         # [loc] = [loc on side1..4 or -1 if border or -2 if neighbour is a gap]
         self.neighbours = self._calc_neighbours()
@@ -77,7 +78,7 @@ class Command(BaseCommand):
 
         self.unused0 = list(range(1, 256+1))
         # none of the hints are in Ring1
-        self.unused0.remove(139)
+        # self.unused0.remove(139)      # needed for loc 36
         # self.unused0.remove(208)      # needed for loc 10
         # self.unused0.remove(255)      # needed for loc 15
         # self.unused0.remove(181)      # needed for loc 50
@@ -117,41 +118,44 @@ class Command(BaseCommand):
         # order of the entries: side 1, 2, 3, 4
         for nr in range(1, 64+1):
             if nr in self.locs:
-                n = list()
-                col = (nr - 1) % 8
-                row = int((nr - 1) / 8)
-
-                # side 1
-                if row == 0:
-                    n.append(-1)    # outer border
-                elif nr - 8 in self.locs:
-                    n.append(nr - 8)
+                if nr == 36:
+                    n = (-2, -2, -2, -2)
                 else:
-                    n.append(-2)    # inner gap
+                    n = list()
+                    col = (nr - 1) % 8
+                    row = int((nr - 1) / 8)
 
-                # side 2
-                if col == 7:
-                    n.append(-1)    # outer border
-                elif nr + 1 in self.locs:
-                    n.append(nr + 1)
-                else:
-                    n.append(-2)    # inner gap
+                    # side 1
+                    if row == 0:
+                        n.append(-1)    # outer border
+                    elif nr - 8 in self.locs:
+                        n.append(nr - 8)
+                    else:
+                        n.append(-2)    # inner gap
 
-                # side 3
-                if row == 7:
-                    n.append(-1)    # outer border
-                elif nr + 8 in self.locs:
-                    n.append(nr + 8)
-                else:
-                    n.append(-2)    # inner gap
+                    # side 2
+                    if col == 7:
+                        n.append(-1)    # outer border
+                    elif nr + 1 in self.locs:
+                        n.append(nr + 1)
+                    else:
+                        n.append(-2)    # inner gap
 
-                # side 4
-                if col == 0:
-                    n.append(-1)    # outer border
-                elif nr - 1 in self.locs:
-                    n.append(nr - 1)
-                else:
-                    n.append(-2)    # inner gap
+                    # side 3
+                    if row == 7:
+                        n.append(-1)    # outer border
+                    elif nr + 8 in self.locs:
+                        n.append(nr + 8)
+                    else:
+                        n.append(-2)    # inner gap
+
+                    # side 4
+                    if col == 0:
+                        n.append(-1)    # outer border
+                    elif nr - 1 in self.locs:
+                        n.append(nr - 1)
+                    else:
+                        n.append(-2)    # inner gap
 
                 neighbours[nr] = tuple(n)
         # for
@@ -234,7 +238,20 @@ class Command(BaseCommand):
                               .distinct('side3', 'side4')
                               .values_list('side3', 'side4'))
 
-    def _iter(self, options_side1, options_side2, options_side3, options_side4):
+    def _iter(self, loc, options_side1, options_side2, options_side3, options_side4):
+
+        unused = self.board_unused[:]
+        if loc != 10 and 208 in unused:
+            unused.remove(208)
+        if loc != 15 and 255 in unused:
+            unused.remove(255)
+        if loc != 36 and 139 in unused:
+            unused.remove(139)
+        if loc != 50 and 181 in unused:
+            unused.remove(181)
+        if loc != 55 and 249 in unused:
+            unused.remove(249)
+
         qset = (Piece2x2
                 .objects
                 .filter(nr1__in=self.board_unused,
@@ -250,6 +267,17 @@ class Command(BaseCommand):
             qset = qset.filter(side3__in=options_side3)
         if options_side4:
             qset = qset.filter(side4__in=options_side4)
+
+        if loc == 10:
+            qset = qset.filter(nr1=208)
+        elif loc == 15:
+            qset = qset.filter(nr2=255)
+        elif loc == 36:
+            qset = qset.filter(nr2=139)
+        elif loc == 50:
+            qset = qset.filter(nr3=181)
+        elif loc == 55:
+            qset = qset.filter(nr4=249)
 
         # todo = qset.count()
         # print('todo: %s' % todo)
@@ -303,7 +331,7 @@ class Command(BaseCommand):
                     if p:
                         options_side4 = [self.twoside2reverse[p.side2]]
 
-                if loc in (10, 15, 50, 55):
+                if loc in (10, 15, 50, 55, 36):
                     count = qset.filter(has_hint=True,
                                         side1__in=options_side1,
                                         side2__in=options_side2,
@@ -320,7 +348,7 @@ class Command(BaseCommand):
 
                 if count == 0:
                     # dead end
-                    self.stdout.write('[DEBUG] No options for %s' % loc)
+                    # self.stdout.write('[DEBUG] No options for %s' % loc)
                     return -1, True
         # for
 
@@ -378,7 +406,7 @@ class Command(BaseCommand):
             if p:
                 options_side4 = [self.twoside2reverse[p.side2]]
 
-        for p in self._iter(options_side1, options_side2, options_side3, options_side4):
+        for p in self._iter(loc, options_side1, options_side2, options_side3, options_side4):
             self._board_place(loc, p)
 
             self._find_recurse()
@@ -425,6 +453,29 @@ class Command(BaseCommand):
                                     15, 7, 8, 16, 14, 6, 23, 24,
                                     50, 49, 57, 58, 42, 41, 51, 59,
                                     55, 56, 64, 63, 47, 48, 54, 62]
+            # self.requested_order = [10, 2, 1, 9,
+            #                         15, 7, 8, 16,
+            #                         50, 49, 57, 58,
+            #                         55, 56, 64, 63,
+            #                         36,
+            #                         11, 14, 3, 6, 4, 5,
+            #                         23, 47, 24, 48, 40, 32,
+            #                         18, 42, 17, 41, 25, 33,
+            #                         51, 54, 59, 62, 60, 61]
+            # self.requested_order = [10, 11, 18,
+            #                         15, 14, 23,
+            #                         50, 51, 42,
+            #                         55, 47, 54,
+            #                         2, 1,
+            #                         7, 8,
+            #                         49, 57,
+            #                         56, 64,
+            #                         9, 16, 58, 63,
+            #                         3, 6, 4, 5,
+            #                         24, 48, 40, 32,
+            #                         17, 41, 25, 33,
+            #                         59, 62, 60, 61,
+            #                         36]
 
         self.stdout.write('[INFO] Initial solve order: %s' % repr(self.requested_order))
 

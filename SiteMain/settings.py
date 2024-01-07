@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'Pieces2x2',
     'Ring1',
     'Solutions',
+    'WorkQueue',
     'django.contrib.admin',
     'django.contrib.staticfiles',   # gather static files from modules helper
     'django.contrib.sessions',      # support for database-backed sessions; needed for logged-in user

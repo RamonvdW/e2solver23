@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
 from Pieces2x2.models import TwoSide, TwoSideOptions, Piece2x2
 from Pieces2x2.helpers import calc_segment
+from WorkQueue.operations import propagate_segment_reduction
 
 
 class Command(BaseCommand):
@@ -216,6 +217,7 @@ class Command(BaseCommand):
             if self.do_commit:
                 qset.delete()
             self.reductions += 1
+            propagate_segment_reduction(self.processor, segment)
 
     def _reduce_s3(self):
         """

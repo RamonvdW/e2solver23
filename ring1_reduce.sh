@@ -1,7 +1,11 @@
 #!/bin/bash
 
 processor=$1
-[ -z "$processor" ] && exit 1
+if [ -z "$processor" ]
+then
+    echo "Missing argument: processor number"
+    exit 1
+fi
 
 
 scan1()
@@ -76,9 +80,10 @@ scan3()
     ./manage.* eval_loc_1 $processor 43
     ./manage.* eval_loc_1 $processor 35
     ./manage.* eval_loc_1 $processor 27
-    ./manage.* eval_loc_1 $processor 19
-    ./manage.* eval_loc_1 $processor 36
+
     ./manage.* eval_loc_1 $processor 28
+    ./manage.* eval_loc_1 $processor 29
+    ./manage.* eval_loc_1 $processor 36
     ./manage.* eval_loc_1 $processor 37
 }
 
@@ -113,10 +118,13 @@ scan5()
 
     ./manage.* eval_loc_4 $processor 19
     ./manage.* eval_loc_4 $processor 20
+
     ./manage.* eval_loc_4 $processor 21
     ./manage.* eval_loc_4 $processor 29
+
     ./manage.* eval_loc_4 $processor 37
     ./manage.* eval_loc_4 $processor 36
+
     ./manage.* eval_loc_4 $processor 35
     ./manage.* eval_loc_4 $processor 27
 }
