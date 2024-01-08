@@ -69,10 +69,40 @@
                         <td colspan="17">Total options remaining: {{ total_options }}</td>
                     </tr>
                 </table>
+
+                <br>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <td colspan="5">Work queue</td>
+                        </tr>
+                        <tr>
+                            <th style="padding:3px">Added</th>
+                            <th style="padding:3px">Priority</th>
+                            <th style="padding:3px">Location</th>
+                            <th style="padding:3px">Job type</th>
+                            <th style="padding:3px">Status</th>
+                        </tr>
+                    </thead>
+
+                    {% for job in work %}
+                        <tr>
+                            <td style="padding:3px">{{ job.when_added }}</td>
+                            <td>{{ job.priority }}</td>
+                            <td>{{ job.location }}</td>
+                            <td style="padding:3px">{{ job.job_type }}</td>
+                            <td style="padding:3px">{{ job.status_str }}</td>
+                        </tr>
+                    {% endfor %}
+
+                </table>
+
+
             </td>
 
             <td style="border:0">
-                <!-- open sides usage -->
+                <!-- compare -->
                 <table style="margin-left:10px">
                     <thead>
                         <tr>

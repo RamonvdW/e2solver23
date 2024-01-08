@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -11,6 +11,7 @@ from django.views.generic import TemplateView
 from django.templatetags.static import static
 from Pieces2x2.models import Piece2x2, TwoSideOptions, EvalProgress
 from Pieces2x2.helpers import calc_segment
+from WorkQueue.models import Work
 from types import SimpleNamespace
 
 
@@ -302,6 +303,18 @@ class OptionsView(TemplateView):
         # for
         return objs
 
+    def _find_work(self, processor):
+        work = Work.objects.filter(done=False, processor=processor).order_by('-doing', 'priority')
+
+        for job in work:
+            if job.doing:
+                job.status_str = 'doing'
+            else:
+                job.status_str = 'wait'
+        # for
+
+        return work
+
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
@@ -356,6 +369,8 @@ class OptionsView(TemplateView):
             segment2count[option.segment] += 1
         # for
         context['total_options'] = sum(segment2count.values())
+
+        context['work'] = self._find_work(processor)
 
         try:
             highlight_segments = [segment for segment, _, _, _ in context['compare']]

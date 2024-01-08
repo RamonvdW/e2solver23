@@ -35,7 +35,7 @@ def _segment_to_loc_1(segment):
 
 def _segment_to_loc_4(segment):
     """ reverse of calc_segment
-        returns the locations -2, -1 from the segment
+        returns the locations where to run the eval_loc_4
     """
 
     loc1_a, loc1_b = _segment_to_loc_1(segment)
@@ -70,7 +70,67 @@ def _segment_to_loc_4(segment):
 
     locs = list()
     for loc in (loc_a, loc_b, loc_c, loc_d, loc_e, loc_f):
-        if 1 <= loc_a <= 55 and loc not in (8, 16, 24, 32, 40, 48):
+        if 1 <= loc <= 55 and loc not in (8, 16, 24, 32, 40, 48):
+            locs.append(loc)
+        else:
+            locs.append(-1)
+    # for
+
+    return tuple(locs)
+
+
+def _segment_to_loc_9(segment):
+    """ reverse of calc_segment
+        returns the locations where to run the eval_loc_9
+    """
+    loc1_a, loc1_b = _segment_to_loc_1(segment)
+
+    if segment > 128:
+        # left/right
+
+        # loc1_a = -1, 0
+        # loc1_b = +1, 0
+
+        loc_1 = loc1_a - 18     # -3, -2
+        loc_2 = loc_1 + 1       # -2, -2
+        loc_3 = loc_2 + 1       # -1, -2
+        loc_4 = loc_3 + 1       # +1, -2
+
+        loc_5 = loc_1 + 8       # -3, -1
+        loc_6 = loc_2 + 8       # -2, -1
+        loc_7 = loc_3 + 8       # -1, -1
+        loc_8 = loc_4 + 8       # +1, -1
+
+        loc_9 = loc_5 + 8       # -3, 0
+        loc_10 = loc_6 + 8      # -2, 0
+        loc_11 = loc_7 + 8      # -1, 0
+        loc_12 = loc_8 + 8      # +1, 0
+
+    else:
+        # above/below
+
+        # loc1_a = 0, -1
+        # loc1_b = 0, +1
+
+        loc_1 = loc1_a - 18     # -2, -3
+        loc_2 = loc_1 + 1       # -1, -3
+        loc_3 = loc_2 + 1       # _0, -3
+
+        loc_4 = loc_1 + 8       # -2, -2
+        loc_5 = loc_2 + 8       # -1, -2
+        loc_6 = loc_3 + 8       # _0, -2
+
+        loc_7 = loc_4 + 8       # -2, -1
+        loc_8 = loc_5 + 8       # -1, -1
+        loc_9 = loc_6 + 8       # _0, -1
+
+        loc_10 = loc_7 + 8      # -2, +1
+        loc_11 = loc_8 + 8      # -1, +1
+        loc_12 = loc_9 + 8      # _0, +1
+
+    locs = list()
+    for loc in (loc_1, loc_2, loc_3, loc_4, loc_5, loc_6, loc_7, loc_8, loc_9, loc_10, loc_11, loc_12):
+        if 1 <= loc <= 55 and loc not in (8, 16, 24, 32, 40, 48):
             locs.append(loc)
         else:
             locs.append(-1)
@@ -89,6 +149,8 @@ def _add_work(processor, priority, job_type, location):
 
 def propagate_segment_reduction(processor, segment):
 
+    # Note: propagating results in repeated evaluation of the same location
+
     # eval_loc_1
     loc_a, loc_b = _segment_to_loc_1(segment)
 
@@ -105,7 +167,22 @@ def propagate_segment_reduction(processor, segment):
     _add_work(processor, 4, 'eval_loc_4', loc_e)
     _add_work(processor, 5, 'eval_loc_4', loc_f)
 
-    #location = segment_to_loc_9(segment)
+    # eval_loc_9
+    loc_1, loc_2, loc_3, loc_4, loc_5, loc_6, loc_7, loc_8, loc_9, loc_10, loc_11, loc_12 = _segment_to_loc_9(segment)
+
+    _add_work(processor, 9, 'eval_loc_9', loc_1)
+    _add_work(processor, 9, 'eval_loc_9', loc_2)
+    _add_work(processor, 9, 'eval_loc_9', loc_3)
+    _add_work(processor, 9, 'eval_loc_9', loc_4)
+    _add_work(processor, 9, 'eval_loc_9', loc_5)
+    _add_work(processor, 9, 'eval_loc_9', loc_6)
+    _add_work(processor, 9, 'eval_loc_9', loc_7)
+    _add_work(processor, 9, 'eval_loc_9', loc_8)
+    _add_work(processor, 9, 'eval_loc_9', loc_9)
+    _add_work(processor, 9, 'eval_loc_9', loc_10)
+    _add_work(processor, 9, 'eval_loc_9', loc_11)
+    _add_work(processor, 9, 'eval_loc_9', loc_12)
+
     #location = segment_to_loc_16(segment)
 
 
