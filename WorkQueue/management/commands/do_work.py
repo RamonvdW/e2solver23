@@ -81,8 +81,8 @@ class Command(BaseCommand):
 
     def _find_work(self):
         # find some work to pick up
-        with transaction.atomic():                  # avoid concurrent update
-            work = Work.objects.filter(done=False, doing=False).order_by('priority').first()
+        with transaction.atomic():
+            work = Work.objects.select_for_update().filter(done=False, doing=False).order_by('priority').first()
             if not work:
                 self.stdout.write('[INFO] Waiting for more work')
                 time.sleep(10)
