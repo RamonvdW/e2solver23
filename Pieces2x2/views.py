@@ -9,7 +9,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views.generic import TemplateView
 from django.templatetags.static import static
-from Pieces2x2.models import Piece2x2, TwoSideOptions, EvalProgress
+from Pieces2x2.models import Piece2x2, TwoSide, TwoSideOptions, EvalProgress
 from Pieces2x2.helpers import calc_segment
 from WorkQueue.models import Work
 from types import SimpleNamespace
@@ -315,6 +315,152 @@ class OptionsView(TemplateView):
 
         return work
 
+    def _make_sol(self, sol, seg2sides, twoside2reverse, unused, is_last=False):
+        for loc in range(1, 64+1):
+            seg1 = calc_segment(loc, 1)
+            seg2 = calc_segment(loc, 2)
+            seg3 = calc_segment(loc, 3)
+            seg4 = calc_segment(loc, 4)
+
+            sides1 = seg2sides[seg1]
+            sides2 = seg2sides[seg2]
+            sides3 = seg2sides[seg3]
+            sides4 = seg2sides[seg4]
+
+            sides3 = [twoside2reverse[side] for side in sides3]
+            sides4 = [twoside2reverse[side] for side in sides4]
+
+            if is_last:
+                limit = 289 + 289 + 1 + 1
+            else:
+                limit = 50
+
+            if len(sides1) + len(sides2) + len(sides3) + len(sides4) < limit:
+                p2x2_nrs = {1: [], 2: [], 3: [], 4: []}     # [base_nr] = [nr, nr, ..]
+                for p2x2 in Piece2x2.objects.filter(side1__in=sides1, side2__in=sides2, side3__in=sides3, side4__in=sides4,
+                                                    nr1__in=unused, nr2__in=unused, nr3__in=unused, nr4__in=unused):
+                    # print('p2x2=%s' % p2x2.nr)
+                    if p2x2.nr1 not in p2x2_nrs[1]:
+                        p2x2_nrs[1].append(p2x2.nr1)
+                    if p2x2.nr2 not in p2x2_nrs[2]:
+                        p2x2_nrs[2].append(p2x2.nr2)
+                    if p2x2.nr3 not in p2x2_nrs[3]:
+                        p2x2_nrs[3].append(p2x2.nr3)
+                    if p2x2.nr4 not in p2x2_nrs[4]:
+                        p2x2_nrs[4].append(p2x2.nr4)
+                # for
+
+                row_nr = int((loc - 1) / 8)
+                base_nr = 2 * (loc - 1) + row_nr * 16
+                base_nr += 1
+                # print('loc=%s, row_nr=%s, base_nr=%s' % (loc, row_nr, base_nr))
+
+                if is_last:
+                    if len(p2x2_nrs[1]) == 1 and sol[base_nr].is_empty:
+                        sol[base_nr].nr = p2x2_nrs[1][0]
+                        sol[base_nr].is_empty = False
+                        unused.remove(sol[base_nr].nr)
+                    if len(p2x2_nrs[2]) == 1 and sol[base_nr + 1].is_empty:
+                        sol[base_nr + 1].nr = p2x2_nrs[2][0]
+                        sol[base_nr + 1].is_empty = False
+                        unused.remove(sol[base_nr + 1].nr)
+                    if len(p2x2_nrs[3]) == 1 and sol[base_nr + 16].is_empty:
+                        sol[base_nr + 16].nr = p2x2_nrs[3][0]
+                        sol[base_nr + 16].is_empty = False
+                        unused.remove(sol[base_nr + 16].nr)
+                    if len(p2x2_nrs[4]) == 1 and sol[base_nr + 17].is_empty:
+                        sol[base_nr + 17].nr = p2x2_nrs[4][0]
+                        sol[base_nr + 17].is_empty = False
+                        unused.remove(sol[base_nr + 17].nr)
+                else:
+                    if len(p2x2_nrs[1]) == 1 and len(p2x2_nrs[2]) == 1 and len(p2x2_nrs[3]) == 1 and len(p2x2_nrs[4]) == 1:
+                        sol[base_nr].nr = p2x2_nrs[1][0]
+                        sol[base_nr].is_empty = False
+                        unused.remove(sol[base_nr].nr)
+
+                        sol[base_nr + 1].nr = p2x2_nrs[2][0]
+                        sol[base_nr + 1].is_empty = False
+                        unused.remove(sol[base_nr + 1].nr)
+
+                        sol[base_nr + 16].nr = p2x2_nrs[3][0]
+                        sol[base_nr + 16].is_empty = False
+                        unused.remove(sol[base_nr + 16].nr)
+
+                        sol[base_nr + 17].nr = p2x2_nrs[4][0]
+                        sol[base_nr + 17].is_empty = False
+                        unused.remove(sol[base_nr + 17].nr)
+        # for
+
+    def _make_solution(self, processor):
+        two2nr = dict()
+        for two in TwoSide.objects.all():
+            two2nr[two.two_sides] = two.nr
+        # for
+        twoside2reverse = dict()
+        for two_sides, nr in two2nr.items():
+            two_rev = two_sides[1] + two_sides[0]
+            rev_nr = two2nr[two_rev]
+            twoside2reverse[nr] = rev_nr
+        # for
+
+        sol = dict()        # [base] = SimpleNamespace
+        wrap = 0
+        for base in range(1, 256+1):
+            sol[base] = SimpleNamespace(is_empty=True, nr=0, do_break=False)
+            wrap += 1
+            if wrap == 16:
+                wrap = 0
+                sol[base].do_break = True
+        # for
+
+        unused = list(range(1, 256+1))
+
+        qset = TwoSideOptions.objects.filter(processor=processor)
+        seg2sides = dict()      # [seg] = list(two_side)
+        for loc in range(1, 64+1):
+            seg1 = calc_segment(loc, 1)
+            seg2 = calc_segment(loc, 2)
+            seg3 = calc_segment(loc, 3)
+            seg4 = calc_segment(loc, 4)
+
+            if seg1 not in seg2sides:
+                sides1 = qset.filter(segment=seg1).values_list('two_side', flat=True)
+                seg2sides[seg1] = list(sides1)
+
+            if seg2 not in seg2sides:
+                sides2 = qset.filter(segment=seg2).values_list('two_side', flat=True)
+                seg2sides[seg2] = list(sides2)
+
+            if seg3 not in seg2sides:
+                sides3 = qset.filter(segment=seg3).values_list('two_side', flat=True)
+                seg2sides[seg3] = list(sides3)
+
+            if seg4 not in seg2sides:
+                sides4 = qset.filter(segment=seg4).values_list('two_side', flat=True)
+                seg2sides[seg4] = list(sides4)
+        # for
+
+        # for seg in seg2sides.keys():
+        #     print('seg2sides[%s] = %s' % (seg, repr(seg2sides[seg])))
+
+        keep_going = True
+        while keep_going:
+            prev_len = len(unused)
+            self._make_sol(sol, seg2sides, twoside2reverse, unused)
+
+            if len(unused) == prev_len:
+                keep_going = False
+                # final run
+                self._make_sol(sol, seg2sides, twoside2reverse, unused, True)
+        # while
+
+        # convert into an array
+        out = list()
+        for base in range(1, 256+1):
+            out.append(sol[base])
+        # for
+        return out
+
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
@@ -377,6 +523,8 @@ class OptionsView(TemplateView):
         except KeyError:
             highlight_segments = list()
         context['squares'] = self._make_squares(segment2count, highlight_segments)
+
+        context['solution'] = self._make_solution(processor)
 
         context['progress'] = self._get_progress(processor)
 

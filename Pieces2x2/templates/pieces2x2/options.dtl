@@ -8,7 +8,7 @@
         table, th, td {
             border: 1px solid black;
             border-collapse: collapse;
-            padding: 0;
+            padding: 3px;
             text-align: center;
             font-size: 16px;
         }
@@ -73,32 +73,16 @@
                 <br>
 
                 <table>
-                    <thead>
-                        <tr>
-                            <td colspan="5">Work queue</td>
-                        </tr>
-                        <tr>
-                            <th style="padding:3px">Added</th>
-                            <th style="padding:3px">Priority</th>
-                            <th style="padding:3px">Location</th>
-                            <th style="padding:3px">Job type</th>
-                            <th style="padding:3px">Status</th>
-                        </tr>
-                    </thead>
-
-                    {% for job in work %}
-                        <tr>
-                            <td style="padding:3px">{{ job.when_added }}</td>
-                            <td>{{ job.priority }}</td>
-                            <td>{{ job.location }}</td>
-                            <td style="padding:3px">{{ job.job_type }}</td>
-                            <td style="padding:3px">{{ job.status_str }}</td>
-                        </tr>
-                    {% endfor %}
-
+                    <tr>
+                        {% for sol in solution %}
+                            <td>{% if not sol.is_empty %}{{ sol.nr }}{% endif %}</td>
+                            {% if sol.do_break %}
+                                </tr>
+                                <tr>
+                            {% endif %}
+                        {% endfor %}
+                    </tr>
                 </table>
-
-
             </td>
 
             <td style="border:0">
@@ -106,23 +90,53 @@
                 <table style="margin-left:10px">
                     <thead>
                         <tr>
-                            <th style="padding:3px">Segment</th>
-                            <th style="padding:3px">Prev</th>
-                            <th style="padding:3px">Now</th>
-                            <th style="padding:3px">Diff</th>
+                            <td colspan="4">Compare</td>
+                        </tr>
+                        <tr>
+                            <th>Segment</th>
+                            <th>Prev</th>
+                            <th>Now</th>
+                            <th>Diff</th>
                         </tr>
                     </thead>
                     {% for segment, count1, count2, diff in compare %}
                         <tr>
-                            <td style="padding:3px">{{ segment }}</td>
-                            <td style="padding:3px">{{ count2 }}</td>
-                            <td style="padding:3px">{{ count1 }}</td>
-                            <td style="padding:3px">{{ diff }}</td>
+                            <td>{{ segment }}</td>
+                            <td>{{ count2 }}</td>
+                            <td>{{ count1 }}</td>
+                            <td>{{ diff }}</td>
                         </tr>
                     {% endfor %}
                 </table>
             </td>
 
+            <td style="border:0">
+                <!-- work -->
+                <table style="margin-left:10px">
+                    <thead>
+                        <tr>
+                            <td colspan="5">Work queue</td>
+                        </tr>
+                        <tr>
+                            <th>Added</th>
+                            <th>Priority</th>
+                            <th>Location</th>
+                            <th>Job type</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+
+                    {% for job in work %}
+                        <tr>
+                            <td>{{ job.when_added }}</td>
+                            <td>{{ job.priority }}</td>
+                            <td>{{ job.location }}</td>
+                            <td>{{ job.job_type }}</td>
+                            <td>{{ job.status_str }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+             </td>
         </tr>
     </table>
 
@@ -133,22 +147,22 @@
     <table style="margin-left:auto; margin-right:auto">
         <thead>
             <tr>
-                <th style="padding:3px">Size</th>
-                <th style="padding:3px">Top-left</th>
-                <th style="padding:3px">Segment</th>
-                <th style="padding:3px">Progress</th>
-                <th style="padding:3px">Updated</th>
-                <th style="padding:3px">Solve order</th>
+                <th>Size</th>
+                <th>Top-left</th>
+                <th>Segment</th>
+                <th>Progress</th>
+                <th>Updated</th>
+                <th>Solve order</th>
             </tr>
         </thead>
         {% for obj in progress %}
             <tr>
-                <td style="padding:3px">{{ obj.eval_size }}</td>
-                <td style="padding:3px">{{ obj.eval_loc }}</td>
-                <td style="padding:3px">{% if obj.segments_todo %}{% for seg in obj.segments_todo %}{% if seg == obj.segment %}<b>{{ seg }}</b>{% else %}{{ seg }}{% endif %}, {% endfor %}{% else %}{{ obj.segment }}{% endif %}</td>
-                <td style="padding:3px">{{ obj.done_count }} / {{ obj.todo_count }}</td>
-                <td style="padding:3px">{{ obj.updated_str }}</td>
-                <td style="padding:3px">{{ obj.solve_order }}</td>
+                <td>{{ obj.eval_size }}</td>
+                <td>{{ obj.eval_loc }}</td>
+                <td>{% if obj.segments_todo %}{% for seg in obj.segments_todo %}{% if seg == obj.segment %}<b>{{ seg }}</b>{% else %}{{ seg }}{% endif %}, {% endfor %}{% else %}{{ obj.segment }}{% endif %}</td>
+                <td>{{ obj.done_count }} / {{ obj.todo_count }}</td>
+                <td>{{ obj.updated_str }}</td>
+                <td>{{ obj.solve_order }}</td>
             </tr>
         {% endfor %}
     </table>
