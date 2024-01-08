@@ -337,8 +337,22 @@ class OptionsView(TemplateView):
 
             if len(sides1) + len(sides2) + len(sides3) + len(sides4) < limit:
                 p2x2_nrs = {1: [], 2: [], 3: [], 4: []}     # [base_nr] = [nr, nr, ..]
+                unused1 = unused[:]
+                unused2 = unused[:]
+                unused3 = unused[:]
+                unused4 = unused[:]
+                if loc == 10:
+                    unused1 = [208]
+                elif loc == 15:
+                    unused2 = [255]
+                elif loc == 36:
+                    unused2 = [139]
+                elif loc == 50:
+                    unused3 = [181]
+                elif loc == 55:
+                    unused4 = [249]
                 for p2x2 in Piece2x2.objects.filter(side1__in=sides1, side2__in=sides2, side3__in=sides3, side4__in=sides4,
-                                                    nr1__in=unused, nr2__in=unused, nr3__in=unused, nr4__in=unused):
+                                                    nr1__in=unused1, nr2__in=unused2, nr3__in=unused3, nr4__in=unused4):
                     # print('p2x2=%s' % p2x2.nr)
                     if p2x2.nr1 not in p2x2_nrs[1]:
                         p2x2_nrs[1].append(p2x2.nr1)
@@ -390,6 +404,10 @@ class OptionsView(TemplateView):
                         sol[base_nr + 17].is_empty = False
                         unused.remove(sol[base_nr + 17].nr)
         # for
+
+        if is_last:
+            sol[136].nr = 139
+            sol[136].is_empty = False
 
     def _make_solution(self, processor):
         two2nr = dict()
