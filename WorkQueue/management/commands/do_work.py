@@ -8,6 +8,7 @@ from django.db import transaction
 from django.core import management
 from django.utils import timezone
 from django.core.management.base import BaseCommand
+from Pieces2x2.models import EvalProgress
 from WorkQueue.models import Work
 import time
 import io
@@ -101,6 +102,7 @@ class Command(BaseCommand):
         if worker_nr == 1:
             # restart all ongoing work
             Work.objects.filter(done=False, doing=True).update(doing=False)
+            EvalProgress.objects.all().delete()
         else:
             # allow a few seconds for the worker 1 to start and reset all ongoing work
             time.sleep(5)
