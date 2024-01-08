@@ -19,7 +19,7 @@ class Work(models.Model):
     doing = models.BooleanField(default=False)
 
     # free-format description of the task to execute
-    job_type = models.CharField(max_length=10, default='')
+    job_type = models.CharField(max_length=20, default='')
 
     # lower number is higher priority
     priority = models.PositiveSmallIntegerField(default=0)
