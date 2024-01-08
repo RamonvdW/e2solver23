@@ -4,6 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+from django.db import IntegrityError
 from WorkQueue.models import Work
 
 
@@ -141,10 +142,15 @@ def _segment_to_loc_9(segment):
 
 def _add_work(processor, priority, job_type, location):
     if location > 0:
-        work, _ = Work.objects.get_or_create(done=False, doing=False,
-                                             processor=processor, priority=priority,
-                                             job_type=job_type, location=location)
-        work.save()
+        count = Work.objects.filter(done=False, doing=False,
+                                    processor=processor, job_type=job_type, location=location).count()
+
+        if count == 0:
+            # not a duplicate
+            # (new duplicate due to race condition is still possible though)
+            Work(done=False, doing=False,
+                 processor=processor, job_type=job_type, location=location,
+                 priority=priority).save()
 
 
 def propagate_segment_reduction(processor, segment):
