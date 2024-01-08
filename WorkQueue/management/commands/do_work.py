@@ -23,7 +23,14 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('worker_nr', nargs=1, type=int, help='Instance number')
 
+    @staticmethod
+    def _get_stamp():
+        return timezone.localtime(timezone.now()).strftime('%Y-%m-%d %H:%M:%S')
+
     def _run_command(self, *args):
+
+        self.stdout.write('[INFO] Running command %s' % " ".join(args))
+
         f1 = io.StringIO()
         f2 = io.StringIO()
 
@@ -43,7 +50,7 @@ class Command(BaseCommand):
         return bad
 
     def _do_work(self, work):
-        self.stdout.write('[INFO] Start on work pk=%s' % work.pk)
+        self.stdout.write('[INFO] Start on work pk=%s at %s' % (work.pk, self._get_stamp()))
 
         bad = True
 
@@ -66,7 +73,7 @@ class Command(BaseCommand):
             self.stdout.write('[WARNING] Failed to perform work pk=%s' % work.pk)
             # leave doing=True to prevent immediate repeat pick-up
         else:
-            self.stdout.write('[INFO] Finished on work pk=%s' % work.pk)
+            self.stdout.write('[INFO] Finished on work pk=%s at %s' % (work.pk, self._get_stamp()))
             work.doing = False
             work.done = True
             work.when_done = timezone.now()
