@@ -83,7 +83,14 @@ class Command(BaseCommand):
     def _find_work(self):
         # find some work to pick up
         with transaction.atomic():
-            work = Work.objects.select_for_update().filter(done=False, doing=False).order_by('priority').first()
+            work = (Work
+                    .objects
+                    .select_for_update()
+                    .filter(done=False,
+                            doing=False)
+                    .order_by('priority',       # lowest first = highest priority
+                              'when_added')     # oldest first
+                    .first())
             if not work:
                 self.stdout.write('[INFO] Waiting for more work')
                 time.sleep(10)

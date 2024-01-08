@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -67,6 +67,24 @@ class Ring1(models.Model):
     nr62 = models.PositiveIntegerField()
     nr63 = models.PositiveIntegerField()
     nr64 = models.PositiveIntegerField()
+
+    nr10 = models.PositiveIntegerField()
+    nr11 = models.PositiveIntegerField()
+    nr18 = models.PositiveIntegerField()
+
+    nr14 = models.PositiveIntegerField()
+    nr15 = models.PositiveIntegerField()
+    nr23 = models.PositiveIntegerField()
+
+    nr42 = models.PositiveIntegerField()
+    nr50 = models.PositiveIntegerField()
+    nr51 = models.PositiveIntegerField()
+
+    nr47 = models.PositiveIntegerField()
+    nr54 = models.PositiveIntegerField()
+    nr55 = models.PositiveIntegerField()
+
+    nr36 = models.PositiveIntegerField()
 
     def __str__(self):
         return str(self.nr)

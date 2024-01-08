@@ -315,95 +315,107 @@ class OptionsView(TemplateView):
 
         return work
 
-    def _make_sol(self, sol, seg2sides, twoside2reverse, unused, is_last=False):
-        for loc in range(1, 64+1):
-            seg1 = calc_segment(loc, 1)
-            seg2 = calc_segment(loc, 2)
-            seg3 = calc_segment(loc, 3)
-            seg4 = calc_segment(loc, 4)
+    def _make_sol_loc(self, loc, sol, seg2sides, twoside2reverse, unused, is_last=False):
+        seg1 = calc_segment(loc, 1)
+        seg2 = calc_segment(loc, 2)
+        seg3 = calc_segment(loc, 3)
+        seg4 = calc_segment(loc, 4)
 
-            sides1 = seg2sides[seg1]
-            sides2 = seg2sides[seg2]
-            sides3 = seg2sides[seg3]
-            sides4 = seg2sides[seg4]
+        sides1 = seg2sides[seg1]
+        sides2 = seg2sides[seg2]
+        sides3 = seg2sides[seg3]
+        sides4 = seg2sides[seg4]
 
-            sides3 = [twoside2reverse[side] for side in sides3]
-            sides4 = [twoside2reverse[side] for side in sides4]
+        sides3 = [twoside2reverse[side] for side in sides3]
+        sides4 = [twoside2reverse[side] for side in sides4]
+
+        if is_last:
+            limit = 289 + 289 + 1 + 1
+        else:
+            limit = 50
+
+        if len(sides1) + len(sides2) + len(sides3) + len(sides4) < limit:
+            p2x2_nrs = {1: [], 2: [], 3: [], 4: []}     # [base_nr] = [nr, nr, ..]
+            unused1 = unused[:]
+            unused2 = unused[:]
+            unused3 = unused[:]
+            unused4 = unused[:]
+            if loc == 10:
+                unused1 = [208]
+            elif loc == 15:
+                unused2 = [255]
+            elif loc == 36:
+                unused2 = [139]
+            elif loc == 50:
+                unused3 = [181]
+            elif loc == 55:
+                unused4 = [249]
+            for p2x2 in Piece2x2.objects.filter(side1__in=sides1, side2__in=sides2, side3__in=sides3, side4__in=sides4,
+                                                nr1__in=unused1, nr2__in=unused2, nr3__in=unused3, nr4__in=unused4):
+                # print('p2x2=%s' % p2x2.nr)
+                if p2x2.nr1 not in p2x2_nrs[1]:
+                    p2x2_nrs[1].append(p2x2.nr1)
+                if p2x2.nr2 not in p2x2_nrs[2]:
+                    p2x2_nrs[2].append(p2x2.nr2)
+                if p2x2.nr3 not in p2x2_nrs[3]:
+                    p2x2_nrs[3].append(p2x2.nr3)
+                if p2x2.nr4 not in p2x2_nrs[4]:
+                    p2x2_nrs[4].append(p2x2.nr4)
+            # for
+
+            row_nr = int((loc - 1) / 8)
+            base_nr = 2 * (loc - 1) + row_nr * 16
+            base_nr += 1
+            # print('loc=%s, row_nr=%s, base_nr=%s' % (loc, row_nr, base_nr))
 
             if is_last:
-                limit = 289 + 289 + 1 + 1
+                if len(p2x2_nrs[1]) == 1 and sol[base_nr].is_empty:
+                    sol[base_nr].nr = p2x2_nrs[1][0]
+                    sol[base_nr].is_empty = False
+                    unused.remove(sol[base_nr].nr)
+                if len(p2x2_nrs[2]) == 1 and sol[base_nr + 1].is_empty:
+                    sol[base_nr + 1].nr = p2x2_nrs[2][0]
+                    sol[base_nr + 1].is_empty = False
+                    unused.remove(sol[base_nr + 1].nr)
+                if len(p2x2_nrs[3]) == 1 and sol[base_nr + 16].is_empty:
+                    sol[base_nr + 16].nr = p2x2_nrs[3][0]
+                    sol[base_nr + 16].is_empty = False
+                    unused.remove(sol[base_nr + 16].nr)
+                if len(p2x2_nrs[4]) == 1 and sol[base_nr + 17].is_empty:
+                    sol[base_nr + 17].nr = p2x2_nrs[4][0]
+                    sol[base_nr + 17].is_empty = False
+                    unused.remove(sol[base_nr + 17].nr)
             else:
-                limit = 50
+                if len(p2x2_nrs[1]) == 1 and len(p2x2_nrs[2]) == 1 and len(p2x2_nrs[3]) == 1 and len(p2x2_nrs[4]) == 1:
+                    sol[base_nr].nr = p2x2_nrs[1][0]
+                    sol[base_nr].is_empty = False
+                    unused.remove(sol[base_nr].nr)
 
-            if len(sides1) + len(sides2) + len(sides3) + len(sides4) < limit:
-                p2x2_nrs = {1: [], 2: [], 3: [], 4: []}     # [base_nr] = [nr, nr, ..]
-                unused1 = unused[:]
-                unused2 = unused[:]
-                unused3 = unused[:]
-                unused4 = unused[:]
-                if loc == 10:
-                    unused1 = [208]
-                elif loc == 15:
-                    unused2 = [255]
-                elif loc == 36:
-                    unused2 = [139]
-                elif loc == 50:
-                    unused3 = [181]
-                elif loc == 55:
-                    unused4 = [249]
-                for p2x2 in Piece2x2.objects.filter(side1__in=sides1, side2__in=sides2, side3__in=sides3, side4__in=sides4,
-                                                    nr1__in=unused1, nr2__in=unused2, nr3__in=unused3, nr4__in=unused4):
-                    # print('p2x2=%s' % p2x2.nr)
-                    if p2x2.nr1 not in p2x2_nrs[1]:
-                        p2x2_nrs[1].append(p2x2.nr1)
-                    if p2x2.nr2 not in p2x2_nrs[2]:
-                        p2x2_nrs[2].append(p2x2.nr2)
-                    if p2x2.nr3 not in p2x2_nrs[3]:
-                        p2x2_nrs[3].append(p2x2.nr3)
-                    if p2x2.nr4 not in p2x2_nrs[4]:
-                        p2x2_nrs[4].append(p2x2.nr4)
-                # for
+                    sol[base_nr + 1].nr = p2x2_nrs[2][0]
+                    sol[base_nr + 1].is_empty = False
+                    unused.remove(sol[base_nr + 1].nr)
 
-                row_nr = int((loc - 1) / 8)
-                base_nr = 2 * (loc - 1) + row_nr * 16
-                base_nr += 1
-                # print('loc=%s, row_nr=%s, base_nr=%s' % (loc, row_nr, base_nr))
+                    sol[base_nr + 16].nr = p2x2_nrs[3][0]
+                    sol[base_nr + 16].is_empty = False
+                    unused.remove(sol[base_nr + 16].nr)
 
-                if is_last:
-                    if len(p2x2_nrs[1]) == 1 and sol[base_nr].is_empty:
-                        sol[base_nr].nr = p2x2_nrs[1][0]
-                        sol[base_nr].is_empty = False
-                        unused.remove(sol[base_nr].nr)
-                    if len(p2x2_nrs[2]) == 1 and sol[base_nr + 1].is_empty:
-                        sol[base_nr + 1].nr = p2x2_nrs[2][0]
-                        sol[base_nr + 1].is_empty = False
-                        unused.remove(sol[base_nr + 1].nr)
-                    if len(p2x2_nrs[3]) == 1 and sol[base_nr + 16].is_empty:
-                        sol[base_nr + 16].nr = p2x2_nrs[3][0]
-                        sol[base_nr + 16].is_empty = False
-                        unused.remove(sol[base_nr + 16].nr)
-                    if len(p2x2_nrs[4]) == 1 and sol[base_nr + 17].is_empty:
-                        sol[base_nr + 17].nr = p2x2_nrs[4][0]
-                        sol[base_nr + 17].is_empty = False
-                        unused.remove(sol[base_nr + 17].nr)
-                else:
-                    if len(p2x2_nrs[1]) == 1 and len(p2x2_nrs[2]) == 1 and len(p2x2_nrs[3]) == 1 and len(p2x2_nrs[4]) == 1:
-                        sol[base_nr].nr = p2x2_nrs[1][0]
-                        sol[base_nr].is_empty = False
-                        unused.remove(sol[base_nr].nr)
+                    sol[base_nr + 17].nr = p2x2_nrs[4][0]
+                    sol[base_nr + 17].is_empty = False
+                    unused.remove(sol[base_nr + 17].nr)
 
-                        sol[base_nr + 1].nr = p2x2_nrs[2][0]
-                        sol[base_nr + 1].is_empty = False
-                        unused.remove(sol[base_nr + 1].nr)
+    def _make_sol(self, sol, seg2sides, twoside2reverse, unused, is_last=False):
+        if is_last:
+            self._make_sol_loc(55, sol, seg2sides, twoside2reverse, unused, is_last)
+            return
 
-                        sol[base_nr + 16].nr = p2x2_nrs[3][0]
-                        sol[base_nr + 16].is_empty = False
-                        unused.remove(sol[base_nr + 16].nr)
-
-                        sol[base_nr + 17].nr = p2x2_nrs[4][0]
-                        sol[base_nr + 17].is_empty = False
-                        unused.remove(sol[base_nr + 17].nr)
+        for loc in range(1, 64+1):
+            self._make_sol_loc(loc, sol, seg2sides, twoside2reverse, unused, is_last)
         # for
+
+        if is_last:
+            for loc in (55, 10, 15, 50):
+                self._make_sol_loc(loc, sol, seg2sides, twoside2reverse, unused, is_last)
+            # for
 
         if is_last:
             sol[136].nr = 139

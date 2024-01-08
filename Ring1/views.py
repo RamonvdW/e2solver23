@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -62,7 +62,12 @@ class ShowView(TemplateView):
             for p_nr in range(1, 64+1):
                 if p_nr in (1, 2, 3, 4, 5, 6, 7, 8,
                             9, 16, 17, 24, 25, 32, 33, 40, 41, 48, 49, 56, 57,
-                            58, 59, 60, 61, 62, 63, 64):
+                            58, 59, 60, 61, 62, 63, 64,
+                            10, 11, 18,
+                            14, 15, 23,
+                            42, 50, 51,
+                            54, 55, 47,
+                            36):
 
                     nr_str = 'nr%s' % p_nr
                     nr = getattr(ring1, nr_str, 0)

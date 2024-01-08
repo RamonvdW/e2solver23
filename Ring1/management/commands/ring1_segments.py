@@ -50,35 +50,36 @@ class Command(BaseCommand):
 
         bulk = list()
         for loc in range(1, 64+1):
-            nr_str = 'nr%s' % loc
-            p_nr = getattr(ring1, nr_str, None)
+            if loc not in (11, 18, 14, 23, 47, 54, 42, 51, 36):
+                nr_str = 'nr%s' % loc
+                p_nr = getattr(ring1, nr_str, None)
 
-            if p_nr:
-                p2x2 = Piece2x2.objects.get(nr=p_nr)
+                if p_nr:
+                    p2x2 = Piece2x2.objects.get(nr=p_nr)
 
-                options = TwoSideOptions(
-                                processor=processor,
-                                segment=calc_segment(loc, 1),
-                                two_side=p2x2.side1)
-                bulk.append(options)
+                    options = TwoSideOptions(
+                                    processor=processor,
+                                    segment=calc_segment(loc, 1),
+                                    two_side=p2x2.side1)
+                    bulk.append(options)
 
-                options = TwoSideOptions(
-                                processor=processor,
-                                segment=calc_segment(loc, 2),
-                                two_side=p2x2.side2)
-                bulk.append(options)
+                    options = TwoSideOptions(
+                                    processor=processor,
+                                    segment=calc_segment(loc, 2),
+                                    two_side=p2x2.side2)
+                    bulk.append(options)
 
-                options = TwoSideOptions(
-                                processor=processor,
-                                segment=calc_segment(loc, 3),
-                                two_side=twoside2reverse[p2x2.side3])
-                bulk.append(options)
+                    options = TwoSideOptions(
+                                    processor=processor,
+                                    segment=calc_segment(loc, 3),
+                                    two_side=twoside2reverse[p2x2.side3])
+                    bulk.append(options)
 
-                options = TwoSideOptions(
-                                processor=processor,
-                                segment=calc_segment(loc, 4),
-                                two_side=twoside2reverse[p2x2.side4])
-                bulk.append(options)
+                    options = TwoSideOptions(
+                                    processor=processor,
+                                    segment=calc_segment(loc, 4),
+                                    two_side=twoside2reverse[p2x2.side4])
+                    bulk.append(options)
         # for
 
         # remove dupes
