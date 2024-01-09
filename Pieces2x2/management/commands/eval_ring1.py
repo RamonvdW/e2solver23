@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -21,8 +21,8 @@ class Command(BaseCommand):
         +----+----+----+----+----+----+----+----+
         | 1  | 2  | 3  | 4  | 5  | 6  | 7  | 8  |
         +----+----+----+----+----+----+----+----+
-        | 9  |                             | 16 |
-        +----+                             +----+
+        | 9  | 10 |                   | 15 | 16 |
+        +----+----+                   +----+----+
         | 17 |                             | 24 |
         +----+                             +----+
         | 25 |                             | 32 |
@@ -30,8 +30,8 @@ class Command(BaseCommand):
         | 33 |                             | 40 |
         +----+                             +----+
         | 41 |                             | 48 |
-        +----+                             +----+
-        | 49 |                             | 56 |
+        +----+----+                   +----+----+
+        | 49 | 50 |                   | 55 | 56 |
         +----+----+----+----+----+----+----+----+
         | 57 | 58 | 59 | 60 | 61 | 62 | 63 | 64 |
         +----+----+----+----+----+----+----+----+
@@ -56,12 +56,12 @@ class Command(BaseCommand):
         self.processor = 0
         self.segment = 0
         self.locs = (1, 2, 3, 4, 5, 6, 7, 8,
-                     9, 16,
+                     9, 10, 15, 16,
                      17, 24,
                      25, 32,
                      33, 40,
                      41, 48,
-                     49, 56,
+                     49, 50, 55, 56,
                      57, 58, 59, 60, 61, 62, 63, 64)
         self.segment_options = dict()       # [segment] = side_options
         self.segment_options_rev = dict()   # [segment] = side_options
@@ -178,10 +178,10 @@ class Command(BaseCommand):
         self.unused0 = list(range(1, 256+1))
         # none of the hints are in Ring1
         self.unused0.remove(139)
-        self.unused0.remove(208)
-        self.unused0.remove(255)
-        self.unused0.remove(181)
-        self.unused0.remove(249)
+        #self.unused0.remove(208)
+        #self.unused0.remove(255)
+        #self.unused0.remove(181)
+        #self.unused0.remove(249)
 
     def _reverse_sides(self, options):
         return [self.twoside2reverse[two_side] for two_side in options]
@@ -226,18 +226,18 @@ class Command(BaseCommand):
 
         # if loc != 36 and 139 in unused:
         #     unused.remove(139)
-        #
-        # if loc != 10 and 208 in unused:
-        #     unused.remove(208)
-        #
-        # if loc != 15 and 255 in unused:
-        #     unused.remove(255)
-        #
-        # if loc != 50 and 181 in unused:
-        #     unused.remove(181)
-        #
-        # if loc != 55 and 249 in unused:
-        #     unused.remove(249)
+
+        if loc != 10 and 208 in unused:
+            unused.remove(208)
+
+        if loc != 15 and 255 in unused:
+            unused.remove(255)
+
+        if loc != 50 and 181 in unused:
+            unused.remove(181)
+
+        if loc != 55 and 249 in unused:
+            unused.remove(249)
 
         for p in (Piece2x2
                   .objects
@@ -248,7 +248,8 @@ class Command(BaseCommand):
                           nr1__in=unused,
                           nr2__in=unused,
                           nr3__in=unused,
-                          nr4__in=unused)):
+                          nr4__in=unused)
+                  .iterator(chunk_size=10000)):
             yield p
         # for
 
@@ -538,6 +539,49 @@ class Command(BaseCommand):
             else:
                 self.stdout.write('[WARNING] Duplicate in requested order: %s' % loc)
         # for
+
+        if len(self.requested_order) == 0:
+            if self.segment in (130, 131):
+                self.requested_order = [2, 10, 1, 9,
+                                        15, 16, 8, 7,
+                                        55, 63, 64, 56,
+                                        50, 58, 57, 49]
+            elif self.segment in (9, 17):
+                self.requested_order = [9, 10, 1, 2,
+                                        15, 16, 8, 7,
+                                        55, 63, 64, 56,
+                                        50, 58, 57, 49]
+            elif self.segment in (135, 136):
+                self.requested_order = [7, 15, 8, 16,
+                                        10, 9, 1, 2,
+                                        55, 63, 64, 56,
+                                        50, 58, 57, 49]
+            elif self.segment in (16, 24):
+                self.requested_order = [16, 15, 8, 7,
+                                        10, 9, 1, 2,
+                                        55, 63, 64, 56,
+                                        50, 58, 57, 49]
+            elif self.segment in (49, 57):
+                self.requested_order = [49, 50, 57, 58,
+                                        2, 10, 1, 9,
+                                        15, 16, 8, 7,
+                                        55, 63, 64, 56]
+            elif self.segment in (186, 187):
+                self.requested_order = [58, 50, 57, 49,
+                                        2, 10, 1, 9,
+                                        15, 16, 8, 7,
+                                        55, 63, 64, 56]
+            elif self.segment in (56, 64):
+                self.requested_order = [56, 55, 64, 63,
+                                        58, 50, 57, 49,
+                                        2, 10, 1, 9,
+                                        15, 16, 8, 7]
+            elif self.segment in (191, 192):
+                self.requested_order = [63, 55, 64, 56,
+                                        58, 50, 57, 49,
+                                        2, 10, 1, 9,
+                                        15, 16, 8, 7]
+
         self.stdout.write('[INFO] Initial solve order: %s' % repr(self.requested_order))
 
         self._calc_unused0()
