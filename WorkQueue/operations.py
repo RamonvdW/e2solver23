@@ -142,7 +142,7 @@ def _segment_to_loc_9(segment):
 
 def _add_work(processor, priority, job_type, location):
     if location > 0:
-        count = Work.objects.filter(done=False, doing=False,
+        count = Work.objects.filter(done=False,
                                     processor=processor, job_type=job_type, location=location).count()
 
         if count == 0:

@@ -34,7 +34,6 @@ class Command(BaseCommand):
                 count_queue = qset.filter(doing=False).count()
 
                 self.stdout.write('       of which %s ongoing and %s queued' % (count_doing, count_queue))
-
         # for
 
 # end of file
