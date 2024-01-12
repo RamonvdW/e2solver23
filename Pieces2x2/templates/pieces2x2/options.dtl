@@ -175,5 +175,7 @@
         </script>
     {% endif %}
 
+    <p style="font-size: 14px">Generated in {{ duration }} seconds</p>
+
 </body>
 </html>

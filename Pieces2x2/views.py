@@ -13,7 +13,7 @@ from Pieces2x2.models import Piece2x2, TwoSide, TwoSideOptions, EvalProgress
 from Pieces2x2.helpers import calc_segment
 from WorkQueue.models import Work
 from types import SimpleNamespace
-
+import time
 
 TEMPLATE_SHOW = 'pieces2x2/show.dtl'
 TEMPLATE_OPTIONS = 'pieces2x2/options.dtl'
@@ -330,7 +330,7 @@ class OptionsView(TemplateView):
         sides4 = [twoside2reverse[side] for side in sides4]
 
         if is_last:
-            limit = 289 + 289 + 1 + 1
+            limit = 289 + 289 + 17 + 17
         else:
             limit = 50
 
@@ -405,7 +405,11 @@ class OptionsView(TemplateView):
 
     def _make_sol(self, sol, seg2sides, twoside2reverse, unused, is_last=False):
         if is_last:
+            self._make_sol_loc(10, sol, seg2sides, twoside2reverse, unused, is_last)
+            self._make_sol_loc(15, sol, seg2sides, twoside2reverse, unused, is_last)
+            self._make_sol_loc(50, sol, seg2sides, twoside2reverse, unused, is_last)
             self._make_sol_loc(55, sol, seg2sides, twoside2reverse, unused, is_last)
+            self._make_sol_loc(36, sol, seg2sides, twoside2reverse, unused, is_last)
             return
 
         for loc in range(1, 64+1):
@@ -495,6 +499,8 @@ class OptionsView(TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
+        start = time.monotonic()
+
         processors = list(TwoSideOptions
                           .objects
                           .distinct('processor')
@@ -559,6 +565,8 @@ class OptionsView(TemplateView):
         context['progress'] = self._get_progress(processor)
 
         context['auto_reload'] = True
+
+        context['duration'] = round(time.monotonic() - start, 2)
 
         return context
 
