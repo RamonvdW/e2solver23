@@ -14,7 +14,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
-        for processor, loc, job in Work.objects.filter(done=False, doing=False).distinct('processor', 'location', 'job_type').values_list('priority', 'location', 'job_type'):
+        for processor, loc, job in Work.objects.filter(done=False, doing=False).distinct('processor', 'location', 'job_type').values_list('processor', 'location', 'job_type'):
             count = Work.objects.filter(done=False, doing=False, processor=processor, location=loc, job_type=job).count()
             if count > 1:
                 self.stdout.write('[INFO] Found duplicates with processor=%s, location=%s, job_type=%s' % (processor, loc, repr(job)))
