@@ -12,8 +12,14 @@ class Command(BaseCommand):
 
     help = "Remove duplicate work orders"
 
+    def add_arguments(self, parser):
+        parser.add_argument('--verbose', action='store_true')
+
     def handle(self, *args, **options):
 
+        verbose = options['verbose']
+
+        deleted = 0
         for processor, loc, job in (Work
                                     .objects
                                     .filter(done=False)
@@ -27,13 +33,26 @@ class Command(BaseCommand):
             count = qset.count()
 
             if count > 1:
-                self.stdout.write('[INFO] Found duplicate work with processor=%s, location=%s, job_type=%s' % (
-                                    processor, loc, repr(job)))
-
                 count_doing = qset.filter(doing=True).count()
                 count_queue = qset.filter(doing=False).count()
 
-                self.stdout.write('       of which %s ongoing and %s queued' % (count_doing, count_queue))
+                if verbose:
+                    self.stdout.write('[INFO] Found duplicate work with processor=%s, location=%s, job_type=%s' % (
+                                        processor, loc, repr(job)))
+                    self.stdout.write('       of which %s ongoing and %s queued' % (count_doing, count_queue))
+
+                if count_doing > 0:
+                    # delete all queued work
+                    qset.filter(doing=False).delete()
+                    deleted += count_queue
+                else:
+                    # delete all but the oldest
+                    pks = list(qset.filter(doing=False).order_by('-doing').values_list('pk', flat=True))
+                    pks = pks[1:]       # keep the oldest
+                    Work.objects.filter(pk__in=pks).delete()
+                    deleted += len(pks)
         # for
+
+        self.stdout.write('[INFO] Deleted %d jobs' % deleted)
 
 # end of file
