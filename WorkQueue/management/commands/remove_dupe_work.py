@@ -24,6 +24,7 @@ class Command(BaseCommand):
                                     .values_list('processor', 'location', 'job_type')):
 
             count = Work.objects.filter(done=False, doing=False, processor=processor, location=loc, job_type=job).count()
+            print(processor, loc, job, count)
             if count > 1:
                 self.stdout.write('[INFO] Found duplicates with processor=%s, location=%s, job_type=%s' % (
                                 processor, loc, repr(job)))
