@@ -4,8 +4,9 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+from django.utils import timezone
 from django.core.management.base import BaseCommand
-from Pieces2x2.models import TwoSide, TwoSideOptions, Piece2x2
+from Pieces2x2.models import TwoSide, TwoSideOptions, Piece2x2, EvalProgress
 from Pieces2x2.helpers import calc_segment
 from WorkQueue.operations import propagate_segment_reduction
 
@@ -47,9 +48,8 @@ class Command(BaseCommand):
         self.side_options = ([], [], [], [], [], [], [], [], [], [], [], [])        # s0..s11
         self.side_options_rev = ([], [], [], [], [], [], [], [], [], [], [], [])    # s0..s11
         self.reductions = 0
-
         self.unused0 = list()
-
+        self.progress = None
         self.do_commit = True
 
     def add_arguments(self, parser):
@@ -234,8 +234,18 @@ class Command(BaseCommand):
         segment = calc_segment(self.locs[0], 2)
         sides = self.side_options[3]
         todo = len(sides)
+
+        self.progress.segment = segment
+        self.progress.todo_count = todo
+        self.progress.left_count = todo
+        self.progress.save(update_fields=['segment', 'todo_count', 'left_count'])
+
         self.stdout.write('[INFO] Checking %s options in segment %s' % (todo, segment))
         for side in sides:
+            self.progress.left_count -= 1
+            self.progress.updated=timezone.now()
+            self.progress.save(update_fields=['left_count', 'updated'])
+
             p0_exp_s2 = side
             p1_exp_s4 = self.twoside2reverse[side]
             found = False
@@ -301,8 +311,18 @@ class Command(BaseCommand):
         segment = calc_segment(self.locs[0], 3)
         sides = self.side_options[5]
         todo = len(sides)
+
+        self.progress.segment = segment
+        self.progress.todo_count = todo
+        self.progress.left_count = todo
+        self.progress.save(update_fields=['segment', 'todo_count', 'left_count'])
+
         self.stdout.write('[INFO] Checking %s options in segment %s' % (todo, segment))
         for side in sides:
+            self.progress.left_count -= 1
+            self.progress.updated=timezone.now()
+            self.progress.save(update_fields=['left_count', 'updated'])
+
             p0_exp_s3 = self.twoside2reverse[side]
             p2_exp_s1 = side
             found = False
@@ -368,8 +388,18 @@ class Command(BaseCommand):
         segment = calc_segment(self.locs[1], 3)
         sides = self.side_options[6]
         todo = len(sides)
+
+        self.progress.segment = segment
+        self.progress.todo_count = todo
+        self.progress.left_count = todo
+        self.progress.save(update_fields=['segment', 'todo_count', 'left_count'])
+
         self.stdout.write('[INFO] Checking %s options in segment %s' % (todo, segment))
         for side in sides:
+            self.progress.left_count -= 1
+            self.progress.updated=timezone.now()
+            self.progress.save(update_fields=['left_count', 'updated'])
+
             p1_exp_s3 = self.twoside2reverse[side]
             p3_exp_s1 = side
             found = False
@@ -435,8 +465,18 @@ class Command(BaseCommand):
         segment = calc_segment(self.locs[2], 2)
         sides = self.side_options[8]
         todo = len(sides)
+
+        self.progress.segment = segment
+        self.progress.todo_count = todo
+        self.progress.left_count = todo
+        self.progress.save(update_fields=['segment', 'todo_count', 'left_count'])
+
         self.stdout.write('[INFO] Checking %s options in segment %s' % (todo, segment))
         for side in sides:
+            self.progress.left_count -= 1
+            self.progress.updated=timezone.now()
+            self.progress.save(update_fields=['left_count', 'updated'])
+
             p2_exp_s2 = side
             p3_exp_s4 = self.twoside2reverse[side]
             found = False
@@ -520,10 +560,43 @@ class Command(BaseCommand):
         self._get_side_options()
         # self.stdout.write('%s' % ", ".join([str(len(opt)) for opt in self.side_options]))
 
-        self._reduce_s3()
-        self._reduce_s5()
-        self._reduce_s6()
-        self._reduce_s8()
+        msg = "%s %s %s %s" % (calc_segment(self.locs[0], 2),
+                               calc_segment(self.locs[0], 3),
+                               calc_segment(self.locs[1], 3),
+                               calc_segment(self.locs[2], 2))
+
+        self.progress = EvalProgress(
+                            eval_size=4,
+                            eval_loc=loc,
+                            processor=self.processor,
+                            segment=0,
+                            todo_count=0,
+                            left_count=0,
+                            solve_order=msg,
+                            updated=timezone.now())
+        self.progress.save()
+
+        try:
+            self._reduce_s3()
+
+            self.progress.solve_order = msg
+            self.progress.updated = timezone.now()
+            self.progress.save(update_fields=['solve_order', 'updated'])
+            self._reduce_s5()
+
+            self.progress.solve_order = msg
+            self.progress.updated = timezone.now()
+            self.progress.save(update_fields=['solve_order', 'updated'])
+            self._reduce_s6()
+
+            self.progress.solve_order = msg
+            self.progress.updated = timezone.now()
+            self.progress.save(update_fields=['solve_order', 'updated'])
+            self._reduce_s8()
+        except KeyboardInterrupt:
+            pass
+
+        self.progress.delete()
 
         if self.reductions == 0:
             self.stdout.write('[INFO] No reductions')

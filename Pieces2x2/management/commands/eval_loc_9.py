@@ -544,14 +544,14 @@ class Command(BaseCommand):
         self.prev_tick = time.monotonic()
 
         self.progress = EvalProgress(
-                        eval_size=9,
-                        eval_loc=self.locs[0],
-                        processor=self.processor,
-                        segment=0,
-                        todo_count=0,
-                        left_count=0,
-                        solve_order='',
-                        updated=timezone.now())
+                            eval_size=9,
+                            eval_loc=self.locs[0],
+                            processor=self.processor,
+                            segment=0,
+                            todo_count=0,
+                            left_count=0,
+                            solve_order='',
+                            updated=timezone.now())
         self.progress.save()
 
         try:
