@@ -33,7 +33,7 @@ class Command(BaseCommand):
                 count_doing = qset.filter(doing=True).count()
                 count_queue = qset.filter(doing=False).count()
 
-                self.stdout.write('[INFO] Of wish %s ongoing and %s queued' % (count_doing, count_queue))
+                self.stdout.write('       of which %s ongoing and %s queued' % (count_doing, count_queue))
 
         # for
 
