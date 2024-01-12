@@ -16,18 +16,25 @@ class Command(BaseCommand):
 
         for processor, loc, job in (Work
                                     .objects
-                                    .filter(done=False,
-                                            doing=False)
+                                    .filter(done=False)
                                     .distinct('processor',
                                               'location',
                                               'job_type')
                                     .values_list('processor', 'location', 'job_type')):
 
-            count = Work.objects.filter(done=False, doing=False, processor=processor, location=loc, job_type=job).count()
-            print(processor, loc, job, count)
+            qset = Work.objects.filter(done=False, processor=processor, location=loc, job_type=job)
+
+            count = qset.count()
+
             if count > 1:
-                self.stdout.write('[INFO] Found duplicates with processor=%s, location=%s, job_type=%s' % (
-                                processor, loc, repr(job)))
+                self.stdout.write('[INFO] Found duplicate work with processor=%s, location=%s, job_type=%s' % (
+                                    processor, loc, repr(job)))
+
+                count_doing = qset.filter(doing=True).count()
+                count_queue = qset.filter(doing=False).count()
+
+                self.stdout.write('[INFO] Of wish %s ongoing and %s queued' % (count_doing, count_queue))
+
         # for
 
 # end of file
