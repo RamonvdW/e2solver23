@@ -10,7 +10,7 @@ from WorkQueue.models import Work
 
 class WorkAdmin(admin.ModelAdmin):
 
-    list_filter = ('done', 'doing', 'priority', 'processor', 'job_type', 'loc')
+    list_filter = ('done', 'doing', 'priority', 'processor', 'job_type', 'location')
 
 
 admin.site.register(Work, WorkAdmin)
