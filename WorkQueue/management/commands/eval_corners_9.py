@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -9,6 +9,7 @@ from django.core.management.base import BaseCommand
 from Pieces2x2.models import TwoSide, TwoSideOptions, Piece2x2, EvalProgress
 from Pieces2x2.helpers import calc_segment
 from Solutions.models import Solution8x8
+from WorkQueue.operations import propagate_segment_reduction, get_unused
 import datetime
 import time
 
@@ -167,9 +168,12 @@ class Command(BaseCommand):
         self.board_unused = list()
         self.p_nrs_order = list()
         self.requested_order = list()
+
+        self.skip_p_nrs = list()
+        self.skip_locs = list()
+
         self.prev_tick = 0
         self.progress = None
-
         self.progress_15min = -1
 
     def add_arguments(self, parser):
@@ -204,23 +208,26 @@ class Command(BaseCommand):
         sol.save()
         print('[INFO] Saved progress solution: pk=%s' % sol.pk)
 
-    def _calc_unused0(self):
-        self.unused0 = list(range(1, 256+1))
+    def _get_unused(self):
+        unused = get_unused(self.processor)
 
-        if 36 not in self.locs:
-            self.unused0.remove(139)
+        if 36 not in self.locs and 139 in unused:
+            unused.remove(139)
 
-        if 10 not in self.locs:
-            self.unused0.remove(208)
+        if 10 not in self.locs and 208 in unused:
+            unused.remove(208)
 
-        if 15 not in self.locs:
-            self.unused0.remove(255)
+        if 15 not in self.locs and 255 in unused:
+            unused.remove(255)
 
-        if 50 not in self.locs:
-            self.unused0.remove(181)
+        if 50 not in self.locs and 181 in unused:
+            unused.remove(181)
 
-        if 55 not in self.locs:
-            self.unused0.remove(249)
+        if 55 not in self.locs and 249 in unused:
+            unused.remove(249)
+
+        self.stdout.write('[INFO] %s base pieces in use' % (256 - len(unused)))
+        return unused
 
     def _reverse_sides(self, options):
         return [self.twoside2reverse[two_side] for two_side in options]
@@ -504,13 +511,35 @@ class Command(BaseCommand):
         self.segment_options[calc_segment(self.locs[34], 2)] = s88
         self.segment_options[calc_segment(self.locs[35], 2)] = s89
 
+    def _find_filled_locs(self):
+        for p_nr, loc in enumerate(self.locs):
+            s1, s2, s3, s4 = self.side_nrs[p_nr]
+            options1 = self.side_options[s1]
+            options2 = self.side_options[s2]
+            options3 = self.side_options_rev[s3]
+            options4 = self.side_options_rev[s4]
+
+            if len(options1) == 1 and len(options2) == 1 and len(options3) == 1 and len(options4) == 1:
+                # completely decided locations; no need to evaluate
+                self.stdout.write('[INFO] loc %s is filled' % loc)
+                self.skip_p_nrs.append(p_nr)
+                self.skip_locs.append(loc)
+                self.board[p_nr] = Piece2x2(nr=0,                   # dummy
+                                            nr1=0, nr2=0, nr3=0, nr4=0,
+                                            side1=options1[0],
+                                            side2=options2[0],
+                                            side3=options3[0],
+                                            side4=options4[0])
+        # for
+
     def _board_place(self, p_nr: int, p2x2):
         self.board_order.append(p_nr)
         self.board[p_nr] = p2x2
-        self.board_unused.remove(p2x2.nr1)
-        self.board_unused.remove(p2x2.nr2)
-        self.board_unused.remove(p2x2.nr3)
-        self.board_unused.remove(p2x2.nr4)
+        if p2x2.nr != 0:
+            self.board_unused.remove(p2x2.nr1)
+            self.board_unused.remove(p2x2.nr2)
+            self.board_unused.remove(p2x2.nr3)
+            self.board_unused.remove(p2x2.nr4)
 
     def _board_pop(self):
         p_nr = self.board_order[-1]
@@ -520,6 +549,17 @@ class Command(BaseCommand):
         self.board_unused.extend([p2x2.nr1, p2x2.nr2, p2x2.nr3, p2x2.nr4])
 
     def _iter(self, options_side1, options_side2, options_side3, options_side4):
+        if len(options_side1) == 1 and len(options_side2) == 1 and len(options_side3) == 1 and len(options_side4) == 1:
+            # special case: this location is already filled, so it can be skipped
+            p2x2 = Piece2x2(nr=0,
+                            nr1=0, nr2=0, nr3=0, nr4=0,
+                            side1=options_side1[0],
+                            side2=options_side2[0],
+                            side3=options_side3[0],
+                            side4=options_side4[0])
+            yield p2x2
+            return
+
         unused = self.board_unused
         for p in (Piece2x2
                   .objects
@@ -542,6 +582,7 @@ class Command(BaseCommand):
             self.stdout.write('[INFO] Reduction segment %s: %s' % (segment, two_side))
             if self.do_commit:
                 qset.delete()
+                propagate_segment_reduction(self.processor, segment)
             self.reductions += 1
 
     def _check_open_ends_1(self):
@@ -698,7 +739,7 @@ class Command(BaseCommand):
 
     def _find_recurse(self):
         tick = time.monotonic()
-        if tick - self.prev_tick > 30:
+        if tick - self.prev_tick > 15:
             self.prev_tick = tick
             msg = '(%s) %s' % (len(self.board_order), repr([self.locs[idx] for idx in self.board_order]))
             # print(msg)
@@ -706,9 +747,9 @@ class Command(BaseCommand):
             self.progress.updated = timezone.now()
             self.progress.save(update_fields=['solve_order', 'updated'])
 
-        if len(self.board_order) == len(self.locs):
-            if self._check_progress_15min():
-                self._save_progress_solution()
+        if len(self.board_order) == len(self.locs) - len(self.skip_locs):
+            # if self._check_progress_15min():
+            #     self._save_progress_solution()
             return True
 
         # decide which p_nr to continue with
@@ -764,6 +805,11 @@ class Command(BaseCommand):
             loc2 = segment - 129
             loc4 = segment - 128
 
+            if loc2 in self.skip_locs:
+                loc2 = 99
+            if loc4 in self.skip_locs:
+                loc4 = 99
+
             if loc2 in self.locs and loc4 in self.locs:
                 # we can choose
                 if loc4 == self.requested_order[0]:
@@ -779,6 +825,11 @@ class Command(BaseCommand):
             # assume side=1
             loc1 = segment
             loc3 = segment - 8
+
+            if loc1 in self.skip_locs:
+                loc1 = 99
+            if loc3 in self.skip_locs:
+                loc3 = 99
 
             if loc1 in self.locs and loc3 in self.locs:
                 # we can choose
@@ -896,13 +947,15 @@ class Command(BaseCommand):
                 else:
                     self.stdout.write('[WARNING] Duplicate in requested order: %s' % loc)
         # for
-        self.stdout.write('[INFO] Initial solve order: %s' % repr(self.requested_order))
 
-        self._calc_unused0()
-        self.board_unused = self.unused0[:]
+        self.stdout.write('[INFO] Initial solve order: %s' % repr(self.requested_order))
 
         self._get_side_options()
         # self.stdout.write('%s' % ", ".join([str(len(opt)) for opt in self.side_options]))
+
+        self.board_unused = self._get_unused()
+
+        self._find_filled_locs()
 
         self.prev_tick = time.monotonic()
 
