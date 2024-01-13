@@ -463,7 +463,7 @@ class Command(BaseCommand):
         if tick - self.prev_tick > 30:
             self.prev_tick = tick
             msg = '(%s) %s' % (len(self.board_order), repr([self.locs[idx] for idx in self.board_order]))
-            print(msg)
+            # print(msg)
             self.progress.solve_order = msg
             self.progress.updated = timezone.now()
             self.progress.save(update_fields=['solve_order', 'updated'])

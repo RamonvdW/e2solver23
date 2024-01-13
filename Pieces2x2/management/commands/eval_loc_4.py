@@ -560,10 +560,10 @@ class Command(BaseCommand):
         self._get_side_options()
         # self.stdout.write('%s' % ", ".join([str(len(opt)) for opt in self.side_options]))
 
-        msg = "%s %s %s %s" % (calc_segment(self.locs[0], 2),
-                               calc_segment(self.locs[0], 3),
-                               calc_segment(self.locs[1], 3),
-                               calc_segment(self.locs[2], 2))
+        msg = "[%s, %s, %s, %s]" % (calc_segment(self.locs[0], 2),
+                                    calc_segment(self.locs[0], 3),
+                                    calc_segment(self.locs[1], 3),
+                                    calc_segment(self.locs[2], 2))
 
         self.progress = EvalProgress(
                             eval_size=4,
