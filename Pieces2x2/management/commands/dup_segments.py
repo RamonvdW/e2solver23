@@ -14,6 +14,7 @@ class Command(BaseCommand):
     help = "Duplicate the latest TwoSideOptions"
 
     def add_arguments(self, parser):
+        parser.add_argument('source', nargs=1, type=int, help='Processor number to copy from')
         parser.add_argument('processor', nargs=1, type=int, help='New processor number')
 
     def handle(self, *args, **options):
@@ -24,16 +25,16 @@ class Command(BaseCommand):
             self.stderr.write('[ERROR] Processor %s already exists' % processor)
             return
 
-        last_rec = TwoSideOptions.objects.distinct('processor').order_by('processor').last()
-        if not last_rec:
-            self.stderr.write('[ERROR] Nothing to duplicate')
+        source = options['source'][0]
+        count = TwoSideOptions.objects.filter(processor=source).count()
+        if count == 0:
+            self.stderr.write('[ERROR] Nothing to copy')
             return
 
-        max_processor = last_rec.processor
-        self.stdout.write('[INFO] Duplicating processor %s to %s' % (max_processor, processor))
+        self.stdout.write('[INFO] Duplicating processor %s to %s' % (source, processor))
 
         bulk = list()
-        for options in TwoSideOptions.objects.filter(processor=max_processor):
+        for options in TwoSideOptions.objects.filter(processor=source):
             option = TwoSideOptions(
                         processor=processor,
                         segment=options.segment,
@@ -44,7 +45,15 @@ class Command(BaseCommand):
         self.stdout.write('[INFO] Creating %s records' % len(bulk))
         TwoSideOptions.objects.bulk_create(bulk)
 
-        ProcessorUsedPieces(processor=processor).save()
+        try:
+            work = ProcessorUsedPieces.objects.get(processor=source)
+        except ProcessorUsedPieces.DoesNotExist:
+            self.stdout.write('[WARNING] Could not load used pieces for processor %s; creating new' % source)
+            work = ProcessorUsedPieces()
+        else:
+            work.pk = None
+            work.processor = processor
+        work.save()
 
 
 # end of file
