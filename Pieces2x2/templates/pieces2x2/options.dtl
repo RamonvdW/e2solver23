@@ -72,7 +72,7 @@
 
                 <br><br>
 
-                <table>
+                <table style="margin-left:auto; margin-right:auto">
                     <tr>
                         {% for sol in solution %}
                             <td>{% if not sol.is_empty %}{{ sol.nr }}{% endif %}</td>
@@ -83,6 +83,8 @@
                         {% endfor %}
                     </tr>
                 </table>
+
+                <p>Used nrs: {% for block in used %}{{ block }}<br>{% endfor %}</p>
 
                 <br><br>
 

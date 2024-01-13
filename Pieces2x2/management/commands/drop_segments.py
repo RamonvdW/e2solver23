@@ -6,7 +6,7 @@
 
 from django.core.management.base import BaseCommand
 from Pieces2x2.models import TwoSideOptions
-from WorkQueue.models import Work
+from WorkQueue.models import Work, ProcessorUsedPieces
 
 
 class Command(BaseCommand):
@@ -32,5 +32,11 @@ class Command(BaseCommand):
             count = Work.objects.filter(processor=processor).count()
             Work.objects.filter(processor=processor).delete()
             self.stdout.write('[INFO] Deleted %s jobs for processor %s from work queue' % (count, processor))
+
+        try:
+            ProcessorUsedPieces.objects.filter(processor=processor).delete()
+        except ProcessorUsedPieces.DoesNotExist:
+            pass
+
 
 # end of file

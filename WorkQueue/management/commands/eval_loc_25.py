@@ -9,7 +9,7 @@ from django.core.management.base import BaseCommand
 from Pieces2x2.models import TwoSide, TwoSideOptions, Piece2x2, EvalProgress
 from Pieces2x2.helpers import calc_segment
 from Solutions.models import Solution8x8
-from WorkQueue.operations import propagate_segment_reduction
+from WorkQueue.operations import propagate_segment_reduction, get_unused
 import datetime
 import time
 
@@ -65,8 +65,6 @@ class Command(BaseCommand):
         self.side_options_rev = ([], [])    # s0..s23
         self.segment_options = dict()       # [segment] = side_options
         self.reductions = 0
-
-        self.unused0 = list()
 
         self.do_commit = True
 
@@ -196,23 +194,26 @@ class Command(BaseCommand):
         sol.save()
         print('[INFO] Saved progress solution: pk=%s' % sol.pk)
 
-    def _calc_unused0(self):
-        self.unused0 = list(range(1, 256+1))
+    def _get_unused(self):
+        unused = get_unused(self.processor)
 
-        if 36 not in self.locs:
-            self.unused0.remove(139)
+        if 36 not in self.locs and 139 in unused:
+            unused.remove(139)
 
-        if 10 not in self.locs:
-            self.unused0.remove(208)
+        if 10 not in self.locs and 208 in unused:
+            unused.remove(208)
 
-        if 15 not in self.locs:
-            self.unused0.remove(255)
+        if 15 not in self.locs and 255 in unused:
+            unused.remove(255)
 
-        if 50 not in self.locs:
-            self.unused0.remove(181)
+        if 50 not in self.locs and 181 in unused:
+            unused.remove(181)
 
-        if 55 not in self.locs:
-            self.unused0.remove(249)
+        if 55 not in self.locs and 249 in unused:
+            unused.remove(249)
+
+        self.stdout.write('[INFO] %s base pieces in use' % (256 - len(unused)))
+        return unused
 
     def _reverse_sides(self, options):
         return [self.twoside2reverse[two_side] for two_side in options]
@@ -777,8 +778,7 @@ class Command(BaseCommand):
         # for
         self.stdout.write('[INFO] Initial solve order: %s' % repr(self.requested_order))
 
-        self._calc_unused0()
-        self.board_unused = self.unused0[:]
+        self.board_unused = self._get_unused()
 
         self._get_side_options()
         # self.stdout.write('%s' % ", ".join([str(len(opt)) for opt in self.side_options]))

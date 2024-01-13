@@ -8,7 +8,7 @@ from django.utils import timezone
 from django.core.management.base import BaseCommand
 from Pieces2x2.models import TwoSide, TwoSideOptions, Piece2x2, EvalProgress
 from Pieces2x2.helpers import calc_segment
-from WorkQueue.operations import propagate_segment_reduction
+from WorkQueue.operations import propagate_segment_reduction, get_unused
 
 
 class Command(BaseCommand):
@@ -54,82 +54,28 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('processor', nargs=1, type=int, help='Processor number to use')
-        parser.add_argument('loc', nargs=1, type=int, help='Location on board (1..55)')
+        parser.add_argument('loc', nargs=1, type=int, help='Top-left location on the board (1..55)')
         parser.add_argument('--dryrun', action='store_true')
 
     def _get_unused(self):
-        unused0 = list(range(1, 256+1))
+        unused = get_unused(self.processor)
 
-        if 36 not in self.locs:
-            unused0.remove(139)
+        if 36 not in self.locs and 139 in unused:
+            unused.remove(139)
 
-        if 10 not in self.locs:
-            unused0.remove(208)
+        if 10 not in self.locs and 208 in unused:
+            unused.remove(208)
 
-        if 15 not in self.locs:
-            unused0.remove(255)
+        if 15 not in self.locs and 255 in unused:
+            unused.remove(255)
 
-        if 50 not in self.locs:
-            unused0.remove(181)
+        if 50 not in self.locs and 181 in unused:
+            unused.remove(181)
 
-        if 55 not in self.locs:
-            unused0.remove(249)
-
-        unused = unused0[:]
-
-        # load all the segments
-        seg2count = dict()
-        for options in TwoSideOptions.objects.filter(processor=self.processor):
-            try:
-                seg2count[options.segment] += 1
-            except KeyError:
-                seg2count[options.segment] = 1
-        # for
-
-        # check how many Piece2x2 fit each location
-        for loc in range(1, 64+1):
-            if loc not in self.locs:                # avoid blocking an evaluation location
-                seg1 = calc_segment(loc, 1)
-                seg2 = calc_segment(loc, 2)
-                seg3 = calc_segment(loc, 3)
-                seg4 = calc_segment(loc, 4)
-
-                count1 = seg2count[seg1]
-                count2 = seg2count[seg2]
-                count3 = seg2count[seg3]
-                count4 = seg2count[seg4]
-
-                if count1 == 1 and count2 == 1 and count3 == 1 and count4 == 1:
-                    # limited options on this location: get the Piece2x2
-                    side1 = TwoSideOptions.objects.get(processor=self.processor, segment=seg1).two_side
-                    side2 = TwoSideOptions.objects.get(processor=self.processor, segment=seg2).two_side
-                    side3 = TwoSideOptions.objects.get(processor=self.processor, segment=seg3).two_side
-                    side4 = TwoSideOptions.objects.get(processor=self.processor, segment=seg4).two_side
-
-                    side3 = self.twoside2reverse[side3]
-                    side4 = self.twoside2reverse[side4]
-
-                    nrs = dict()
-                    p2x2_count = 0
-                    for p2x2 in Piece2x2.objects.filter(side1=side1, side2=side2, side3=side3, side4=side4,
-                                                        nr1__in=unused0, nr2__in=unused0,
-                                                        nr3__in=unused0, nr4__in=unused0):
-                        p2x2_count += 1
-                        for nr in (p2x2.nr1, p2x2.nr2, p2x2.nr3, p2x2.nr4):
-                            try:
-                                nrs[nr] += 1
-                            except KeyError:
-                                nrs[nr] = 1
-                        # for
-                    # for
-                    for nr, nr_count in nrs.items():
-                        if nr_count == p2x2_count:
-                            unused.remove(nr)
-                    # for
-        # for
+        if 55 not in self.locs and 249 in unused:
+            unused.remove(249)
 
         self.stdout.write('[INFO] %s base pieces in use' % (256 - len(unused)))
-
         return unused
 
     def _reverse_sides(self, options):

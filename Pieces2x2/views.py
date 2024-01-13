@@ -11,7 +11,7 @@ from django.views.generic import TemplateView
 from django.templatetags.static import static
 from Pieces2x2.models import Piece2x2, TwoSide, TwoSideOptions, EvalProgress
 from Pieces2x2.helpers import calc_segment
-from WorkQueue.models import Work
+from WorkQueue.models import Work, ProcessorUsedPieces
 from types import SimpleNamespace
 import time
 
@@ -495,6 +495,29 @@ class OptionsView(TemplateView):
         # for
         return out
 
+    def _get_used(self, processor):
+        try:
+            used = ProcessorUsedPieces.objects.get(processor=processor)
+        except ProcessorUsedPieces.DoesNotExist:
+            # make a new one
+            used =  ProcessorUsedPieces(processor=processor)
+
+        used_nrs = list()
+        for nr in range(1, 256+1):
+            nr_str = 'nr%s' % nr
+            if getattr(used, nr_str, False):
+                used_nrs.append(str(nr))
+        # for
+
+        blocks = list()
+        while len(used_nrs) > 15:
+            blocks.append(", ".join(used_nrs[:15]) + ',')
+            used_nrs = used_nrs[15:]
+        # while
+        blocks.append(", ".join(used_nrs))
+
+        return blocks
+
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
@@ -559,6 +582,8 @@ class OptionsView(TemplateView):
         except KeyError:
             highlight_segments = list()
         context['squares'] = self._make_squares(segment2count, highlight_segments)
+
+        context['used'] = self._get_used(processor)
 
         context['solution'] = self._make_solution(processor)
 

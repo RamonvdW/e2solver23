@@ -7,7 +7,7 @@
 from django.core.management.base import BaseCommand
 from Pieces2x2.models import TwoSide, TwoSideOptions, Piece2x2
 from Pieces2x2.helpers import calc_segment
-from WorkQueue.operations import propagate_segment_reduction
+from WorkQueue.operations import propagate_segment_reduction, set_used
 
 
 class Command(BaseCommand):
@@ -170,6 +170,9 @@ class Command(BaseCommand):
             self._reduce_loc_57(corner_base)
         else:
             self._reduce_loc_64(corner_base)
+
+        base_nrs = [corner_base]
+        set_used(self.processor, base_nrs)
 
         total = sum(self.reductions.values())
         if total == 0:

@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.db import IntegrityError
-from WorkQueue.models import Work
+from WorkQueue.models import Work, ProcessorUsedPieces
 
 
 def _segment_to_loc_1(segment):
@@ -190,6 +190,42 @@ def propagate_segment_reduction(processor, segment):
     _add_work(processor, 9, 'eval_loc_9', loc_12)
 
     #location = segment_to_loc_16(segment)
+
+
+def get_unused(processor):
+    """ return the list with unused based piece numbers """
+
+    unused = list(range(1, 256+1))
+    try:
+        used = ProcessorUsedPieces.objects.get(processor=processor)
+    except ProcessorUsedPieces.DoesNotExist:
+        # not available; so simple return all
+        pass
+    else:
+        for nr in range(1, 256+1):
+            nr_str = 'nr%s' % nr
+            if getattr(used, nr_str, False):
+                # this piece is used
+                unused.remove(nr)
+        # for
+
+    return unused
+
+
+def set_used(processor, base_nrs):
+    try:
+        used = ProcessorUsedPieces.objects.get(processor=processor)
+    except ProcessorUsedPieces.DoesNotExist:
+        # not available; so simple skip
+        pass
+    else:
+        updated = list()
+        for nr in base_nrs:
+            nr_str = 'nr%s' % nr
+            setattr(used, nr_str, True)
+            updated.append(nr_str)
+        # for
+        used.save(update_fields=updated)
 
 
 # end of file
