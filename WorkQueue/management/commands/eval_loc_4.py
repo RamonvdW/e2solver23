@@ -136,6 +136,17 @@ class Command(BaseCommand):
 
     @staticmethod
     def _iter(unused1, options_side1, options_side2, options_side3, options_side4):
+        if len(options_side1) == 1 and len(options_side2) == 1 and len(options_side3) == 1 and len(options_side4) == 1:
+            # special case: this location is already filled, so it can be skipped
+            p2x2 = Piece2x2(nr=0,
+                            nr1=0, nr2=0, nr3=0, nr4=0,
+                            side1=options_side1[0],
+                            side2=options_side2[0],
+                            side3=options_side3[0],
+                            side4=options_side4[0])
+            yield p2x2, unused1
+            return
+
         for p in (Piece2x2
                   .objects
                   .filter(side1__in=options_side1,

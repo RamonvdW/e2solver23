@@ -53,7 +53,7 @@ class Command(BaseCommand):
         else:
             # force creation of a new record
             work.pk = None
-            
+
         work.processor = processor
         work.save()
 
