@@ -26,6 +26,6 @@ class Command(BaseCommand):
             count += 1
         # for
 
-        self.stdout.write('[INFO] Reduce priority of %s jobs for processor %s' % (count, processore))
+        self.stdout.write('[INFO] Reduce priority of %s jobs for processor %s' % (count, processor))
 
 # end of file
