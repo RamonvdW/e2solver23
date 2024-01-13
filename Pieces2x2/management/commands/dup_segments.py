@@ -51,8 +51,10 @@ class Command(BaseCommand):
             self.stdout.write('[WARNING] Could not load used pieces for processor %s; creating new' % source)
             work = ProcessorUsedPieces()
         else:
+            # force creation of a new record
             work.pk = None
-            work.processor = processor
+            
+        work.processor = processor
         work.save()
 
 
