@@ -409,6 +409,26 @@ class Command(BaseCommand):
         self.segment_options[calc_segment(self.locs[23], 3)] = s58
         self.segment_options[calc_segment(self.locs[24], 3)] = s59
 
+    def _find_filled_locs(self):
+        for p_nr, loc in enumerate(self.locs):
+            s1, s2, s3, s4 = self.side_nrs[p_nr]
+            options1 = self.side_options[s1]
+            options2 = self.side_options[s2]
+            options3 = self.side_options_rev[s3]
+            options4 = self.side_options_rev[s4]
+
+            if len(options1) == 1 and len(options2) == 1 and len(options3) == 1 and len(options4) == 1:
+                # completely decided locations; no need to evaluate
+                self.stdout.write('[INFO] loc %s is filled' % loc)
+                self.board_order.append(p_nr)
+                self.board[p_nr] = Piece2x2(nr=0,                   # dummy
+                                            nr1=0, nr2=0, nr3=0, nr4=0,
+                                            side1=options1[0],
+                                            side2=options2[0],
+                                            side3=options3[0],
+                                            side4=options4[0])
+        # for
+
     def _board_place(self, p_nr: int, p2x2):
         self.board_order.append(p_nr)
         self.board[p_nr] = p2x2
@@ -447,8 +467,8 @@ class Command(BaseCommand):
             self.stdout.write('[INFO] Reduction segment %s: %s' % (segment, two_side))
             if self.do_commit:
                 qset.delete()
+                propagate_segment_reduction(self.processor, segment)
             self.reductions += 1
-            propagate_segment_reduction(self.processor, segment)
 
     def _check_open_ends_1(self):
         #  verify each twoside open end can still be solved
@@ -613,8 +633,8 @@ class Command(BaseCommand):
             self.progress.save(update_fields=['solve_order', 'updated'])
 
         if len(self.board_order) == len(self.locs):
-            if self._check_progress_15min():
-                self._save_progress_solution()
+            # if self._check_progress_15min():
+            #     self._save_progress_solution()
             return True
 
         # decide which p_nr to continue with
@@ -782,6 +802,8 @@ class Command(BaseCommand):
 
         self._get_side_options()
         # self.stdout.write('%s' % ", ".join([str(len(opt)) for opt in self.side_options]))
+
+        self._find_filled_locs()
 
         self.prev_tick = time.monotonic()
 
