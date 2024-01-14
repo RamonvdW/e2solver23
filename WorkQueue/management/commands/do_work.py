@@ -106,19 +106,15 @@ class Command(BaseCommand):
         worker_nr = options['worker_nr'][0]
         self.stdout.write('[INFO] Worker number: %s' % worker_nr)
 
-        if worker_nr <= 1:
+        if worker_nr == 0:
             # restart all ongoing work
             Work.objects.filter(done=False, doing=True).update(doing=False)
             EvalProgress.objects.all().delete()
-
-            if worker_nr == 0:
-                return
-        else:
-            # allow a few seconds for the worker 1 to start and reset all ongoing work
-            time.sleep(5)
+            return
 
         while worker_nr:
             self._find_work()
             time.sleep(0.1)
+        # while
 
 # end of file

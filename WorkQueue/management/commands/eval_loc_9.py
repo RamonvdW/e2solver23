@@ -425,24 +425,15 @@ class Command(BaseCommand):
         self.stdout.write('[INFO] Checking %s options in segment %s' % (len(sides), segment))
         self.p_nrs_order = list()       # allow deciding optimal order anew
 
-        updated = list()
-        if segment != self.progress.segment:
-            self.progress.segment = segment
-            updated.append('segment')
-
-        if todo != self.progress.todo_count:
-            self.progress.todo_count = todo
-            updated.append('todo_count')
+        self.progress.segment = segment
+        self.progress.todo_count = todo
+        self.progress.save(update_fields=['segment', 'todo_count'])
 
         for side in sides:
             # update the progress record in the database
-            if todo != self.progress.left_count:
-                self.progress.left_count = todo
-                updated.append('left_count')
+            self.progress.left_count = todo
             self.progress.updated = timezone.now()
-            updated.append('updated')
-            self.progress.save(update_fields=updated)
-            updated = list()
+            self.progress.save(update_fields=['left_count', 'updated'])
 
             # place the first piece
             s1, s2, s3, s4 = self.side_nrs[p_nr]

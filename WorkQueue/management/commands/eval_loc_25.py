@@ -699,20 +699,14 @@ class Command(BaseCommand):
         loc, side_n = self._segment_to_loc(self.segment)
         p_nr = self.locs.index(loc)
 
-        updated = list()
-        if todo != self.progress.todo_count:
-            self.progress.todo_count = todo
-            updated.append('todo_count')
+        self.progress.todo_count = todo
+        self.progress.save(update_fields=['todo'])
 
         for side in sides:
             # update the progress record in the database
-            if todo != self.progress.left_count:
-                self.progress.left_count = todo
-                updated.append('left_count')
+            self.progress.left_count = todo
             self.progress.updated = timezone.now()
-            updated.append('updated')
-            self.progress.save(update_fields=updated)
-            updated = list()
+            self.progress.save(update_fields=['left_count', 'updated'])
 
             # place the first piece
             s1, s2, s3, s4 = self.side_nrs[p_nr]
