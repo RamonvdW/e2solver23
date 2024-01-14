@@ -176,7 +176,8 @@ class Command(BaseCommand):
             # for
         # for
 
-        set_used(self.processor, base_nrs)
+        if self.do_commit:
+            set_used(self.processor, base_nrs)
 
         total = sum(self.reductions.values())
         if total == 0:
