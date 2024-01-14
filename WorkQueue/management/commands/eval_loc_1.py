@@ -4,8 +4,9 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+from django.utils import timezone
 from django.core.management.base import BaseCommand
-from Pieces2x2.models import TwoSide, TwoSideOptions, Piece2x2
+from Pieces2x2.models import TwoSide, TwoSideOptions, Piece2x2, EvalProgress
 from Pieces2x2.helpers import calc_segment
 from WorkQueue.operations import propagate_segment_reduction, get_unused, set_used
 
@@ -131,6 +132,18 @@ class Command(BaseCommand):
 
         if count == 0:
             self.stderr.write('[ERROR] Safety stop')
+
+            progress, is_created = EvalProgress.objects.get_or_create(
+                                                    eval_size=1,
+                                                    eval_loc=self.loc,
+                                                    processor=self.processor,
+                                                    segment=0,
+                                                    todo_count=0,
+                                                    left_count=0,
+                                                    solve_order="Safety stop!")
+            if is_created:
+                progress.updated = timezone.now()
+                progress.save()
             return
 
         if count == 1:
