@@ -12,7 +12,7 @@ from WorkQueue.operations import propagate_segment_reduction, set_used, get_unus
 
 class Command(BaseCommand):
 
-    help = "Fix one of the locations to one of possible Piece2x2"
+    help = "Show the base piece claims for locations with limited options"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -33,13 +33,10 @@ class Command(BaseCommand):
         self.processor = 0
         self.reductions = {1: 0, 2: 0, 3: 0, 4: 0}     # [side_nr] = count
         self.unused = list()
-        self.do_commit = False
 
     def add_arguments(self, parser):
-        parser.add_argument('--commit', action='store_true')
+        # parser.add_argument('--verbose', action='store_true')
         parser.add_argument('processor', nargs=1, type=int, help='Processor number to use')
-        parser.add_argument('loc', nargs=1, type=int, help='Location on board')
-        parser.add_argument('index', nargs=1, type=int, help='i-th Piece2x2 number to use')
 
     def _reverse_sides(self, options):
         return [self.twoside2reverse[two_side] for two_side in options]
@@ -64,25 +61,8 @@ class Command(BaseCommand):
         # print('segment %s options: %s' % (segment, repr(options)))
         return options
 
-    def _reduce(self, segment, two_side, side_nr):
-        if side_nr in (3, 4):
-            two_side = self.twoside2reverse[two_side]
-
-        qset = TwoSideOptions.objects.filter(processor=self.processor, segment=segment, two_side=two_side)
-        if qset.count() != 1:
-            self.stderr.write('[ERROR] Cannot find segment=%s, two_side=%s' % (segment, two_side))
-        else:
-            if self.do_commit:
-                self.stdout.write('[INFO] Reduction side%s: %s' % (side_nr, two_side))
-                qset.delete()
-                propagate_segment_reduction(self.processor, segment)
-            self.reductions[side_nr] += 1
-
-    def _limit_base_pieces(self, not_loc):
+    def _limit_base_pieces(self):
         for loc in range(1, 64+1):
-            if loc == not_loc:
-                continue
-
             # see if this loc requires certain base pieces
             options1 = self._get_side_options(loc, 1)
             options2 = self._get_side_options(loc, 2)
@@ -121,73 +101,13 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
-        self.do_commit = options['commit']
-
-        loc = options['loc'][0]
-        if loc in (10, 15, 50, 55, 36):
-            self.stderr.write('[ERROR] Invalid location')
-            return
-
         self.processor = options['processor'][0]
 
-        index = options['index'][0]
-
-        self.stdout.write('[INFO] Processor=%s; Location: %s' % (self.processor, loc))
+        self.stdout.write('[INFO] Processor=%s' % self.processor)
 
         self._load_unused()
 
-        # self._limit_base_pieces(loc)
-
-        options1 = self._get_side_options(loc, 1)
-        options2 = self._get_side_options(loc, 2)
-        options3 = self._get_side_options(loc, 3)
-        options4 = self._get_side_options(loc, 4)
-
-        qset = Piece2x2.objects.filter(side1__in=options1, side2__in=options2, side3__in=options3, side4__in=options4,
-                                       nr1__in=self.unused, nr2__in=self.unused, nr3__in=self.unused, nr4__in=self.unused)
-        nrs = list(qset.values_list('nr', flat=True))
-
-        self.stdout.write('[INFO] Selecting %s / %s' % (index, len(nrs)))
-
-        try:
-            nr = nrs[index]
-        except IndexError:
-            self.stderr.write('[ERROR] Invalid index')
-            return
-
-        p2x2 = qset.get(nr=nr)
-
-        base_nrs = [p2x2.nr1, p2x2.nr2, p2x2.nr3, p2x2.nr4]
-        print('[INFO] Selected p2x2 with base nrs: %s' % repr(base_nrs))
-        # print('[DEBUG] p2x2 sides: %s, %s, %s, %s' % (p2x2.side1, p2x2.side2, p2x2.side3, p2x2.side4))
-
-        for side_nr in (1, 2, 3, 4):
-            segment = calc_segment(loc, side_nr)
-            self.stdout.write('[INFO] Side %s is segment %s' % (side_nr, segment))
-
-            side_options = self._get_side_options(loc, side_nr)     # gets reversed for side 3 and 4
-
-            side_field = 'side%s' % side_nr
-            side_new = getattr(p2x2, side_field, self.twoside_border)
-
-            for side in side_options:
-                if side != side_new:
-                    self._reduce(segment, side, side_nr)            # reverses back for side 3 and 4
-            # for
-        # for
-
-        set_used(self.processor, base_nrs)
-
-        total = sum(self.reductions.values())
-        if total == 0:
-            self.stdout.write('[INFO] No reductions')
-        else:
-            self.stdout.write('[INFO] Reductions: %s, %s, %s, %s' % (self.reductions[1],
-                                                                     self.reductions[2],
-                                                                     self.reductions[3],
-                                                                     self.reductions[4]))
-            if not self.do_commit:
-                self.stdout.write('[WARNING] Use --commit to keep')
+        self._limit_base_pieces()
 
 
 # end of file
