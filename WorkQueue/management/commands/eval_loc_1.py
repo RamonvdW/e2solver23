@@ -131,19 +131,29 @@ class Command(BaseCommand):
         count = qset.count()
 
         if count == 0:
+            if len(side1_options) + len(side2_options) + len(side3_options) + len(side4_options) == 4:
+                self.stdout.write('[INFO] Location seems filled')
+                return
+
             self.stderr.write('[ERROR] Safety stop')
 
-            progress, is_created = EvalProgress.objects.get_or_create(
-                                                    eval_size=1,
-                                                    eval_loc=self.loc,
-                                                    processor=self.processor,
-                                                    segment=0,
-                                                    todo_count=0,
-                                                    left_count=0,
-                                                    solve_order="Safety stop!")
-            if is_created:
-                progress.updated = timezone.now()
-                progress.save()
+            if EvalProgress.objects.filter(
+                                    eval_size=1,
+                                    eval_loc=self.loc,
+                                    processor=self.processor,
+                                    segment=0,
+                                    todo_count=0,
+                                    left_count=0,
+                                    solve_order="Safety stop!").count() == 0:
+                EvalProgress(
+                        eval_size=1,
+                        eval_loc=self.loc,
+                        processor=self.processor,
+                        segment=0,
+                        todo_count=0,
+                        left_count=0,
+                        solve_order="Safety stop!",
+                        updated=timezone.now()).save()
             return
 
         if count == 1:
