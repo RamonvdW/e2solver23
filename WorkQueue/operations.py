@@ -189,7 +189,7 @@ def propagate_segment_reduction(processor, segment):
     # _add_work(processor, 9, 'eval_loc_9', loc_11)
     # _add_work(processor, 9, 'eval_loc_9', loc_12)
 
-    #location = segment_to_loc_16(segment)
+    # location = segment_to_loc_16(segment)
 
 
 def get_unused(processor):

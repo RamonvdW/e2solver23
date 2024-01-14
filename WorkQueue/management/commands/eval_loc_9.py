@@ -197,7 +197,7 @@ class Command(BaseCommand):
             if len(options1) == 1 and len(options2) == 1 and len(options3) == 1 and len(options4) == 1:
                 # completely decided locations; no need to evaluate
                 self.stdout.write('[INFO] loc %s is filled' % loc)
-                self.board_order.append(loc)
+                self.board_order.append(self.locs.index(loc))
                 self.board[p_nr] = Piece2x2(nr=0,                   # dummy
                                             nr1=0, nr2=0, nr3=0, nr4=0,
                                             side1=options1[0],
