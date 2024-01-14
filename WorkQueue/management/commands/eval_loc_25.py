@@ -700,7 +700,7 @@ class Command(BaseCommand):
         p_nr = self.locs.index(loc)
 
         self.progress.todo_count = todo
-        self.progress.save(update_fields=['todo'])
+        self.progress.save(update_fields=['todo_count'])
 
         for side in sides:
             # update the progress record in the database
