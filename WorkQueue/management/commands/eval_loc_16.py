@@ -490,15 +490,24 @@ class Command(BaseCommand):
         self.stdout.write('[INFO] Checking %s options in segment %s' % (len(sides), segment))
         self.p_nrs_order = list()       # allow deciding optimal order anew
 
-        self.progress.segment = segment
-        self.progress.todo_count = todo
-        self.progress.save(update_fields=['segment', 'todo_count'])
+        updated = list()
+        if segment != self.progress.segment:
+            self.progress.segment = segment
+            updated.append('segment')
+
+        if todo != self.progress.todo_count:
+            self.progress.todo_count = todo
+            updated.append('todo_count')
 
         for side in sides:
             # update the progress record in the database
-            self.progress.left_count = todo
+            if todo != self.progress.left_count:
+                self.progress.left_count = todo
+                updated.append('left_count')
             self.progress.updated = timezone.now()
-            self.progress.save(update_fields=['left_count', 'updated'])
+            updated.append('updated')
+            self.progress.save(update_fields=updated)
+            updated = list()
 
             # place the first piece
             s1, s2, s3, s4 = self.side_nrs[p_nr]
@@ -534,7 +543,6 @@ class Command(BaseCommand):
         # for
 
     def handle(self, *args, **options):
-
         """
                       s0           s1           s2            s3
                     +-----+      +-----+      +-----+       +-----+
@@ -584,14 +592,14 @@ class Command(BaseCommand):
         self.prev_tick = time.monotonic()
 
         self.progress = EvalProgress(
-                        eval_size=16,
-                        eval_loc=self.locs[0],
-                        processor=self.processor,
-                        segment=0,
-                        todo_count=0,
-                        left_count=0,
-                        solve_order='',
-                        updated=timezone.now())
+                            eval_size=16,
+                            eval_loc=self.locs[0],
+                            processor=self.processor,
+                            segment=0,
+                            todo_count=0,
+                            left_count=0,
+                            solve_order='',
+                            updated=timezone.now())
         self.progress.save()
 
         try:
