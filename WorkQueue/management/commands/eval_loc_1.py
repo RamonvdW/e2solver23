@@ -7,7 +7,7 @@
 from django.core.management.base import BaseCommand
 from Pieces2x2.models import TwoSide, TwoSideOptions, Piece2x2
 from Pieces2x2.helpers import calc_segment
-from WorkQueue.operations import propagate_segment_reduction, get_unused
+from WorkQueue.operations import propagate_segment_reduction, get_unused, set_used
 
 
 class Command(BaseCommand):
@@ -127,8 +127,18 @@ class Command(BaseCommand):
 
         self.stdout.write('[INFO] Number of Piece2x2: %s' % qset.count())
 
-        if qset.count() == 0:
+        count = qset.count()
+
+        if count == 0:
             self.stderr.write('[ERROR] Safety stop')
+            return
+
+        if count == 1:
+            # only 1 solution left: set the base pieces as used
+            self.stdout.write('[INFO] Single solution left for loc %s' % self.loc)
+            p2x2 = qset.first()
+            base_nrs = [p2x2.nr1, p2x2.nr2, p2x2.nr3, p2x2.nr4]
+            set_used(self.processor, base_nrs)
             return
 
         side1_new = list(qset.distinct('side1').values_list('side1', flat=True))
