@@ -74,7 +74,7 @@ class Command(BaseCommand):
                                            nr1__in=self.unused, nr2__in=self.unused,
                                            nr3__in=self.unused, nr4__in=self.unused)
 
-            if 1 < qset.count() < 100:
+            if 1 < qset.count() < 1000:
                 self.stdout.write('[INFO] Checking base piece claims on loc %s' % loc)
 
                 p_nrs = {1: [], 2: [], 3: [], 4: []}
@@ -89,13 +89,13 @@ class Command(BaseCommand):
                         p_nrs[4].append(p2x2.nr4)
                 # for
 
-                if len(p_nrs[1]) <= 2:
+                if len(p_nrs[1]) <= 3:
                     self.stdout.write('[INFO] Loc %s requires base %s on nr1' % (loc, repr(p_nrs[1])))
-                if len(p_nrs[2]) <= 2:
+                if len(p_nrs[2]) <= 3:
                     self.stdout.write('[INFO] Loc %s requires base %s on nr2' % (loc, repr(p_nrs[2])))
-                if len(p_nrs[3]) <= 2:
+                if len(p_nrs[3]) <= 3:
                     self.stdout.write('[INFO] Loc %s requires base %s on nr3' % (loc, repr(p_nrs[3])))
-                if len(p_nrs[4]) <= 2:
+                if len(p_nrs[4]) <= 3:
                     self.stdout.write('[INFO] Loc %s requires base %s on nr4' % (loc, repr(p_nrs[4])))
         # for
 
