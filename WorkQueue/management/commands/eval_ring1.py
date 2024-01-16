@@ -9,6 +9,7 @@ from django.core.management.base import BaseCommand
 from Pieces2x2.models import TwoSide, TwoSideOptions, Piece2x2, EvalProgress
 from Pieces2x2.helpers import calc_segment
 from Solutions.models import Solution8x8
+from WorkQueue.operations import propagate_segment_reduction, get_unused
 import datetime
 import time
 
@@ -66,8 +67,6 @@ class Command(BaseCommand):
         self.segment_options = dict()       # [segment] = side_options
         self.segment_options_rev = dict()   # [segment] = side_options
         self.reductions = 0
-
-        self.unused0 = list()
 
         self.do_commit = True
 
@@ -174,14 +173,26 @@ class Command(BaseCommand):
         sol.save()
         print('[INFO] Saved progress solution: pk=%s' % sol.pk)
 
-    def _calc_unused0(self):
-        self.unused0 = list(range(1, 256+1))
-        # none of the hints are in Ring1
-        self.unused0.remove(139)
-        #self.unused0.remove(208)
-        #self.unused0.remove(255)
-        #self.unused0.remove(181)
-        #self.unused0.remove(249)
+    def _get_unused(self):
+        unused = get_unused(self.processor)
+
+        if 36 not in self.locs and 139 in unused:
+            unused.remove(139)
+
+        if 10 not in self.locs and 208 in unused:
+            unused.remove(208)
+
+        if 15 not in self.locs and 255 in unused:
+            unused.remove(255)
+
+        if 50 not in self.locs and 181 in unused:
+            unused.remove(181)
+
+        if 55 not in self.locs and 249 in unused:
+            unused.remove(249)
+
+        self.stdout.write('[INFO] %s base pieces in use' % (256 - len(unused)))
+        return unused
 
     def _reverse_sides(self, options):
         return [self.twoside2reverse[two_side] for two_side in options]
@@ -204,6 +215,26 @@ class Command(BaseCommand):
                 options = self._query_segment_options(segment)
                 self.segment_options[segment] = options
                 self.segment_options_rev[segment] = self._reverse_sides(options)
+        # for
+
+    def _find_filled_locs(self):
+        for p_nr, loc in enumerate(self.locs):
+            s1, s2, s3, s4 = self.segment_nrs[loc]
+            options1 = self.segment_options[s1]
+            options2 = self.segment_options[s2]
+            options3 = self.segment_options_rev[s3]
+            options4 = self.segment_options_rev[s4]
+
+            if len(options1) == 1 and len(options2) == 1 and len(options3) == 1 and len(options4) == 1:
+                # completely decided locations; no need to evaluate
+                self.stdout.write('[INFO] loc %s is filled' % loc)
+                self.board_order.append(loc)
+                self.board[loc] = Piece2x2(nr=0,                   # dummy
+                                           nr1=0, nr2=0, nr3=0, nr4=0,
+                                           side1=options1[0],
+                                           side2=options2[0],
+                                           side3=options3[0],
+                                           side4=options4[0])
         # for
 
     def _board_place(self, p_nr: int, p2x2):
@@ -261,6 +292,7 @@ class Command(BaseCommand):
             self.stdout.write('[INFO] Reduction segment %s: %s' % (segment, two_side))
             if self.do_commit:
                 qset.delete()
+                propagate_segment_reduction(self.processor, segment)
             self.reductions += 1
 
     def _check_open_ends(self):
@@ -376,7 +408,7 @@ class Command(BaseCommand):
         if tick - self.prev_tick > 5:
             self.prev_tick = tick
             msg = '(%s) %s' % (len(self.board_order), repr(self.board_order))
-            # print(msg)
+            print(msg)
             self.progress.solve_order = msg
             self.progress.updated = timezone.now()
             self.progress.save(update_fields=['solve_order', 'updated'])
@@ -584,11 +616,12 @@ class Command(BaseCommand):
 
         self.stdout.write('[INFO] Initial solve order: %s' % repr(self.requested_order))
 
-        self._calc_unused0()
-        self.board_unused = self.unused0[:]
+        self.board_unused = self._get_unused()
 
         self._get_segments_options()
         # self.stdout.write('%s' % ", ".join([str(len(opt)) for opt in self.side_options]))
+
+        self._find_filled_locs()
 
         self.prev_tick = time.monotonic()
 

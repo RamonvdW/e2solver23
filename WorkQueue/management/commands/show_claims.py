@@ -62,6 +62,7 @@ class Command(BaseCommand):
         return options
 
     def _limit_base_pieces(self):
+        shorts = list()
         for loc in range(1, 64+1):
             # see if this loc requires certain base pieces
             options1 = self._get_side_options(loc, 1)
@@ -97,7 +98,18 @@ class Command(BaseCommand):
                     self.stdout.write('[INFO] Loc %s requires base %s on nr3' % (loc, repr(p_nrs[3])))
                 if len(p_nrs[4]) <= 3:
                     self.stdout.write('[INFO] Loc %s requires base %s on nr4' % (loc, repr(p_nrs[4])))
+
+                for lp in (1, 2, 3, 4):
+                    if len(p_nrs[lp]) == 1:
+                        tup = (p_nrs[lp][0], loc)
+                        shorts.append(tup)
+                # for
         # for
+
+        shorts.sort()
+        for nr, loc in shorts:
+            self.stdout.write('[WARNING] Short: %s needs %s' % (loc, nr))
+
 
     def handle(self, *args, **options):
 
