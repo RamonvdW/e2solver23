@@ -7,7 +7,7 @@
 from django.core.management.base import BaseCommand
 from Pieces2x2.models import TwoSide, TwoSideOptions, Piece2x2
 from Pieces2x2.helpers import calc_segment
-from WorkQueue.operations import propagate_segment_reduction, set_used, get_unused
+from WorkQueue.operations import get_unused
 
 
 class Command(BaseCommand):
@@ -109,7 +109,6 @@ class Command(BaseCommand):
         shorts.sort()
         for nr, loc in shorts:
             self.stdout.write('[WARNING] Short: %s needs %s' % (loc, nr))
-
 
     def handle(self, *args, **options):
 
