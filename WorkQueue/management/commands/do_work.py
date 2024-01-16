@@ -80,17 +80,21 @@ class Command(BaseCommand):
             work.when_done = timezone.now()
             work.save()
 
-    def _find_work(self):
+    def _find_work(self, only_eval_loc_1):
         # find some work to pick up
         with transaction.atomic():
-            work = (Work
+            qset = (Work
                     .objects
                     .select_for_update()
                     .filter(done=False,
                             doing=False)
                     .order_by('priority',       # lowest first = highest priority
-                              'when_added')     # oldest first
-                    .first())
+                              'when_added'))    # oldest first
+
+            if only_eval_loc_1:
+                qset = qset.filter(job_type='eval_loc_1')
+
+            work = qset.first()
             if not work:
                 self.stdout.write('[INFO] Waiting for more work')
                 time.sleep(10)
@@ -112,8 +116,11 @@ class Command(BaseCommand):
             EvalProgress.objects.all().delete()
             return
 
+        # keep one worker available for small tasks
+        only_eval_loc_1 = worker_nr == 1
+
         while worker_nr:
-            self._find_work()
+            self._find_work(only_eval_loc_1)
             time.sleep(0.1)
         # while
 

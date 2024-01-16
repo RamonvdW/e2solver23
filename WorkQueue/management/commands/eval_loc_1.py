@@ -200,7 +200,7 @@ class Command(BaseCommand):
             base_nrs = [p2x2.nr1, p2x2.nr2, p2x2.nr3, p2x2.nr4]
             set_used(self.processor, base_nrs)
             return
-        
+
         total = sum(self.reductions.values())
         if total == 0:
             self.stdout.write('[INFO] No reductions')
