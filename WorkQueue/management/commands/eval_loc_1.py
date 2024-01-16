@@ -156,14 +156,6 @@ class Command(BaseCommand):
                         updated=timezone.now()).save()
             return
 
-        if count == 1:
-            # only 1 solution left: set the base pieces as used
-            self.stdout.write('[INFO] Single solution left for loc %s' % self.loc)
-            p2x2 = qset.first()
-            base_nrs = [p2x2.nr1, p2x2.nr2, p2x2.nr3, p2x2.nr4]
-            set_used(self.processor, base_nrs)
-            return
-
         side1_new = list(qset.distinct('side1').values_list('side1', flat=True))
         side2_new = list(qset.distinct('side2').values_list('side2', flat=True))
         side3_new = list(qset.distinct('side3').values_list('side3', flat=True))
@@ -201,6 +193,14 @@ class Command(BaseCommand):
                     self._reduce(segment, self.twoside2reverse[side], 4)
             # for
 
+        if count == 1:
+            # only 1 solution left: set the base pieces as used
+            self.stdout.write('[INFO] Single solution left for loc %s' % self.loc)
+            p2x2 = qset.first()
+            base_nrs = [p2x2.nr1, p2x2.nr2, p2x2.nr3, p2x2.nr4]
+            set_used(self.processor, base_nrs)
+            return
+        
         total = sum(self.reductions.values())
         if total == 0:
             self.stdout.write('[INFO] No reductions')
