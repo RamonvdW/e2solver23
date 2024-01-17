@@ -4,7 +4,6 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.db import IntegrityError
 from WorkQueue.models import Work, ProcessorUsedPieces
 
 
@@ -49,11 +48,11 @@ def _segment_to_loc_4(segment):
 
         loc_a = loc1_a - 1 - 8  # -2, -1
         loc_b = loc_a + 1       # -1, -1
-        loc_c = loc_b + 1       # +1, -1
+        # loc_c = loc_b + 1       # +1, -1
 
-        loc_d = loc_a + 8       # -2, 0
+        # loc_d = loc_a + 8       # -2, 0
         loc_e = loc_b + 8       # -1, 0
-        loc_f = loc_c + 8       # +1, 0
+        # loc_f = loc_c + 8       # +1, 0
 
     else:
         # above/below
@@ -63,14 +62,14 @@ def _segment_to_loc_4(segment):
 
         loc_a = loc1_a - 8 - 1  # -1, -2
         loc_b = loc_a + 8       # -1, -1
-        loc_c = loc_b + 8       # -1, +1
+        # loc_c = loc_b + 8       # -1, +1
 
-        loc_d = loc_a + 1       # 0, -2
+        # loc_d = loc_a + 1       # 0, -2
         loc_e = loc_b + 1       # 0, -1
-        loc_f = loc_c + 1       # 0, +1
+        # loc_f = loc_c + 1       # 0, +1
 
     locs = list()
-    for loc in (loc_a, loc_b, loc_c, loc_d, loc_e, loc_f):
+    for loc in (loc_b, loc_e):  # (loc_a, loc_b, loc_c, loc_d, loc_e, loc_f):
         if 1 <= loc <= 55 and loc not in (8, 16, 24, 32, 40, 48):
             locs.append(loc)
         else:
