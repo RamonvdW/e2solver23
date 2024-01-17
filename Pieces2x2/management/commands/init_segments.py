@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from BasePieces.models import BasePiece
-from Pieces2x2.models import TwoSide, TwoSideOptions, Piece2x2
+from Pieces2x2.models import TwoSide, TwoSideOptions, Piece2x2, EvalProgress
 from Pieces2x2.helpers import LOC_CORNERS, LOC_BORDERS, LOC_HINTS, calc_segment
+from WorkQueue.models import ProcessorUsedPieces
 
 
 class Command(BaseCommand):
@@ -156,7 +156,9 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
 
         if options['confirm']:
+            EvalProgress.objects.all().delete()
             TwoSideOptions.objects.all().delete()
+            ProcessorUsedPieces.objects.all().delete()
 
         # get all possibilities for a typical type
         qset = (Piece2x2
