@@ -506,6 +506,10 @@ class Command(BaseCommand):
         sides = self.segment_options[self.segment]
         todo = len(sides)
         self.stdout.write('[INFO] Checking %s options in segment %s' % (len(sides), self.segment))
+        if todo == 1:
+            # no work
+            return
+
         self.solve_order = self.requested_order[:]       # allow deciding optimal order anew
 
         loc, side_n = self._segment_to_loc(self.segment)

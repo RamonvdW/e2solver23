@@ -106,7 +106,7 @@
                             <td>{% if obj.segments_todo %}{% for seg in obj.segments_todo %}{% if seg == obj.segment %}<b>{{ seg }}</b>{% else %}{{ seg }}{% endif %}, {% endfor %}{% else %}{{ obj.segment }}{% endif %}</td>
                             <td>{{ obj.done_count }} / {{ obj.todo_count }}</td>
                             <td>{{ obj.updated_str }}</td>
-                            <td>{{ obj.solve_order }}</td>
+                            <td>{% for line in obj.solve_lines %}{% if not forloop.first %}<br>{% endif %}{{ line }}{% endfor %}</td>
                         </tr>
                     {% endfor %}
                 </table>

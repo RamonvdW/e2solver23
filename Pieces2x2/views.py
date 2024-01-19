@@ -300,10 +300,24 @@ class OptionsView(TemplateView):
             obj.updated_str = timezone.localtime(obj.updated).strftime("%Y-%m-%d %H:%M")
             obj.done_count = obj.todo_count - obj.left_count
             obj.segments_todo = self._get_segments(obj)
+
+            # split solve_order into several lines of 50 long each
+            obj.solve_lines = list()
+            while len(obj.solve_order) > 50:
+                pos = obj.solve_order.find(',', 50)
+                if pos < 0:
+                    # no comma found, so take remainder of the line
+                    pos = len(obj.solve_order)
+                obj.solve_lines.append(obj.solve_order[:pos+1])
+                obj.solve_order = obj.solve_order[pos+2:]
+            # while
+            obj.solve_lines.append(obj.solve_order)
+            obj.solve_order = ''
         # for
         return objs
 
-    def _find_work(self, processor):
+    @staticmethod
+    def _find_work(processor):
         work = Work.objects.filter(done=False, processor=processor).order_by('-doing', 'priority')
 
         for job in work:
@@ -315,7 +329,8 @@ class OptionsView(TemplateView):
 
         return work
 
-    def _make_sol_loc(self, loc, sol, seg2sides, twoside2reverse, unused, is_last=False):
+    @staticmethod
+    def _make_sol_loc(loc, sol, seg2sides, twoside2reverse, unused, is_last=False):
         seg1 = calc_segment(loc, 1)
         seg2 = calc_segment(loc, 2)
         seg3 = calc_segment(loc, 3)
@@ -500,7 +515,7 @@ class OptionsView(TemplateView):
             used = ProcessorUsedPieces.objects.get(processor=processor)
         except ProcessorUsedPieces.DoesNotExist:
             # make a new one
-            used =  ProcessorUsedPieces(processor=processor)
+            used = ProcessorUsedPieces(processor=processor)
 
         used_nrs = list()
         for nr in range(1, 256+1):
