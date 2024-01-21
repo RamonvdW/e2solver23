@@ -212,6 +212,50 @@ def get_unused(processor):
     return unused
 
 
+def get_unused_for_locs(processor, locs):
+    """ return the list with unused based piece numbers
+        when working on the given locations
+    """
+
+    unused = list(range(1, 256+1))
+    try:
+        used = ProcessorUsedPieces.objects.get(processor=processor)
+    except ProcessorUsedPieces.DoesNotExist:
+        # not available; so simple return all
+        pass
+    else:
+        for nr in range(1, 256+1):
+            nr_str = 'nr%s' % nr
+            if getattr(used, nr_str, False):
+                # this piece is used
+                unused.remove(nr)
+        # for
+
+        for claim in used.claimed_nrs_single.split(','):
+            if claim:
+                nr_str, loc_str = claim.split(':')
+                loc = int(loc_str)
+                if loc not in locs:
+                    nr = int(nr_str)
+                    if nr in unused:
+                        unused.remove(nr)
+        # for
+
+        for claim in used.claimed_nrs_double.split(','):
+            if claim:
+                nr_str, locs_str = claim.split(':')
+                spl = locs_str.split(';')
+                loc1 = int(spl[0])
+                loc2 = int(spl[1])
+                if loc1 not in locs and loc2 not in locs:
+                    nr = int(nr_str)
+                    if nr in unused:
+                        unused.remove(nr)
+        # for
+
+    return unused
+
+
 def set_used(processor, base_nrs):
     try:
         used = ProcessorUsedPieces.objects.get(processor=processor)

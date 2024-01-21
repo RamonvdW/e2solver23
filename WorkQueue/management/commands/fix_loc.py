@@ -7,7 +7,7 @@
 from django.core.management.base import BaseCommand
 from Pieces2x2.models import TwoSide, TwoSideOptions, Piece2x2
 from Pieces2x2.helpers import calc_segment
-from WorkQueue.operations import propagate_segment_reduction, set_used, get_unused
+from WorkQueue.operations import propagate_segment_reduction, set_used, get_unused_for_locs
 
 
 class Command(BaseCommand):
@@ -44,7 +44,7 @@ class Command(BaseCommand):
         parser.add_argument('claimed', nargs='*', type=int, help="Base piece number claimed for other location")
 
     def _get_unused(self, claimed):
-        unused = get_unused(self.processor)
+        unused = get_unused_for_locs(self.processor, [self.loc])
 
         if self.loc != 36 and 139 in unused:
             unused.remove(139)

@@ -309,4 +309,10 @@ class ProcessorUsedPieces(models.Model):
     nr255 = models.BooleanField(default=False)
     nr256 = models.BooleanField(default=False)
 
+    # claimed_nrs_single: "nr:loc,nr:loc" etc
+    claimed_nrs_single = models.CharField(max_length=512, default='')
+
+    # claimed_nrs_double: "nr:loc;loc,nr:loc;loc" etc.
+    claimed_nrs_double = models.CharField(max_length=512, default='')
+
 # end of file

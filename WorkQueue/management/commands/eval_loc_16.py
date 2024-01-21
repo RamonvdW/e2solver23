@@ -8,7 +8,7 @@ from django.utils import timezone
 from django.core.management.base import BaseCommand
 from Pieces2x2.models import TwoSide, TwoSideOptions, Piece2x2, EvalProgress
 from Pieces2x2.helpers import calc_segment
-from WorkQueue.operations import propagate_segment_reduction, get_unused
+from WorkQueue.operations import propagate_segment_reduction, get_unused_for_locs
 import time
 
 
@@ -133,7 +133,7 @@ class Command(BaseCommand):
         parser.add_argument('--dryrun', action='store_true')
 
     def _get_unused(self):
-        unused = get_unused(self.processor)
+        unused = get_unused_for_locs(self.processor, self.locs)
 
         if 36 not in self.locs and 139 in unused:
             unused.remove(139)

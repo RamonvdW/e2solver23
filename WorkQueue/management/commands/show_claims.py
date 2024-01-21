@@ -7,6 +7,7 @@
 from django.core.management.base import BaseCommand
 from Pieces2x2.models import TwoSide, TwoSideOptions, Piece2x2
 from Pieces2x2.helpers import calc_segment
+from WorkQueue.models import ProcessorUsedPieces
 from WorkQueue.operations import get_unused
 
 
@@ -62,7 +63,8 @@ class Command(BaseCommand):
         return options
 
     def _limit_base_pieces(self):
-        shorts = list()
+        single_nrs = list()
+        double_nrs = dict()
         for loc in range(1, 64+1):
             # see if this loc requires certain base pieces
             options1 = self._get_side_options(loc, 1)
@@ -102,13 +104,38 @@ class Command(BaseCommand):
                 for lp in (1, 2, 3, 4):
                     if len(p_nrs[lp]) == 1:
                         tup = (p_nrs[lp][0], loc)
-                        shorts.append(tup)
+                        single_nrs.append(tup)
+                    if len(p_nrs[lp]) == 2:
+                        tup = tuple(p_nrs[lp])
+                        try:
+                            double_nrs[tup].append(loc)
+                        except KeyError:
+                            double_nrs[tup] = [loc]
                 # for
         # for
 
-        shorts.sort()
-        for nr, loc in shorts:
-            self.stdout.write('[WARNING] Short: %s needs %s' % (loc, nr))
+        used = ProcessorUsedPieces.objects.get(processor=self.processor)
+
+        claimed_nrs = list()
+        single_nrs.sort()
+        for nr, loc in single_nrs:
+            self.stdout.write('[WARNING] Single claim: %s needs %s' % (loc, nr))
+            claimed_nrs.append('%s:%s' % (nr, loc))
+        # for
+        used.claimed_nrs_single = ",".join(claimed_nrs)
+
+        claimed_nrs = list()
+        for tup, locs in double_nrs.items():
+            if len(locs) > 1:
+                locs_str = " and ".join([str(loc) for loc in locs])
+                self.stdout.write('[WARNING] Double claim: %s need %s' % (locs_str, repr(tup)))
+                for nr in tup:
+                    claimed_nrs.append('%s:%s;%s' % (nr, locs[0], locs[1]))
+        # for
+        used.claimed_nrs_double = ",".join(claimed_nrs)
+
+        self.stdout.write('[INFO] Storing single and double piece claims')
+        used.save(update_fields=['claimed_nrs_single', 'claimed_nrs_double'])
 
     def handle(self, *args, **options):
 

@@ -9,7 +9,7 @@ from django.core.management.base import BaseCommand
 from Pieces2x2.models import TwoSide, TwoSideOptions, Piece2x2, EvalProgress
 from Pieces2x2.helpers import calc_segment
 from Solutions.models import Solution8x8
-from WorkQueue.operations import propagate_segment_reduction, get_unused
+from WorkQueue.operations import propagate_segment_reduction, get_unused_for_locs
 import datetime
 import time
 
@@ -168,34 +168,8 @@ class Command(BaseCommand):
         parser.add_argument('--dryrun', action='store_true')
         parser.add_argument('order', nargs='*', type=int, help='Solving order (1..64), max %s' % len(self.locs))
 
-    def _check_progress_15min(self):
-        # returns True when it is time to do a 15min-interval report
-        minute = datetime.datetime.now().minute
-        curr_15min = int(minute / 15) % 4
-        if curr_15min != self.progress_15min:
-            next_15min = (curr_15min + 1) % 4
-            self.progress_15min = next_15min
-            return True
-        return False
-
-    def _save_progress_solution(self):
-        sol = Solution8x8(based_on_6x6=0)
-        for loc in range(1, 64+1):
-            field_str = 'nr%s' % loc
-            setattr(sol, field_str, 0)
-        # for
-        for nr in range(len(self.locs)):
-            loc = self.locs[nr]
-            p2x2 = self.board[nr]
-            if p2x2:
-                field_str = 'nr%s' % loc
-                setattr(sol, field_str, p2x2.nr)
-        # for
-        sol.save()
-        print('[INFO] Saved progress solution: pk=%s' % sol.pk)
-
     def _get_unused(self):
-        unused = get_unused(self.processor)
+        unused = get_unused_for_locs(self.processor, self.locs)
 
         if 36 not in self.locs and 139 in unused:
             unused.remove(139)
@@ -633,8 +607,6 @@ class Command(BaseCommand):
             self.progress.save(update_fields=['solve_order', 'updated'])
 
         if len(self.board_order) == len(self.locs):
-            # if self._check_progress_15min():
-            #     self._save_progress_solution()
             return True
 
         # decide which p_nr to continue with
