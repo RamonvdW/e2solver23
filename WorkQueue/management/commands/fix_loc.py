@@ -41,11 +41,9 @@ class Command(BaseCommand):
         parser.add_argument('processor', nargs=1, type=int, help='Processor number to use')
         parser.add_argument('loc', nargs=1, type=int, help='Location on board')
         parser.add_argument('index', nargs=1, type=int, help='i-th Piece2x2 number to use')
+        parser.add_argument('claimed', nargs='*', type=int, help="Base piece number claimed for other location")
 
-    def _reverse_sides(self, options):
-        return [self.twoside2reverse[two_side] for two_side in options]
-
-    def _load_unused(self):
+    def _get_unused(self, claimed):
         unused = get_unused(self.processor)
 
         if self.loc != 36 and 139 in unused:
@@ -63,8 +61,16 @@ class Command(BaseCommand):
         if self.loc != 55 and 249 in unused:
             unused.remove(249)
 
+        for claim in claimed:
+            if claim in unused:
+                unused.remove(claim)
+        # for
+
+        self.stdout.write('[INFO] %s base pieces in use or claimed' % (256 - len(unused)))
         self.unused = unused
-        self.stdout.write('[INFO] %s base pieces in use' % (256 - len(self.unused)))
+
+    def _reverse_sides(self, options):
+        return [self.twoside2reverse[two_side] for two_side in options]
 
     def _get_side_options(self, side_nr):
         segment = calc_segment(self.loc, side_nr)
@@ -108,7 +114,7 @@ class Command(BaseCommand):
 
         self.stdout.write('[INFO] Processor=%s; Location: %s' % (self.processor, self.loc))
 
-        self._load_unused()
+        self._get_unused(options['claimed'])
 
         options1 = self._get_side_options(1)
         options2 = self._get_side_options(2)

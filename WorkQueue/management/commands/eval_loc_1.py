@@ -39,8 +39,9 @@ class Command(BaseCommand):
         # parser.add_argument('--verbose', action='store_true')
         parser.add_argument('processor', nargs=1, type=int, help='Processor number to use')
         parser.add_argument('loc', nargs=1, type=int, help='Location on board (1..64)')
+        parser.add_argument('claimed', nargs='*', type=int, help="Base piece number claimed for other location")
 
-    def _get_unused(self):
+    def _get_unused(self, claimed):
         unused = get_unused(self.processor)
 
         if self.loc != 36 and 139 in unused:
@@ -58,7 +59,12 @@ class Command(BaseCommand):
         if self.loc != 55 and 249 in unused:
             unused.remove(249)
 
-        self.stdout.write('[INFO] %s base pieces in use' % (256 - len(unused)))
+        for claim in claimed:
+            if claim in unused:
+                unused.remove(claim)
+        # for
+
+        self.stdout.write('[INFO] %s base pieces in use or claimed' % (256 - len(unused)))
         return unused
 
     def _reverse_sides(self, options):
@@ -101,7 +107,7 @@ class Command(BaseCommand):
 
         self.stdout.write('[INFO] Location: %s; processor=%s' % (self.loc, self.processor))
 
-        unused = self._get_unused()
+        unused = self._get_unused(options['claimed'])
 
         side1_options = self._get_side_options(1)
         side2_options = self._get_side_options(2)
