@@ -8,9 +8,7 @@ from django.utils import timezone
 from django.core.management.base import BaseCommand
 from Pieces2x2.models import TwoSide, TwoSideOptions, Piece2x2, EvalProgress
 from Pieces2x2.helpers import calc_segment
-from Solutions.models import Solution8x8
 from WorkQueue.operations import propagate_segment_reduction, get_unused
-import datetime
 import time
 
 
@@ -92,6 +90,7 @@ class Command(BaseCommand):
         self.solve_order = list()
         self.requested_order = list()
         self.prev_tick = time.monotonic()
+        self.deadline = 0
         self.progress = None
 
         self.progress_15min = -1
@@ -147,31 +146,6 @@ class Command(BaseCommand):
                 neighbours[nr] = tuple(n)
         # for
         return neighbours
-
-    def _check_progress_15min(self):
-        # returns True when it is time to do a 15min-interval report
-        minute = datetime.datetime.now().minute
-        curr_15min = int(minute / 15) % 4
-        if curr_15min != self.progress_15min:
-            next_15min = (curr_15min + 1) % 4
-            self.progress_15min = next_15min
-            return True
-        return False
-
-    def _save_progress_solution(self):
-        sol = Solution8x8(based_on_6x6=0)
-        for loc in range(1, 64+1):
-            field_str = 'nr%s' % loc
-            setattr(sol, field_str, 0)
-        # for
-        for loc in self.locs:
-            p2x2 = self.board[loc]
-            if p2x2:
-                field_str = 'nr%s' % loc
-                setattr(sol, field_str, p2x2.nr)
-        # for
-        sol.save()
-        print('[INFO] Saved progress solution: pk=%s' % sol.pk)
 
     def _get_unused(self):
         unused = get_unused(self.processor)
@@ -414,8 +388,11 @@ class Command(BaseCommand):
             self.progress.save(update_fields=['solve_order', 'updated'])
 
         if len(self.board_order) == len(self.locs):
-            if self._check_progress_15min():
-                self._save_progress_solution()
+            return True
+
+        if tick > self.deadline:
+            self.stdout.write('[WARNING] Reached search deadline')
+            # non-conclusive, so return True to avoid removal of this option
             return True
 
         # decide which p_nr to continue with
@@ -542,9 +519,13 @@ class Command(BaseCommand):
 
             found = False
             for p in self._iter(loc, options_side1, options_side2, options_side3, options_side4):
+                # set deadline at 10 minutes = 600 seconds
+                self.deadline = time.monotonic() + 600
+
                 self._board_place(loc, p)
                 found = self._find_recurse()
                 self._board_pop()
+
                 if found:
                     break
             # for
