@@ -442,6 +442,10 @@ class Command(BaseCommand):
             options_side3 = self.side_options_rev[s3]
             options_side4 = self.side_options_rev[s4]
 
+            # skip if this location is surrounded by too high options count
+            if len(options_side1) > 200 and len(options_side2) > 200 and len(options_side3) > 200 and len(options_side4) > 200:
+                return
+
             if side_n == 1:
                 options_side1 = [side]
             elif side_n == 2:

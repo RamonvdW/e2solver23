@@ -687,8 +687,8 @@ class Command(BaseCommand):
             options_side3 = self.side_options_rev[s3]
             options_side4 = self.side_options_rev[s4]
 
-            # skip if this location is surrounded by maximum segment counts
-            if len(options_side1) + len(options_side2) + len(options_side3) + len(options_side4) == 4 * 289:
+            # skip if this location is surrounded by too high options count
+            if len(options_side1) > 200 and len(options_side2) > 200 and len(options_side3) > 200 and len(options_side4) > 200:
                 return
 
             if side_n == 1:
