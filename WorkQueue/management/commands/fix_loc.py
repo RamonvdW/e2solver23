@@ -124,6 +124,18 @@ class Command(BaseCommand):
         qset = Piece2x2.objects.filter(side1__in=options1, side2__in=options2, side3__in=options3, side4__in=options4,
                                        nr1__in=self.unused, nr2__in=self.unused,
                                        nr3__in=self.unused, nr4__in=self.unused)
+
+        if self.loc == 10:
+            qset = qset.filter(nr1=208)
+        elif self.loc == 15:
+            qset = qset.filter(nr2=255)
+        elif self.loc == 36:
+            qset = qset.filter(nr2=139)
+        elif self.loc == 50:
+            qset = qset.filter(nr3=181)
+        elif self.loc == 55:
+            qset = qset.filter(nr4=249)
+
         nrs = list(qset.values_list('nr', flat=True))
 
         # perform a reduction first
