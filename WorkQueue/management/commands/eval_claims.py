@@ -122,7 +122,14 @@ class Command(BaseCommand):
             self.stdout.write('[WARNING] Single claim: %s needs %s' % (loc, nr))
             claimed_nrs.append('%s:%s' % (nr, loc))
         # for
-        used.claimed_nrs_single = ",".join(claimed_nrs)
+        claimed_nrs_single = ",".join(claimed_nrs)
+
+        if used.claimed_nrs_single != claimed_nrs_single:
+            count1 = used.claimed_nrs_single.count(':')
+            count2 = claimed_nrs_single.count(':')
+            self.stdout.write('[INFO] Singles claim changed from %s to %s nrs' % (count1, count2))
+
+        used.claimed_nrs_single = claimed_nrs_single
 
         claimed_nrs = list()
         for tup, locs in double_nrs.items():
@@ -132,9 +139,13 @@ class Command(BaseCommand):
                 for nr in tup:
                     claimed_nrs.append('%s:%s;%s' % (nr, locs[0], locs[1]))
         # for
-        used.claimed_nrs_double = ",".join(claimed_nrs)
+        claimed_nrs_double = ",".join(claimed_nrs)
 
-        self.stdout.write('[INFO] Storing single and double piece claims')
+        if used.claimed_nrs_double != claimed_nrs_double:
+            count1 = used.claimed_nrs_double.count(':')
+            count2 = claimed_nrs_double.count(':')
+            self.stdout.write('[INFO] Doubles claim changed from %s to %s nrs' % (count1, count2))
+
         used.save(update_fields=['claimed_nrs_single', 'claimed_nrs_double'])
 
     def handle(self, *args, **options):

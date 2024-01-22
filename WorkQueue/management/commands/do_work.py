@@ -67,6 +67,9 @@ class Command(BaseCommand):
         elif work.job_type == 'eval_loc_16':
             bad = self._run_command('eval_loc_16', str(work.processor), str(work.location))
 
+        elif work.job_type == 'eval_claims':
+            bad = self._run_command('eval_claims', str(work.processor))
+
         else:
             self.stdout.write('[ERROR] Unsupported job_type %s in work pk=%s' % (repr(work.job_type), work.pk))
 

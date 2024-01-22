@@ -464,7 +464,7 @@ class Command(BaseCommand):
                 self._reduce(segment, side)
 
             todo -= 1
-            self.stdout.write('[INFO] Remaining: %s/%s' % (todo, len(sides)))
+            self.stdout.write('[INFO] Left: %s/%s' % (todo, len(sides)))
             self.prev_tick = time.monotonic()
         # for
 

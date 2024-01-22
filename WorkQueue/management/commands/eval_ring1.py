@@ -534,7 +534,7 @@ class Command(BaseCommand):
                 self._reduce(self.segment, side)
 
             todo -= 1
-            self.stdout.write('[INFO] Remaining: %s/%s' % (todo, len(sides)))
+            self.stdout.write('[INFO] Left: %s/%s' % (todo, len(sides)))
             self.prev_tick = time.monotonic()
         # for
 
@@ -605,6 +605,9 @@ class Command(BaseCommand):
 
         self._get_segments_options()
         # self.stdout.write('%s' % ", ".join([str(len(opt)) for opt in self.side_options]))
+        if len(self.segment_options[self.segment]) == 289:
+            self.stdout.write('[WARNING] Ignoring due to max segments')
+            return
 
         self._find_filled_locs()
 

@@ -250,7 +250,7 @@ class Command(BaseCommand):
                 self._reduce(segment, side)
 
             todo -= 1
-            self.stdout.write('[INFO] Remaining: %s/%s' % (todo, len(sides)))
+            self.stdout.write('[INFO] Left: %s/%s' % (todo, len(sides)))
         # for
 
     def _reduce_s5(self):
@@ -327,7 +327,7 @@ class Command(BaseCommand):
                 self._reduce(segment, side)
 
             todo -= 1
-            self.stdout.write('[INFO] Remaining: %s/%s' % (todo, len(sides)))
+            self.stdout.write('[INFO] Left: %s/%s' % (todo, len(sides)))
         # for
 
     def _reduce_s6(self):
@@ -404,7 +404,7 @@ class Command(BaseCommand):
                 self._reduce(segment, side)
 
             todo -= 1
-            self.stdout.write('[INFO] Remaining: %s/%s' % (todo, len(sides)))
+            self.stdout.write('[INFO] Left: %s/%s' % (todo, len(sides)))
         # for
 
     def _reduce_s8(self):
@@ -481,7 +481,7 @@ class Command(BaseCommand):
                 self._reduce(segment, side)
 
             todo -= 1
-            self.stdout.write('[INFO] Remaining: %s/%s' % (todo, len(sides)))
+            self.stdout.write('[INFO] Left: %s/%s' % (todo, len(sides)))
         # for
 
     def handle(self, *args, **options):

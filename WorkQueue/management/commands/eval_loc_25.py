@@ -687,6 +687,10 @@ class Command(BaseCommand):
             options_side3 = self.side_options_rev[s3]
             options_side4 = self.side_options_rev[s4]
 
+            # skip if this location is surrounded by maximum segment counts
+            if len(options_side1) + len(options_side2) + len(options_side3) + len(options_side4) == 4 * 289:
+                return
+
             if side_n == 1:
                 options_side1 = [side]
             elif side_n == 2:
@@ -709,7 +713,7 @@ class Command(BaseCommand):
                 self._reduce(self.segment, side)
 
             todo -= 1
-            self.stdout.write('[INFO] Remaining: %s/%s' % (todo, len(sides)))
+            self.stdout.write('[INFO] Left: %s/%s' % (todo, len(sides)))
             self.prev_tick = time.monotonic()
         # for
 
