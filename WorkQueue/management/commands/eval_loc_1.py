@@ -132,9 +132,20 @@ class Command(BaseCommand):
                         nr3__in=unused,
                         nr4__in=unused))
 
-        self.stdout.write('[INFO] Number of Piece2x2: %s' % qset.count())
+        if self.loc == 10:
+            qset = qset.filter(nr1=208)
+        elif self.loc == 15:
+            qset = qset.filter(nr2=255)
+        elif self.loc == 36:
+            qset = qset.filter(nr2=139)
+        elif self.loc == 50:
+            qset = qset.filter(nr3=181)
+        elif self.loc == 55:
+            qset = qset.filter(nr4=249)
 
         count = qset.count()
+
+        self.stdout.write('[INFO] Number of Piece2x2: %s' % count)
 
         if count == 0:
             if len(side1_options) + len(side2_options) + len(side3_options) + len(side4_options) == 4:
@@ -206,6 +217,12 @@ class Command(BaseCommand):
             base_nrs = [p2x2.nr1, p2x2.nr2, p2x2.nr3, p2x2.nr4]
             set_used(self.processor, base_nrs)
             return
+
+        if count < 5:
+            for p2x2 in qset:
+                print('[DEBUG] p2x2 nr %s has base nrs [%s, %s, %s, %s]' % (p2x2.nr,
+                                                                            p2x2.nr1, p2x2.nr2, p2x2.nr3, p2x2.nr4))
+            # for
 
         total = sum(self.reductions.values())
         if total == 0:
