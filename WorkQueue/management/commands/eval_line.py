@@ -537,7 +537,7 @@ class Command(BaseCommand):
             # for
 
             if not found:
-                self._reduce(self.segment, side)
+                self._reduce(segment, side)
 
             todo -= 1
             self.stdout.write('[INFO] Left: %s/%s' % (todo, len(sides)))
