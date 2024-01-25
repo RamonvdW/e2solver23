@@ -531,6 +531,9 @@ class OptionsView(TemplateView):
         # while
         blocks.append(", ".join(used_nrs))
 
+        used.claimed_nrs_single = used.claimed_nrs_single.replace(',', ', ')
+        used.claimed_nrs_double = used.claimed_nrs_double.replace(',', ', ')
+
         return blocks, used
 
     def get_context_data(self, **kwargs):
