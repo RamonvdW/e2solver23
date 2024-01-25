@@ -284,8 +284,8 @@ def request_eval_claims(processor):
         diff = used.claimed_at_twoside_count - count
         if diff > 5:
             perc = diff / count
-            if perc > 0.1:
-                # 10% reduction
+            if perc > 0.05:
+                # 5% reduction
                 if Work.objects.filter(processor=processor, job_type='eval_claims', done=False).count() == 0:
                     Work(processor=processor, job_type='eval_claims', priority='2').save()
 
