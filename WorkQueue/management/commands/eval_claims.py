@@ -78,10 +78,38 @@ class Command(BaseCommand):
             options3 = self._get_side_options(loc, 3)
             options4 = self._get_side_options(loc, 4)
 
+            unused = self.unused[:]
+
+            if loc != 36 and 139 in unused:
+                unused.remove(139)
+
+            if loc != 10 and 208 in unused:
+                unused.remove(208)
+
+            if loc != 15 and 255 in unused:
+                unused.remove(255)
+
+            if loc != 50 and 181 in unused:
+                unused.remove(181)
+
+            if loc != 55 and 249 in unused:
+                unused.remove(249)
+
             qset = Piece2x2.objects.filter(side1__in=options1, side2__in=options2,
                                            side3__in=options3, side4__in=options4,
-                                           nr1__in=self.unused, nr2__in=self.unused,
-                                           nr3__in=self.unused, nr4__in=self.unused)
+                                           nr1__in=unused, nr2__in=unused,
+                                           nr3__in=unused, nr4__in=unused)
+
+            if loc == 10:
+                qset = qset.filter(nr1=208)
+            elif loc == 15:
+                qset = qset.filter(nr2=255)
+            elif loc == 36:
+                qset = qset.filter(nr2=139)
+            elif loc == 50:
+                qset = qset.filter(nr3=181)
+            elif loc == 55:
+                qset = qset.filter(nr4=249)
 
             if 1 < qset.count() < 1000:
                 self.stdout.write('[INFO] Checking base piece claims on loc %s' % loc)
@@ -135,6 +163,7 @@ class Command(BaseCommand):
 
         used.claimed_nrs_single = claimed_nrs_single
 
+        # TODO: double claim from one loc
         claimed_nrs = list()
         for tup, locs in double_nrs.items():
             if len(locs) > 1:
