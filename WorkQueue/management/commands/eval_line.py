@@ -492,6 +492,10 @@ class Command(BaseCommand):
             # no work
             return
 
+        if todo > 50:
+            self.stdout.write('[INFO] Too much; skipping')
+            return
+
         self.solve_order = self.requested_order[:]       # allow deciding optimal order anew
 
         loc, side_n = self._segment_to_loc(segment)
@@ -556,16 +560,16 @@ class Command(BaseCommand):
 
         if side == 1:
             self.locs = (1, 2, 3, 4, 10, 5, 6, 7, 8, 15)
-            segments = (130, 131, 132, 133, 134, 135, 136)
+            segments = (130, 131, 132, 133, 134, 135, 136, 9, 10, 11, 12, 13, 14, 15, 16)
         elif side == 2:
             self.locs = (8, 16, 24, 32, 15, 40, 48, 56, 55)
-            segments = (16, 24, 32, 40, 48, 56, 64)
+            segments = (16, 24, 32, 40, 48, 56, 64, 136, 144, 152, 160, 168, 176, 184, 192)
         elif side == 3:
             self.locs = (57, 58, 59, 60, 50, 61, 62, 63, 64, 55)
-            segments = (186, 187, 188, 189, 190, 191, 192)
+            segments = (186, 187, 188, 189, 190, 191, 192, 57, 58, 59, 60, 61, 62, 63, 64)
         else:
             self.locs = (1, 9, 17, 25, 10, 33, 41, 49, 57, 50)
-            segments = (9, 17, 25, 33, 41, 49, 57)
+            segments = (9, 17, 25, 33, 41, 49, 57, 130, 138, 146, 154, 162, 170, 178, 186)
 
         self.requested_order = self.locs[:]
 

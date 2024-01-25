@@ -67,6 +67,9 @@ class Command(BaseCommand):
         elif work.job_type == 'eval_loc_16':
             bad = self._run_command('eval_loc_16', str(work.processor), str(work.location))
 
+        elif work.job_type == 'eval_line':
+            bad = self._run_command('eval_line', str(work.processor), str(work.location))
+
         elif work.job_type == 'eval_claims':
             bad = self._run_command('eval_claims', str(work.processor))
 
