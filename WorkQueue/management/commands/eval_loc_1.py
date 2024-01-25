@@ -8,7 +8,7 @@ from django.utils import timezone
 from django.core.management.base import BaseCommand
 from Pieces2x2.models import TwoSide, TwoSideOptions, Piece2x2, EvalProgress
 from Pieces2x2.helpers import calc_segment
-from WorkQueue.operations import propagate_segment_reduction, get_unused_for_locs, set_used
+from WorkQueue.operations import propagate_segment_reduction, get_unused_for_locs, set_used, request_eval_claims
 
 
 class Command(BaseCommand):
@@ -232,6 +232,7 @@ class Command(BaseCommand):
                                                                      self.reductions[2],
                                                                      self.reductions[3],
                                                                      self.reductions[4]))
+            request_eval_claims(self.processor)
 
 
 # end of file

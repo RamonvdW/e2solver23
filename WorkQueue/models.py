@@ -315,4 +315,7 @@ class ProcessorUsedPieces(models.Model):
     # claimed_nrs_double: "nr:loc;loc,nr:loc;loc" etc.
     claimed_nrs_double = models.CharField(max_length=512, default='')
 
+    # track when the claim was last evaluated, for automatically triggering a new check
+    claimed_at_twoside_count = models.PositiveIntegerField(default=99999)
+
 # end of file

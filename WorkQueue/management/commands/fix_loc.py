@@ -7,7 +7,7 @@
 from django.core.management.base import BaseCommand
 from Pieces2x2.models import TwoSide, TwoSideOptions, Piece2x2
 from Pieces2x2.helpers import calc_segment
-from WorkQueue.operations import propagate_segment_reduction, set_used, get_unused_for_locs
+from WorkQueue.operations import propagate_segment_reduction, set_used, get_unused_for_locs, request_eval_claims
 
 
 class Command(BaseCommand):
@@ -209,6 +209,8 @@ class Command(BaseCommand):
                                                                      self.reductions[2],
                                                                      self.reductions[3],
                                                                      self.reductions[4]))
+            request_eval_claims(self.processor)
+
             if not self.do_commit:
                 self.stdout.write('[WARNING] Use --commit to keep')
 

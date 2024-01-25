@@ -4,6 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+from Pieces2x2.models import TwoSideOptions
 from WorkQueue.models import Work, ProcessorUsedPieces
 
 
@@ -270,6 +271,23 @@ def set_used(processor, base_nrs):
             updated.append(nr_str)
         # for
         used.save(update_fields=updated)
+
+
+def request_eval_claims(processor):
+    try:
+        used = ProcessorUsedPieces.objects.get(processor=processor)
+    except ProcessorUsedPieces.DoesNotExist:
+        # not available; so simple skip
+        pass
+    else:
+        count = TwoSideOptions.objects.filter(processor=processor).count()
+        diff = used.claimed_at_twoside_count - count
+        if diff > 5:
+            perc = diff / count
+            if perc > 0.1:
+                # 10% reduction
+                if Work.objects.filter(processor=processor, job_type='eval_claims', done=False).count() == 0:
+                    Work(processor=processor, job_type='eval_claims', priority='2').save()
 
 
 # end of file

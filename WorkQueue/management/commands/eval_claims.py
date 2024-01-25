@@ -62,7 +62,13 @@ class Command(BaseCommand):
         # print('segment %s options: %s' % (segment, repr(options)))
         return options
 
+    def _count_twoside(self):
+        return TwoSideOptions.objects.filter(processor=self.processor).count()
+
     def _limit_base_pieces(self):
+        used = ProcessorUsedPieces.objects.get(processor=self.processor)
+        used.claimed_at_twoside_count = self._count_twoside()
+
         single_nrs = list()
         double_nrs = dict()
         for loc in range(1, 64+1):
@@ -114,8 +120,6 @@ class Command(BaseCommand):
                 # for
         # for
 
-        used = ProcessorUsedPieces.objects.get(processor=self.processor)
-
         claimed_nrs = list()
         single_nrs.sort()
         for nr, loc in single_nrs:
@@ -146,7 +150,7 @@ class Command(BaseCommand):
             count2 = claimed_nrs_double.count(':')
             self.stdout.write('[INFO] Doubles claim changed from %s to %s nrs' % (count1, count2))
 
-        used.save(update_fields=['claimed_nrs_single', 'claimed_nrs_double'])
+        used.save(update_fields=['claimed_nrs_single', 'claimed_nrs_double', 'claimed_at_twoside_count'])
 
     def handle(self, *args, **options):
 
