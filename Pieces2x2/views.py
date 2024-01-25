@@ -531,7 +531,7 @@ class OptionsView(TemplateView):
         # while
         blocks.append(", ".join(used_nrs))
 
-        return blocks
+        return blocks, used
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -598,7 +598,7 @@ class OptionsView(TemplateView):
             highlight_segments = list()
         context['squares'] = self._make_squares(segment2count, highlight_segments)
 
-        context['used'] = self._get_used(processor)
+        context['used_blocks'], context['used'] = self._get_used(processor)
 
         context['solution'] = self._make_solution(processor)
 

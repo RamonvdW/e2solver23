@@ -84,7 +84,9 @@
                     </tr>
                 </table>
 
-                <p>Used nrs: {% for block in used %}{{ block }}<br>{% endfor %}</p>
+                <p>Used nrs: {% for block in used_blocks %}{{ block }}<br>{% endfor %}</p>
+                <p>Single claims: {{ used.claimed_nrs_single }}</p>
+                <p>Double claims: {{ used.claimed_nrs_double }}</p>
 
                 <br><br>
 
