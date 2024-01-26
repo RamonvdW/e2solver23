@@ -422,6 +422,9 @@ class Command(BaseCommand):
         segment = calc_segment(self.locs[p_nr], side_n)
         sides = self.side_options[s_nr]
         todo = len(sides)
+        if todo > 100:
+            return
+
         self.stdout.write('[INFO] Checking %s options in segment %s' % (len(sides), segment))
         self.p_nrs_order = list()       # allow deciding optimal order anew
 

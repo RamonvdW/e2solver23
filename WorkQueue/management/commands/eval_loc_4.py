@@ -191,6 +191,8 @@ class Command(BaseCommand):
         segment = calc_segment(self.locs[0], 2)
         sides = self.side_options[3]
         todo = len(sides)
+        if todo > 100:
+            return
 
         self.progress.segment = segment
         self.progress.todo_count = todo
@@ -268,6 +270,8 @@ class Command(BaseCommand):
         segment = calc_segment(self.locs[0], 3)
         sides = self.side_options[5]
         todo = len(sides)
+        if todo > 100:
+            return
 
         self.progress.segment = segment
         self.progress.todo_count = todo
@@ -345,6 +349,8 @@ class Command(BaseCommand):
         segment = calc_segment(self.locs[1], 3)
         sides = self.side_options[6]
         todo = len(sides)
+        if todo > 100:
+            return
 
         self.progress.segment = segment
         self.progress.todo_count = todo
@@ -422,6 +428,8 @@ class Command(BaseCommand):
         segment = calc_segment(self.locs[2], 2)
         sides = self.side_options[8]
         todo = len(sides)
+        if todo > 100:
+            return
 
         self.progress.segment = segment
         self.progress.todo_count = todo
