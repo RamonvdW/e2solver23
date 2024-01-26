@@ -14,7 +14,7 @@ import time
 
 class Command(BaseCommand):
 
-    help = "Eval a possible reduction in TwoSideOptions for the first ring of 2x2"
+    help = "Eval a possible reduction in TwoSideOptions for the first line of 2x2"
 
     """
      side 1
@@ -573,7 +573,7 @@ class Command(BaseCommand):
 
         self.requested_order = self.locs[:]
 
-        self.stdout.write('[INFO] Initial solve order: %s' % repr(self.requested_order))
+        # self.stdout.write('[INFO] Initial solve order: %s' % repr(self.requested_order))
 
         self.board_unused = self._get_unused()
 
@@ -596,6 +596,8 @@ class Command(BaseCommand):
 
         try:
             for segment in segments:
+                loc, _ = self._segment_to_loc(segment)
+                self.requested_order = [loc]
                 self._find_reduce(segment)
         except KeyboardInterrupt:
             pass

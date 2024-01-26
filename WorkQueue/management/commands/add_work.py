@@ -12,7 +12,7 @@ class Command(BaseCommand):
 
     help = "Add job definition to the work queue"
 
-    supported_job_types = ('eval_loc_1', 'eval_loc_4', 'eval_loc_9', 'eval_loc_16', 'eval_line', 'eval_claims')
+    supported_job_types = ('eval_loc_1', 'eval_loc_4', 'eval_loc_9', 'eval_loc_16', 'eval_line1', 'eval_line2', 'eval_claims')
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
