@@ -157,7 +157,7 @@
 
                     {% for job in work %}
                         <tr>
-                            <td>{{ job.when_added }}</td>
+                            <td>{{ job.when_added|date:"H:i:s" }}</td>
                             <td>{{ job.priority }}</td>
                             <td>{{ job.location }}</td>
                             <td>{{ job.job_type }}</td>
