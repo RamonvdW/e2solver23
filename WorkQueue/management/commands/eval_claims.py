@@ -185,7 +185,7 @@ class Command(BaseCommand):
         claimed_nrs = list()
         single_nrs.sort()
         for nr, loc in single_nrs:
-            self.stdout.write('[WARNING] Single claim: %s needs %s' % (loc, nr))
+            # self.stdout.write('[WARNING] Single claim: %s needs %s' % (loc, nr))
             claimed_nrs.append('%s:%s' % (nr, loc))
         # for
         claimed_nrs_single = ",".join(claimed_nrs)
@@ -193,10 +193,11 @@ class Command(BaseCommand):
         if used.claimed_nrs_single != claimed_nrs_single:
             count1 = used.claimed_nrs_single.count(':')
             count2 = claimed_nrs_single.count(':')
-            self.stdout.write('[INFO] Singles claim changed from %s to %s nrs' % (count1, count2))
-
-        used.claimed_nrs_single = claimed_nrs_single
-        used.save(update_fields=['claimed_nrs_single'])
+            self.stdout.write('[INFO] Single claims changed from %s to %s nrs' % (count1, count2))
+            used.claimed_nrs_single = claimed_nrs_single
+            used.save(update_fields=['claimed_nrs_single'])
+        else:
+            self.stdout.write('[INFO] Single claims unchanged')
 
     def handle(self, *args, **options):
 
