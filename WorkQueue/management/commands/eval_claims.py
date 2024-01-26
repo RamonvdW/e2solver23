@@ -32,8 +32,15 @@ class Command(BaseCommand):
         # for
 
         self.processor = 0
-        self.reductions = {1: 0, 2: 0, 3: 0, 4: 0}     # [side_nr] = count
         self.unused = list()
+
+        self.nr_claims = dict()     # [loc, 1/2/3/4] = [nr, ..]
+        for loc in range(1, 64+1):
+            self.nr_claims[(loc, 1)] = list()
+            self.nr_claims[(loc, 2)] = list()
+            self.nr_claims[(loc, 3)] = list()
+            self.nr_claims[(loc, 4)] = list()
+        # for
 
     def add_arguments(self, parser):
         # parser.add_argument('--verbose', action='store_true')
@@ -65,87 +72,114 @@ class Command(BaseCommand):
     def _count_twoside(self):
         return TwoSideOptions.objects.filter(processor=self.processor).count()
 
-    def _limit_base_pieces(self):
-        used = ProcessorUsedPieces.objects.get(processor=self.processor)
+    def _scan_locs(self, used):
+        """ Determinate the claims for each location, not considering existing claims """
         used.claimed_at_twoside_count = self._count_twoside()
+        used.save(update_fields=['claimed_at_twoside_count'])
 
-        single_nrs = list()
-        double_nrs = dict()
+        print_at = 1
         for loc in range(1, 64+1):
+            if loc == print_at:
+                self.stdout.write('[INFO] Scanning locs %s-%s' % (loc, loc + 8))
+                print_at = loc + 8
+
             # see if this loc requires certain base pieces
             options1 = self._get_side_options(loc, 1)
             options2 = self._get_side_options(loc, 2)
             options3 = self._get_side_options(loc, 3)
             options4 = self._get_side_options(loc, 4)
 
-            unused = self.unused[:]
+            if len(options1) + len(options2) + len(options3) + len(options4) < 500:
+                unused = self.unused[:]
 
-            if loc != 36 and 139 in unused:
-                unused.remove(139)
+                if loc != 36 and 139 in unused:
+                    unused.remove(139)
 
-            if loc != 10 and 208 in unused:
-                unused.remove(208)
+                if loc != 10 and 208 in unused:
+                    unused.remove(208)
 
-            if loc != 15 and 255 in unused:
-                unused.remove(255)
+                if loc != 15 and 255 in unused:
+                    unused.remove(255)
 
-            if loc != 50 and 181 in unused:
-                unused.remove(181)
+                if loc != 50 and 181 in unused:
+                    unused.remove(181)
 
-            if loc != 55 and 249 in unused:
-                unused.remove(249)
+                if loc != 55 and 249 in unused:
+                    unused.remove(249)
 
-            qset = Piece2x2.objects.filter(side1__in=options1, side2__in=options2,
-                                           side3__in=options3, side4__in=options4,
-                                           nr1__in=unused, nr2__in=unused,
-                                           nr3__in=unused, nr4__in=unused)
+                qset = Piece2x2.objects.filter(side1__in=options1, side2__in=options2,
+                                               side3__in=options3, side4__in=options4,
+                                               nr1__in=unused, nr2__in=unused,
+                                               nr3__in=unused, nr4__in=unused)
 
-            if loc == 10:
-                qset = qset.filter(nr1=208)
-            elif loc == 15:
-                qset = qset.filter(nr2=255)
-            elif loc == 36:
-                qset = qset.filter(nr2=139)
-            elif loc == 50:
-                qset = qset.filter(nr3=181)
-            elif loc == 55:
-                qset = qset.filter(nr4=249)
+                if loc == 10:
+                    qset = qset.filter(nr1=208)
+                elif loc == 15:
+                    qset = qset.filter(nr2=255)
+                elif loc == 36:
+                    qset = qset.filter(nr2=139)
+                elif loc == 50:
+                    qset = qset.filter(nr3=181)
+                elif loc == 55:
+                    qset = qset.filter(nr4=249)
 
-            if 1 < qset.count() < 1000:
-                self.stdout.write('[INFO] Checking base piece claims on loc %s' % loc)
+                if 1 < qset.count() < 2000:
+                    nrs1 = self.nr_claims[(loc, 1)]
+                    nrs2 = self.nr_claims[(loc, 2)]
+                    nrs3 = self.nr_claims[(loc, 3)]
+                    nrs4 = self.nr_claims[(loc, 4)]
 
-                p_nrs = {1: [], 2: [], 3: [], 4: []}
-                for p2x2 in qset.all():
-                    if p2x2.nr1 not in p_nrs[1]:
-                        p_nrs[1].append(p2x2.nr1)
-                    if p2x2.nr2 not in p_nrs[2]:
-                        p_nrs[2].append(p2x2.nr2)
-                    if p2x2.nr3 not in p_nrs[3]:
-                        p_nrs[3].append(p2x2.nr3)
-                    if p2x2.nr4 not in p_nrs[4]:
-                        p_nrs[4].append(p2x2.nr4)
-                # for
+                    for p2x2 in qset.all():
+                        if p2x2.nr1 not in nrs1:
+                            nrs1.append(p2x2.nr1)
+                        if p2x2.nr2 not in nrs2:
+                            nrs2.append(p2x2.nr2)
+                        if p2x2.nr3 not in nrs3:
+                            nrs3.append(p2x2.nr3)
+                        if p2x2.nr4 not in nrs4:
+                            nrs4.append(p2x2.nr4)
+                    # for
 
-                if len(p_nrs[1]) <= 3:
-                    self.stdout.write('[INFO] Loc %s requires base %s on nr1' % (loc, repr(p_nrs[1])))
-                if len(p_nrs[2]) <= 3:
-                    self.stdout.write('[INFO] Loc %s requires base %s on nr2' % (loc, repr(p_nrs[2])))
-                if len(p_nrs[3]) <= 3:
-                    self.stdout.write('[INFO] Loc %s requires base %s on nr3' % (loc, repr(p_nrs[3])))
-                if len(p_nrs[4]) <= 3:
-                    self.stdout.write('[INFO] Loc %s requires base %s on nr4' % (loc, repr(p_nrs[4])))
+                    nrs1.sort()
+                    nrs2.sort()
+                    nrs3.sort()
+                    nrs4.sort()
+        # for
 
-                for lp in (1, 2, 3, 4):
-                    if len(p_nrs[lp]) == 1:
-                        tup = (p_nrs[lp][0], loc)
+    def _limit_base_pieces(self, used):
+        changed = True
+        claimed = list()
+        single_nrs = list()
+        while changed:
+            changed = False
+
+            for loc in range(1, 64+1):
+                for nr in range(1, 4+1):
+                    nrs = self.nr_claims[(loc, nr)]
+                    if len(nrs) == 1:
+                        self.stdout.write('[INFO] Loc %s requires base %s on nr%s' % (loc, nrs[0], nr))
+                        tup = (nrs[0], loc)
                         single_nrs.append(tup)
-                    if len(p_nrs[lp]) == 2:
-                        tup = tuple(p_nrs[lp])
-                        try:
-                            double_nrs[tup].append(loc)
-                        except KeyError:
-                            double_nrs[tup] = [loc]
+                        claimed.append(nrs[0])
                 # for
+            # for
+
+            # self.stdout.write('[INFO] Claimed: (%s) %s' % (len(claimed), repr(claimed)))
+            for loc, nr in self.nr_claims.keys():
+                nrs = self.nr_claims[(loc, nr)]
+                if len(nrs) > 0:
+                    for chk in nrs:
+                        if chk in claimed:
+                            nrs.remove(chk)
+                            changed = True
+                    # for
+        # while
+
+        self.stdout.write('[INFO] Remaining small claims:')
+        for loc, nr in self.nr_claims.keys():
+            nrs = self.nr_claims[(loc, nr)]
+            if 1 <= len(nrs) <= 3:
+                self.stdout.write('%s.nr%s: %s' % (loc, nr, repr(nrs)))
         # for
 
         claimed_nrs = list()
@@ -162,24 +196,7 @@ class Command(BaseCommand):
             self.stdout.write('[INFO] Singles claim changed from %s to %s nrs' % (count1, count2))
 
         used.claimed_nrs_single = claimed_nrs_single
-
-        # TODO: double claim from one loc
-        claimed_nrs = list()
-        for tup, locs in double_nrs.items():
-            if len(locs) > 1:
-                locs_str = " and ".join([str(loc) for loc in locs])
-                self.stdout.write('[WARNING] Double claim: %s need %s' % (locs_str, repr(tup)))
-                for nr in tup:
-                    claimed_nrs.append('%s:%s;%s' % (nr, locs[0], locs[1]))
-        # for
-        claimed_nrs_double = ",".join(claimed_nrs)
-
-        if used.claimed_nrs_double != claimed_nrs_double:
-            count1 = used.claimed_nrs_double.count(':')
-            count2 = claimed_nrs_double.count(':')
-            self.stdout.write('[INFO] Doubles claim changed from %s to %s nrs' % (count1, count2))
-
-        used.save(update_fields=['claimed_nrs_single', 'claimed_nrs_double', 'claimed_at_twoside_count'])
+        used.save(update_fields=['claimed_nrs_single'])
 
     def handle(self, *args, **options):
 
@@ -187,9 +204,17 @@ class Command(BaseCommand):
 
         self.stdout.write('[INFO] Processor=%s' % self.processor)
 
+        try:
+            used = ProcessorUsedPieces.objects.get(processor=self.processor)
+        except ProcessorUsedPieces.DoesNotExist:
+            self.stderr.write('[ERROR] Used pieces admin not found')
+            return
+
         self._load_unused()
 
-        self._limit_base_pieces()
+        self._scan_locs(used)
+
+        self._limit_base_pieces(used)
 
 
 # end of file
