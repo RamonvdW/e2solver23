@@ -173,7 +173,7 @@
         <script>
             setTimeout(function(){
                 window.location.reload();
-            }, 15*1000);        // 15 seconds
+            }, 10*1000);        // 10 seconds
         </script>
     {% endif %}
 

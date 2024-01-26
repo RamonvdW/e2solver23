@@ -15,7 +15,7 @@ class TwoSideOptionsAdmin(admin.ModelAdmin):
 
 class ProgressAdmin(admin.ModelAdmin):
 
-    list_filter = ('eval_size',)
+    list_filter = ('eval_size', 'processor')
 
 
 class Piece2x2Admin(admin.ModelAdmin):
