@@ -99,7 +99,6 @@ class Command(BaseCommand):
             if self.do_commit:
                 self.stdout.write('[INFO] Reduction side%s: %s' % (side_nr, two_side))
                 qset.delete()
-                propagate_segment_reduction(self.processor, segment)
             self.reductions[side_nr] += 1
 
     def handle(self, *args, **options):
@@ -138,6 +137,22 @@ class Command(BaseCommand):
 
         nrs = list(qset.values_list('nr', flat=True))
 
+        if len(options1) + len(options2) + len(options3) + len(options4) == 0:
+            self.stdout.write('[WARNING] Nothing found in that location')
+            return
+
+        if len(options1) + len(options2) + len(options3) + len(options4) <= 4:
+            self.stdout.write('[WARNING] Location seems filled already')
+            return
+
+        self.stdout.write('[INFO] Selecting %s / %s' % (index, len(nrs)))
+
+        try:
+            nr = nrs[index]
+        except IndexError:
+            self.stderr.write('[ERROR] Invalid index')
+            return
+
         # perform a reduction first
         self.stdout.write('[INFO] Performing eval_loc_1 equivalent check for loc %s' % self.loc)
         side1_new = list(qset.distinct('side1').values_list('side1', flat=True))
@@ -169,14 +184,6 @@ class Command(BaseCommand):
                 self._reduce(segment, side, 4)
         # for
 
-        self.stdout.write('[INFO] Selecting %s / %s' % (index, len(nrs)))
-
-        try:
-            nr = nrs[index]
-        except IndexError:
-            self.stderr.write('[ERROR] Invalid index')
-            return
-
         p2x2 = qset.get(nr=nr)
 
         base_nrs = [p2x2.nr1, p2x2.nr2, p2x2.nr3, p2x2.nr4]
@@ -196,6 +203,9 @@ class Command(BaseCommand):
                 if side != side_new:
                     self._reduce(segment, side, side_nr)            # reverses back for side 3 and 4
             # for
+
+            if self.do_commit:
+                propagate_segment_reduction(self.processor, segment)
         # for
 
         if self.do_commit:
