@@ -205,6 +205,7 @@ class Command(BaseCommand):
         # for
 
     def _find_filled_locs(self):
+        self.board_order = list()
         for p_nr, loc in enumerate(self.locs):
             s1, s2, s3, s4 = self.segment_nrs[loc]
             options1 = self.segment_options[s1]
