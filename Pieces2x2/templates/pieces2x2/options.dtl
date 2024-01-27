@@ -50,7 +50,7 @@
                             {% if sq.loc %}
                                 <td style="background: lightgray; color: #808080; height:30px; width:30px">{{ sq.loc }}</td>
                             {% elif sq.count %}
-                                <td style="background: hsl({{ sq.hue }}, 100%, 50%);{% if sq.highlight %}background:white{% endif %}">
+                                <td style="background: hsl({{ sq.hue }}, 100%, 50%);{% if sq.highlight %}background:white{% endif %}{% if sq.working %} border:2px dotted red{% endif %}">
                                     <div{% if sq.transform %} style="transform: {{ sq.transform }}"{% endif %}>{{ sq.count }}</div>
                                 </td>
                             {% else %}

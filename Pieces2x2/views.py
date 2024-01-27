@@ -118,7 +118,10 @@ class OptionsView(TemplateView):
         # for
         return compare
 
-    def _make_squares(self, segment2count, highlight_segments):
+    def _make_squares(self, segment2count, highlight_segments, processor):
+        # get segments that are being worked on
+        work_segments = list(EvalProgress.objects.filter(processor=processor).values_list('segment', flat=True))
+
         # initialize matrix
         squares = dict()    # [(x,y)] = SimpleNamespace
         for y in range(16+1):
@@ -127,7 +130,7 @@ class OptionsView(TemplateView):
                 transform = 'rotate(90deg)'
 
             for x in range(16+1):
-                squares[(x, y)] = SimpleNamespace(break_after=False, transform=transform)
+                squares[(x, y)] = SimpleNamespace(break_after=False, transform=transform, working=False)
             # for
             squares[(16, y)].break_after = True
         # for
@@ -143,24 +146,28 @@ class OptionsView(TemplateView):
             squares[(x, y-1)].count = count
             squares[(x, y-1)].highlight = segment in highlight_segments
             squares[(x, y-1)].hue = self._calc_hue(count)
+            squares[(x, y-1)].working = segment in work_segments
 
             segment = calc_segment(loc, 2)
             count = segment2count[segment]
             squares[(x+1, y)].count = count
             squares[(x+1, y)].highlight = segment in highlight_segments
             squares[(x+1, y)].hue = self._calc_hue(count)
+            squares[(x+1, y)].working = segment in work_segments
 
             segment = calc_segment(loc, 3)
             count = segment2count[segment]
             squares[(x, y+1)].count = count
             squares[(x, y+1)].highlight = segment in highlight_segments
             squares[(x, y+1)].hue = self._calc_hue(count)
+            squares[(x, y+1)].working = segment in work_segments
 
             segment = calc_segment(loc, 4)
             count = segment2count[segment]
             squares[(x-1, y)].count = count
             squares[(x-1, y)].highlight = segment in highlight_segments
             squares[(x-1, y)].hue = self._calc_hue(count)
+            squares[(x-1, y)].working = segment in work_segments
 
             x += 2
             if x > 16:
@@ -599,7 +606,7 @@ class OptionsView(TemplateView):
             highlight_segments = [segment for segment, _, _, _ in context['compare']]
         except KeyError:
             highlight_segments = list()
-        context['squares'] = self._make_squares(segment2count, highlight_segments)
+        context['squares'] = self._make_squares(segment2count, highlight_segments, processor)
 
         context['used_blocks'], context['used'] = self._get_used(processor)
 
