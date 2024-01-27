@@ -583,12 +583,6 @@ class Command(BaseCommand):
 
         # self.stdout.write('[INFO] Initial solve order: %s' % repr(self.requested_order))
 
-        self.board_unused = self._get_unused()
-
-        self._get_segments_options()
-
-        self._find_filled_locs()
-
         self.prev_tick = time.monotonic()
 
         self.progress = EvalProgress(
@@ -604,9 +598,16 @@ class Command(BaseCommand):
 
         try:
             for segment in segments:
+                # due to runtime, refresh for every segment
+                self.board_unused = self._get_unused()
+                self._get_segments_options()
+                self._find_filled_locs()
+
                 loc, _ = self._segment_to_loc(segment)
                 self.requested_order = [loc]
+
                 self._find_reduce(segment)
+
         except KeyboardInterrupt:
             pass
 
