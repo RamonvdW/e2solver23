@@ -294,7 +294,7 @@ def set_dead_end(processor):
     """ Use this method to report a dead end that has been found
         This aborts further processing by all other evaluators.
     """
-    ProcessorUsedPieces.objects.get(processor=processor).update(reached_dead_end=True)
+    ProcessorUsedPieces.objects.filter(processor=processor).update(reached_dead_end=True)
 
 
 def check_dead_end(processor):
