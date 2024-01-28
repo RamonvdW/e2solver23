@@ -8,7 +8,7 @@ from django.utils import timezone
 from django.core.management.base import BaseCommand
 from Pieces2x2.models import TwoSide, TwoSideOptions, Piece2x2, EvalProgress
 from Pieces2x2.helpers import calc_segment
-from WorkQueue.operations import propagate_segment_reduction, get_unused_for_locs
+from WorkQueue.operations import propagate_segment_reduction, get_unused_for_locs, check_dead_end
 import time
 
 
@@ -599,6 +599,9 @@ class Command(BaseCommand):
 
         try:
             for segment in segments:
+                if check_dead_end(self.processor):
+                    return
+
                 # due to runtime, refresh for every segment
                 self.board_unused = self._get_unused()
                 self._get_segments_options()

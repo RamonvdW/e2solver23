@@ -290,4 +290,22 @@ def request_eval_claims(processor):
                     Work(processor=processor, job_type='eval_claims', priority='2').save()
 
 
+def set_dead_end(processor):
+    """ Use this method to report a dead end that has been found
+        This aborts further processing by all other evaluators.
+    """
+    ProcessorUsedPieces.objects.get(processor=processor).update(reached_dead_end=True)
+
+
+def check_dead_end(processor):
+    """ Returns True when a dead end has been reached and processing should stop """
+    try:
+        used = ProcessorUsedPieces.objects.get(processor=processor)
+    except ProcessorUsedPieces.DoesNotExist:
+        # not available anymore; so assume deleted == dead end
+        return True
+
+    return used.reached_dead_end
+
+
 # end of file

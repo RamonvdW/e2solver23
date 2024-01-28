@@ -310,12 +310,23 @@ class ProcessorUsedPieces(models.Model):
     nr256 = models.BooleanField(default=False)
 
     # claimed_nrs_single: "nr:loc,nr:loc" etc
-    claimed_nrs_single = models.CharField(max_length=512, default='')
+    claimed_nrs_single = models.CharField(max_length=512, default='', blank=True)
 
     # claimed_nrs_double: "nr:loc;loc,nr:loc;loc" etc.
-    claimed_nrs_double = models.CharField(max_length=512, default='')
+    claimed_nrs_double = models.CharField(max_length=512, default='', blank=True)
 
     # track when the claim was last evaluated, for automatically triggering a new check
     claimed_at_twoside_count = models.PositiveIntegerField(default=99999)
+
+    # set to True when any segments reaches zero options
+    # this is monitored by all the solvers and ends the searches
+    reached_dead_end = models.BooleanField(default=False)
+
+    def __str__(self):
+        msg = "Processor %s" % self.processor
+        if self.reached_dead_end:
+            msg += " (dead end)"
+        return msg
+
 
 # end of file

@@ -8,7 +8,8 @@ from django.utils import timezone
 from django.core.management.base import BaseCommand
 from Pieces2x2.models import TwoSide, TwoSideOptions, Piece2x2, EvalProgress
 from Pieces2x2.helpers import calc_segment
-from WorkQueue.operations import propagate_segment_reduction, get_unused_for_locs, set_used, request_eval_claims
+from WorkQueue.operations import (propagate_segment_reduction, get_unused_for_locs, set_used, request_eval_claims,
+                                  check_dead_end, set_dead_end)
 
 
 class Command(BaseCommand):
@@ -153,6 +154,7 @@ class Command(BaseCommand):
                 return
 
             self.stderr.write('[ERROR] Safety stop')
+            set_dead_end(self.processor)
 
             if EvalProgress.objects.filter(
                                     eval_size=1,

@@ -24,7 +24,7 @@
             <td style="border:0">
 
                 <!-- options -->
-                <table>
+                <table{% if used.reached_dead_end %} style="background:orangered"{% endif %}>
                     <thead>
                         <tr>
                             <td colspan="4">
@@ -72,7 +72,7 @@
 
                 <br><br>
 
-                <table style="margin-left:auto; margin-right:auto">
+                <table style="margin-left:auto; margin-right:auto{% if used.reached_dead_end %};background:orangered{% endif %}">
                     <tr>
                         {% for sol in solution %}
                             <td>{% if not sol.is_empty %}{{ sol.nr }}{% endif %}</td>

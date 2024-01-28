@@ -8,7 +8,7 @@ from django.utils import timezone
 from django.core.management.base import BaseCommand
 from Pieces2x2.models import TwoSide, TwoSideOptions, Piece2x2, EvalProgress
 from Pieces2x2.helpers import calc_segment
-from WorkQueue.operations import propagate_segment_reduction, get_unused_for_locs
+from WorkQueue.operations import propagate_segment_reduction, get_unused_for_locs, check_dead_end
 
 
 class Command(BaseCommand):
@@ -201,6 +201,9 @@ class Command(BaseCommand):
 
         self.stdout.write('[INFO] Checking %s options in segment %s' % (todo, segment))
         for side in sides:
+            if check_dead_end(self.processor):
+                return
+
             self.progress.left_count -= 1
             self.progress.updated=timezone.now()
             self.progress.save(update_fields=['left_count', 'updated'])
@@ -280,6 +283,9 @@ class Command(BaseCommand):
 
         self.stdout.write('[INFO] Checking %s options in segment %s' % (todo, segment))
         for side in sides:
+            if check_dead_end(self.processor):
+                return
+
             self.progress.left_count -= 1
             self.progress.updated=timezone.now()
             self.progress.save(update_fields=['left_count', 'updated'])
@@ -359,6 +365,9 @@ class Command(BaseCommand):
 
         self.stdout.write('[INFO] Checking %s options in segment %s' % (todo, segment))
         for side in sides:
+            if check_dead_end(self.processor):
+                return
+
             self.progress.left_count -= 1
             self.progress.updated=timezone.now()
             self.progress.save(update_fields=['left_count', 'updated'])
@@ -438,6 +447,9 @@ class Command(BaseCommand):
 
         self.stdout.write('[INFO] Checking %s options in segment %s' % (todo, segment))
         for side in sides:
+            if check_dead_end(self.processor):
+                return
+
             self.progress.left_count -= 1
             self.progress.updated=timezone.now()
             self.progress.save(update_fields=['left_count', 'updated'])
@@ -544,15 +556,24 @@ class Command(BaseCommand):
         try:
             self._reduce_s3()
 
+            if check_dead_end(self.processor):
+                return
+
             self.progress.solve_order = msg
             self.progress.updated = timezone.now()
             self.progress.save(update_fields=['solve_order', 'updated'])
             self._reduce_s5()
 
+            if check_dead_end(self.processor):
+                return
+
             self.progress.solve_order = msg
             self.progress.updated = timezone.now()
             self.progress.save(update_fields=['solve_order', 'updated'])
             self._reduce_s6()
+
+            if check_dead_end(self.processor):
+                return
 
             self.progress.solve_order = msg
             self.progress.updated = timezone.now()

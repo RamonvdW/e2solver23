@@ -8,7 +8,7 @@ from django.utils import timezone
 from django.core.management.base import BaseCommand
 from Pieces2x2.models import TwoSide, TwoSideOptions, Piece2x2, EvalProgress
 from Pieces2x2.helpers import calc_segment
-from WorkQueue.operations import propagate_segment_reduction, get_unused_for_locs
+from WorkQueue.operations import propagate_segment_reduction, get_unused_for_locs, check_dead_end
 import time
 
 
@@ -368,6 +368,9 @@ class Command(BaseCommand):
             self.prev_tick = tick
             msg = '(%s) %s' % (len(self.board_order), repr([self.locs[idx] for idx in self.board_order]))
             # print(msg)
+            if check_dead_end(self.processor):
+                return True     # True causes stop and avoid reduction
+
             self.progress.solve_order = msg
             self.progress.updated = timezone.now()
             self.progress.save(update_fields=['solve_order', 'updated'])
@@ -433,6 +436,9 @@ class Command(BaseCommand):
         self.progress.save(update_fields=['segment', 'todo_count'])
 
         for side in sides:
+            if check_dead_end(self.processor):
+                return
+
             # update the progress record in the database
             self.progress.left_count = todo
             self.progress.updated = timezone.now()
