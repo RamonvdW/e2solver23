@@ -92,17 +92,17 @@ class OptionsView(TemplateView):
         hue = int(count * (100 / 289))
         return 100 - hue        # low number = green, higher number = red
 
-    def _compare_pre(self, processor, prev_processor):
+    def _compare_pre(self, used):
         segment2count = dict()       # [segment] = int
         prev_segment2count = dict()  # [segment] = int
         for segment in range(256):
             segment2count[segment] = 0
             prev_segment2count[segment] = 0
         # for
-        for option in TwoSideOptions.objects.filter(processor=processor):
+        for option in TwoSideOptions.objects.filter(processor=used.processor):
             segment2count[option.segment] += 1
         # for
-        for option in TwoSideOptions.objects.filter(processor=prev_processor):
+        for option in TwoSideOptions.objects.filter(processor=used.created_from):
             prev_segment2count[option.segment] += 1
         # for
 
@@ -462,12 +462,24 @@ class OptionsView(TemplateView):
         sol = dict()        # [base] = SimpleNamespace
         wrap = 0
         for base in range(1, 256+1):
-            sol[base] = SimpleNamespace(is_empty=True, nr=0, do_break=False)
+            sol[base] = SimpleNamespace(is_empty=True, nr=0, do_break=False, has_claims=False)
             wrap += 1
             if wrap == 16:
                 wrap = 0
                 sol[base].do_break = True
         # for
+
+        try:
+            used = ProcessorUsedPieces.objects.get(processor=processor)
+        except ProcessorUsedPieces.DoesNotExist:
+            # not available; so simple return all
+            pass
+        else:
+            # parse the claims
+            for claim in used.claimed_nrs_single.split(','):
+                # nr:loc
+                nr, loc = claim.split(':')
+                loc = int(loc)
 
         unused = list(range(1, 256+1))
 
@@ -566,11 +578,6 @@ class OptionsView(TemplateView):
         else:
             processor = processors[-1]
 
-        if 'ref' in kwargs:
-            processor_ref = kwargs['ref']
-        else:
-            processor_ref = -1
-
         context['processor'] = processor
 
         try:
@@ -580,15 +587,11 @@ class OptionsView(TemplateView):
             pass
         else:
             if idx > 0:
-                if processor_ref == -1:
-                    processor_ref = processors[idx - 1]
-                context['compare'] = self._compare_pre(processor, processor_ref)
+                context['url_prev'] = reverse('Pieces2x2:options-nr', kwargs={'nr': processors[idx - 1]})
 
-                context['url_prev'] = reverse('Pieces2x2:options-nr-ref', kwargs={'nr': processors[idx - 1],
-                                                                                  'ref': processor_ref})
             if idx < len(processors) - 1:
-                context['url_next'] = reverse('Pieces2x2:options-nr-ref', kwargs={'nr': processors[idx + 1],
-                                                                                  'ref': processor_ref})
+                context['url_next'] = reverse('Pieces2x2:options-nr', kwargs={'nr': processors[idx + 1]})
+
         context['url_last'] = reverse('Pieces2x2:options')
 
         segment2count = dict()  # [segment] = int
@@ -609,6 +612,8 @@ class OptionsView(TemplateView):
         context['squares'] = self._make_squares(segment2count, highlight_segments, processor)
 
         context['used_blocks'], context['used'] = self._get_used(processor)
+
+        context['compare'] = self._compare_pre(context['used'])
 
         context['solution'] = self._make_solution(processor)
 

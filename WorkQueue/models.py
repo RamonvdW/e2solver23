@@ -51,6 +51,9 @@ class ProcessorUsedPieces(models.Model):
     # related to which processor?
     processor = models.PositiveIntegerField(default=0)
 
+    # from which processor was duplication done?
+    created_from = models.PositiveIntegerField(default=0)
+
     # out of all 256 base pieces, which ones are in use?
     nr1 = models.BooleanField(default=False)
     nr2 = models.BooleanField(default=False)

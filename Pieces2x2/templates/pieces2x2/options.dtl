@@ -119,13 +119,13 @@
                 <table style="margin-left:10px">
                     <thead>
                         <tr>
-                            <td colspan="4">Compare</td>
+                            <td colspan="4">Compare to {{ used.created_from }}</td>
                         </tr>
                         <tr>
                             <th>Segment</th>
                             <th>Prev</th>
                             <th>Now</th>
-                            <th>Diff</th>
+                            <th>&Delta;</th>
                         </tr>
                     </thead>
                     {% for segment, count1, count2, diff in compare %}

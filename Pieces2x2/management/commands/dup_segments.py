@@ -55,6 +55,7 @@ class Command(BaseCommand):
             work.pk = None
 
         work.processor = processor
+        work.created_from = source
         work.save()
 
 
