@@ -8,7 +8,7 @@ from django.utils import timezone
 from django.core.management.base import BaseCommand
 from Pieces2x2.models import TwoSide, TwoSideOptions, Piece2x2, EvalProgress
 from Pieces2x2.helpers import calc_segment
-from WorkQueue.operations import (propagate_segment_reduction, get_unused_for_locs, set_used, request_eval_claims,
+from WorkQueue.operations import (propagate_segment_reduction, get_unused_for_locs, set_loc_used, request_eval_claims,
                                   check_dead_end, set_dead_end)
 
 
@@ -35,6 +35,7 @@ class Command(BaseCommand):
         self.processor = 0
         self.loc = 0
         self.reductions = {1: 0, 2: 0, 3: 0, 4: 0}     # [side_nr] = count
+        self.bulk_reduce = dict()       # [segment] = [two_side, ..]
 
     def add_arguments(self, parser):
         # parser.add_argument('--verbose', action='store_true')
@@ -88,14 +89,12 @@ class Command(BaseCommand):
         return options
 
     def _reduce(self, segment, two_side, side_nr):
-        qset = TwoSideOptions.objects.filter(processor=self.processor, segment=segment, two_side=two_side)
-        if qset.count() != 1:
-            self.stderr.write('[ERROR] Cannot find segment=%s, two_side=%s' % (segment, two_side))
-        else:
-            self.stdout.write('[INFO] Reduction side%s: %s' % (side_nr, two_side))
-            qset.delete()
-            self.reductions[side_nr] += 1
-            propagate_segment_reduction(self.processor, segment)
+        try:
+            self.bulk_reduce[segment].append(two_side)
+        except KeyError:
+            self.bulk_reduce[segment] = [two_side]
+
+        self.reductions[side_nr] += 1
 
     def handle(self, *args, **options):
 
@@ -212,12 +211,20 @@ class Command(BaseCommand):
                     self._reduce(segment, self.twoside2reverse[side], 4)
             # for
 
+        for segment, two_sides in self.bulk_reduce.items():
+            qset2 = TwoSideOptions.objects.filter(processor=self.processor, segment=segment, two_side__in=two_sides)
+            qset2.delete()
+        # for
+
+        for segment in self.bulk_reduce.keys():
+            propagate_segment_reduction(self.processor, segment)
+        # for
+
         if count == 1:
             # only 1 solution left: set the base pieces as used
             self.stdout.write('[INFO] Single solution left for loc %s' % self.loc)
             p2x2 = qset.first()
-            base_nrs = [p2x2.nr1, p2x2.nr2, p2x2.nr3, p2x2.nr4]
-            set_used(self.processor, base_nrs)
+            set_loc_used(self.processor, self.loc, p2x2)
             return
 
         if count < 5:

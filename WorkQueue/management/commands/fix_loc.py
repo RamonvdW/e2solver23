@@ -7,7 +7,7 @@
 from django.core.management.base import BaseCommand
 from Pieces2x2.models import TwoSide, TwoSideOptions, Piece2x2
 from Pieces2x2.helpers import calc_segment
-from WorkQueue.operations import propagate_segment_reduction, set_used, get_unused_for_locs, request_eval_claims
+from WorkQueue.operations import propagate_segment_reduction, set_loc_used, get_unused_for_locs, request_eval_claims
 
 
 class Command(BaseCommand):
@@ -35,6 +35,7 @@ class Command(BaseCommand):
         self.reductions = {1: 0, 2: 0, 3: 0, 4: 0}     # [side_nr] = count
         self.unused = list()
         self.do_commit = False
+        self.bulk_reduce = dict()       # [segment] = [two_side, ..]
 
     def add_arguments(self, parser):
         parser.add_argument('--commit', action='store_true')
@@ -92,14 +93,13 @@ class Command(BaseCommand):
         if side_nr in (3, 4):
             two_side = self.twoside2reverse[two_side]
 
-        qset = TwoSideOptions.objects.filter(processor=self.processor, segment=segment, two_side=two_side)
-        if qset.count() != 1:
-            self.stderr.write('[ERROR] Cannot find segment=%s, two_side=%s' % (segment, two_side))
-        else:
-            if self.do_commit:
-                self.stdout.write('[INFO] Reduction side%s: %s' % (side_nr, two_side))
-                qset.delete()
-            self.reductions[side_nr] += 1
+        try:
+            self.bulk_reduce[segment].append(two_side)
+        except KeyError:
+            self.bulk_reduce[segment] = [two_side]
+
+        self.reductions[side_nr] += 1
+        return
 
     def handle(self, *args, **options):
 
@@ -203,13 +203,18 @@ class Command(BaseCommand):
                 if side != side_new:
                     self._reduce(segment, side, side_nr)            # reverses back for side 3 and 4
             # for
-
-            if self.do_commit:
-                propagate_segment_reduction(self.processor, segment)
         # for
 
         if self.do_commit:
-            set_used(self.processor, base_nrs)
+            for segment, two_sides in self.bulk_reduce.items():
+                qset = TwoSideOptions.objects.filter(processor=self.processor, segment=segment, two_side__in=two_sides)
+                qset.delete()
+            # for
+            set_loc_used(self.processor, self.loc, p2x2)
+
+            for segment in self.bulk_reduce.keys():
+                propagate_segment_reduction(self.processor, segment)
+            # for
 
         total = sum(self.reductions.values())
         if total == 0:

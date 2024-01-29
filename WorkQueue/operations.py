@@ -257,15 +257,33 @@ def get_unused_for_locs(processor, locs):
     return unused
 
 
-def set_used(processor, base_nrs):
+# def set_used(processor, base_nrs):
+#     try:
+#         used = ProcessorUsedPieces.objects.get(processor=processor)
+#     except ProcessorUsedPieces.DoesNotExist:
+#         # not available; so simple skip
+#         pass
+#     else:
+#         updated = list()
+#         for nr in base_nrs:
+#             nr_str = 'nr%s' % nr
+#             setattr(used, nr_str, True)
+#             updated.append(nr_str)
+#         # for
+#         used.save(update_fields=updated)
+
+
+def set_loc_used(processor, loc, p2x2):
     try:
         used = ProcessorUsedPieces.objects.get(processor=processor)
     except ProcessorUsedPieces.DoesNotExist:
         # not available; so simple skip
         pass
     else:
-        updated = list()
-        for nr in base_nrs:
+        loc_str = 'loc%s' % loc
+        setattr(used, loc_str, p2x2.nr)
+        updated = [loc_str]
+        for nr in [p2x2.nr1, p2x2.nr2, p2x2.nr3, p2x2.nr4]:
             nr_str = 'nr%s' % nr
             setattr(used, nr_str, True)
             updated.append(nr_str)

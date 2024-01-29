@@ -447,7 +447,7 @@ class OptionsView(TemplateView):
             sol[136].nr = 139
             sol[136].is_empty = False
 
-    def _make_solution(self, processor):
+    def _make_solution(self, processor, used):
         two2nr = dict()
         for two in TwoSide.objects.all():
             two2nr[two.two_sides] = two.nr
@@ -469,17 +469,13 @@ class OptionsView(TemplateView):
                 sol[base].do_break = True
         # for
 
-        try:
-            used = ProcessorUsedPieces.objects.get(processor=processor)
-        except ProcessorUsedPieces.DoesNotExist:
-            # not available; so simple return all
-            pass
-        else:
-            # parse the claims
-            for claim in used.claimed_nrs_single.split(','):
+        # parse the claims
+        for claim in used.claimed_nrs_single.split(','):
+            if claim:
                 # nr:loc
                 nr, loc = claim.split(':')
                 loc = int(loc)
+        # for
 
         unused = list(range(1, 256+1))
 
@@ -506,6 +502,31 @@ class OptionsView(TemplateView):
             if seg4 not in seg2sides:
                 sides4 = qset.filter(segment=seg4).values_list('two_side', flat=True)
                 seg2sides[seg4] = list(sides4)
+
+            loc_str = 'loc%s' % loc
+            nr = getattr(used, loc_str)
+            if nr > 0:
+                row_nr = int((loc - 1) / 8)
+                base_nr = 2 * (loc - 1) + row_nr * 16
+                base_nr += 1
+                # print('loc=%s, row_nr=%s, base_nr=%s' % (loc, row_nr, base_nr))
+                p2x2 = Piece2x2.objects.get(nr=nr)
+
+                sol[base_nr].nr = p2x2.nr1
+                sol[base_nr].is_empty = False
+                unused.remove(p2x2.nr1)
+
+                sol[base_nr + 1].nr = p2x2.nr2
+                sol[base_nr + 1].is_empty = False
+                unused.remove(p2x2.nr2)
+
+                sol[base_nr + 16].nr = p2x2.nr3
+                sol[base_nr + 16].is_empty = False
+                unused.remove(p2x2.nr3)
+
+                sol[base_nr + 17].nr = p2x2.nr4
+                sol[base_nr + 17].is_empty = False
+                unused.remove(p2x2.nr4)
         # for
 
         # for seg in seg2sides.keys():
@@ -603,9 +624,10 @@ class OptionsView(TemplateView):
         # for
         context['total_options'] = sum(segment2count.values())
 
-        context['used_blocks'], context['used'] = self._get_used(processor)
+        context['used_blocks'], used = self._get_used(processor)
+        context['used'] = used
 
-        context['compare'] = self._compare_pre(context['used'])
+        context['compare'] = self._compare_pre(used)
 
         context['work'] = self._find_work(processor)
 
@@ -615,7 +637,7 @@ class OptionsView(TemplateView):
             highlight_segments = list()
         context['squares'] = self._make_squares(segment2count, highlight_segments, processor)
 
-        context['solution'] = self._make_solution(processor)
+        context['solution'] = self._make_solution(processor, used)
 
         context['progress'] = self._get_progress(processor)
 
