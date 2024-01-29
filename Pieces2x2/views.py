@@ -603,6 +603,10 @@ class OptionsView(TemplateView):
         # for
         context['total_options'] = sum(segment2count.values())
 
+        context['used_blocks'], context['used'] = self._get_used(processor)
+
+        context['compare'] = self._compare_pre(context['used'])
+
         context['work'] = self._find_work(processor)
 
         try:
@@ -610,10 +614,6 @@ class OptionsView(TemplateView):
         except KeyError:
             highlight_segments = list()
         context['squares'] = self._make_squares(segment2count, highlight_segments, processor)
-
-        context['used_blocks'], context['used'] = self._get_used(processor)
-
-        context['compare'] = self._compare_pre(context['used'])
 
         context['solution'] = self._make_solution(processor)
 
