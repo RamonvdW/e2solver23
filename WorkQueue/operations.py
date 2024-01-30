@@ -4,6 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+from django.utils import timezone
 from Pieces2x2.models import TwoSideOptions
 from WorkQueue.models import Work, ProcessorUsedPieces
 
@@ -289,6 +290,19 @@ def set_loc_used(processor, loc, p2x2):
             updated.append(nr_str)
         # for
         used.save(update_fields=updated)
+
+
+def used_note_add(processor, msg):
+    try:
+        used = ProcessorUsedPieces.objects.get(processor=processor)
+    except ProcessorUsedPieces.DoesNotExist:
+        # not available; so simple return all
+        pass
+    else:
+        now = timezone.localtime(timezone.now())
+        stamp_str = now.strftime('%Y-%m-%d %H:%M')
+        used.choices += "[%s] %s\n" % (stamp_str, msg)
+        used.save(update_fields=['choices'])
 
 
 def request_eval_claims(processor):

@@ -7,7 +7,8 @@
 from django.core.management.base import BaseCommand
 from Pieces2x2.models import TwoSide, TwoSideOptions, Piece2x2
 from Pieces2x2.helpers import calc_segment
-from WorkQueue.operations import propagate_segment_reduction, set_loc_used, get_unused_for_locs, request_eval_claims
+from WorkQueue.operations import (propagate_segment_reduction, set_loc_used, get_unused_for_locs, request_eval_claims,
+                                  used_note_add)
 
 
 class Command(BaseCommand):
@@ -189,6 +190,12 @@ class Command(BaseCommand):
         base_nrs = [p2x2.nr1, p2x2.nr2, p2x2.nr3, p2x2.nr4]
         print('[INFO] Selected p2x2 with base nrs: %s' % repr(base_nrs))
         # print('[DEBUG] p2x2 sides: %s, %s, %s, %s' % (p2x2.side1, p2x2.side2, p2x2.side3, p2x2.side4))
+
+        if self.do_commit:
+            msg = 'fix_loc %s %s' % (self.loc, index)
+            msg += ' --> p2x2 nr %s' % nr
+            msg += ' --> base nrs %s' % repr(base_nrs)
+            used_note_add(self.processor, msg)
 
         for side_nr in (1, 2, 3, 4):
             segment = calc_segment(self.loc, side_nr)

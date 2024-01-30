@@ -5,8 +5,10 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
+from django.utils import timezone
 from Pieces2x2.models import TwoSide, TwoSideOptions, Piece2x2, EvalProgress
 from Pieces2x2.helpers import LOC_CORNERS, LOC_BORDERS, LOC_HINTS, calc_segment
+from WorkQueue.operations import used_note_add
 from WorkQueue.models import ProcessorUsedPieces
 
 
@@ -224,6 +226,11 @@ class Command(BaseCommand):
                     self._save_options(loc, 3, twosides_side3)
                     self._save_options(loc, 4, twosides_side4)
         # for
+
+        processor = 0
+        ProcessorUsedPieces(processor=processor).save()
+
+        used_note_add(processor, 'Initialized')
 
         self.stdout.write('[INFO] Done')
 

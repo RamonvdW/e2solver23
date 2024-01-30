@@ -391,6 +391,9 @@ class ProcessorUsedPieces(models.Model):
     # this is monitored by all the solvers and ends the searches
     reached_dead_end = models.BooleanField(default=False)
 
+    # logbook of the manual fixes
+    choices = models.TextField(default='', blank=True)
+
     def __str__(self):
         msg = "Processor %s" % self.processor
         if self.reached_dead_end:
