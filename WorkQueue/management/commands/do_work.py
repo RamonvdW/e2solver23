@@ -106,7 +106,10 @@ class Command(BaseCommand):
                               'when_added'))    # oldest first
 
             if only_eval_loc_1:
+                # avoid concurrent claiming by serializing eval_loc_1 on one worker
                 qset = qset.filter(job_type='eval_loc_1')
+            else:
+                qset = qset.exclude(job_type='eval_loc_1')
 
             work = qset.first()
             if not work:
