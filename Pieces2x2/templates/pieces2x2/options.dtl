@@ -83,35 +83,6 @@
                         {% endfor %}
                     </tr>
                 </table>
-
-                <p>Used nrs: {% for block in used_blocks %}{{ block }}<br>{% endfor %}</p>
-                <p>Single claims: {{ used.claimed_nrs_single }}</p>
-                <p>Double claims: {{ used.claimed_nrs_double }}</p>
-
-                <br><br>
-
-                <table style="margin-left:auto; margin-right:auto">
-                    <thead>
-                        <tr>
-                            <th>Size</th>
-                            <th>Top-left</th>
-                            <th>Segment</th>
-                            <th>Progress</th>
-                            <th>Updated</th>
-                            <th>Solve order</th>
-                        </tr>
-                    </thead>
-                    {% for obj in progress %}
-                        <tr>
-                            <td>{{ obj.eval_size }}</td>
-                            <td>{{ obj.eval_loc }}</td>
-                            <td>{% if obj.segments_todo %}{% for seg in obj.segments_todo %}{% if seg == obj.segment %}<b>{{ seg }}</b>{% else %}{{ seg }}{% endif %}, {% endfor %}{% else %}{{ obj.segment }}{% endif %}</td>
-                            <td>{{ obj.done_count }} / {{ obj.todo_count }}</td>
-                            <td>{{ obj.updated_str }}</td>
-                            <td>{% for line in obj.solve_lines %}{% if not forloop.first %}<br>{% endif %}{{ line }}{% endfor %}</td>
-                        </tr>
-                    {% endfor %}
-                </table>
             </td>
 
             <td style="border:0">
@@ -166,6 +137,40 @@
                     {% endfor %}
                 </table>
              </td>
+        </tr>
+
+        <tr>
+            <td colspan="3" style="border:0">
+
+                <p>Used nrs: {% for block in used_blocks %}{{ block }}<br>{% endfor %}</p>
+                <p>Single claims: {{ used.claimed_nrs_single }}</p>
+                <p>Double claims: {{ used.claimed_nrs_double }}</p>
+
+                <br><br>
+
+                <table style="margin-left:auto; margin-right:auto">
+                    <thead>
+                        <tr>
+                            <th>Size</th>
+                            <th>Top-left</th>
+                            <th>Segment</th>
+                            <th>Progress</th>
+                            <th>Updated</th>
+                            <th>Solve order</th>
+                        </tr>
+                    </thead>
+                    {% for obj in progress %}
+                        <tr>
+                            <td>{{ obj.eval_size }}</td>
+                            <td>{{ obj.eval_loc }}</td>
+                            <td>{% if obj.segments_todo %}{% for seg in obj.segments_todo %}{% if seg == obj.segment %}<b>{{ seg }}</b>{% else %}{{ seg }}{% endif %}, {% endfor %}{% else %}{{ obj.segment }}{% endif %}</td>
+                            <td>{{ obj.done_count }} / {{ obj.todo_count }}</td>
+                            <td>{{ obj.updated_str }}</td>
+                            <td>{% for line in obj.solve_lines %}{% if not forloop.first %}<br>{% endif %}{{ line }}{% endfor %}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </td>
         </tr>
     </table>
 
