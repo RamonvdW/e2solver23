@@ -30,6 +30,10 @@ class Work(models.Model):
     # which location (1..64)?
     location = models.PositiveSmallIntegerField(default=0)
 
+    # limit to pass along: 1..289
+    # (0 = not in use)
+    limit = models.PositiveSmallIntegerField(default=0)
+
     # when was this job requested?
     when_added = models.DateTimeField(auto_now_add=True)
 

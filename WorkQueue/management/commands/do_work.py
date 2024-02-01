@@ -55,6 +55,11 @@ class Command(BaseCommand):
 
         bad = True
 
+        if work.limit:
+            limit_arg = '--limit=%s' % work.limit
+        else:
+            limit_arg = ''
+
         if work.job_type == 'eval_loc_1':
             bad = self._run_command('eval_loc_1', str(work.processor), str(work.location))
 
@@ -62,7 +67,7 @@ class Command(BaseCommand):
             bad = self._run_command('eval_loc_4', str(work.processor), str(work.location))
 
         elif work.job_type == 'eval_loc_9':
-            bad = self._run_command('eval_loc_9', str(work.processor), str(work.location))
+            bad = self._run_command('eval_loc_9', str(work.processor), str(work.location), limit_arg)
 
         elif work.job_type == 'eval_loc_16':
             bad = self._run_command('eval_loc_16', str(work.processor), str(work.location))
