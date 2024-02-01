@@ -514,19 +514,23 @@ class OptionsView(TemplateView):
 
                 sol[base_nr].nr = p2x2.nr1
                 sol[base_nr].is_empty = False
-                unused.remove(p2x2.nr1)
+                if p2x2.nr1 in unused:
+                    unused.remove(p2x2.nr1)
 
                 sol[base_nr + 1].nr = p2x2.nr2
                 sol[base_nr + 1].is_empty = False
-                unused.remove(p2x2.nr2)
+                if p2x2.nr2 in unused:
+                    unused.remove(p2x2.nr2)
 
                 sol[base_nr + 16].nr = p2x2.nr3
                 sol[base_nr + 16].is_empty = False
-                unused.remove(p2x2.nr3)
+                if p2x2.nr3 in unused:
+                    unused.remove(p2x2.nr3)
 
                 sol[base_nr + 17].nr = p2x2.nr4
                 sol[base_nr + 17].is_empty = False
-                unused.remove(p2x2.nr4)
+                if p2x2.nr4 in unused:
+                    unused.remove(p2x2.nr4)
         # for
 
         # for seg in seg2sides.keys():
