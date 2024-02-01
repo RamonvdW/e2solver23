@@ -53,7 +53,7 @@ class Command(BaseCommand):
         self.side_options = ([], [])        # s0..s23
         self.side_options_rev = ([], [])    # s0..s23
         self.reductions = 0
-
+        self.segment_limit = 100
         self.do_commit = True
 
         # [p_nr] = [p_nr on side1..4 or -1 if no neighbour]
@@ -90,8 +90,9 @@ class Command(BaseCommand):
         self.progress = None
 
     def add_arguments(self, parser):
-        parser.add_argument('processor', nargs=1, type=int, help='Processor number to use')
-        parser.add_argument('loc', nargs=1, type=int, help='Top-left location on the board (1..46)')
+        parser.add_argument('processor', type=int, help='Processor number to use')
+        parser.add_argument('loc', type=int, help='Top-left location on the board (1..46)')
+        parser.add_argument('--limit', default=100, type=int, help='Skip segment evaluation above this limit')
         parser.add_argument('--dryrun', action='store_true')
 
     def _get_unused(self):
@@ -425,7 +426,7 @@ class Command(BaseCommand):
         segment = calc_segment(self.locs[p_nr], side_n)
         sides = self.side_options[s_nr]
         todo = len(sides)
-        if todo > 100:
+        if todo > self.segment_limit:
             return
 
         self.stdout.write('[INFO] Checking %s options in segment %s' % (len(sides), segment))
@@ -501,7 +502,7 @@ class Command(BaseCommand):
         if options['dryrun']:
             self.do_commit = False
 
-        loc = options['loc'][0]
+        loc = options['loc']
         if loc < 1 or loc > 46 or loc in (7, 8,
                                           15, 16,
                                           23, 24,
@@ -514,8 +515,11 @@ class Command(BaseCommand):
                      loc + 16, loc + 17, loc + 18)
         self.stdout.write('[INFO] Locations: %s' % repr(self.locs))
 
-        self.processor = options['processor'][0]
+        self.processor = options['processor']
         self.stdout.write('[INFO] Processor=%s' % self.processor)
+
+        self.segment_limit = options['limit']
+        self.stdout.write('[INFO] Segment limit: %s' % self.segment_limit)
 
         self.board_unused = self._get_unused()
 
