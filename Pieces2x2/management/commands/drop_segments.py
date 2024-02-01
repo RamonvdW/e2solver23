@@ -5,20 +5,20 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from Pieces2x2.models import TwoSideOptions
+from Pieces2x2.models import TwoSideOptions, EvalProgress
 from WorkQueue.models import Work, ProcessorUsedPieces
 
 
 class Command(BaseCommand):
 
-    help = "Duplicate the latest TwoSideOptions"
+    help = "Drop the a specific TwoSideOptions set"
 
     def add_arguments(self, parser):
-        parser.add_argument('processor', nargs=1, type=int, help='New processor number')
+        parser.add_argument('processor', type=int, help='New processor number')
 
     def handle(self, *args, **options):
 
-        processor = options['processor'][0]
+        processor = options['processor']
 
         qset = TwoSideOptions.objects.filter(processor=processor)
         count = qset.count()
@@ -36,6 +36,11 @@ class Command(BaseCommand):
         try:
             ProcessorUsedPieces.objects.filter(processor=processor).delete()
         except ProcessorUsedPieces.DoesNotExist:
+            pass
+
+        try:
+            EvalProgress.objects.filter(processor=processor).delete()
+        except EvalProgress.DoesNotExist:
             pass
 
 
