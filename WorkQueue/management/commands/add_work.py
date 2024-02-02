@@ -40,17 +40,20 @@ class Command(BaseCommand):
         if job_type == 'scan1':
             job_type = 'eval_loc_1'
             self.stdout.write('[INFO] Adding work: %s %s %s {1..64}' % (processor, job_type, priority))
+
             bulk = list()
             for loc in range(1, 64+1):
-                bulk.append(Work(processor=processor, job_type=job_type, priority=priority, location=location))
+                bulk.append(Work(processor=processor, job_type=job_type, priority=priority, location=loc))
             # for
+
             Work.objects.bulk_create(bulk)
         else:
+            limit_str = ''
             if limit > 0:
                 limit_str = ' --limit %s' % limit
-            else:
-                limit_str = ''
-            self.stdout.write('[INFO] Adding work: %s %s %s %s%s' % (processor, job_type, priority, location, limit_str))
+            self.stdout.write(
+                '[INFO] Adding work: %s %s %s %s%s' % (processor, job_type, priority, location, limit_str))
+
             Work(processor=processor, job_type=job_type, priority=priority, location=location, limit=limit).save()
 
 

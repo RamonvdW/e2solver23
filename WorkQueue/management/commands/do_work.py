@@ -9,7 +9,7 @@ from django.core import management
 from django.utils import timezone
 from django.core.management.base import BaseCommand
 from Pieces2x2.models import EvalProgress
-from WorkQueue.models import Work
+from WorkQueue.models import Work, ProcessorUsedPieces
 import time
 import io
 
@@ -115,6 +115,12 @@ class Command(BaseCommand):
                 self.stdout.write('[INFO] Waiting for more work')
                 time.sleep(10)
                 return
+
+            used = ProcessorUsedPieces.objects.filter(processor=work.processor).first()
+            if used:
+                if used.reached_dead_end:
+                    work.delete()
+                    return
 
             work.doing = True
             work.save(update_fields=['doing'])

@@ -211,7 +211,7 @@ class Command(BaseCommand):
                 return
 
             self.progress.left_count -= 1
-            self.progress.updated=timezone.now()
+            self.progress.updated = timezone.now()
             self.progress.save(update_fields=['left_count', 'updated'])
 
             p0_exp_s2 = side
@@ -395,7 +395,7 @@ class Command(BaseCommand):
                 return
 
             self.progress.left_count -= 1
-            self.progress.updated=timezone.now()
+            self.progress.updated = timezone.now()
             self.progress.save(update_fields=['left_count', 'updated'])
 
             p1_exp_s3 = self.twoside2reverse[side]
@@ -484,7 +484,7 @@ class Command(BaseCommand):
                 return
 
             self.progress.left_count -= 1
-            self.progress.updated=timezone.now()
+            self.progress.updated = timezone.now()
             self.progress.save(update_fields=['left_count', 'updated'])
 
             p2_exp_s2 = side
