@@ -22,7 +22,7 @@ class Command(BaseCommand):
         super().__init__(**kwargs)
 
     def add_arguments(self, parser):
-        parser.add_argument('worker_nr', nargs=1, type=int, help='Instance number')
+        parser.add_argument('worker_nr', type=int, help='Instance number')
 
     @staticmethod
     def _get_stamp():
@@ -55,11 +55,6 @@ class Command(BaseCommand):
 
         bad = True
 
-        if work.limit:
-            limit_arg = '--limit=%s' % work.limit
-        else:
-            limit_arg = ''
-
         if work.job_type == 'eval_loc_1':
             bad = self._run_command('eval_loc_1', str(work.processor), str(work.location))
 
@@ -67,7 +62,11 @@ class Command(BaseCommand):
             bad = self._run_command('eval_loc_4', str(work.processor), str(work.location))
 
         elif work.job_type == 'eval_loc_9':
-            bad = self._run_command('eval_loc_9', str(work.processor), str(work.location), limit_arg)
+            if work.limit:
+                limit_arg = '--limit=%s' % work.limit
+                bad = self._run_command('eval_loc_9', str(work.processor), str(work.location), limit_arg)
+            else:
+                bad = self._run_command('eval_loc_9', str(work.processor), str(work.location))
 
         elif work.job_type == 'eval_loc_16':
             bad = self._run_command('eval_loc_16', str(work.processor), str(work.location))
@@ -124,7 +123,7 @@ class Command(BaseCommand):
         self._do_work(work)
 
     def handle(self, *args, **options):
-        worker_nr = options['worker_nr'][0]
+        worker_nr = options['worker_nr']
         self.stdout.write('[INFO] Worker number: %s' % worker_nr)
 
         if worker_nr == 0:

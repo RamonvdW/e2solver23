@@ -12,7 +12,8 @@ class Command(BaseCommand):
 
     help = "Add job definition to the work queue"
 
-    supported_job_types = ('eval_loc_1', 'eval_loc_4', 'eval_loc_9', 'eval_loc_16', 'eval_line1', 'eval_line2', 'eval_claims')
+    supported_job_types = ('eval_loc_1', 'eval_loc_4', 'eval_loc_9', 'eval_loc_16', 'eval_line1', 'eval_line2',
+                           'eval_claims', 'scan1')
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -36,14 +37,21 @@ class Command(BaseCommand):
             self.stdout.write('[INFO] Please choose from: %s' % repr(self.supported_job_types))
             return
 
-        if limit > 0:
-            limit_str = ' --limit %s' % limit
+        if job_type == 'scan1':
+            job_type = 'eval_loc_1'
+            self.stdout.write('[INFO] Adding work: %s %s %s {1..64}' % (processor, job_type, priority))
+            bulk = list()
+            for loc in range(1, 64+1):
+                bulk.append(Work(processor=processor, job_type=job_type, priority=priority, location=location))
+            # for
+            Work.objects.bulk_create(bulk)
         else:
-            limit_str = ''
-
-        self.stdout.write('[INFO] Adding work: %s %s %s %s%s' % (processor, job_type, priority, location, limit_str))
-
-        Work(processor=processor, job_type=job_type, priority=priority, location=location, limit=limit).save()
+            if limit > 0:
+                limit_str = ' --limit %s' % limit
+            else:
+                limit_str = ''
+            self.stdout.write('[INFO] Adding work: %s %s %s %s%s' % (processor, job_type, priority, location, limit_str))
+            Work(processor=processor, job_type=job_type, priority=priority, location=location, limit=limit).save()
 
 
 # end of file
