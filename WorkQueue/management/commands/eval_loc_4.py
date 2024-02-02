@@ -51,10 +51,16 @@ class Command(BaseCommand):
         self.unused0 = list()
         self.progress = None
         self.do_commit = True
+        self.segment_limit = 100
+
+        self._sides5_seen = list()
+        self._sides6_seen = list()
+        self._sides8_seen = list()
 
     def add_arguments(self, parser):
-        parser.add_argument('processor', nargs=1, type=int, help='Processor number to use')
-        parser.add_argument('loc', nargs=1, type=int, help='Top-left location on the board (1..55)')
+        parser.add_argument('processor', type=int, help='Processor number to use')
+        parser.add_argument('loc', type=int, help='Top-left location on the board (1..55)')
+        parser.add_argument('--limit', default=100, type=int, help='Skip segment evaluation above this limit')
         parser.add_argument('--dryrun', action='store_true')
 
     def _get_unused(self):
@@ -191,7 +197,7 @@ class Command(BaseCommand):
         segment = calc_segment(self.locs[0], 2)
         sides = self.side_options[3]
         todo = len(sides)
-        if todo > 100:
+        if todo > self.segment_limit:
             return
 
         self.progress.segment = segment
@@ -232,13 +238,17 @@ class Command(BaseCommand):
                                                   self.side_options_rev[7]):
                         p3_exp_s4 = self.twoside2reverse[p2.side2]
 
-                        for _ in self._iter(unused3,
-                                            [p3_exp_s1],
-                                            self.side_options[9],
-                                            self.side_options_rev[11],
-                                            [p3_exp_s4]):
+                        for p3, _ in self._iter(unused3,
+                                                [p3_exp_s1],
+                                                self.side_options[9],
+                                                self.side_options_rev[11],
+                                                [p3_exp_s4]):
                             # found a combi of p0..p3
                             found = True
+                            # avoid repeating
+                            self._sides5_seen.append(p2.side1)
+                            self._sides6_seen.append(p3.side1)
+                            self._sides8_seen.append(p2.side2)
                             break
                         # for
                         if found:
@@ -253,6 +263,10 @@ class Command(BaseCommand):
 
             if not found:
                 self._reduce(segment, side)
+                # built up history is no longer valid
+                self._sides5_seen = list()
+                self._sides6_seen = list()
+                self._sides8_seen = list()
 
             todo -= 1
             self.stdout.write('[INFO] Left: %s/%s' % (todo, len(sides)))
@@ -273,7 +287,7 @@ class Command(BaseCommand):
         segment = calc_segment(self.locs[0], 3)
         sides = self.side_options[5]
         todo = len(sides)
-        if todo > 100:
+        if todo - len(self._sides5_seen) > self.segment_limit:
             return
 
         self.progress.segment = segment
@@ -283,11 +297,14 @@ class Command(BaseCommand):
 
         self.stdout.write('[INFO] Checking %s options in segment %s' % (todo, segment))
         for side in sides:
+            if side in self._sides5_seen:
+                continue
+
             if check_dead_end(self.processor):
                 return
 
             self.progress.left_count -= 1
-            self.progress.updated=timezone.now()
+            self.progress.updated = timezone.now()
             self.progress.save(update_fields=['left_count', 'updated'])
 
             p0_exp_s3 = self.twoside2reverse[side]
@@ -314,13 +331,16 @@ class Command(BaseCommand):
                                                   [p1_exp_s4]):
                         p3_exp_s1 = self.twoside2reverse[p1.side3]
 
-                        for _ in self._iter(unused3,
-                                            [p3_exp_s1],
-                                            self.side_options[9],
-                                            self.side_options_rev[11],
-                                            [p3_exp_s4]):
+                        for p3, _ in self._iter(unused3,
+                                                [p3_exp_s1],
+                                                self.side_options[9],
+                                                self.side_options_rev[11],
+                                                [p3_exp_s4]):
                             # found a combi of p0..p3
                             found = True
+                            # avoid repeating
+                            self._sides6_seen.append(p3.side1)
+                            self._sides8_seen.append(p2.side2)
                             break
                         # for
                         if found:
@@ -335,6 +355,9 @@ class Command(BaseCommand):
 
             if not found:
                 self._reduce(segment, side)
+                # built up history is no longer valid
+                self._sides6_seen = list()
+                self._sides8_seen = list()
 
             todo -= 1
             self.stdout.write('[INFO] Left: %s/%s' % (todo, len(sides)))
@@ -355,7 +378,7 @@ class Command(BaseCommand):
         segment = calc_segment(self.locs[1], 3)
         sides = self.side_options[6]
         todo = len(sides)
-        if todo > 100:
+        if todo - len(self._sides6_seen) > self.segment_limit:
             return
 
         self.progress.segment = segment
@@ -365,6 +388,9 @@ class Command(BaseCommand):
 
         self.stdout.write('[INFO] Checking %s options in segment %s' % (todo, segment))
         for side in sides:
+            if side in self._sides6_seen:
+                continue
+
             if check_dead_end(self.processor):
                 return
 
@@ -396,13 +422,15 @@ class Command(BaseCommand):
                                                   self.side_options_rev[2]):
                         p2_exp_s1 = self.twoside2reverse[p0.side3]
 
-                        for _ in self._iter(unused3,
-                                            [p2_exp_s1],
-                                            [p2_exp_s2],
-                                            self.side_options_rev[10],
-                                            self.side_options_rev[7]):
+                        for p2, _ in self._iter(unused3,
+                                                [p2_exp_s1],
+                                                [p2_exp_s2],
+                                                self.side_options_rev[10],
+                                                self.side_options_rev[7]):
                             # found a combi of p0..p3
                             found = True
+                            # avoid repeating
+                            self._sides8_seen.append(p2.side2)
                             break
                         # for
                         if found:
@@ -417,6 +445,8 @@ class Command(BaseCommand):
 
             if not found:
                 self._reduce(segment, side)
+                # built up history is no longer valid
+                self._sides8_seen = list()
 
             todo -= 1
             self.stdout.write('[INFO] Left: %s/%s' % (todo, len(sides)))
@@ -437,7 +467,7 @@ class Command(BaseCommand):
         segment = calc_segment(self.locs[2], 2)
         sides = self.side_options[8]
         todo = len(sides)
-        if todo > 100:
+        if todo - len(self._sides8_seen) > self.segment_limit:
             return
 
         self.progress.segment = segment
@@ -447,6 +477,9 @@ class Command(BaseCommand):
 
         self.stdout.write('[INFO] Checking %s options in segment %s' % (todo, segment))
         for side in sides:
+            if side in self._sides8_seen:
+                continue
+
             if check_dead_end(self.processor):
                 return
 
@@ -521,7 +554,7 @@ class Command(BaseCommand):
         if options['dryrun']:
             self.do_commit = False
 
-        loc = options['loc'][0]
+        loc = options['loc']
         if loc < 1 or loc > 55 or loc in (8, 16, 24, 32, 40, 48):
             self.stderr.write('[ERROR] Invalid location')
             return
@@ -529,8 +562,11 @@ class Command(BaseCommand):
                      loc + 8, loc + 9)
         self.stdout.write('[INFO] Locations: %s' % repr(self.locs))
 
-        self.processor = options['processor'][0]
+        self.processor = options['processor']
         self.stdout.write('[INFO] Processor=%s' % self.processor)
+
+        self.segment_limit = options['limit']
+        self.stdout.write('[INFO] Segment limit: %s' % self.segment_limit)
 
         self.unused0 = self._get_unused()
 
@@ -562,6 +598,7 @@ class Command(BaseCommand):
             self.progress.solve_order = msg
             self.progress.updated = timezone.now()
             self.progress.save(update_fields=['solve_order', 'updated'])
+            self._sides5_seen = frozenset(self._sides5_seen)
             self._reduce_s5()
 
             if check_dead_end(self.processor):
@@ -570,6 +607,7 @@ class Command(BaseCommand):
             self.progress.solve_order = msg
             self.progress.updated = timezone.now()
             self.progress.save(update_fields=['solve_order', 'updated'])
+            self._sides6_seen = frozenset(self._sides6_seen)
             self._reduce_s6()
 
             if check_dead_end(self.processor):
@@ -578,6 +616,7 @@ class Command(BaseCommand):
             self.progress.solve_order = msg
             self.progress.updated = timezone.now()
             self.progress.save(update_fields=['solve_order', 'updated'])
+            self._sides8_seen = frozenset(self._sides8_seen)
             self._reduce_s8()
         except KeyboardInterrupt:
             pass
