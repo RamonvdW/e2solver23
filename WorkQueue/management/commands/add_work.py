@@ -5,7 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from WorkQueue.models import Work
+from WorkQueue.models import Work, ProcessorUsedPieces
 
 
 class Command(BaseCommand):
@@ -41,12 +41,19 @@ class Command(BaseCommand):
             job_type = 'eval_loc_1'
             self.stdout.write('[INFO] Adding work: %s %s %s {1..64}' % (processor, job_type, priority))
 
+            try:
+                used = ProcessorUsedPieces.objects.get(processor=processor)
+            except ProcessorUsedPieces.DoesNotExist:
+                used = ProcessorUsedPieces()
+
             bulk = list()
             for loc in range(1, 64+1):
-                bulk.append(Work(processor=processor, job_type=job_type, priority=priority, location=loc))
+                loc_str = 'loc%s' % loc
+                if getattr(used, loc_str) == 0:
+                    bulk.append(Work(processor=processor, job_type=job_type, priority=priority, location=loc))
             # for
-
             Work.objects.bulk_create(bulk)
+            self.stdout.write('[INFO] Added %s jobs' % len(bulk))
         else:
             limit_str = ''
             if limit > 0:
