@@ -649,6 +649,8 @@ class OptionsView(TemplateView):
 
         context['duration'] = round(time.monotonic() - start, 2)
 
+        context['show_url'] = reverse('Solutions:show-work', kwargs={'processor': processor})
+
         return context
 
 

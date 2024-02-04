@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -12,6 +12,7 @@ from BasePieces.models import BasePiece
 from BasePieces.pieces_1x1 import INTERNAL_BORDER_SIDES
 from Pieces2x2.models import Piece2x2, TwoSide
 from Solutions.models import Solution8x8
+from WorkQueue.models import ProcessorUsedPieces
 from types import SimpleNamespace
 
 TEMPLATE_VIEW = 'solutions/show.dtl'
@@ -374,6 +375,37 @@ class ShowAutoView(TemplateView):
         context['auto_reload'] = True
 
         context['title'] = 'Solution'
+
+        return context
+
+
+class ShowWorkView(TemplateView):
+
+    template_name = TEMPLATE_VIEW
+
+    def get_context_data(self, **kwargs):
+        """ called by the template system to get the context data for the template """
+        context = super().get_context_data(**kwargs)
+
+        try:
+            used = ProcessorUsedPieces.objects.get(processor=kwargs['processor'])
+        except ProcessorUsedPieces.DoesNotExist:
+            raise Http404('Used pieces not found')
+
+        sol = Solution8x8()
+
+        for loc in range(1, 64+1):
+            loc_str = 'loc%s' % loc
+            p2x2_nr = getattr(used, loc_str)
+
+            nr_str = 'nr%s' % loc
+            setattr(sol, nr_str, p2x2_nr)
+        # for
+
+        context['solution'] = sol
+        _fill_sol(sol)
+
+        context['title'] = 'Work %s' % used.processor
 
         return context
 

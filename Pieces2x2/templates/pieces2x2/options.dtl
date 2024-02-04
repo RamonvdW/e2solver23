@@ -83,6 +83,9 @@
                         {% endfor %}
                     </tr>
                 </table>
+
+                <br><br>
+                <button onclick="location.href='{{ show_url }}'" type="button">Show</button>
             </td>
 
             <td style="border:0">
