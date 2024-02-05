@@ -142,7 +142,7 @@ def _sol_add_stats_1x1(sol, neighbours):
             s_open = 64 - s_open
             s_left = s_open
         else:
-            s_left = s_max - s_used - s_open*2
+            s_left = s_max - s_used - s_open
         s_trouble = s_left < s_open
         tup = (s1, s_open, s_used, s_max, s_left, s_trouble)
         sol.s1_counts.append(tup)
