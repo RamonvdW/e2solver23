@@ -79,13 +79,13 @@
                             <th style="padding:5px">Left</th>
                         </tr>
                     </thead>
-                    {% for s_nr, s_open, s_used, s_max, s_left in solution.s1_counts %}
+                    {% for s_nr, s_open, s_used, s_max, s_left, s_trouble in solution.s1_counts %}
                         <tr{% if s_nr in "AEIQMX" %} style="background:lightgray"{% endif %}>
                             <td style="padding:5px">{{ s_nr }}</td>
                             <td style="padding:5px">{{ s_max }}</td>
                             <td style="padding:5px">{{ s_used }}</td>
                             <td style="padding:5px">{{ s_open }}</td>
-                            <td style="padding:5px">{{ s_left }}</td>
+                            <td style="padding:5px{% if s_trouble %};color:red{% endif %}">{{ s_left }}</td>
                         </tr>
                     {% endfor %}
                 </table>
