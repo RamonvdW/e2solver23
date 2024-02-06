@@ -55,7 +55,7 @@ class Command(BaseCommand):
             keep = borders[0]
             borders = borders[1:]
 
-            nrs = list(TwoSide.objects.filter(two_sides__startswith=keep).values_list('nr', flat=True))
+            nrs = list(TwoSide.objects.exclude(two_sides__startswith=keep).values_list('nr', flat=True))
 
             qset = TwoSideOptions.objects.filter(processor=processor, segment=segment, two_side__in=nrs)
             qset.delete()
@@ -66,13 +66,12 @@ class Command(BaseCommand):
             keep = borders[0]
             borders = borders[1:]
 
-            nrs = list(TwoSide.objects.filter(two_sides__endswith=keep).values_list('nr', flat=True))
+            nrs = list(TwoSide.objects.exclude(two_sides__endswith=keep).values_list('nr', flat=True))
 
             qset = TwoSideOptions.objects.filter(processor=processor, segment=segment, two_side__in=nrs)
             qset.delete()
             # self.stdout.write('segment=%s, keep=%s, count=%s' % (segment, keep, qset.count()))
         # for
-
 
 
 # end of file
