@@ -10,6 +10,7 @@ from Pieces2x2.models import TwoSide, TwoSideOptions, Piece2x2, EvalProgress
 from Pieces2x2.helpers import calc_segment
 from WorkQueue.operations import (propagate_segment_reduction, get_unused_for_locs, set_loc_used, request_eval_claims,
                                   set_dead_end)
+import sys
 
 
 class Command(BaseCommand):
@@ -172,7 +173,8 @@ class Command(BaseCommand):
                         left_count=0,
                         solve_order="Safety stop!",
                         updated=timezone.now()).save()
-            return
+
+            sys.exit(1)
 
         side1_new = list(qset.distinct('side1').values_list('side1', flat=True))
         side2_new = list(qset.distinct('side2').values_list('side2', flat=True))
