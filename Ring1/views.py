@@ -71,17 +71,21 @@ class ShowView(TemplateView):
 
                     nr_str = 'nr%s' % p_nr
                     nr = getattr(ring1, nr_str, 0)
-                    p2x2 = Piece2x2.objects.get(nr=nr)
+                    if nr:
+                        p2x2 = Piece2x2.objects.get(nr=nr)
 
-                    p2x2.img1 = static('pieces/%s.png' % p2x2.nr1)
-                    p2x2.img2 = static('pieces/%s.png' % p2x2.nr2)
-                    p2x2.img3 = static('pieces/%s.png' % p2x2.nr3)
-                    p2x2.img4 = static('pieces/%s.png' % p2x2.nr4)
+                        p2x2.img1 = static('pieces/%s.png' % p2x2.nr1)
+                        p2x2.img2 = static('pieces/%s.png' % p2x2.nr2)
+                        p2x2.img3 = static('pieces/%s.png' % p2x2.nr3)
+                        p2x2.img4 = static('pieces/%s.png' % p2x2.nr4)
 
-                    p2x2.transform1 = self.rot2transform[p2x2.rot1]
-                    p2x2.transform2 = self.rot2transform[p2x2.rot2]
-                    p2x2.transform3 = self.rot2transform[p2x2.rot3]
-                    p2x2.transform4 = self.rot2transform[p2x2.rot4]
+                        p2x2.transform1 = self.rot2transform[p2x2.rot1]
+                        p2x2.transform2 = self.rot2transform[p2x2.rot2]
+                        p2x2.transform3 = self.rot2transform[p2x2.rot3]
+                        p2x2.transform4 = self.rot2transform[p2x2.rot4]
+                    else:
+                        p2x2 = SimpleNamespace(is_empty=True,
+                                               break_after=False)
 
                     p2x2.break_after = (p_nr % 8 == 0)
                 else:

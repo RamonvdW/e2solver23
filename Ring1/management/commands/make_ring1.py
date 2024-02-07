@@ -174,8 +174,24 @@ class Command(BaseCommand):
         ring = Ring1()
         for loc in self.locs:
             field = 'nr%s' % loc
-            setattr(ring, field, self.board[loc].nr)
+            p2x2 = self.board[loc]
+            if p2x2:
+                nr = p2x2.nr
+            else:
+                nr = 0
+            setattr(ring, field, nr)
         # for
+
+        ring.nr11 = 0
+        ring.nr18 = 0
+        ring.nr14 = 0
+        ring.nr23 = 0
+        ring.nr42 = 0
+        ring.nr51 = 0
+        ring.nr47 = 0
+        ring.nr54 = 0
+        ring.nr36 = 0
+
         ring.save()
         self.stdout.write('[INFO] Saved Ring1 with pk=%s' % ring.pk)
 
@@ -328,7 +344,7 @@ class Command(BaseCommand):
 
     def _find_recurse(self):
         tick = time.monotonic()
-        if tick - self.prev_tick > 10:
+        if tick - self.prev_tick > 30:
             self.prev_tick = tick
             msg = '(%s) %s' % (len(self.board_order), ", ".join(self.board_progress))
             print(msg)
