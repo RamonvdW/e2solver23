@@ -32,6 +32,7 @@ class Command(BaseCommand):
         # for
 
         self.processor = 0
+        self.small_limit = 3
         self.unused = list()
 
         self.nr_claims = dict()     # [loc, 1/2/3/4] = [nr, ..]
@@ -42,9 +43,12 @@ class Command(BaseCommand):
             self.nr_claims[(loc, 4)] = list()
         # for
 
+        self.reached_dead_end = False
+
     def add_arguments(self, parser):
         # parser.add_argument('--verbose', action='store_true')
-        parser.add_argument('processor', nargs=1, type=int, help='Processor number to use')
+        parser.add_argument('processor', type=int, help='Processor number to use')
+        parser.add_argument('--limit', type=int, default=3, help='Size of small claims to show')
 
     def _reverse_sides(self, options):
         return [self.twoside2reverse[two_side] for two_side in options]
@@ -147,6 +151,7 @@ class Command(BaseCommand):
         # for
 
     def _limit_base_pieces(self, used):
+        multi_claims = dict()        # [claim] = count
         changed = True
         claimed = list()
         single_nrs = list()
@@ -156,11 +161,22 @@ class Command(BaseCommand):
             for loc in range(1, 64+1):
                 for nr in range(1, 4+1):
                     nrs = self.nr_claims[(loc, nr)]
+                    nrs = tuple(nrs)
+
+                    try:
+                        multi_claims[nrs] += 1
+                    except KeyError:
+                        multi_claims[nrs] = 1
+
                     if len(nrs) == 1:
-                        self.stdout.write('[INFO] Loc %s requires base %s on nr%s' % (loc, nrs[0], nr))
-                        tup = (nrs[0], loc)
+                        claim = nrs[0]
+                        self.stdout.write('[INFO] Loc %s requires base %s on nr%s' % (loc, claim, nr))
+                        tup = (claim, loc)
                         single_nrs.append(tup)
-                        claimed.append(nrs[0])
+                        if claim in claimed:
+                            self.stderr.write('[INFO] Detected multi-claim on base %s' % claim)
+                            self.reached_dead_end = True
+                        claimed.append(claim)
                 # for
             # for
 
@@ -178,8 +194,12 @@ class Command(BaseCommand):
         self.stdout.write('[INFO] Remaining small claims:')
         for loc, nr in self.nr_claims.keys():
             nrs = self.nr_claims[(loc, nr)]
-            if 1 <= len(nrs) <= 3:
-                self.stdout.write('%s.nr%s: %s' % (loc, nr, repr(nrs)))
+            count = multi_claims[tuple(nrs)]
+            if 1 <= len(nrs) <= self.small_limit or (1 < len(nrs) < 2 * self.small_limit and count > 1):
+                multi_str = ''
+                if count > 1:
+                    multi_str = ' *** MULTI (%s) ***' % count
+                self.stdout.write('%s.nr%s: %s%s' % (loc, nr, repr(nrs), multi_str))
         # for
 
         claimed_nrs = list()
@@ -201,7 +221,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
-        self.processor = options['processor'][0]
+        self.processor = options['processor']
+        self.small_limit = options['limit']
 
         self.stdout.write('[INFO] Processor=%s' % self.processor)
 
@@ -216,6 +237,10 @@ class Command(BaseCommand):
         self._scan_locs(used)
 
         self._limit_base_pieces(used)
+
+        if self.reached_dead_end:
+            used.reached_dead_end = True
+            used.save(update_fields=['reached_dead_end'])
 
 
 # end of file
