@@ -163,10 +163,11 @@ class Command(BaseCommand):
                     nrs = self.nr_claims[(loc, nr)]
                     nrs = tuple(nrs)
 
+                    loc_nr = "%s.nr%s" % (loc, nr)
                     try:
-                        multi_claims[nrs] += 1
+                        multi_claims[nrs].append(loc_nr)
                     except KeyError:
-                        multi_claims[nrs] = 1
+                        multi_claims[nrs] = [loc_nr]
 
                     if len(nrs) == 1:
                         claim = nrs[0]
@@ -194,11 +195,12 @@ class Command(BaseCommand):
         self.stdout.write('[INFO] Remaining small claims:')
         for loc, nr in self.nr_claims.keys():
             nrs = self.nr_claims[(loc, nr)]
-            count = multi_claims[tuple(nrs)]
+            multi = multi_claims[tuple(nrs)]
+            count = len(multi)
             if 1 <= len(nrs) <= self.small_limit or (1 < len(nrs) < 2 * self.small_limit and count > 1):
                 multi_str = ''
                 if count > 1:
-                    multi_str = ' *** MULTI (%s) ***' % count
+                    multi_str = '  *** MULTI (%s) %s ***' % (count, " + ".join(multi))
                 self.stdout.write('%s.nr%s: %s%s' % (loc, nr, repr(nrs), multi_str))
         # for
 
