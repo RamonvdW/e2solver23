@@ -90,6 +90,7 @@ class Command(BaseCommand):
 
         self.solve_order = list()
         self.board_order = list()   # solved order (for popping)
+        self.board_progress = list()
         self.board_unused = self.unused0[:]
         self.requested_order = list()
 
@@ -329,7 +330,7 @@ class Command(BaseCommand):
         tick = time.monotonic()
         if tick - self.prev_tick > 10:
             self.prev_tick = tick
-            msg = '(%s) %s' % (len(self.board_order), repr(self.board_order))
+            msg = '(%s) %s' % (len(self.board_order), ", ".join(self.board_progress))
             print(msg)
 
         if len(self.board_order) == len(self.locs):
@@ -366,12 +367,16 @@ class Command(BaseCommand):
             if p:
                 options_side4 = [self.twoside2reverse[p.side2]]
 
+        p_instance = 0
         for p in self._iter(loc, options_side1, options_side2, options_side3, options_side4):
             self._board_place(loc, p)
+            self.board_progress.append('%s/%s' % (loc, p_instance))
+            p_instance += 1
 
             self._find_recurse()
 
             self._board_pop()
+            self.board_progress = self.board_progress[:-1]
         # for
 
     def handle(self, *args, **options):
