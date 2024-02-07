@@ -19,17 +19,17 @@ class Command(BaseCommand):
         +----+----+----+----+----+----+----+----+
         | 1  | 2  | 3  | 4  | 5  | 6  | 7  | 8  |
         +----+----+----+----+----+----+----+----+
-        | 9  | 10 | 11 | 12   13 | 14 | 15 | 16 |
-        +----+----+----+    +    +----+----+----+
-        | 17 | 18 |                   | 23 | 24 |
+        | 9  | 10 |                   | 15 | 16 |
         +----+----+                   +----+----+
-        | 25 | 26                       31 | 32 |
-        +----+    +    +----+         +    +----+
-        | 33 | 34      | 36 |           39 | 40 |
-        +----+----+    +----+         +----+----+
-        | 41 | 42 |                   | 47 | 48 |
-        +----+----+----+    +    +----+----+----+
-        | 49 | 50 | 51 | 52   53 | 54 | 55 | 56 |
+        | 17 |                             | 24 |
+        +----+                             +----+
+        | 25 |                             | 32 |
+        +----+                             +----+
+        | 33 |                             | 40 |
+        +----+                             +----+
+        | 41 |                             | 48 |
+        +----+----+                   +----+----+
+        | 49 | 50 |                   | 55 | 56 |
         +----+----+----+----+----+----+----+----+
         | 57 | 58 | 59 | 60 | 61 | 62 | 63 | 64 |
         +----+----+----+----+----+----+----+----+
@@ -60,12 +60,7 @@ class Command(BaseCommand):
                      41, 48,
                      49, 56,
                      57, 58, 59, 60, 61, 62, 63, 64,
-                     10, 15, 50, 55,
-                     42, 18, 26, 34,
-                     11, 14, 12, 13,
-                     23, 47, 31, 39,
-                     54, 51, 52, 53,
-                     36)
+                     10, 15, 50, 55)
 
         # [loc] = [loc on side1..4 or -1 if border or -2 if neighbour is a gap]
         self.neighbours = self._calc_neighbours()
@@ -80,8 +75,9 @@ class Command(BaseCommand):
         # for
 
         self.unused0 = list(range(1, 256+1))
-        # none of the hints are in Ring1
-        # self.unused0.remove(139)      # needed for loc 36
+
+        # remove the hints not in Ring1
+        self.unused0.remove(139)      # needed for loc 36
         # self.unused0.remove(208)      # needed for loc 10
         # self.unused0.remove(255)      # needed for loc 15
         # self.unused0.remove(181)      # needed for loc 50
@@ -99,20 +95,11 @@ class Command(BaseCommand):
 
         self.prev_tick = time.monotonic()
 
-        self.p10_sides = list()     # list of tuples: (side4, side1)
-        self.p15_sides = list()     # list of tuples: (side1, side2)
-        self.p55_sides = list()     # list of tuples: (side2, side3)
-        self.p50_sides = list()     # list of tuples: (side3, side4)
-
         self.segment_options = dict()
         self.segment_options_rev = dict()
 
     def add_arguments(self, parser):
-        parser.add_argument('processor', nargs=1, type=int, help='Processor number to use')
-        parser.add_argument('start10', nargs=1, type=int, help='Start index for p10 (1..500)')
-        parser.add_argument('start15', nargs=1, type=int, help='Start index for p15 (1..500)')
-        parser.add_argument('start50', nargs=1, type=int, help='Start index for p50 (1..500)')
-        parser.add_argument('start55', nargs=1, type=int, help='Start index for p55 (1..500)')
+        parser.add_argument('processor', type=int, help='Processor number to use')
         parser.add_argument('order', nargs='*', type=int, help='Solving order (1..64), max %s' % len(self.locs))
 
     def _calc_neighbours(self):
@@ -211,36 +198,6 @@ class Command(BaseCommand):
                 self.segment_options_rev[segment] = self._reverse_sides(options)
         # for
 
-    def _get_hint_sides(self):
-        """ find all combinations of 2 sides of the 2x2 with the hint pieces, facing the ring1 """
-        p10_sides4 = self.segment_options[138]
-        p10_sides1 = self.segment_options[10]
-        self.p10_sides = list(Piece2x2.objects
-                              .filter(side4__in=p10_sides4, side1__in=p10_sides1, has_hint=True, nr1=208)
-                              .distinct('side4', 'side1')
-                              .values_list('side4', 'side1'))
-
-        p15_sides1 = self.segment_options[15]
-        p15_sides2 = self.segment_options[144]
-        self.p15_sides = list(Piece2x2.objects
-                              .filter(side1__in=p15_sides1, side2__in=p15_sides2, has_hint=True, nr2=255)
-                              .distinct('side1', 'side2')
-                              .values_list('side1', 'side2'))
-
-        p55_sides2 = self.segment_options[184]
-        p55_sides3 = self.segment_options_rev[63]
-        self.p55_sides = list(Piece2x2.objects
-                              .filter(side2__in=p55_sides2, side3__in=p55_sides3, has_hint=True, nr4=249)
-                              .distinct('side2', 'side3')
-                              .values_list('side2', 'side3'))
-
-        p50_sides3 = self.segment_options_rev[58]
-        p50_sides4 = self.segment_options_rev[178]
-        self.p50_sides = list(Piece2x2.objects
-                              .filter(side3__in=p50_sides3, side4__in=p50_sides4, has_hint=True, nr3=181)
-                              .distinct('side3', 'side4')
-                              .values_list('side3', 'side4'))
-
     def _iter(self, loc, options_side1, options_side2, options_side3, options_side4):
 
         unused = self.board_unused[:]
@@ -310,7 +267,7 @@ class Command(BaseCommand):
             if self.board[loc] is None:
                 # empty position on the board
                 seg1, seg2, seg3, seg4 = self.segment_nrs[loc]
-                # print('loc=%s, segs=%s, %s, %s, %s' % (loc, seg1, seg2, seg3, seg4))
+                # print('loc=%s, segments=%s, %s, %s, %s' % (loc, seg1, seg2, seg3, seg4))
                 options_side1 = self.segment_options[seg1]
                 options_side2 = self.segment_options[seg2]
                 options_side3 = self.segment_options_rev[seg3]
@@ -417,29 +374,8 @@ class Command(BaseCommand):
             self._board_pop()
         # for
 
-    def _find_ring1(self, seg138, seg10, seg15, seg144, seg184, seg63, seg58, seg178):
-        self.stdout.write('[INFO] Find ring1 starting with 10=%s,%s, 15=%s,%s, 55=%s,%s, 50=%s,%s' % (
-                            seg138, seg10, seg15, seg144, seg184, seg63, seg58, seg178))
-
-        # load the limited segment options
-        self.segment_options[138] = [seg138]
-        self.segment_options[10] = [seg10]
-        self.segment_options[15] = [seg15]
-        self.segment_options[144] = [seg144]
-        self.segment_options[184] = [seg184]
-        self.segment_options[63] = [seg63]
-        self.segment_options[58] = [seg58]
-        self.segment_options[178] = [seg178]
-
-        for seg in (138, 10, 15, 144, 184, 63, 58, 178):
-            self.segment_options_rev[seg] = self._reverse_sides(self.segment_options[seg])
-        # for
-
-        self.solve_order = self.requested_order[:]
-        self._find_recurse()
-
     def handle(self, *args, **options):
-        self.processor = options['processor'][0]
+        self.processor = options['processor']
         self.stdout.write('[INFO] Processor: %s' % self.processor)
 
         for loc in options['order']:
@@ -452,62 +388,24 @@ class Command(BaseCommand):
         # for
 
         if len(self.requested_order) == 0:
-            self.requested_order = [10, 2, 1, 9, 11, 3, 18, 17,
-                                    15, 7, 8, 16, 14, 6, 23, 24,
-                                    50, 49, 57, 58, 42, 41, 51, 59,
-                                    55, 56, 64, 63, 47, 48, 54, 62]
-            # self.requested_order = [10, 2, 1, 9,
-            #                         15, 7, 8, 16,
-            #                         50, 49, 57, 58,
-            #                         55, 56, 64, 63,
-            #                         36,
-            #                         11, 14, 3, 6, 4, 5,
-            #                         23, 47, 24, 48, 40, 32,
-            #                         18, 42, 17, 41, 25, 33,
-            #                         51, 54, 59, 62, 60, 61]
-            # self.requested_order = [10, 11, 18,
-            #                         15, 14, 23,
-            #                         50, 51, 42,
-            #                         55, 47, 54,
-            #                         2, 1,
-            #                         7, 8,
-            #                         49, 57,
-            #                         56, 64,
-            #                         9, 16, 58, 63,
-            #                         3, 6, 4, 5,
-            #                         24, 48, 40, 32,
-            #                         17, 41, 25, 33,
-            #                         59, 62, 60, 61,
-            #                         36]
+            self.requested_order = [1, 2, 9,
+                                    8, 7, 16,
+                                    57, 58, 49,
+                                    64, 63, 56,
+                                    3, 24, 62, 41,
+                                    4, 6, 5,
+                                    32, 48, 40,
+                                    61, 59, 60,
+                                    17, 33, 25,
+                                    10, 15, 50, 55]
 
         self.stdout.write('[INFO] Initial solve order: %s' % repr(self.requested_order))
 
         self._get_segments_options()
-        self._get_hint_sides()
-
-        start10 = options['start10'][0]
-        start15 = options['start15'][0]
-        start50 = options['start50'][0]
-        start55 = options['start55'][0]
-
-        self.stdout.write('[INFO] p10_sides: %s/%s' % (start10, len(self.p10_sides)))
-        self.stdout.write('[INFO] p15_sides: %s/%s' % (start15, len(self.p15_sides)))
-        self.stdout.write('[INFO] p50_sides: %s/%s' % (start50, len(self.p50_sides)))
-        self.stdout.write('[INFO] p55_sides: %s/%s' % (start55, len(self.p55_sides)))
-        # self.stdout.write('[INFO] total: %s' % (
-        #                   len(self.p10_sides) * len(self.p15_sides) * len(self.p55_sides) * len(self.p50_sides)))
-
-        p10_s4, p10_s1 = self.p10_sides[start10 - 1]
-        p15_s1, p15_s2 = self.p15_sides[start15 - 1]
-        p50_s3, p50_s4 = self.p50_sides[start50 - 1]
-        p55_s2, p55_s3 = self.p55_sides[start55 - 1]
 
         try:
-            self._find_ring1(
-                    self.twoside2reverse[p10_s4], p10_s1,
-                    p15_s1, p15_s2,
-                    p55_s2, self.twoside2reverse[p55_s3],
-                    self.twoside2reverse[p50_s3], self.twoside2reverse[p50_s4])
+            self.solve_order = self.requested_order[:]
+            self._find_recurse()
         except KeyboardInterrupt:
             pass
 
