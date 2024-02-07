@@ -196,6 +196,8 @@ class Command(BaseCommand):
         for loc, nr in self.nr_claims.keys():
             nrs = self.nr_claims[(loc, nr)]
             multi = multi_claims[tuple(nrs)]
+            multi = list(frozenset(multi))       # removes dupes
+            multi.sort()
             count = len(multi)
             if 1 <= len(nrs) <= self.small_limit or (1 < len(nrs) < 2 * self.small_limit and count > 1):
                 multi_str = ''
