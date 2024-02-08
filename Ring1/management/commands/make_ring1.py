@@ -60,7 +60,8 @@ class Command(BaseCommand):
                      41, 48,
                      49, 56,
                      57, 58, 59, 60, 61, 62, 63, 64,
-                     10, 15, 50, 55)
+                     10, 15, 50, 55,
+                     11, 18, 42, 51, 47, 54, 14, 23)
 
         # [loc] = [loc on side1..4 or -1 if border or -2 if neighbour is a gap]
         self.neighbours = self._calc_neighbours()
@@ -88,7 +89,6 @@ class Command(BaseCommand):
         for loc in self.locs:
             self.board[loc] = None
 
-        self.solve_order = list()
         self.board_order = list()   # solved order (for popping)
         self.board_progress = list()
         self.board_unused = self.unused0[:]
@@ -101,7 +101,6 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('processor', type=int, help='Processor number to use')
-        parser.add_argument('order', nargs='*', type=int, help='Solving order (1..64), max %s' % len(self.locs))
 
     def _calc_neighbours(self):
         neighbours = dict()
@@ -182,16 +181,8 @@ class Command(BaseCommand):
             setattr(ring, field, nr)
         # for
 
-        ring.nr11 = 0
-        ring.nr18 = 0
-        ring.nr14 = 0
-        ring.nr23 = 0
-        ring.nr42 = 0
-        ring.nr51 = 0
-        ring.nr47 = 0
-        ring.nr54 = 0
+        ring.processor = self.processor
         ring.nr36 = 0
-
         ring.save()
         self.stdout.write('[INFO] Saved Ring1 with pk=%s' % ring.pk)
 
@@ -264,27 +255,21 @@ class Command(BaseCommand):
         # for
 
     def _select_next_loc(self):
-        # decide which position on the board has the fewest options
-
-        # follow previous solve order
-        for loc in self.solve_order:
-            if self.board[loc] is None:
-                return loc, False
-        # for
-
-        # decide the next best position on the board to solve
+        # decide which position on the board to work on
 
         qset = Piece2x2.objects.filter(nr1__in=self.board_unused,
                                        nr2__in=self.board_unused,
                                        nr3__in=self.board_unused,
                                        nr4__in=self.board_unused)
 
-        loc_counts = list()
+        claims = dict()     # [loc] = (nr, nr, ..)
+        single_claims = list()
+
         for loc in self.locs:
+            loc_claims = list()
             if self.board[loc] is None:
                 # empty position on the board
                 seg1, seg2, seg3, seg4 = self.segment_nrs[loc]
-                # print('loc=%s, segments=%s, %s, %s, %s' % (loc, seg1, seg2, seg3, seg4))
                 options_side1 = self.segment_options[seg1]
                 options_side2 = self.segment_options[seg2]
                 options_side3 = self.segment_options_rev[seg3]
@@ -308,25 +293,113 @@ class Command(BaseCommand):
                     if p:
                         options_side4 = [self.twoside2reverse[p.side2]]
 
+                qset2 = qset.filter(side1__in=options_side1,
+                                    side2__in=options_side2,
+                                    side3__in=options_side3,
+                                    side4__in=options_side4)
+
                 if loc in (10, 15, 50, 55, 36):
-                    count = qset.filter(has_hint=True,
-                                        side1__in=options_side1,
-                                        side2__in=options_side2,
-                                        side3__in=options_side3,
-                                        side4__in=options_side4).count()
+                    qset2 = qset2.filter(has_hint=True)
+
+                elif loc in (11, 18, 14, 23, 47, 54, 51, 42):
+                    if len(self.board_order) < 14:
+                        claims[loc] = loc_claims
+                        continue
+                    qset2 = qset2.filter(has_hint=False,
+                                         is_border=False)
                 else:
-                    count = qset.filter(is_border=True,
-                                        side1__in=options_side1,
-                                        side2__in=options_side2,
-                                        side3__in=options_side3,
-                                        side4__in=options_side4).count()
-                tup = (count, loc)
-                loc_counts.append(tup)
+                    qset2 = qset2.filter(is_border=True)
+
+                # find the claims this location has
+                nrs1 = list(qset2.distinct('nr1').values_list('nr1', flat=True))
+                nrs2 = list(qset2.distinct('nr2').values_list('nr2', flat=True))
+                nrs3 = list(qset2.distinct('nr3').values_list('nr3', flat=True))
+                nrs4 = list(qset2.distinct('nr4').values_list('nr4', flat=True))
+                if len(nrs1) == 1:
+                    loc_claims.append(nrs1[0])
+                if len(nrs2) == 1:
+                    loc_claims.append(nrs2[0])
+                if len(nrs3) == 1:
+                    loc_claims.append(nrs3[0])
+                if len(nrs4) == 1:
+                    loc_claims.append(nrs4[0])
+
+            loc_claims = list(set(loc_claims))
+            claims[loc] = loc_claims
+            single_claims.extend(loc_claims)
+        # for
+
+        # print('claims: %s' % repr(claims))
+        # print('single_claims: %s' % repr(single_claims))
+        if len(single_claims) != len(set(single_claims)):
+            # self.stdout.write('Found duplicate claims')
+            return -1, True
+
+        loc_counts = list()
+        for loc in self.locs:
+            if self.board[loc] is None:
+                # empty position on the board
+                seg1, seg2, seg3, seg4 = self.segment_nrs[loc]
+                options_side1 = self.segment_options[seg1]
+                options_side2 = self.segment_options[seg2]
+                options_side3 = self.segment_options_rev[seg3]
+                options_side4 = self.segment_options_rev[seg4]
+
+                n1, n2, n3, n4 = self.neighbours[loc]
+                if n1 > 0:
+                    p = self.board[n1]
+                    if p:
+                        options_side1 = [self.twoside2reverse[p.side3]]
+                if n2 > 0:
+                    p = self.board[n2]
+                    if p:
+                        options_side2 = [self.twoside2reverse[p.side4]]
+                if n3 > 0:
+                    p = self.board[n3]
+                    if p:
+                        options_side3 = [self.twoside2reverse[p.side1]]
+                if n4 > 0:
+                    p = self.board[n4]
+                    if p:
+                        options_side4 = [self.twoside2reverse[p.side2]]
+
+                # remove all single claims from the unused pieces
+                unused = self.board_unused[:]
+                for nr in single_claims:
+                    if nr in unused:
+                        unused.remove(nr)
+                # for
+
+                # add the claims for this specific location
+                unused.extend(claims[loc])
+
+                qset = Piece2x2.objects.filter(nr1__in=self.board_unused,
+                                               nr2__in=self.board_unused,
+                                               nr3__in=self.board_unused,
+                                               nr4__in=self.board_unused,
+                                               side1__in=options_side1,
+                                               side2__in=options_side2,
+                                               side3__in=options_side3,
+                                               side4__in=options_side4)
+
+                if loc in (10, 15, 50, 55, 36):
+                    count = qset.filter(has_hint=True).count()
+
+                elif loc in (11, 18, 14, 23, 47, 54, 51, 42):
+                    if len(self.board_order) < 16:
+                        continue
+                    count = qset.filter(has_hint=False,
+                                        is_border=False).count()
+                else:
+                    count = qset.filter(is_border=True).count()
 
                 if count == 0:
                     # dead end
                     # self.stdout.write('[DEBUG] No options for %s' % loc)
                     return -1, True
+
+                tup = (count, loc)
+                loc_counts.append(tup)
         # for
 
         # take the lowest
@@ -334,7 +407,6 @@ class Command(BaseCommand):
             loc_counts.sort()       # lowest first
             loc = loc_counts[0][-1]
             # self.stdout.write('[INFO] Added %s' % p_nr)
-            self.solve_order.append(loc)
             return loc, False
 
         # niets kunnen kiezen
@@ -344,7 +416,7 @@ class Command(BaseCommand):
 
     def _find_recurse(self):
         tick = time.monotonic()
-        if tick - self.prev_tick > 30:
+        if tick - self.prev_tick > 10:
             self.prev_tick = tick
             msg = '(%s) %s' % (len(self.board_order), ", ".join(self.board_progress))
             print(msg)
@@ -399,33 +471,9 @@ class Command(BaseCommand):
         self.processor = options['processor']
         self.stdout.write('[INFO] Processor: %s' % self.processor)
 
-        for loc in options['order']:
-            if loc not in self.locs:
-                self.stdout.write('[WARNING] Skipping invalid order: %s' % loc)
-            elif loc not in self.requested_order:
-                self.requested_order.append(loc)
-            else:
-                self.stdout.write('[WARNING] Duplicate in requested order: %s' % loc)
-        # for
-
-        if len(self.requested_order) == 0:
-            self.requested_order = [1, 2, 9,
-                                    8, 7, 16,
-                                    57, 58, 49,
-                                    64, 63, 56,
-                                    3, 24, 62, 41,
-                                    4, 6, 5,
-                                    32, 48, 40,
-                                    61, 59, 60,
-                                    17, 33, 25,
-                                    10, 15, 50, 55]
-
-        self.stdout.write('[INFO] Initial solve order: %s' % repr(self.requested_order))
-
         self._get_segments_options()
 
         try:
-            self.solve_order = self.requested_order[:]
             self._find_recurse()
         except KeyboardInterrupt:
             pass

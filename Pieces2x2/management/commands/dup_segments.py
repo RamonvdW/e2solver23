@@ -14,18 +14,18 @@ class Command(BaseCommand):
     help = "Duplicate the latest TwoSideOptions"
 
     def add_arguments(self, parser):
-        parser.add_argument('source', nargs=1, type=int, help='Processor number to copy from')
-        parser.add_argument('processor', nargs=1, type=int, help='New processor number')
+        parser.add_argument('source', type=int, help='Processor number to copy from')
+        parser.add_argument('processor', type=int, help='New processor number')
 
     def handle(self, *args, **options):
 
-        processor = options['processor'][0]
+        processor = options['processor']
 
         if TwoSideOptions.objects.filter(processor=processor).count() > 0:
             self.stderr.write('[ERROR] Processor %s already exists' % processor)
             return
 
-        source = options['source'][0]
+        source = options['source']
         count = TwoSideOptions.objects.filter(processor=source).count()
         if count == 0:
             self.stderr.write('[ERROR] Nothing to copy')

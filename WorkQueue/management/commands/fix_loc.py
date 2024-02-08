@@ -40,9 +40,9 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('--commit', action='store_true')
-        parser.add_argument('processor', nargs=1, type=int, help='Processor number to use')
-        parser.add_argument('loc', nargs=1, type=int, help='Location on board')
-        parser.add_argument('index', nargs=1, type=int, help='i-th Piece2x2 number to use')
+        parser.add_argument('processor', type=int, help='Processor number to use')
+        parser.add_argument('loc', type=int, help='Location on board')
+        parser.add_argument('index', type=int, help='i-th Piece2x2 number to use')
         parser.add_argument('claimed', nargs='*', type=int, help="Base piece number claimed for other location")
 
     def _get_unused(self, claimed):
@@ -106,11 +106,11 @@ class Command(BaseCommand):
 
         self.do_commit = options['commit']
 
-        self.loc = options['loc'][0]
+        self.loc = options['loc']
 
-        self.processor = options['processor'][0]
+        self.processor = options['processor']
 
-        index = options['index'][0]
+        index = options['index']
 
         self.stdout.write('[INFO] Processor=%s; Location: %s' % (self.processor, self.loc))
 
