@@ -63,6 +63,14 @@ class Command(BaseCommand):
                      10, 15, 50, 55,
                      11, 18, 42, 51, 47, 54, 14, 23)
 
+        self.solve_order = (#1, 2, 9, 10,
+                            #8, 7, 16, 15,
+                            #58, 49, 50, 41, 59,
+                            #64, 63, 56, 55
+                            32, 61, 33, 4,
+                            40, 60, 25, 5,
+                            )
+
         # [loc] = [loc on side1..4 or -1 if border or -2 if neighbour is a gap]
         self.neighbours = self._calc_neighbours()
 
@@ -206,26 +214,13 @@ class Command(BaseCommand):
                 self.segment_options_rev[segment] = self._reverse_sides(options)
         # for
 
-    def _iter(self, loc, options_side1, options_side2, options_side3, options_side4):
-
-        unused = self.board_unused[:]
-        if loc != 10 and 208 in unused:
-            unused.remove(208)
-        if loc != 15 and 255 in unused:
-            unused.remove(255)
-        if loc != 36 and 139 in unused:
-            unused.remove(139)
-        if loc != 50 and 181 in unused:
-            unused.remove(181)
-        if loc != 55 and 249 in unused:
-            unused.remove(249)
-
+    def _iter(self, loc, unused, options_side1, options_side2, options_side3, options_side4):
         qset = (Piece2x2
                 .objects
-                .filter(nr1__in=self.board_unused,
-                        nr2__in=self.board_unused,
-                        nr3__in=self.board_unused,
-                        nr4__in=self.board_unused))
+                .filter(nr1__in=unused,
+                        nr2__in=unused,
+                        nr3__in=unused,
+                        nr4__in=unused))
 
         if options_side1:
             qset = qset.filter(side1__in=options_side1)
@@ -247,15 +242,22 @@ class Command(BaseCommand):
         elif loc == 55:
             qset = qset.filter(nr4=249)
 
-        # todo = qset.count()
+        qset = qset.order_by('nr')
+
+        todo = qset.count()
         # print('todo: %s' % todo)
 
         for p in qset:
-            yield p
+            msg = '%s/%s' % (loc, todo)
+            yield p, msg
+            todo -= 1
         # for
 
     def _select_next_loc(self):
-        # decide which position on the board to work on
+        """ decide which position on the board to work on """
+
+        if len(self.board_order) < len(self.solve_order):
+            return self.solve_order[len(self.board_order)], False, self.board_unused
 
         qset = Piece2x2.objects.filter(nr1__in=self.board_unused,
                                        nr2__in=self.board_unused,
@@ -332,8 +334,26 @@ class Command(BaseCommand):
         # print('claims: %s' % repr(claims))
         # print('single_claims: %s' % repr(single_claims))
         if len(single_claims) != len(set(single_claims)):
-            # self.stdout.write('Found duplicate claims')
-            return -1, True
+            claims_fmt = list()
+            for loc, claimed in claims.items():
+                if len(claimed) > 0:
+                    claims_fmt.append('%s:%s' % (loc, repr(claimed)))
+            # for
+            self.stdout.write('[DEBUG] Duplicate claims: %s' % ", ".join(claims_fmt))
+            return -1, True, []
+
+        tick = time.monotonic()
+        if tick - self.prev_tick > 5:
+            self.prev_tick = tick
+            msg = '(%s) %s' % (len(self.board_order), ", ".join(self.board_progress))
+            print(msg)
+            claims_fmt = list()
+            for loc, claimed in claims.items():
+                if len(claimed) > 0:
+                    claims_fmt.append('%s:%s' % (loc, repr(claimed)))
+            # for
+            print('%s %s' % ("     "[:2+len(str(len(self.board_order)))], ", ".join(claims_fmt)))
+            print('%s' % repr(self.board_unused))
 
         loc_counts = list()
         for loc in self.locs:
@@ -386,17 +406,18 @@ class Command(BaseCommand):
                     count = qset.filter(has_hint=True).count()
 
                 elif loc in (11, 18, 14, 23, 47, 54, 51, 42):
-                    if len(self.board_order) < 16:
-                        continue
+                    # if len(self.board_order) < 16:
+                    #     continue
                     count = qset.filter(has_hint=False,
                                         is_border=False).count()
                 else:
+                    # border
                     count = qset.filter(is_border=True).count()
 
                 if count == 0:
                     # dead end
-                    # self.stdout.write('[DEBUG] No options for %s' % loc)
-                    return -1, True
+                    self.stdout.write('[DEBUG] No options for %s' % loc)
+                    return -1, True, []
 
                 tup = (count, loc)
                 loc_counts.append(tup)
@@ -406,27 +427,32 @@ class Command(BaseCommand):
         if len(loc_counts) > 0:
             loc_counts.sort()       # lowest first
             loc = loc_counts[0][-1]
+
+            # remove all single claims from the unused pieces
+            unused = self.board_unused[:]
+            for nr in single_claims:
+                if nr in unused:
+                    unused.remove(nr)
+            # for
+
+            # add the claims needed for the selectie location
+            unused.extend(claims[loc])
+
             # self.stdout.write('[INFO] Added %s' % p_nr)
-            return loc, False
+            return loc, False, unused
 
         # niets kunnen kiezen
         self.stdout.write('[ERROR] select_next_loc failed')
         self.stdout.write('[DEBUG] solve_order = %s' % repr(self.board_order))
-        return -1, True
+        return -1, True, []
 
     def _find_recurse(self):
-        tick = time.monotonic()
-        if tick - self.prev_tick > 10:
-            self.prev_tick = tick
-            msg = '(%s) %s' % (len(self.board_order), ", ".join(self.board_progress))
-            print(msg)
-
         if len(self.board_order) == len(self.locs):
             self._save_ring1()
             return
 
         # decide which loc to continue with
-        loc, has_zero = self._select_next_loc()
+        loc, has_zero, unused = self._select_next_loc()
         if has_zero:
             return
         # self.stdout.write('next loc: %s' % loc)
@@ -455,11 +481,9 @@ class Command(BaseCommand):
             if p:
                 options_side4 = [self.twoside2reverse[p.side2]]
 
-        p_instance = 0
-        for p in self._iter(loc, options_side1, options_side2, options_side3, options_side4):
+        for p, msg in self._iter(loc, unused, options_side1, options_side2, options_side3, options_side4):
             self._board_place(loc, p)
-            self.board_progress.append('%s/%s' % (loc, p_instance))
-            p_instance += 1
+            self.board_progress.append(msg)
 
             self._find_recurse()
 
