@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Piece 2x2</title>
+    <style>
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+            padding: 5px 10px 5px 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>BasePieces</h1>
+
+    <table style="margin-left:auto; margin-right:auto">
+        <thead>
+            <tr>
+                <th>Nr</th>
+                <th>Image</th>
+                <th>Nr</th>
+                <th>Image</th>
+                <th>Nr</th>
+                <th>Image</th>
+                <th>Nr</th>
+                <th>Image</th>
+                <th>Nr</th>
+                <th>Image</th>
+                <th>Nr</th>
+                <th>Image</th>
+                <th>Nr</th>
+                <th>Image</th>
+                <th>Nr</th>
+                <th>Image</th>
+            </tr>
+        </thead>
+
+        {% for group in groups %}
+            <tr>
+                {% for piece in group %}
+                        <td>{{ piece.nr }}</td>
+                        <td><img src="{{ piece.img }}"></td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+    </table>
+
+</body>
+</html>
