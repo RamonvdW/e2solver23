@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -264,12 +264,19 @@ class Command(BaseCommand):
                             if piece4_side3 == 'X':
                                 continue
 
+                        is_border = (piece1_side4 == 'X' or piece1_side1 == 'X' or
+                                     piece4_side2 == 'X' or piece4_side3 == 'X')
+
+                        has_hint = piece1_is_hint or piece2_is_hint or piece3_is_hint or piece4_is_hint
+
+                        if is_border and has_hint:
+                            continue
+
                         nr += 1
                         piece = Piece2x2(
                                         nr=nr,
-                                        is_border=(piece1_side4 == 'X' or piece1_side1 == 'X' or
-                                                   piece4_side2 == 'X' or piece4_side3 == 'X'),
-                                        has_hint=piece1_is_hint or piece2_is_hint or piece3_is_hint or piece4_is_hint,
+                                        is_border=is_border,
+                                        has_hint=has_hint,
                                         side1=self._get_two_sides_nr(piece1.get_side(1, rot1), piece2.get_side(1, rot2)),
                                         side2=self._get_two_sides_nr(piece2.get_side(2, rot2), piece4.get_side(2, rot4)),
                                         side3=self._get_two_sides_nr(piece4.get_side(3, rot4), piece3.get_side(3, rot3)),
