@@ -63,10 +63,11 @@ class Command(BaseCommand):
                      10, 15, 50, 55,
                      11, 18, 42, 51, 47, 54, 14, 23)
 
-        self.solve_order = (#1, 2, 9, 10,
-                            #8, 7, 16, 15,
-                            #58, 49, 50, 41, 59,
-                            #64, 63, 56, 55
+        self.solve_order = (
+                            # 1, 2, 9, 10,
+                            # 8, 7, 16, 15,
+                            # 58, 49, 50, 41, 59,
+                            # 64, 63, 56, 55
                             32, 61, 33, 4,
                             40, 60, 25, 5,
                             )
@@ -214,7 +215,8 @@ class Command(BaseCommand):
                 self.segment_options_rev[segment] = self._reverse_sides(options)
         # for
 
-    def _iter(self, loc, unused, options_side1, options_side2, options_side3, options_side4):
+    @staticmethod
+    def _iter(loc, unused, options_side1, options_side2, options_side3, options_side4):
         qset = (Piece2x2
                 .objects
                 .filter(nr1__in=unused,
@@ -244,10 +246,13 @@ class Command(BaseCommand):
 
         qset = qset.order_by('nr')
 
-        todo = qset.count()
+        p2x2s = list(qset)
+
+        todo = len(p2x2s)
+        # todo = qset.count()
         # print('todo: %s' % todo)
 
-        for p in qset:
+        for p in p2x2s:
             msg = '%s/%s' % (loc, todo)
             yield p, msg
             todo -= 1
@@ -271,6 +276,18 @@ class Command(BaseCommand):
             loc_claims = list()
             if self.board[loc] is None:
                 # empty position on the board
+
+                if loc in (10, 15, 50, 55, 11, 18, 42, 51, 47, 54, 14, 23):
+                    is_lonely = True
+                    for n_loc in self.neighbours[loc]:
+                        if n_loc > 0 and self.board[n_loc]:
+                            is_lonely = False
+                            break
+                    # for
+                    if is_lonely:
+                        claims[loc] = loc_claims
+                        continue
+
                 seg1, seg2, seg3, seg4 = self.segment_nrs[loc]
                 options_side1 = self.segment_options[seg1]
                 options_side2 = self.segment_options[seg2]
@@ -304,19 +321,36 @@ class Command(BaseCommand):
                     qset2 = qset2.filter(has_hint=True)
 
                 elif loc in (11, 18, 14, 23, 47, 54, 51, 42):
-                    if len(self.board_order) < 14:
-                        claims[loc] = loc_claims
-                        continue
                     qset2 = qset2.filter(has_hint=False,
                                          is_border=False)
                 else:
                     qset2 = qset2.filter(is_border=True)
 
                 # find the claims this location has
-                nrs1 = list(qset2.distinct('nr1').values_list('nr1', flat=True))
-                nrs2 = list(qset2.distinct('nr2').values_list('nr2', flat=True))
-                nrs3 = list(qset2.distinct('nr3').values_list('nr3', flat=True))
-                nrs4 = list(qset2.distinct('nr4').values_list('nr4', flat=True))
+                # nrs1 = list(qset2.distinct('nr1').values_list('nr1', flat=True))
+                # nrs2 = list(qset2.distinct('nr2').values_list('nr2', flat=True))
+                # nrs3 = list(qset2.distinct('nr3').values_list('nr3', flat=True))
+                # nrs4 = list(qset2.distinct('nr4').values_list('nr4', flat=True))
+                nrs1 = list()
+                nrs2 = list()
+                nrs3 = list()
+                nrs4 = list()
+                for p2x2 in qset2.all():
+                    if len(nrs1) < 2:
+                        if p2x2.nr1 not in nrs1:
+                            nrs1.append(p2x2.nr1)
+                    if len(nrs2) < 2:
+                        if p2x2.nr2 not in nrs2:
+                            nrs2.append(p2x2.nr2)
+                    if len(nrs3) < 2:
+                        if p2x2.nr3 not in nrs3:
+                            nrs3.append(p2x2.nr3)
+                    if len(nrs4) < 2:
+                        if p2x2.nr4 not in nrs4:
+                            nrs4.append(p2x2.nr4)
+                    if len(nrs1) > 1 and len(nrs2) > 1 and len(nrs3) > 1 and len(nrs4) > 1:
+                        break
+                # for
                 if len(nrs1) == 1:
                     loc_claims.append(nrs1[0])
                 if len(nrs2) == 1:
@@ -353,12 +387,22 @@ class Command(BaseCommand):
                     claims_fmt.append('%s:%s' % (loc, repr(claimed)))
             # for
             print('%s %s' % ("     "[:2+len(str(len(self.board_order)))], ", ".join(claims_fmt)))
-            print('%s' % repr(self.board_unused))
+            # print('%s' % repr(self.board_unused))
 
         loc_counts = list()
         for loc in self.locs:
             if self.board[loc] is None:
                 # empty position on the board
+
+                is_lonely = True
+                for n_loc in self.neighbours[loc]:
+                    if n_loc > 0 and self.board[n_loc]:
+                        is_lonely = False
+                        break
+                # for
+                if is_lonely:
+                    continue
+
                 seg1, seg2, seg3, seg4 = self.segment_nrs[loc]
                 options_side1 = self.segment_options[seg1]
                 options_side2 = self.segment_options[seg2]
@@ -406,7 +450,7 @@ class Command(BaseCommand):
                     count = qset.filter(has_hint=True).count()
 
                 elif loc in (11, 18, 14, 23, 47, 54, 51, 42):
-                    # if len(self.board_order) < 16:
+                    # if len(self.board_order) < 14:
                     #     continue
                     count = qset.filter(has_hint=False,
                                         is_border=False).count()
