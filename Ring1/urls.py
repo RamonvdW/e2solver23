@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -13,7 +13,11 @@ app_name = 'Ring1'
 
 urlpatterns = [
     path('view/<nr>/',
-         views.ShowView.as_view(),
+         views.ShowRing1View.as_view(),
+         name='show'),
+
+    path('corner1/<nr>/',
+         views.ShowCorner1View.as_view(),
          name='show'),
 ]
 
