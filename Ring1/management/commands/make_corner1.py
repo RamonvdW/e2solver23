@@ -7,6 +7,7 @@
 from django.core.management.base import BaseCommand
 from Pieces2x2.models import TwoSide, Piece2x2
 from Ring1.models import Corner1
+import random
 
 
 class Command(BaseCommand):
@@ -41,12 +42,18 @@ class Command(BaseCommand):
             self.twoside2reverse[nr] = rev_nr
         # for
 
-        self.unused = list(range(1, 256+1))
-        self.unused.remove(139)      # needed for loc 36
-        self.unused.remove(208)      # needed for loc 10
-        self.unused.remove(255)      # needed for loc 15
-        self.unused.remove(181)      # needed for loc 50
-        self.unused.remove(249)      # needed for loc 55
+        self.select_central = 136
+        self.select_corners = (1, 2, 3, 4)
+        self.select_hints = (208, 255, 249, 181)
+        self.select_borders = list(range(5, 60+1))
+        self.select_rest = list(range(61, 256+1))
+        self.select_rest.remove(self.select_central)
+        for hint in self.select_hints:
+            self.select_rest.remove(hint)
+        # for
+
+        self.corner = 1
+        self.unused = list()
 
         # solve order: 10, 9, 1, 2, 3, 11, 17, 18, 25, 4
         self.loc1_exp_s3 = 0
@@ -63,7 +70,44 @@ class Command(BaseCommand):
         self.loc25_exp_s1 = 0
 
         self.count = 0
-        self.count_print = 100000
+        self.count_print = 1        # 100_000
+        self.bulk = list()
+
+    def _fill_unused(self, seed):
+        r = random.Random(seed)
+        upper = len(self.select_rest)
+        for lp in range(100000):
+            idx = int(r.uniform(0, upper))
+            nr = self.select_rest.pop(idx)
+            self.select_rest.append(nr)
+        # for
+
+        corner = self.corner
+
+        self.unused = list()
+        self.unused.append(self.select_corners[corner - 1])
+        self.unused.extend(self.select_borders)
+        # for idx in range(14):
+        #     self.unused.append(self.select_borders[corner - 1 + idx * 4])
+        # # for
+        for idx in range(47):
+            self.unused.append(self.select_rest[corner - 1 + idx * 4])
+        # for
+
+    def add_arguments(self, parser):
+        parser.add_argument('seed', type=int, help='Randomization seed')
+
+    def _save(self, c1):
+        self.count += 1
+        # if self.count > self.count_print:
+        #     print('count: %s --> 10=%s, 9=%s, 1=%s, 2=%s, 3=%s, 17=%s, 18=%s' % (
+        #         self.count, c1.loc10, c1.loc9, c1.loc1, c1.loc2, c1.loc3, c1.loc17, c1.loc18))
+        #     # self.count_print += 100_000
+        c1.pk = None
+        self.bulk.append(c1)
+        if len(self.bulk) >= 1000:
+            Corner1.objects.bulk_create(self.bulk)
+            self.bulk = list()
 
     def _find_nr4(self, c1):
         exp_s1 = self.twoside_border
@@ -74,21 +118,14 @@ class Command(BaseCommand):
                              nr1__in=self.unused, nr2__in=self.unused, nr3__in=self.unused, nr4__in=self.unused)
                      .exclude(side2=self.twoside_border)):
             c1.loc4 = p2x2.nr
+            c1.side2 = p2x2.side2
 
             c1.nr37 = p2x2.nr1
             c1.nr38 = p2x2.nr2
             c1.nr39 = p2x2.nr3
             c1.nr40 = p2x2.nr4
 
-            self.count += 1
-            if self.count > self.count_print:
-                print('count: %s --> 10=%s, 9=%s, 1=%s, 2=%s, 3=%s, 17=%s, 18=%s' % (
-                        self.count, c1.loc10, c1.loc9, c1.loc1, c1.loc2, c1.loc3, c1.loc17, c1.loc18))
-                self.count_print += 100_000
-
-                # c1.pk = None
-                # c1.save()
-                # print('saved Corner1; pk=%s' % c1.pk)
+            self._save(c1)
         # for
 
     def _find_nr25(self, c1):
@@ -100,6 +137,7 @@ class Command(BaseCommand):
                              nr1__in=self.unused, nr2__in=self.unused, nr3__in=self.unused, nr4__in=self.unused)
                      .exclude(side3=self.twoside_border)):
             c1.loc25 = p2x2.nr
+            c1.side3 = p2x2.side3
 
             c1.nr33 = p2x2.nr1
             c1.nr34 = p2x2.nr2
@@ -147,7 +185,7 @@ class Command(BaseCommand):
                         side1=self.loc17_exp_s1, side4=exp_s4,
                         nr1__in=self.unused, nr2__in=self.unused, nr3__in=self.unused, nr4__in=self.unused)
                 .exclude(side3=self.twoside_border))
-        print('17 count: %s' % qset.count())
+        # print('17 count: %s' % qset.count())
         for p2x2 in qset:
             c1.loc17 = p2x2.nr
             self.loc18_exp_s4 = self.twoside2reverse[p2x2.side2]
@@ -174,7 +212,7 @@ class Command(BaseCommand):
                 .filter(is_border=False,
                         side1=self.loc11_exp_s1, side4=self.loc11_exp_s4,
                         nr1__in=self.unused, nr2__in=self.unused, nr3__in=self.unused, nr4__in=self.unused))
-        print('11 count: %s' % qset.count())
+        # print('11 count: %s' % qset.count())
         for p2x2 in qset:
             c1.loc11 = p2x2.nr
 
@@ -201,7 +239,7 @@ class Command(BaseCommand):
                         side1=exp_s1, side4=self.loc3_exp_s4,
                         nr1__in=self.unused, nr2__in=self.unused, nr3__in=self.unused, nr4__in=self.unused)
                 .exclude(side2=self.twoside_border))
-        print('3 count: %s' % qset.count())
+        # print('3 count: %s' % qset.count())
         for p2x2 in qset:
             c1.loc3 = p2x2.nr
             self.loc4_exp_s4 = self.twoside2reverse[p2x2.side2]
@@ -230,11 +268,10 @@ class Command(BaseCommand):
                         side1=exp_s1, side4=self.loc2_exp_s4, side3=self.loc2_exp_s3,
                         nr1__in=self.unused, nr2__in=self.unused, nr3__in=self.unused, nr4__in=self.unused)
                 .exclude(side2=self.twoside_border))
-        print('2 count: %s' % qset.count())
+        # print('2 count: %s' % qset.count())
         for p2x2 in qset:
             c1.loc2 = p2x2.nr
             self.loc3_exp_s4 = self.twoside2reverse[p2x2.side2]
-            self.nr10_exp_s1 = self.twoside2reverse[p2x2.side3]
 
             c1.nr13 = p2x2.nr1
             c1.nr14 = p2x2.nr2
@@ -258,11 +295,10 @@ class Command(BaseCommand):
                 .filter(is_border=True,
                         side1=exp_s1, side4=exp_s4, side3=self.loc1_exp_s3,
                         nr1__in=self.unused, nr2__in=self.unused, nr3__in=self.unused, nr4__in=self.unused))
-        print('1 count: %s' % qset.count())
+        # print('1 count: %s' % qset.count())
         for p2x2 in qset:
             c1.loc1 = p2x2.nr
             self.loc2_exp_s4 = self.twoside2reverse[p2x2.side2]
-            self.nr9_exp_s1 = self.twoside2reverse[p2x2.side4]
 
             c1.nr9 = p2x2.nr1
             c1.nr10 = p2x2.nr2
@@ -286,7 +322,7 @@ class Command(BaseCommand):
                 .filter(is_border=True,
                         side2=self.loc9_exp_s2, side4=exp_s4,
                         nr1__in=self.unused, nr2__in=self.unused, nr3__in=self.unused, nr4__in=self.unused))
-        print('9 count: %s' % qset.count())
+        # print('9 count: %s' % qset.count())
         for p2x2 in qset:
             c1.loc9 = p2x2.nr
             self.loc1_exp_s3 = self.twoside2reverse[p2x2.side1]
@@ -314,7 +350,7 @@ class Command(BaseCommand):
                         has_hint=True,
                         nr1=208,
                         nr2__in=self.unused, nr3__in=self.unused, nr4__in=self.unused))
-        print('10 count: %s' % qset.count())
+        # print('10 count: %s' % qset.count())
         for p2x2 in qset:
             c1.loc10 = p2x2.nr
             self.loc2_exp_s3 = self.twoside2reverse[p2x2.side1]
@@ -322,7 +358,7 @@ class Command(BaseCommand):
             self.loc18_exp_s1 = self.twoside2reverse[p2x2.side3]
             self.loc9_exp_s2 = self.twoside2reverse[p2x2.side4]
 
-            c1.nr1 = 208
+            c1.nr1 = p2x2.nr1
             c1.nr2 = p2x2.nr2
             c1.nr3 = p2x2.nr3
             c1.nr4 = p2x2.nr4
@@ -338,10 +374,23 @@ class Command(BaseCommand):
         # for
 
     def handle(self, *args, **options):
+
+        seed = options['seed']
+        self._fill_unused(seed)
+        self.stdout.write('[INFO] Selected base pieces: %s' % repr(self.unused))
+
+        Corner1.objects.all().delete()
+
         c1 = Corner1()
         try:
             self._find_nr10(c1)
         except KeyboardInterrupt:
             pass
+
+        if len(self.bulk):
+            Corner1.objects.bulk_create(self.bulk)
+            self.bulk = list()
+
+        self.stdout.write('[INFO] Created %s Corner1' % self.count)
 
 # end of file
