@@ -5,40 +5,17 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from Pieces2x2.models import TwoSide, TwoSideOptions, Piece2x2
+from Pieces2x2.models import TwoSideOptions, TwoSide, Piece2x2
 from Pieces2x2.helpers import calc_segment
-from Ring1.models import Ring1
-import time
+from Ring1.models import Ring1, Corner1, Corner2, Corner3, Corner4
 
 
 class Command(BaseCommand):
 
-    help = "Make all possible combinations of ring1, the outer 2x2 ring"
-
-    """
-        +----+----+----+----+----+----+----+----+
-        | 1  | 2  | 3  | 4  | 5  | 6  | 7  | 8  |
-        +----+----+----+----+----+----+----+----+
-        | 9  | 10 |                   | 15 | 16 |
-        +----+----+                   +----+----+
-        | 17 |                             | 24 |
-        +----+                             +----+
-        | 25 |                             | 32 |
-        +----+                             +----+
-        | 33 |                             | 40 |
-        +----+                             +----+
-        | 41 |                             | 48 |
-        +----+----+                   +----+----+
-        | 49 | 50 |                   | 55 | 56 |
-        +----+----+----+----+----+----+----+----+
-        | 57 | 58 | 59 | 60 | 61 | 62 | 63 | 64 |
-        +----+----+----+----+----+----+----+----+
-    """
+    help = "Compile a Ring1 from Corner1..4"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-
-        self.twoside_border = TwoSide.objects.get(two_sides='XX').nr
 
         two2nr = dict()
         for two in TwoSide.objects.all():
@@ -51,501 +28,267 @@ class Command(BaseCommand):
             self.twoside2reverse[nr] = rev_nr
         # for
 
-        self.processor = 0
-        self.locs = (1, 2, 3, 4, 5, 6, 7, 8,
-                     9, 16,
-                     17, 24,
-                     25, 32,
-                     33, 40,
-                     41, 48,
-                     49, 56,
-                     57, 58, 59, 60, 61, 62, 63, 64,
-                     10, 15, 50, 55,
-                     11, 18, 42, 51, 47, 54, 14, 23)
+    def reverse_sides(self, sides):
+        return [self.twoside2reverse[side] for side in sides]
 
-        self.solve_order = (
-                            1, 64,
-                            9, 2, 10,
-                            56, 63, 55,
-                            # 17, 18
-                            # 8, 7, 16, 15,
-                            # 58, 49, 50, 41, 59,
-                            # 32, 61, 33, 4,
-                            # 40, 60, 25, 5,
-                            )
+    def _save(self, c1, c2, c3, c4):
+        ring1 = Ring1(
+                    nr1=c1.loc1,
+                    nr2=c1.loc2,
+                    nr3=c1.loc3,
+                    nr4=c1.loc4,
 
-        # [loc] = [loc on side1..4 or -1 if border or -2 if neighbour is a gap]
-        self.neighbours = self._calc_neighbours()
+                    nr5=c2.loc5,
+                    nr6=c2.loc6,
+                    nr7=c2.loc7,
+                    nr8=c2.loc8,
 
-        # [loc] = [4 side nr]
-        self.segment_nrs: dict[int, tuple] = dict()
-        for loc in self.locs:
-            self.segment_nrs[loc] = (calc_segment(loc, 1),
-                                     calc_segment(loc, 2),
-                                     calc_segment(loc, 3),
-                                     calc_segment(loc, 4))
-        # for
+                    nr9=c1.loc9,
+                    nr10=c1.loc10,
+                    nr11=c1.loc11,
 
-        self.unused0 = list(range(1, 256+1))
+                    nr14=c2.loc14,
+                    nr15=c2.loc15,
+                    nr16=c2.loc16,
 
-        # remove the hints not in Ring1
-        self.unused0.remove(139)      # needed for loc 36
-        # self.unused0.remove(208)      # needed for loc 10
-        # self.unused0.remove(255)      # needed for loc 15
-        # self.unused0.remove(181)      # needed for loc 50
-        # self.unused0.remove(249)      # needed for loc 55
+                    nr17=c1.loc17,
+                    nr18=c1.loc18,
 
-        # [1..64] = None or Piece2x2 with side1/2/3/4
-        self.board: dict[int, Piece2x2 | None] = {}
-        for loc in self.locs:
-            self.board[loc] = None
+                    nr23=c2.loc23,
+                    nr24=c2.loc24,
 
-        self.board_order = list()   # solved order (for popping)
-        self.board_progress = list()
-        self.board_unused = self.unused0[:]
-        self.requested_order = list()
+                    nr25=c1.loc25,
 
-        self.prev_tick = time.monotonic()
+                    nr32=c2.loc32,
 
-        self.segment_options = dict()
-        self.segment_options_rev = dict()
+                    nr33=c4.loc33,
 
-    def add_arguments(self, parser):
-        parser.add_argument('processor', type=int, help='Processor number to use')
+                    nr40=c3.loc40,
 
-    def _calc_neighbours(self):
-        neighbours = dict()
+                    nr41=c4.loc41,
+                    nr42=c4.loc42,
 
-        # order of the entries: side 1, 2, 3, 4
-        for nr in range(1, 64+1):
-            if nr in self.locs:
-                if nr == 36:
-                    n = (-2, -2, -2, -2)
-                else:
-                    n = list()
-                    col = (nr - 1) % 8
-                    row = int((nr - 1) / 8)
+                    nr47=c3.loc47,
+                    nr48=c3.loc48,
 
-                    # side 1
-                    if row == 0:
-                        n.append(-1)    # outer border
-                    elif nr - 8 in self.locs:
-                        n.append(nr - 8)
-                    else:
-                        n.append(-2)    # inner gap
+                    nr49=c4.loc49,
+                    nr50=c4.loc50,
+                    nr51=c4.loc51,
 
-                    # side 2
-                    if col == 7:
-                        n.append(-1)    # outer border
-                    elif nr + 1 in self.locs:
-                        n.append(nr + 1)
-                    else:
-                        n.append(-2)    # inner gap
+                    nr54=c3.loc54,
+                    nr55=c3.loc55,
+                    nr56=c3.loc56,
 
-                    # side 3
-                    if row == 7:
-                        n.append(-1)    # outer border
-                    elif nr + 8 in self.locs:
-                        n.append(nr + 8)
-                    else:
-                        n.append(-2)    # inner gap
+                    nr57=c4.loc57,
+                    nr58=c4.loc58,
+                    nr59=c4.loc59,
+                    nr60=c4.loc60,
 
-                    # side 4
-                    if col == 0:
-                        n.append(-1)    # outer border
-                    elif nr - 1 in self.locs:
-                        n.append(nr - 1)
-                    else:
-                        n.append(-2)    # inner gap
+                    nr61=c3.loc61,
+                    nr62=c3.loc62,
+                    nr63=c3.loc63,
+                    nr64=c3.loc64,
 
-                neighbours[nr] = tuple(n)
-        # for
-        return neighbours
+                    nr36=0)
 
-    def _reverse_sides(self, options):
-        return [self.twoside2reverse[two_side] for two_side in options]
+        ring1.save()
+        print('saved Ring1 pk=%s' % ring1.pk)
 
-    def _board_place(self, p_nr: int, p2x2):
-        self.board_order.append(p_nr)
-        self.board[p_nr] = p2x2
-        self.board_unused.remove(p2x2.nr1)
-        self.board_unused.remove(p2x2.nr2)
-        self.board_unused.remove(p2x2.nr3)
-        self.board_unused.remove(p2x2.nr4)
+    def _iter_c4(self, c1, c2, c3):
+        print('c1:%s c2:%s c3:%s' % (c1.pk, c2.pk, c3.pk))
 
-    def _board_pop(self):
-        p_nr = self.board_order[-1]
-        self.board_order = self.board_order[:-1]
-        p2x2 = self.board[p_nr]
-        self.board[p_nr] = None
-        self.board_unused.extend([p2x2.nr1, p2x2.nr2, p2x2.nr3, p2x2.nr4])
+        c4 = Corner4(loc33=0, loc41=0, loc42=0, loc49=0, loc50=0, loc51=0, loc57=0, loc58=0, loc59=0, loc60=0)
+        self._save(c1, c2, c3, c4)
+        return
 
-    def _save_ring1(self):
-        ring = Ring1()
-        for loc in self.locs:
-            field = 'nr%s' % loc
-            p2x2 = self.board[loc]
-            if p2x2:
-                nr = p2x2.nr
-            else:
-                nr = 0
-            setattr(ring, field, nr)
-        # for
+        used = [c1.nr1, c1.nr2, c1.nr3, c1.nr4, c1.nr5, c1.nr6, c1.nr7, c1.nr8, c1.nr9, c1.nr10, c1.nr11, c1.nr12,
+                c1.nr13, c1.nr14, c1.nr15, c1.nr16, c1.nr17, c1.nr18, c1.nr19, c1.nr20, c1.nr21, c1.nr22, c1.nr23,
+                c1.nr24, c1.nr25, c1.nr26, c1.nr27, c1.nr28, c1.nr29, c1.nr30, c1.nr31, c1.nr32, c1.nr33, c1.nr34,
+                c1.nr35, c1.nr36, c1.nr37, c1.nr38, c1.nr39, c1.nr40,
+                c2.nr1, c2.nr2, c2.nr3, c2.nr4, c2.nr5, c2.nr6, c2.nr7, c2.nr8, c2.nr9, c2.nr10, c2.nr11, c2.nr12,
+                c2.nr13, c2.nr14, c2.nr15, c2.nr16, c2.nr17, c2.nr18, c2.nr19, c2.nr20, c2.nr21, c2.nr22, c2.nr23,
+                c2.nr24, c2.nr25, c2.nr26, c2.nr27, c2.nr28, c2.nr29, c2.nr30, c2.nr31, c2.nr32, c2.nr33, c2.nr34,
+                c2.nr35, c2.nr36, c2.nr37, c2.nr38, c2.nr39, c2.nr40,
+                c3.nr1, c3.nr2, c3.nr3, c3.nr4, c3.nr5, c3.nr6, c3.nr7, c3.nr8, c3.nr9, c3.nr10, c3.nr11, c3.nr12,
+                c3.nr13, c3.nr14, c3.nr15, c3.nr16, c3.nr17, c3.nr18, c3.nr19, c3.nr20, c3.nr21, c3.nr22, c3.nr23,
+                c3.nr24, c3.nr25, c3.nr26, c3.nr27, c3.nr28, c3.nr29, c3.nr30, c3.nr31, c3.nr32, c3.nr33, c3.nr34,
+                c3.nr35, c3.nr36, c3.nr37, c3.nr38, c3.nr39, c3.nr40]
 
-        ring.processor = self.processor
-        ring.nr36 = 0
-        ring.save()
-        self.stdout.write('[INFO] Saved Ring1 with pk=%s' % ring.pk)
-
-    def _query_segment_options(self, segment):
-        """ Return the options remaining for a specific segment """
-        options = (TwoSideOptions
+        exp_s2 = self.twoside2reverse[c3.side4]
+        exp_s1 = self.twoside2reverse[c1.side3]
+        for c4 in (Corner4
                    .objects
-                   .filter(processor=self.processor,
-                           segment=segment)
-                   .values_list('two_side', flat=True))
-        options = list(options)
-        # self.stdout.write('[DEBUG] Segment %s has %s options' % (segment, len(options)))
-        return options
+                   .filter(side1=exp_s1,
+                           side2=exp_s2)
+                   .exclude(nr1__in=used)
+                   .exclude(nr2__in=used)
+                   .exclude(nr3__in=used)
+                   .exclude(nr4__in=used)
+                   .exclude(nr5__in=used)
+                   .exclude(nr6__in=used)
+                   .exclude(nr7__in=used)
+                   .exclude(nr8__in=used)
+                   .exclude(nr9__in=used)
+                   .exclude(nr10__in=used)
+                   .exclude(nr11__in=used)
+                   .exclude(nr12__in=used)
+                   .exclude(nr13__in=used)
+                   .exclude(nr14__in=used)
+                   .exclude(nr15__in=used)
+                   .exclude(nr16__in=used)
+                   .exclude(nr17__in=used)
+                   .exclude(nr18__in=used)
+                   .exclude(nr19__in=used)
+                   .exclude(nr20__in=used)
+                   .exclude(nr21__in=used)
+                   .exclude(nr22__in=used)
+                   .exclude(nr23__in=used)
+                   .exclude(nr24__in=used)
+                   .exclude(nr25__in=used)
+                   .exclude(nr26__in=used)
+                   .exclude(nr27__in=used)
+                   .exclude(nr28__in=used)
+                   .exclude(nr29__in=used)
+                   .exclude(nr30__in=used)
+                   .exclude(nr31__in=used)
+                   .exclude(nr32__in=used)
+                   .exclude(nr33__in=used)
+                   .exclude(nr34__in=used)
+                   .exclude(nr35__in=used)
+                   .exclude(nr36__in=used)
+                   .exclude(nr37__in=used)
+                   .exclude(nr38__in=used)
+                   .exclude(nr39__in=used)
+                   .exclude(nr40__in=used)):
 
-    def _get_segments_options(self):
-        for loc in self.locs:
-            for side in range(1, 4+1):
-                segment = calc_segment(loc, side)
-                options = self._query_segment_options(segment)
-                self.segment_options[segment] = options
-                self.segment_options_rev[segment] = self._reverse_sides(options)
+            self._save(c1, c2, c3, c4)
         # for
 
-    @staticmethod
-    def _iter(loc, unused, options_side1, options_side2, options_side3, options_side4):
-        qset = (Piece2x2
-                .objects
-                .filter(nr1__in=unused,
-                        nr2__in=unused,
-                        nr3__in=unused,
-                        nr4__in=unused))
+    def _iter_c2(self, c1, c3):
+        print('c1:%s c3:%s' % (c1.pk, c3.pk))
 
-        if options_side1:
-            qset = qset.filter(side1__in=options_side1)
-        if options_side2:
-            qset = qset.filter(side2__in=options_side2)
-        if options_side3:
-            qset = qset.filter(side3__in=options_side3)
-        if options_side4:
-            qset = qset.filter(side4__in=options_side4)
+        used = [c1.nr1, c1.nr2, c1.nr3, c1.nr4, c1.nr5, c1.nr6, c1.nr7, c1.nr8, c1.nr9, c1.nr10, c1.nr11, c1.nr12,
+                c1.nr13, c1.nr14, c1.nr15, c1.nr16, c1.nr17, c1.nr18, c1.nr19, c1.nr20, c1.nr21, c1.nr22, c1.nr23,
+                c1.nr24, c1.nr25, c1.nr26, c1.nr27, c1.nr28, c1.nr29, c1.nr30, c1.nr31, c1.nr32, c1.nr33, c1.nr34,
+                c1.nr35, c1.nr36, c1.nr37, c1.nr38, c1.nr39, c1.nr40,
+                c3.nr1, c3.nr2, c3.nr3, c3.nr4, c3.nr5, c3.nr6, c3.nr7, c3.nr8, c3.nr9, c3.nr10, c3.nr11, c3.nr12,
+                c3.nr13, c3.nr14, c3.nr15, c3.nr16, c3.nr17, c3.nr18, c3.nr19, c3.nr20, c3.nr21, c3.nr22, c3.nr23,
+                c3.nr24, c3.nr25, c3.nr26, c3.nr27, c3.nr28, c3.nr29, c3.nr30, c3.nr31, c3.nr32, c3.nr33, c3.nr34,
+                c3.nr35, c3.nr36, c3.nr37, c3.nr38, c3.nr39, c3.nr40]
 
-        if loc == 10:
-            qset = qset.filter(nr1=208)
-        elif loc == 15:
-            qset = qset.filter(nr2=255)
-        elif loc == 36:
-            qset = qset.filter(nr2=139)
-        elif loc == 50:
-            qset = qset.filter(nr3=181)
-        elif loc == 55:
-            qset = qset.filter(nr4=249)
+        exp_s4 = self.twoside2reverse[c1.side2]
+        exp_s3 = self.twoside2reverse[c3.side1]
 
-        qset = qset.order_by('nr')
+        for c2 in (Corner2
+                   .objects
+                   .filter(side4=exp_s4,
+                           side3=exp_s3)
+                   .exclude(nr1__in=used)
+                   .exclude(nr2__in=used)
+                   .exclude(nr3__in=used)
+                   .exclude(nr4__in=used)
+                   .exclude(nr5__in=used)
+                   .exclude(nr6__in=used)
+                   .exclude(nr7__in=used)
+                   .exclude(nr8__in=used)
+                   .exclude(nr9__in=used)
+                   .exclude(nr10__in=used)
+                   .exclude(nr11__in=used)
+                   .exclude(nr12__in=used)
+                   .exclude(nr13__in=used)
+                   .exclude(nr14__in=used)
+                   .exclude(nr15__in=used)
+                   .exclude(nr16__in=used)
+                   .exclude(nr17__in=used)
+                   .exclude(nr18__in=used)
+                   .exclude(nr19__in=used)
+                   .exclude(nr20__in=used)
+                   .exclude(nr21__in=used)
+                   .exclude(nr22__in=used)
+                   .exclude(nr23__in=used)
+                   .exclude(nr24__in=used)
+                   .exclude(nr25__in=used)
+                   .exclude(nr26__in=used)
+                   .exclude(nr27__in=used)
+                   .exclude(nr28__in=used)
+                   .exclude(nr29__in=used)
+                   .exclude(nr30__in=used)
+                   .exclude(nr31__in=used)
+                   .exclude(nr32__in=used)
+                   .exclude(nr33__in=used)
+                   .exclude(nr34__in=used)
+                   .exclude(nr35__in=used)
+                   .exclude(nr36__in=used)
+                   .exclude(nr37__in=used)
+                   .exclude(nr38__in=used)
+                   .exclude(nr39__in=used)
+                   .exclude(nr40__in=used)):
 
-        p2x2s = list(qset)
-
-        todo = len(p2x2s)
-        # todo = qset.count()
-        # print('todo: %s' % todo)
-
-        for p in p2x2s:
-            msg = '%s/%s' % (loc, todo)
-            yield p, msg
-            todo -= 1
+            self._iter_c4(c1, c2, c3)
         # for
 
-    def _select_next_loc(self):
-        """ decide which position on the board to work on """
+    def _iter_c3(self, c1):
 
-        if len(self.board_order) < len(self.solve_order):
-            return self.solve_order[len(self.board_order)], False, self.board_unused
+        used = [c1.nr1, c1.nr2, c1.nr3, c1.nr4, c1.nr5, c1.nr6, c1.nr7, c1.nr8, c1.nr9, c1.nr10, c1.nr11, c1.nr12,
+                c1.nr13, c1.nr14, c1.nr15, c1.nr16, c1.nr17, c1.nr18, c1.nr19, c1.nr20, c1.nr21, c1.nr22, c1.nr23,
+                c1.nr24, c1.nr25, c1.nr26, c1.nr27, c1.nr28, c1.nr29, c1.nr30, c1.nr31, c1.nr32, c1.nr33, c1.nr34,
+                c1.nr35, c1.nr36, c1.nr37, c1.nr38, c1.nr39, c1.nr40]
 
-        qset = Piece2x2.objects.filter(nr1__in=self.board_unused,
-                                       nr2__in=self.board_unused,
-                                       nr3__in=self.board_unused,
-                                       nr4__in=self.board_unused)
+        for c3 in (Corner3
+                   .objects
+                   .exclude(nr1__in=used)
+                   .exclude(nr2__in=used)
+                   .exclude(nr3__in=used)
+                   .exclude(nr4__in=used)
+                   .exclude(nr5__in=used)
+                   .exclude(nr6__in=used)
+                   .exclude(nr7__in=used)
+                   .exclude(nr8__in=used)
+                   .exclude(nr9__in=used)
+                   .exclude(nr10__in=used)
+                   .exclude(nr11__in=used)
+                   .exclude(nr12__in=used)
+                   .exclude(nr13__in=used)
+                   .exclude(nr14__in=used)
+                   .exclude(nr15__in=used)
+                   .exclude(nr16__in=used)
+                   .exclude(nr17__in=used)
+                   .exclude(nr18__in=used)
+                   .exclude(nr19__in=used)
+                   .exclude(nr20__in=used)
+                   .exclude(nr21__in=used)
+                   .exclude(nr22__in=used)
+                   .exclude(nr23__in=used)
+                   .exclude(nr24__in=used)
+                   .exclude(nr25__in=used)
+                   .exclude(nr26__in=used)
+                   .exclude(nr27__in=used)
+                   .exclude(nr28__in=used)
+                   .exclude(nr29__in=used)
+                   .exclude(nr30__in=used)
+                   .exclude(nr31__in=used)
+                   .exclude(nr32__in=used)
+                   .exclude(nr33__in=used)
+                   .exclude(nr34__in=used)
+                   .exclude(nr35__in=used)
+                   .exclude(nr36__in=used)
+                   .exclude(nr37__in=used)
+                   .exclude(nr38__in=used)
+                   .exclude(nr39__in=used)
+                   .exclude(nr40__in=used)
+                   .iterator(chunk_size=1000)):
 
-        claims = dict()     # [loc] = (nr, nr, ..)
-        single_claims = list()
-
-        for loc in self.locs:
-            loc_claims = list()
-            if self.board[loc] is None:
-                # empty position on the board
-
-                if loc in (10, 15, 50, 55, 11, 18, 42, 51, 47, 54, 14, 23):
-                    is_lonely = True
-                    for n_loc in self.neighbours[loc]:
-                        if n_loc > 0 and self.board[n_loc]:
-                            is_lonely = False
-                            break
-                    # for
-                    if is_lonely:
-                        claims[loc] = loc_claims
-                        continue
-
-                seg1, seg2, seg3, seg4 = self.segment_nrs[loc]
-                options_side1 = self.segment_options[seg1]
-                options_side2 = self.segment_options[seg2]
-                options_side3 = self.segment_options_rev[seg3]
-                options_side4 = self.segment_options_rev[seg4]
-
-                n1, n2, n3, n4 = self.neighbours[loc]
-                if n1 > 0:
-                    p = self.board[n1]
-                    if p:
-                        options_side1 = [self.twoside2reverse[p.side3]]
-                if n2 > 0:
-                    p = self.board[n2]
-                    if p:
-                        options_side2 = [self.twoside2reverse[p.side4]]
-                if n3 > 0:
-                    p = self.board[n3]
-                    if p:
-                        options_side3 = [self.twoside2reverse[p.side1]]
-                if n4 > 0:
-                    p = self.board[n4]
-                    if p:
-                        options_side4 = [self.twoside2reverse[p.side2]]
-
-                qset2 = qset.filter(side1__in=options_side1,
-                                    side2__in=options_side2,
-                                    side3__in=options_side3,
-                                    side4__in=options_side4)
-
-                if loc in (10, 15, 50, 55, 36):
-                    qset2 = qset2.filter(has_hint=True)
-
-                elif loc in (11, 18, 14, 23, 47, 54, 51, 42):
-                    qset2 = qset2.filter(has_hint=False,
-                                         is_border=False)
-                else:
-                    qset2 = qset2.filter(is_border=True)
-
-                # find the claims this location has
-                # nrs1 = list(qset2.distinct('nr1').values_list('nr1', flat=True))
-                # nrs2 = list(qset2.distinct('nr2').values_list('nr2', flat=True))
-                # nrs3 = list(qset2.distinct('nr3').values_list('nr3', flat=True))
-                # nrs4 = list(qset2.distinct('nr4').values_list('nr4', flat=True))
-                nrs1 = list()
-                nrs2 = list()
-                nrs3 = list()
-                nrs4 = list()
-                for p2x2 in qset2.all():
-                    if len(nrs1) < 2:
-                        if p2x2.nr1 not in nrs1:
-                            nrs1.append(p2x2.nr1)
-                    if len(nrs2) < 2:
-                        if p2x2.nr2 not in nrs2:
-                            nrs2.append(p2x2.nr2)
-                    if len(nrs3) < 2:
-                        if p2x2.nr3 not in nrs3:
-                            nrs3.append(p2x2.nr3)
-                    if len(nrs4) < 2:
-                        if p2x2.nr4 not in nrs4:
-                            nrs4.append(p2x2.nr4)
-                    if len(nrs1) > 1 and len(nrs2) > 1 and len(nrs3) > 1 and len(nrs4) > 1:
-                        break
-                # for
-                if len(nrs1) == 1:
-                    loc_claims.append(nrs1[0])
-                if len(nrs2) == 1:
-                    loc_claims.append(nrs2[0])
-                if len(nrs3) == 1:
-                    loc_claims.append(nrs3[0])
-                if len(nrs4) == 1:
-                    loc_claims.append(nrs4[0])
-
-            loc_claims = list(set(loc_claims))
-            claims[loc] = loc_claims
-            single_claims.extend(loc_claims)
+            self._iter_c2(c1, c3)
         # for
 
-        # print('claims: %s' % repr(claims))
-        # print('single_claims: %s' % repr(single_claims))
-        if len(single_claims) != len(set(single_claims)):
-            claims_fmt = list()
-            for loc, claimed in claims.items():
-                if len(claimed) > 0:
-                    claims_fmt.append('%s:%s' % (loc, repr(claimed)))
-            # for
-            self.stdout.write('[DEBUG] Duplicate claims: %s' % ", ".join(claims_fmt))
-            return -1, True, []
-
-        tick = time.monotonic()
-        if tick - self.prev_tick > 5:
-            self.prev_tick = tick
-            msg = '(%s) %s' % (len(self.board_order), ", ".join(self.board_progress))
-            print(msg)
-            claims_fmt = list()
-            for loc, claimed in claims.items():
-                if len(claimed) > 0:
-                    claims_fmt.append('%s:%s' % (loc, repr(claimed)))
-            # for
-            print('%s %s' % ("     "[:2+len(str(len(self.board_order)))], ", ".join(claims_fmt)))
-            # print('%s' % repr(self.board_unused))
-
-        loc_counts = list()
-        for loc in self.locs:
-            if self.board[loc] is None:
-                # empty position on the board
-
-                is_lonely = True
-                for n_loc in self.neighbours[loc]:
-                    if n_loc > 0 and self.board[n_loc]:
-                        is_lonely = False
-                        break
-                # for
-                if is_lonely:
-                    continue
-
-                seg1, seg2, seg3, seg4 = self.segment_nrs[loc]
-                options_side1 = self.segment_options[seg1]
-                options_side2 = self.segment_options[seg2]
-                options_side3 = self.segment_options_rev[seg3]
-                options_side4 = self.segment_options_rev[seg4]
-
-                n1, n2, n3, n4 = self.neighbours[loc]
-                if n1 > 0:
-                    p = self.board[n1]
-                    if p:
-                        options_side1 = [self.twoside2reverse[p.side3]]
-                if n2 > 0:
-                    p = self.board[n2]
-                    if p:
-                        options_side2 = [self.twoside2reverse[p.side4]]
-                if n3 > 0:
-                    p = self.board[n3]
-                    if p:
-                        options_side3 = [self.twoside2reverse[p.side1]]
-                if n4 > 0:
-                    p = self.board[n4]
-                    if p:
-                        options_side4 = [self.twoside2reverse[p.side2]]
-
-                # remove all single claims from the unused pieces
-                unused = self.board_unused[:]
-                for nr in single_claims:
-                    if nr in unused:
-                        unused.remove(nr)
-                # for
-
-                # add the claims for this specific location
-                unused.extend(claims[loc])
-
-                qset = Piece2x2.objects.filter(nr1__in=self.board_unused,
-                                               nr2__in=self.board_unused,
-                                               nr3__in=self.board_unused,
-                                               nr4__in=self.board_unused,
-                                               side1__in=options_side1,
-                                               side2__in=options_side2,
-                                               side3__in=options_side3,
-                                               side4__in=options_side4)
-
-                if loc in (10, 15, 50, 55, 36):
-                    count = qset.filter(has_hint=True).count()
-
-                elif loc in (11, 18, 14, 23, 47, 54, 51, 42):
-                    # if len(self.board_order) < 14:
-                    #     continue
-                    count = qset.filter(has_hint=False,
-                                        is_border=False).count()
-                else:
-                    # border
-                    count = qset.filter(is_border=True).count()
-
-                if count == 0:
-                    # dead end
-                    self.stdout.write('[DEBUG] No options for %s' % loc)
-                    return -1, True, []
-
-                tup = (count, loc)
-                loc_counts.append(tup)
-        # for
-
-        # take the lowest
-        if len(loc_counts) > 0:
-            loc_counts.sort()       # lowest first
-            loc = loc_counts[0][-1]
-
-            # remove all single claims from the unused pieces
-            unused = self.board_unused[:]
-            for nr in single_claims:
-                if nr in unused:
-                    unused.remove(nr)
-            # for
-
-            # add the claims needed for the selectie location
-            unused.extend(claims[loc])
-
-            # self.stdout.write('[INFO] Added %s' % p_nr)
-            return loc, False, unused
-
-        # niets kunnen kiezen
-        self.stdout.write('[ERROR] select_next_loc failed')
-        self.stdout.write('[DEBUG] solve_order = %s' % repr(self.board_order))
-        return -1, True, []
-
-    def _find_recurse(self):
-        if len(self.board_order) == len(self.locs):
-            self._save_ring1()
-            return
-
-        # decide which loc to continue with
-        loc, has_zero, unused = self._select_next_loc()
-        if has_zero:
-            return
-        # self.stdout.write('next loc: %s' % loc)
-
-        seg1, seg2, seg3, seg4 = self.segment_nrs[loc]
-        options_side1 = self.segment_options[seg1]
-        options_side2 = self.segment_options[seg2]
-        options_side3 = self.segment_options_rev[seg3]
-        options_side4 = self.segment_options_rev[seg4]
-
-        n1, n2, n3, n4 = self.neighbours[loc]
-        if n1 >= 0:
-            p = self.board[n1]
-            if p:
-                options_side1 = [self.twoside2reverse[p.side3]]
-        if n2 >= 0:
-            p = self.board[n2]
-            if p:
-                options_side2 = [self.twoside2reverse[p.side4]]
-        if n3 >= 0:
-            p = self.board[n3]
-            if p:
-                options_side3 = [self.twoside2reverse[p.side1]]
-        if n4 >= 0:
-            p = self.board[n4]
-            if p:
-                options_side4 = [self.twoside2reverse[p.side2]]
-
-        for p, msg in self._iter(loc, unused, options_side1, options_side2, options_side3, options_side4):
-            self._board_place(loc, p)
-            self.board_progress.append(msg)
-
-            self._find_recurse()
-
-            self._board_pop()
-            self.board_progress = self.board_progress[:-1]
+    def _iter_c1(self):
+        for c1 in Corner1.objects.all().iterator(chunk_size=1000):
+            self._iter_c3(c1)
         # for
 
     def handle(self, *args, **options):
-        self.processor = options['processor']
-        self.stdout.write('[INFO] Processor: %s' % self.processor)
 
-        self._get_segments_options()
+        self._iter_c1()
 
-        try:
-            self._find_recurse()
-        except KeyboardInterrupt:
-            pass
 
 # end of file

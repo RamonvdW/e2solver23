@@ -418,7 +418,7 @@ class Command(BaseCommand):
 
         seed = options['seed']
         self._fill_unused(seed)
-        self.stdout.write('[INFO] Selected base pieces: %s' % repr(self.unused))
+        # self.stdout.write('[INFO] Selected base pieces: %s' % repr(self.unused))
 
         Corner4.objects.all().delete()
 

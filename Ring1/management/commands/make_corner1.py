@@ -64,7 +64,7 @@ class Command(BaseCommand):
             4: (61, 68, 107, 131, 141, 142, 144, 159, 169, 173, 179),
         }
 
-        # solve order: 10, 9, 1, 2, 3, 11, 17, 18, 25, 4
+        # solve order: 10, 9, 1, 2, 3, 11, 17, 18, (19), 25, (26), 4 (12)
         self.loc1_exp_s3 = 0
         self.loc2_exp_s4 = 0
         self.loc2_exp_s3 = 0
@@ -77,6 +77,13 @@ class Command(BaseCommand):
         self.loc18_exp_s1 = 0
         self.loc18_exp_s4 = 0
         self.loc25_exp_s1 = 0
+
+        self.loc12_exp_s1 = 0
+        self.loc12_exp_s4 = 0
+        self.loc19_exp_s1 = 0
+        self.loc19_exp_s4 = 0
+        self.loc26_exp_s1 = 0
+        self.loc26_exp_s4 = 0
 
         self.count = 0
         self.count_print = 5000
@@ -145,6 +152,54 @@ class Command(BaseCommand):
             Corner1.objects.bulk_create(self.bulk)
             self.bulk = list()
 
+    def _check(self, c1):
+
+        used = [c1.nr1, c1.nr2, c1.nr3, c1.nr4, c1.nr5, c1.nr6, c1.nr7, c1.nr8, c1.nr9, c1.nr10, c1.nr11, c1.nr12,
+                c1.nr13, c1.nr14, c1.nr15, c1.nr16, c1.nr17, c1.nr18, c1.nr19, c1.nr20, c1.nr21, c1.nr22, c1.nr23,
+                c1.nr24, c1.nr25, c1.nr26, c1.nr27, c1.nr28, c1.nr29, c1.nr30, c1.nr31, c1.nr32, c1.nr33, c1.nr34,
+                c1.nr35, c1.nr36, c1.nr37, c1.nr38, c1.nr39, c1.nr40]
+
+        # check loc12
+        chk12 = (Piece2x2
+                 .objects
+                 .filter(side1=self.loc12_exp_s1,
+                         side4=self.loc12_exp_s4)
+                 .exclude(nr1__in=used)
+                 .exclude(nr2__in=used)
+                 .exclude(nr3__in=used)
+                 .exclude(nr4__in=used)
+                 .count())
+        if chk12 == 0:
+            return
+
+        # check loc19
+        chk19 = (Piece2x2
+                 .objects
+                 .filter(side1=self.loc19_exp_s1,
+                         side4=self.loc19_exp_s4)
+                 .exclude(nr1__in=used)
+                 .exclude(nr2__in=used)
+                 .exclude(nr3__in=used)
+                 .exclude(nr4__in=used)
+                 .count())
+        if chk19 == 0:
+            return
+
+        # check loc26
+        chk26 = (Piece2x2
+                 .objects
+                 .filter(side1=self.loc26_exp_s1,
+                         side4=self.loc26_exp_s4)
+                 .exclude(nr1__in=used)
+                 .exclude(nr2__in=used)
+                 .exclude(nr3__in=used)
+                 .exclude(nr4__in=used)
+                 .count())
+        if chk26 == 0:
+            return
+
+        self._save(c1)
+
     def _find_nr4(self, c1):
         exp_s1 = self.twoside_border
         for p2x2 in (Piece2x2
@@ -156,12 +211,14 @@ class Command(BaseCommand):
             c1.loc4 = p2x2.nr
             c1.side2 = p2x2.side2
 
+            self.loc12_exp_s1 = self.twoside2reverse[p2x2.side3]
+
             c1.nr37 = p2x2.nr1
             c1.nr38 = p2x2.nr2
             c1.nr39 = p2x2.nr3
             c1.nr40 = p2x2.nr4
 
-            self._save(c1)
+            self._check(c1)
         # for
 
     def _find_nr25(self, c1):
@@ -174,6 +231,8 @@ class Command(BaseCommand):
                      .exclude(side3=self.twoside_border)):
             c1.loc25 = p2x2.nr
             c1.side3 = p2x2.side3
+
+            self.loc26_exp_s4 = self.twoside2reverse[p2x2.side2]
 
             c1.nr33 = p2x2.nr1
             c1.nr34 = p2x2.nr2
@@ -197,6 +256,9 @@ class Command(BaseCommand):
                              side1=self.loc18_exp_s1, side4=self.loc18_exp_s4,
                              nr1__in=self.unused, nr2__in=self.unused, nr3__in=self.unused, nr4__in=self.unused)):
             c1.loc18 = p2x2.nr
+
+            self.loc26_exp_s1 = self.twoside2reverse[p2x2.side3]
+            self.loc19_exp_s4 = self.twoside2reverse[p2x2.side2]
 
             c1.nr29 = p2x2.nr1
             c1.nr30 = p2x2.nr2
@@ -251,6 +313,9 @@ class Command(BaseCommand):
         # print('11 count: %s' % qset.count())
         for p2x2 in qset:
             c1.loc11 = p2x2.nr
+
+            self.loc12_exp_s4 = self.twoside2reverse[p2x2.side2]
+            self.loc19_exp_s1 = self.twoside2reverse[p2x2.side3]
 
             c1.nr21 = p2x2.nr1
             c1.nr22 = p2x2.nr2

@@ -74,6 +74,10 @@
         </tr>
     </table>
 
+    {% if base_nrs %}
+        <p>Used nrs: {{ base_nrs }}</p>
+    {% endif %}
+
     {% if auto_reload %}
         <script>
             setTimeout(function(){

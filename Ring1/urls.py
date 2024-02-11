@@ -31,6 +31,10 @@ urlpatterns = [
     path('corner4/<nr>/',
          views.ShowCorner4View.as_view(),
          name='show-c4'),
+
+    path('corner12/<nr>/',
+         views.ShowCorner12View.as_view(),
+         name='show-c12'),
 ]
 
 
