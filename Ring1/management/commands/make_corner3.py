@@ -6,30 +6,30 @@
 
 from django.core.management.base import BaseCommand
 from Pieces2x2.models import TwoSide, Piece2x2
-from Ring1.models import Corner1
+from Ring1.models import Corner3
 import random
 
 
 class Command(BaseCommand):
 
-    help = "Make all possible combinations of corner 1"
+    help = "Make all possible combinations of corner3"
 
     """
+                       +----+
+                       | 40 |
+                  +----+----+
+                  | 47 | 48 |
+             +----+----+----+
+             | 54 | 55 | 56 |
         +----+----+----+----+
-        | 1  | 2  | 3  | 4  |
+        | 61 | 62 | 63 | 64 |
         +----+----+----+----+
-        | 9  | 10 | 11 |
-        +----+----+----+
-        | 17 | 18 |
-        +----+----+
-        | 25 |
-        +----+
     """
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.corner = 1
+        self.corner = 3
         self.unused = list()
 
         self.twoside_border = TwoSide.objects.get(two_sides='XX').nr
@@ -63,19 +63,19 @@ class Command(BaseCommand):
             4: (61, 68, 107, 131, 141, 142, 144, 159, 169, 173, 179),
         }
 
-        # solve order: 10, 9, 1, 2, 3, 11, 17, 18, 25, 4
-        self.loc1_exp_s3 = 0
-        self.loc2_exp_s4 = 0
-        self.loc2_exp_s3 = 0
-        self.loc3_exp_s4 = 0
-        self.loc4_exp_s4 = 0
-        self.loc9_exp_s2 = 0
-        self.loc11_exp_s1 = 0
-        self.loc11_exp_s4 = 0
-        self.loc17_exp_s1 = 0
-        self.loc18_exp_s1 = 0
-        self.loc18_exp_s4 = 0
-        self.loc25_exp_s1 = 0
+        # solve order: 55, 56, 64, 63, 62, 54, 47, 47, 40, 61
+        self.loc47_exp_s3 = 0
+        self.loc56_exp_s4 = 0
+        self.loc63_exp_s1 = 0
+        self.loc54_exp_s2 = 0
+        self.loc48_exp_s3 = 0
+        self.loc64_exp_s1 = 0
+        self.loc63_exp_s2 = 0
+        self.loc62_exp_s2 = 0
+        self.loc54_exp_s3 = 0
+        self.loc61_exp_s2 = 0
+        self.loc40_exp_s3 = 0
+        self.loc47_exp_s2 = 0
 
         self.count = 0
         self.count_print = 5000
@@ -133,280 +133,280 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('seed', type=int, help='Randomization seed')
 
-    def _save(self, c1):
+    def _save(self, c3):
         self.count += 1
-        c1.pk = None
-        self.bulk.append(c1)
+        c3.pk = None
+        self.bulk.append(c3)
         if len(self.bulk) >= 1000:
             if self.count >= self.count_print:
-                print('count: %s --> 10=%s, 9=%s, 1=%s, 2=%s, 3=%s, 17=%s, 18=%s' % (
-                    self.count, c1.loc10, c1.loc9, c1.loc1, c1.loc2, c1.loc3, c1.loc17, c1.loc18))
+                print('count: %s --> 55=%s, 56=%s, 64=%s, 63=%s, 62=%s, 48=%s, 47=%s' % (
+                    self.count, c3.loc55, c3.loc56, c3.loc64, c3.loc63, c3.loc62, c3.loc48, c3.loc47))
                 self.count_print += 5000
-            Corner1.objects.bulk_create(self.bulk)
+            Corner3.objects.bulk_create(self.bulk)
             self.bulk = list()
 
-    def _find_nr4(self, c1):
-        exp_s1 = self.twoside_border
+    def _find_nr61(self, c3):
+        exp_s3 = self.twoside_border
         for p2x2 in (Piece2x2
                      .objects
                      .filter(is_border=True,
-                             side1=exp_s1, side4=self.loc4_exp_s4,
+                             side3=exp_s3, side2=self.loc61_exp_s2,
                              nr1__in=self.unused, nr2__in=self.unused, nr3__in=self.unused, nr4__in=self.unused)
-                     .exclude(side2=self.twoside_border)):
-            c1.loc4 = p2x2.nr
-            c1.side2 = p2x2.side2
+                     .exclude(side4=self.twoside_border)):
+            c3.loc61 = p2x2.nr
+            c3.side4 = p2x2.side4
 
-            c1.nr37 = p2x2.nr1
-            c1.nr38 = p2x2.nr2
-            c1.nr39 = p2x2.nr3
-            c1.nr40 = p2x2.nr4
+            c3.nr37 = p2x2.nr1
+            c3.nr38 = p2x2.nr2
+            c3.nr39 = p2x2.nr3
+            c3.nr40 = p2x2.nr4
 
-            self._save(c1)
+            self._save(c3)
         # for
 
-    def _find_nr25(self, c1):
-        exp_s4 = self.twoside_border
+    def _find_nr40(self, c3):
+        exp_s2 = self.twoside_border
         for p2x2 in (Piece2x2
                      .objects
                      .filter(is_border=True,
-                             side1=self.loc25_exp_s1, side4=exp_s4,
+                             side3=self.loc40_exp_s3, side2=exp_s2,
                              nr1__in=self.unused, nr2__in=self.unused, nr3__in=self.unused, nr4__in=self.unused)
-                     .exclude(side3=self.twoside_border)):
-            c1.loc25 = p2x2.nr
-            c1.side3 = p2x2.side3
+                     .exclude(side1=self.twoside_border)):
+            c3.loc40 = p2x2.nr
+            c3.side1 = p2x2.side1
 
-            c1.nr33 = p2x2.nr1
-            c1.nr34 = p2x2.nr2
-            c1.nr35 = p2x2.nr3
-            c1.nr36 = p2x2.nr4
+            c3.nr33 = p2x2.nr1
+            c3.nr34 = p2x2.nr2
+            c3.nr35 = p2x2.nr3
+            c3.nr36 = p2x2.nr4
 
             self.unused.remove(p2x2.nr1)
             self.unused.remove(p2x2.nr2)
             self.unused.remove(p2x2.nr3)
             self.unused.remove(p2x2.nr4)
 
-            self._find_nr4(c1)
+            self._find_nr61(c3)
 
             self.unused.extend([p2x2.nr1, p2x2.nr2, p2x2.nr3, p2x2.nr4])
         # for
 
-    def _find_nr18(self, c1):
+    def _find_nr47(self, c3):
         for p2x2 in (Piece2x2
                      .objects
                      .filter(is_border=False,
-                             side1=self.loc18_exp_s1, side4=self.loc18_exp_s4,
+                             side2=self.loc47_exp_s2, side3=self.loc47_exp_s3,
                              nr1__in=self.unused, nr2__in=self.unused, nr3__in=self.unused, nr4__in=self.unused)):
-            c1.loc18 = p2x2.nr
+            c3.loc47 = p2x2.nr
 
-            c1.nr29 = p2x2.nr1
-            c1.nr30 = p2x2.nr2
-            c1.nr31 = p2x2.nr3
-            c1.nr32 = p2x2.nr4
+            c3.nr29 = p2x2.nr1
+            c3.nr30 = p2x2.nr2
+            c3.nr31 = p2x2.nr3
+            c3.nr32 = p2x2.nr4
 
             self.unused.remove(p2x2.nr1)
             self.unused.remove(p2x2.nr2)
             self.unused.remove(p2x2.nr3)
             self.unused.remove(p2x2.nr4)
 
-            self._find_nr25(c1)
+            self._find_nr40(c3)
 
             self.unused.extend([p2x2.nr1, p2x2.nr2, p2x2.nr3, p2x2.nr4])
         # for
 
-    def _find_nr17(self, c1):
-        exp_s4 = self.twoside_border
+    def _find_nr48(self, c3):
+        exp_s2 = self.twoside_border
         qset = (Piece2x2
                 .objects
                 .filter(is_border=True,
-                        side1=self.loc17_exp_s1, side4=exp_s4,
+                        side3=self.loc48_exp_s3, side2=exp_s2,
                         nr1__in=self.unused, nr2__in=self.unused, nr3__in=self.unused, nr4__in=self.unused)
-                .exclude(side3=self.twoside_border))
-        # print('17 count: %s' % qset.count())
+                .exclude(side1=self.twoside_border))
+        # print('48 count: %s' % qset.count())
         for p2x2 in qset:
-            c1.loc17 = p2x2.nr
-            self.loc18_exp_s4 = self.twoside2reverse[p2x2.side2]
-            self.loc25_exp_s1 = self.twoside2reverse[p2x2.side3]
+            c3.loc48 = p2x2.nr
+            self.loc47_exp_s2 = self.twoside2reverse[p2x2.side4]
+            self.loc40_exp_s3 = self.twoside2reverse[p2x2.side1]
 
-            c1.nr25 = p2x2.nr1
-            c1.nr26 = p2x2.nr2
-            c1.nr27 = p2x2.nr3
-            c1.nr28 = p2x2.nr4
+            c3.nr25 = p2x2.nr1
+            c3.nr26 = p2x2.nr2
+            c3.nr27 = p2x2.nr3
+            c3.nr28 = p2x2.nr4
 
             self.unused.remove(p2x2.nr1)
             self.unused.remove(p2x2.nr2)
             self.unused.remove(p2x2.nr3)
             self.unused.remove(p2x2.nr4)
 
-            self._find_nr18(c1)
+            self._find_nr47(c3)
 
             self.unused.extend([p2x2.nr1, p2x2.nr2, p2x2.nr3, p2x2.nr4])
         # for
 
-    def _find_nr11(self, c1):
+    def _find_nr54(self, c3):
         qset = (Piece2x2
                 .objects
                 .filter(is_border=False,
-                        side1=self.loc11_exp_s1, side4=self.loc11_exp_s4,
+                        side2=self.loc54_exp_s2, side3=self.loc54_exp_s3,
                         nr1__in=self.unused, nr2__in=self.unused, nr3__in=self.unused, nr4__in=self.unused))
-        # print('11 count: %s' % qset.count())
+        # print('54 count: %s' % qset.count())
         for p2x2 in qset:
-            c1.loc11 = p2x2.nr
+            c3.loc54 = p2x2.nr
 
-            c1.nr21 = p2x2.nr1
-            c1.nr22 = p2x2.nr2
-            c1.nr23 = p2x2.nr3
-            c1.nr24 = p2x2.nr4
+            c3.nr21 = p2x2.nr1
+            c3.nr22 = p2x2.nr2
+            c3.nr23 = p2x2.nr3
+            c3.nr24 = p2x2.nr4
 
             self.unused.remove(p2x2.nr1)
             self.unused.remove(p2x2.nr2)
             self.unused.remove(p2x2.nr3)
             self.unused.remove(p2x2.nr4)
 
-            self._find_nr17(c1)
+            self._find_nr48(c3)
 
             self.unused.extend([p2x2.nr1, p2x2.nr2, p2x2.nr3, p2x2.nr4])
         # for
 
-    def _find_nr3(self, c1):
-        exp_s1 = self.twoside_border
+    def _find_nr62(self, c3):
+        exp_s3 = self.twoside_border
         qset = (Piece2x2
                 .objects
                 .filter(is_border=True,
-                        side1=exp_s1, side4=self.loc3_exp_s4,
+                        side3=exp_s3, side2=self.loc62_exp_s2,
                         nr1__in=self.unused, nr2__in=self.unused, nr3__in=self.unused, nr4__in=self.unused)
-                .exclude(side2=self.twoside_border))
-        # print('3 count: %s' % qset.count())
+                .exclude(side4=self.twoside_border))
+        # print('62 count: %s' % qset.count())
         for p2x2 in qset:
-            c1.loc3 = p2x2.nr
-            self.loc4_exp_s4 = self.twoside2reverse[p2x2.side2]
-            self.loc11_exp_s1 = self.twoside2reverse[p2x2.side3]
+            c3.loc62 = p2x2.nr
+            self.loc54_exp_s3 = self.twoside2reverse[p2x2.side1]
+            self.loc61_exp_s2 = self.twoside2reverse[p2x2.side4]
 
-            c1.nr17 = p2x2.nr1
-            c1.nr18 = p2x2.nr2
-            c1.nr19 = p2x2.nr3
-            c1.nr20 = p2x2.nr4
+            c3.nr17 = p2x2.nr1
+            c3.nr18 = p2x2.nr2
+            c3.nr19 = p2x2.nr3
+            c3.nr20 = p2x2.nr4
 
             self.unused.remove(p2x2.nr1)
             self.unused.remove(p2x2.nr2)
             self.unused.remove(p2x2.nr3)
             self.unused.remove(p2x2.nr4)
 
-            self._find_nr11(c1)
+            self._find_nr54(c3)
 
             self.unused.extend([p2x2.nr1, p2x2.nr2, p2x2.nr3, p2x2.nr4])
         # for
 
-    def _find_nr2(self, c1):
-        exp_s1 = self.twoside_border
+    def _find_nr63(self, c3):
+        exp_s3 = self.twoside_border
         qset = (Piece2x2
                 .objects
                 .filter(is_border=True,
-                        side1=exp_s1, side4=self.loc2_exp_s4, side3=self.loc2_exp_s3,
+                        side3=exp_s3, side2=self.loc63_exp_s2, side1=self.loc63_exp_s1,
                         nr1__in=self.unused, nr2__in=self.unused, nr3__in=self.unused, nr4__in=self.unused)
-                .exclude(side2=self.twoside_border))
-        # print('2 count: %s' % qset.count())
+                .exclude(side4=self.twoside_border))
+        # print('63 count: %s' % qset.count())
         for p2x2 in qset:
-            c1.loc2 = p2x2.nr
-            self.loc3_exp_s4 = self.twoside2reverse[p2x2.side2]
+            c3.loc63 = p2x2.nr
+            self.loc62_exp_s2 = self.twoside2reverse[p2x2.side4]
 
-            c1.nr13 = p2x2.nr1
-            c1.nr14 = p2x2.nr2
-            c1.nr15 = p2x2.nr3
-            c1.nr16 = p2x2.nr4
+            c3.nr13 = p2x2.nr1
+            c3.nr14 = p2x2.nr2
+            c3.nr15 = p2x2.nr3
+            c3.nr16 = p2x2.nr4
 
             self.unused.remove(p2x2.nr1)
             self.unused.remove(p2x2.nr2)
             self.unused.remove(p2x2.nr3)
             self.unused.remove(p2x2.nr4)
 
-            self._find_nr3(c1)
+            self._find_nr62(c3)
 
             self.unused.extend([p2x2.nr1, p2x2.nr2, p2x2.nr3, p2x2.nr4])
         # for
 
-    def _find_nr1(self, c1):
-        exp_s1 = exp_s4 = self.twoside_border
+    def _find_nr64(self, c3):
+        exp_s2 = exp_s3 = self.twoside_border
         qset = (Piece2x2
                 .objects
                 .filter(is_border=True,
-                        side1=exp_s1, side4=exp_s4, side3=self.loc1_exp_s3,
+                        side2=exp_s2, side3=exp_s3, side1=self.loc64_exp_s1,
                         nr1__in=self.unused, nr2__in=self.unused, nr3__in=self.unused, nr4__in=self.unused))
-        # print('1 count: %s' % qset.count())
+        # print('64 count: %s' % qset.count())
         for p2x2 in qset:
-            c1.loc1 = p2x2.nr
-            self.loc2_exp_s4 = self.twoside2reverse[p2x2.side2]
+            c3.loc64 = p2x2.nr
+            self.loc63_exp_s2 = self.twoside2reverse[p2x2.side4]
 
-            c1.nr9 = p2x2.nr1
-            c1.nr10 = p2x2.nr2
-            c1.nr11 = p2x2.nr3
-            c1.nr12 = p2x2.nr4
+            c3.nr9 = p2x2.nr1
+            c3.nr10 = p2x2.nr2
+            c3.nr11 = p2x2.nr3
+            c3.nr12 = p2x2.nr4
 
             self.unused.remove(p2x2.nr1)
             self.unused.remove(p2x2.nr2)
             self.unused.remove(p2x2.nr3)
             self.unused.remove(p2x2.nr4)
 
-            self._find_nr2(c1)
+            self._find_nr63(c3)
 
             self.unused.extend([p2x2.nr1, p2x2.nr2, p2x2.nr3, p2x2.nr4])
         # for
 
-    def _find_nr9(self, c1):
-        exp_s4 = self.twoside_border
+    def _find_nr56(self, c3):
+        exp_s2 = self.twoside_border
         qset = (Piece2x2
                 .objects
                 .filter(is_border=True,
-                        side2=self.loc9_exp_s2, side4=exp_s4,
+                        side4=self.loc56_exp_s4, side2=exp_s2,
                         nr1__in=self.unused, nr2__in=self.unused, nr3__in=self.unused, nr4__in=self.unused))
-        # print('9 count: %s' % qset.count())
+        # print('56 count: %s' % qset.count())
         for p2x2 in qset:
-            c1.loc9 = p2x2.nr
-            self.loc1_exp_s3 = self.twoside2reverse[p2x2.side1]
-            self.loc17_exp_s1 = self.twoside2reverse[p2x2.side3]
+            c3.loc56 = p2x2.nr
+            self.loc64_exp_s1 = self.twoside2reverse[p2x2.side3]
+            self.loc48_exp_s3 = self.twoside2reverse[p2x2.side1]
 
-            c1.nr5 = p2x2.nr1
-            c1.nr6 = p2x2.nr2
-            c1.nr7 = p2x2.nr3
-            c1.nr8 = p2x2.nr4
+            c3.nr5 = p2x2.nr1
+            c3.nr6 = p2x2.nr2
+            c3.nr7 = p2x2.nr3
+            c3.nr8 = p2x2.nr4
 
             self.unused.remove(p2x2.nr1)
             self.unused.remove(p2x2.nr2)
             self.unused.remove(p2x2.nr3)
             self.unused.remove(p2x2.nr4)
 
-            self._find_nr1(c1)
+            self._find_nr64(c3)
 
             self.unused.extend([p2x2.nr1, p2x2.nr2, p2x2.nr3, p2x2.nr4])
         # for
 
-    def _find_nr10(self, c1):
+    def _find_nr55(self, c3):
         qset = (Piece2x2
                 .objects
                 .filter(is_border=False,
                         has_hint=True,
-                        nr1=208,
-                        nr2__in=self.unused, nr3__in=self.unused, nr4__in=self.unused))
-        # print('10 count: %s' % qset.count())
+                        nr4=249,
+                        nr1__in=self.unused, nr2__in=self.unused, nr3__in=self.unused))
+        # print('55 count: %s' % qset.count())
         for p2x2 in qset:
-            c1.loc10 = p2x2.nr
-            self.loc2_exp_s3 = self.twoside2reverse[p2x2.side1]
-            self.loc11_exp_s4 = self.twoside2reverse[p2x2.side2]
-            self.loc18_exp_s1 = self.twoside2reverse[p2x2.side3]
-            self.loc9_exp_s2 = self.twoside2reverse[p2x2.side4]
+            c3.loc55 = p2x2.nr
+            self.loc47_exp_s3 = self.twoside2reverse[p2x2.side1]
+            self.loc56_exp_s4 = self.twoside2reverse[p2x2.side2]
+            self.loc63_exp_s1 = self.twoside2reverse[p2x2.side3]
+            self.loc54_exp_s2 = self.twoside2reverse[p2x2.side4]
 
-            c1.nr1 = p2x2.nr1
-            c1.nr2 = p2x2.nr2
-            c1.nr3 = p2x2.nr3
-            c1.nr4 = p2x2.nr4
+            c3.nr1 = p2x2.nr1
+            c3.nr2 = p2x2.nr2
+            c3.nr3 = p2x2.nr3
+            c3.nr4 = p2x2.nr4
 
-            # self.unused.remove(p2x2.nr1)
+            self.unused.remove(p2x2.nr1)
             self.unused.remove(p2x2.nr2)
             self.unused.remove(p2x2.nr3)
-            self.unused.remove(p2x2.nr4)
+            # self.unused.remove(p2x2.nr4)
 
-            self._find_nr9(c1)
+            self._find_nr56(c3)
 
-            self.unused.extend([p2x2.nr2, p2x2.nr3, p2x2.nr4])
+            self.unused.extend([p2x2.nr1, p2x2.nr2, p2x2.nr3])
         # for
 
     def handle(self, *args, **options):
@@ -415,22 +415,22 @@ class Command(BaseCommand):
         self._fill_unused(seed)
         # self.stdout.write('[INFO] Selected base pieces: %s' % repr(self.unused))
 
-        Corner1.objects.all().delete()
+        Corner3.objects.all().delete()
 
-        c1 = Corner1()
+        c3 = Corner3()
         try:
-            self._find_nr10(c1)
+            self._find_nr55(c3)
         except KeyboardInterrupt:
             pass
-        else:
-            if len(self.bulk):
-                Corner1.objects.bulk_create(self.bulk)
-                self.bulk = list()
 
-            self.stdout.write('[INFO] Created %s Corner1' % self.count)
+        if len(self.bulk):
+            Corner3.objects.bulk_create(self.bulk)
+            self.bulk = list()
 
-            count1 = Corner1.objects.distinct('side3').count()
-            count2 = Corner1.objects.distinct('side2').count()
-            self.stdout.write('[INFO] Distinct sides: %s, %s' % (count1, count2))
+        self.stdout.write('[INFO] Created %s Corner3' % self.count)
+
+        count1 = Corner3.objects.distinct('side1').count()
+        count2 = Corner3.objects.distinct('side4').count()
+        self.stdout.write('[INFO] Distinct sides: %s, %s' % (count1, count2))
 
 # end of file
