@@ -360,7 +360,9 @@ class Command(BaseCommand):
                 .objects
                 .filter(is_border=True,
                         side2=self.loc49_exp_s2, side4=exp_s4,
-                        nr1__in=self.unused, nr2__in=self.unused, nr3__in=self.unused, nr4__in=self.unused))
+                        nr1__in=self.unused, nr2__in=self.unused, nr3__in=self.unused, nr4__in=self.unused)
+                .exclude(side3=self.twoside_border)
+                .exclude(side1=self.twoside_border))
         # print('49 count: %s' % qset.count())
         for p2x2 in qset:
             c4.loc49 = p2x2.nr
