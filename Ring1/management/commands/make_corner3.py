@@ -167,8 +167,8 @@ class Command(BaseCommand):
                  .exclude(nr2__in=used)
                  .exclude(nr3__in=used)
                  .exclude(nr4__in=used)
-                 .count())
-        if chk39 == 0:
+                 .first())
+        if not chk39:
             return
 
         # check loc46
@@ -180,8 +180,8 @@ class Command(BaseCommand):
                  .exclude(nr2__in=used)
                  .exclude(nr3__in=used)
                  .exclude(nr4__in=used)
-                 .count())
-        if chk46 == 0:
+                 .first())
+        if not chk46:
             return
 
         # check loc53
@@ -193,8 +193,8 @@ class Command(BaseCommand):
                  .exclude(nr2__in=used)
                  .exclude(nr3__in=used)
                  .exclude(nr4__in=used)
-                 .count())
-        if chk53 == 0:
+                 .first())
+        if not chk53:
             return
 
         self._save(c3)
