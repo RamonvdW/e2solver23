@@ -7,6 +7,7 @@
 from django.core.management.base import BaseCommand
 from Pieces2x2.models import TwoSide, Piece2x2
 from Ring1.models import Corner1
+from copy import deepcopy
 import random
 
 
@@ -135,8 +136,7 @@ class Command(BaseCommand):
 
     def _save(self, c1):
         self.count += 1
-        c1.pk = None
-        self.bulk.append(c1)
+        self.bulk.append(deepcopy(c1))
         if len(self.bulk) >= 1000:
             if self.count >= self.count_print:
                 print('count: %s --> 10=%s, 9=%s, 1=%s, 2=%s, 3=%s, 17=%s, 18=%s' % (

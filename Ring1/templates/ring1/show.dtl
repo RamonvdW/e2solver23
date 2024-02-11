@@ -17,17 +17,21 @@
 
 <body>
 
-    <h1>Ring1</h1>
+    <h1>{{ title }}</h1>
 
     <p>
-        {% if url_prev1000 %}<a style="margin:10px" href="{{ url_prev1000 }}">-1000</a>{%  else %}<span style="margin:10px">-1000</span>{% endif %}
-        {% if url_prev100  %}<a style="margin:10px" href="{{ url_prev100  }}">-100</a>{%   else %}<span style="margin:10px">-100</span>{% endif %}
-        {% if url_prev10   %}<a style="margin:10px" href="{{ url_prev10   }}">-10</a>{%    else %}<span style="margin:10px">-10</span>{%  endif %}
-        {% if url_prev1    %}<a style="margin:10px" href="{{ url_prev1    }}">-1</a>{%     else %}<span style="margin:10px">-1</span>{%   endif %}
-        {% if url_next1    %}<a style="margin:10px" href="{{ url_next1    }}">+1</a>{%    endif %}
-        {% if url_next10   %}<a style="margin:10px" href="{{ url_next10   }}">+10</a>{%   endif %}
-        {% if url_next100  %}<a style="margin:10px" href="{{ url_next100  }}">+100</a>{%  endif %}
-        {% if url_next1000 %}<a style="margin:10px" href="{{ url_next1000 }}">+1000</a>{% endif %}
+        {% if url_first %}
+            <a href="{{ url_first }}">first</a>
+        {% else %}
+            {% if url_prev1000 %}<a style="margin:10px" href="{{ url_prev1000 }}">-1000</a>{%  else %}<span style="margin:10px">-1000</span>{% endif %}
+            {% if url_prev100  %}<a style="margin:10px" href="{{ url_prev100  }}">-100</a>{%   else %}<span style="margin:10px">-100</span>{% endif %}
+            {% if url_prev10   %}<a style="margin:10px" href="{{ url_prev10   }}">-10</a>{%    else %}<span style="margin:10px">-10</span>{%  endif %}
+            {% if url_prev1    %}<a style="margin:10px" href="{{ url_prev1    }}">-1</a>{%     else %}<span style="margin:10px">-1</span>{%   endif %}
+            {% if url_next1    %}<a style="margin:10px" href="{{ url_next1    }}">+1</a>{%    endif %}
+            {% if url_next10   %}<a style="margin:10px" href="{{ url_next10   }}">+10</a>{%   endif %}
+            {% if url_next100  %}<a style="margin:10px" href="{{ url_next100  }}">+100</a>{%  endif %}
+            {% if url_next1000 %}<a style="margin:10px" href="{{ url_next1000 }}">+1000</a>{% endif %}
+        {% endif %}
     </p>
 
     <table style="margin-left:auto; margin-right:auto; border:0">

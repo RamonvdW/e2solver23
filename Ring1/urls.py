@@ -18,7 +18,19 @@ urlpatterns = [
 
     path('corner1/<nr>/',
          views.ShowCorner1View.as_view(),
-         name='show'),
+         name='show-c1'),
+
+    path('corner2/<nr>/',
+         views.ShowCorner2View.as_view(),
+         name='show-c2'),
+
+    path('corner3/<nr>/',
+         views.ShowCorner3View.as_view(),
+         name='show-c3'),
+
+    path('corner4/<nr>/',
+         views.ShowCorner4View.as_view(),
+         name='show-c4'),
 ]
 
 
