@@ -707,7 +707,7 @@ class Corner12(models.Model):
         return str(self.nr)
 
     class Meta:
-        verbose_name = 'Corner4'
+        verbose_name = 'Corner12'
 
         indexes = [
             models.Index(fields=['nr1']),
@@ -801,8 +801,8 @@ class Corner34(models.Model):
 
     nr = models.AutoField(primary_key=True)
 
-    side3_left = models.PositiveIntegerField()        # loc33 side1
-    side3_right = models.PositiveIntegerField()       # loc40 side1
+    side1_left = models.PositiveIntegerField()        # loc33 side1
+    side1_right = models.PositiveIntegerField()       # loc40 side1
 
     # reference to Corner3 and Corner4
     c3 = models.PositiveIntegerField()
@@ -894,7 +894,7 @@ class Corner34(models.Model):
         return str(self.nr)
 
     class Meta:
-        verbose_name = 'Corner4'
+        verbose_name = 'Corner34'
 
         indexes = [
             models.Index(fields=['nr1']),

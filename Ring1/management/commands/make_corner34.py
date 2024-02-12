@@ -6,12 +6,12 @@
 
 from django.core.management.base import BaseCommand
 from Pieces2x2.models import TwoSide, Piece2x2
-from Ring1.models import Corner1, Corner2, Corner12
+from Ring1.models import Corner3, Corner4, Corner34
 
 
 class Command(BaseCommand):
 
-    help = "Compile a Corner12 from Corner1 and Corner2"
+    help = "Compile a Corner34 from Corner3 and Corner4"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -32,40 +32,40 @@ class Command(BaseCommand):
     def reverse_sides(self, sides):
         return [self.twoside2reverse[side] for side in sides]
 
-    def _save(self, c1, c2):
-        p25 = Piece2x2.objects.get(nr=c1.loc25)
-        p32 = Piece2x2.objects.get(nr=c2.loc32)
+    def _save(self, c3, c4):
+        p33 = Piece2x2.objects.get(nr=c4.loc33)
+        p40 = Piece2x2.objects.get(nr=c3.loc40)
 
-        c12 = Corner12(
-                    c1=c1.nr,
-                    c2=c2.nr,
+        c34 = Corner34(
+                    c3=c3.nr,
+                    c4=c4.nr,
 
-                    side3_left=p25.side3,
-                    side3_right=p32.side3)
+                    side1_left=p33.side1,
+                    side1_right=p40.side1)
 
         for nr in range(1, 40+1):
             nr_str = 'nr%s' % nr
             nr1_str = nr_str
             nr2_str = 'nr%s' % (40 + nr)
-            setattr(c12, nr1_str, getattr(c1, nr_str))
-            setattr(c12, nr2_str, getattr(c2, nr_str))
+            setattr(c34, nr1_str, getattr(c3, nr_str))
+            setattr(c34, nr2_str, getattr(c4, nr_str))
         # for
 
-        c12.save()
-        print('saved Corner12 pk=%s' % c12.pk)
+        c34.save()
+        print('saved Corner34 pk=%s' % c34.pk)
         self.count += 1
 
-    def _iter_c2(self, c1):
-        used = [c1.nr1, c1.nr2, c1.nr3, c1.nr4, c1.nr5, c1.nr6, c1.nr7, c1.nr8, c1.nr9, c1.nr10, c1.nr11, c1.nr12,
-                c1.nr13, c1.nr14, c1.nr15, c1.nr16, c1.nr17, c1.nr18, c1.nr19, c1.nr20, c1.nr21, c1.nr22, c1.nr23,
-                c1.nr24, c1.nr25, c1.nr26, c1.nr27, c1.nr28, c1.nr29, c1.nr30, c1.nr31, c1.nr32, c1.nr33, c1.nr34,
-                c1.nr35, c1.nr36, c1.nr37, c1.nr38, c1.nr39, c1.nr40]
+    def _iter_c4(self, c3):
+        used = [c3.nr1, c3.nr2, c3.nr3, c3.nr4, c3.nr5, c3.nr6, c3.nr7, c3.nr8, c3.nr9, c3.nr10, c3.nr11, c3.nr12,
+                c3.nr13, c3.nr14, c3.nr15, c3.nr16, c3.nr17, c3.nr18, c3.nr19, c3.nr20, c3.nr21, c3.nr22, c3.nr23,
+                c3.nr24, c3.nr25, c3.nr26, c3.nr27, c3.nr28, c3.nr29, c3.nr30, c3.nr31, c3.nr32, c3.nr33, c3.nr34,
+                c3.nr35, c3.nr36, c3.nr37, c3.nr38, c3.nr39, c3.nr40]
 
-        exp_s4 = self.twoside2reverse[c1.side2]
+        exp_s2 = self.twoside2reverse[c3.side4]
 
-        for c2 in (Corner2
+        for c4 in (Corner4
                    .objects
-                   .filter(side4=exp_s4)
+                   .filter(side2=exp_s2)
                    .exclude(nr1__in=used)
                    .exclude(nr2__in=used)
                    .exclude(nr3__in=used)
@@ -105,29 +105,31 @@ class Command(BaseCommand):
                    .exclude(nr37__in=used)
                    .exclude(nr38__in=used)
                    .exclude(nr39__in=used)
-                   .exclude(nr40__in=used)):
+                   .exclude(nr40__in=used)
+                   .iterator(chunk_size=1000)):
 
-            self._save(c1, c2)
+            self._save(c3, c4)
         # for
 
-    def _iter_c1(self):
-        for c1 in Corner1.objects.all().iterator(chunk_size=1000):
-            self._iter_c2(c1)
+    def _iter_c3(self):
+        for c3 in Corner3.objects.all().iterator(chunk_size=1000):
+            # print('c3 pk=%s, side1=%s, side4=%s' % (c3.pk, c3.side1, c3.side4))
+            self._iter_c4(c3)
         # for
 
     def handle(self, *args, **options):
 
-        Corner12.objects.all().delete()
+        Corner34.objects.all().delete()
 
         try:
-            self._iter_c1()
+            self._iter_c3()
         except KeyboardInterrupt:
             pass
 
-        self.stdout.write('[INFO] Created %s Corner12' % self.count)
+        self.stdout.write('[INFO] Created %s Corner34' % self.count)
 
-        count1 = Corner12.objects.distinct('side3_left').count()
-        count2 = Corner12.objects.distinct('side3_right').count()
+        count1 = Corner34.objects.distinct('side1_left').count()
+        count2 = Corner34.objects.distinct('side1_right').count()
         self.stdout.write('[INFO] Distinct sides: %s, %s' % (count1, count2))
 
 # end of file
