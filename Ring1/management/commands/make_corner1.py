@@ -270,7 +270,21 @@ class Command(BaseCommand):
             self.unused.remove(p2x2.nr3)
             self.unused.remove(p2x2.nr4)
 
-            self._find_nr25(c1)
+            # check loc19
+            used = [c1.nr1, c1.nr2, c1.nr3, c1.nr4, c1.nr5, c1.nr6, c1.nr7, c1.nr8, c1.nr9, c1.nr10, c1.nr11, c1.nr12,
+                    c1.nr13, c1.nr14, c1.nr15, c1.nr16, c1.nr17, c1.nr18, c1.nr19, c1.nr20, c1.nr21, c1.nr22, c1.nr23,
+                    c1.nr24, c1.nr25, c1.nr26, c1.nr27, c1.nr28, c1.nr29, c1.nr30, c1.nr31, c1.nr32]
+            chk19 = (Piece2x2
+                     .objects
+                     .filter(side1=self.loc19_exp_s1,
+                             side4=self.loc19_exp_s4)
+                     .exclude(nr1__in=used)
+                     .exclude(nr2__in=used)
+                     .exclude(nr3__in=used)
+                     .exclude(nr4__in=used)
+                     .first())
+            if chk19:
+                self._find_nr25(c1)
 
             self.unused.extend([p2x2.nr1, p2x2.nr2, p2x2.nr3, p2x2.nr4])
         # for
