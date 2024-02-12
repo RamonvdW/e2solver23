@@ -83,7 +83,7 @@ class Command(BaseCommand):
 
         found = False
         for p2x2_loc12 in qset.filter(side1=loc12_exp_s1, side4=loc12_exp_s4):
-            loc13_exp_s4 = self.twoside2reverse[p2x2_loc12.side4]
+            loc13_exp_s4 = self.twoside2reverse[p2x2_loc12.side2]
 
             p2x2_loc13 = qset.filter(side1=loc13_exp_s1, side2=loc13_exp_s2, side4=loc13_exp_s4).first()
             if p2x2_loc13:
