@@ -10,6 +10,7 @@ from django.utils import timezone
 from django.core.management.base import BaseCommand
 from Pieces2x2.models import EvalProgress
 from WorkQueue.models import Work, ProcessorUsedPieces
+import datetime
 import time
 import io
 
@@ -54,6 +55,7 @@ class Command(BaseCommand):
         self.stdout.write('[INFO] Start on work pk=%s at %s' % (work.pk, self._get_stamp()))
 
         bad = True
+        do_later = False
 
         if work.job_type == 'eval_loc_1':
             bad = self._run_command('eval_loc_1', str(work.processor), str(work.location))
@@ -80,12 +82,55 @@ class Command(BaseCommand):
         elif work.job_type == 'eval_claims':
             bad = self._run_command('eval_claims', str(work.processor))
 
+        elif work.job_type == 'make_c1':
+            bad = self._run_command('make_corner1', str(work.seed))
+
+        elif work.job_type == 'make_c2':
+            bad = self._run_command('make_corner2', str(work.seed))
+
+        elif work.job_type == 'make_c3':
+            bad = self._run_command('make_corner3', str(work.seed))
+
+        elif work.job_type == 'make_c4':
+            bad = self._run_command('make_corner4', str(work.seed))
+
+        elif work.job_type == 'make_c12':
+            if Work.objects.filter(job_type='make_c1', seed=work.seed, done=True).count() == 0:
+                do_later = True
+            elif Work.objects.filter(job_type='make_c2', seed=work.seed, done=True).count() == 0:
+                do_later = True
+            else:
+                bad = self._run_command('make_corner12', str(work.seed))
+
+        elif work.job_type == 'make_c34':
+            if Work.objects.filter(job_type='make_c3', seed=work.seed, done=True).count() == 0:
+                do_later = True
+            elif Work.objects.filter(job_type='make_c4', seed=work.seed, done=True).count() == 0:
+                do_later = True
+            else:
+                bad = self._run_command('make_corner34', str(work.seed))
+
+        elif work.job_type == 'make_ring1':
+            if Work.objects.filter(job_type='make_c12', seed=work.seed, done=True).count() == 0:
+                do_later = True
+            elif Work.objects.filter(job_type='make_c34', seed=work.seed, done=True).count() == 0:
+                do_later = True
+            else:
+                bad = self._run_command('make_ring1', str(work.seed))
+
         else:
             self.stdout.write('[ERROR] Unsupported job_type %s in work pk=%s' % (repr(work.job_type), work.pk))
 
-        if bad:
+        if do_later:
+            self.stdout.write('[INFO] Delaying work pk=%s with 30 minutes' % work.pk)
+            work.start_after = timezone.now() + datetime.timedelta(minutes=30)
+            work.doing = False
+            work.save(update_fields=['start_after', 'doing'])
+
+        elif bad:
             self.stdout.write('[WARNING] Failed to perform work pk=%s' % work.pk)
             # leave doing=True to prevent immediate repeat pick-up
+
         else:
             self.stdout.write('[INFO] Finished on work pk=%s at %s' % (work.pk, self._get_stamp()))
             work.doing = False
@@ -95,12 +140,15 @@ class Command(BaseCommand):
 
     def _find_work(self, only_eval_loc_1):
         # find some work to pick up
+        now = timezone.now()
+
         with transaction.atomic():
             qset = (Work
                     .objects
                     .select_for_update()
                     .filter(done=False,
                             doing=False)
+                    .exclude(start_after__gt=now)
                     .order_by('priority',       # lowest first = highest priority
                               'when_added'))    # oldest first
 

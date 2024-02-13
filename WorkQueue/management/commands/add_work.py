@@ -13,7 +13,8 @@ class Command(BaseCommand):
     help = "Add job definition to the work queue"
 
     supported_job_types = ('eval_loc_1', 'eval_loc_4', 'eval_loc_9', 'eval_loc_16', 'eval_line1', 'eval_line2',
-                           'eval_claims', 'scan1')
+                           'eval_claims', 'scan1',
+                           'make_c1', 'make_c2', 'make_c3', 'make_c4', 'make_c12', 'make_c34', 'make_ring1')
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -21,14 +22,14 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('processor', type=int, help='For which processor instance?')
         parser.add_argument('job', type=str, help='Job type: eval_loc_1/4/9/16, eval_line, eval_claims')
-        parser.add_argument('priority', type=int, help='Priority (lower numbers are handled first)')
+        parser.add_argument('prio_seed', type=int, help='Priority (lower numbers are handled first) or seed')
         parser.add_argument('location', type=int, help='Location (1..64) / side (1..4)')
         parser.add_argument('--limit', default=0, type=int, help='Optional limit (1..289)')
 
     def handle(self, *args, **options):
         processor = options['processor']
         job_type = options['job']
-        priority = options['priority']
+        prio_seed = options['prio_seed']
         location = options['location']
         limit = options['limit']
 
@@ -50,18 +51,22 @@ class Command(BaseCommand):
             for loc in range(1, 64+1):
                 loc_str = 'loc%s' % loc
                 if getattr(used, loc_str) == 0:
-                    bulk.append(Work(processor=processor, job_type=job_type, priority=priority, location=loc))
+                    bulk.append(Work(processor=processor, job_type=job_type, priority=prio_seed, location=loc))
             # for
             Work.objects.bulk_create(bulk)
             self.stdout.write('[INFO] Added %s jobs' % len(bulk))
+
+        elif job_type.startswith('make_c') or job_type == 'make_ring1':
+            self.stdout.write('[INFO] Adding work: %s %s %s' % (processor, job_type, prio_seed))
+            Work(processor=processor, job_type=job_type, seed=prio_seed).save()
+
         else:
             limit_str = ''
             if limit > 0:
                 limit_str = ' --limit %s' % limit
             self.stdout.write(
-                '[INFO] Adding work: %s %s %s %s%s' % (processor, job_type, priority, location, limit_str))
-
-            Work(processor=processor, job_type=job_type, priority=priority, location=location, limit=limit).save()
+                '[INFO] Adding work: %s %s %s %s%s' % (processor, job_type, prio_seed, location, limit_str))
+            Work(processor=processor, job_type=job_type, priority=prio_seed, location=location, limit=limit).save()
 
 
 # end of file

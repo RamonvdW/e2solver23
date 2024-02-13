@@ -42,6 +42,9 @@ class Work(models.Model):
 
     when_done = models.DateTimeField(auto_now_add=True)
 
+    # delayed start?
+    start_after = models.DateTimeField(auto_now_add=True)
+
     def __str__(self):
         return '[%s] %s %s %s %s' % (self.pk,
                                      self.when_added.strftime('%Y-%m-%d %H:%M'),
