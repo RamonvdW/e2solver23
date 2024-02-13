@@ -34,6 +34,9 @@ class Work(models.Model):
     # (0 = not in use)
     limit = models.PositiveSmallIntegerField(default=0)
 
+    # which seed (for Ring1)
+    seed = models.PositiveSmallIntegerField(default=0)
+
     # when was this job requested?
     when_added = models.DateTimeField(auto_now_add=True)
 

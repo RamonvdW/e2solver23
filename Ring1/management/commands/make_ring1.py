@@ -29,11 +29,16 @@ class Command(BaseCommand):
 
         self.count = 0
 
+    def add_arguments(self, parser):
+        parser.add_argument('seed', type=int, help='Randomization seed')
+
     def reverse_sides(self, sides):
         return [self.twoside2reverse[side] for side in sides]
 
     def _save(self, c12, c34):
         ring1 = Ring1(
+                    seed=c12.seed,
+
                     nr1=c12.loc1,
                     nr2=c12.loc2,
                     nr3=c12.loc3,
@@ -93,8 +98,16 @@ class Command(BaseCommand):
                     nr36=0)
 
         ring1.save()
-        print('saved Ring1 pk=%s' % ring1.pk)
+        self.stdout.write('saved Ring1 pk=%s' % ring1.pk)
         self.count += 1
+
+    def _check(self, c12, c34):
+
+        # TODO: check solution locs 26, 34, 31, 39 with remaining unused pieces
+
+        # TODO: check solution locs 12, 13, 31, 39, 52, 53, 26, 34 with remaining unused pieces
+
+        self._save(c12, c34)
 
     def _iter_c34(self, c12):
 
@@ -113,7 +126,8 @@ class Command(BaseCommand):
 
         for c34 in (Corner34
                     .objects
-                    .filter(side1_left=exp_s1_left,
+                    .filter(seed=c12.seed,
+                            side1_left=exp_s1_left,
                             side1_right=exp_s1_right)
                     .exclude(nr1__in=used)
                     .exclude(nr2__in=used)
@@ -197,20 +211,31 @@ class Command(BaseCommand):
                     .exclude(nr80__in=used)
                     .iterator(chunk_size=1000)):
 
-            self._save(c12, c34)
+            self._check(c12, c34)
         # for
 
-    def _iter_c12(self):
-        for c12 in Corner12.objects.all().iterator(chunk_size=1000):
+    def _iter_c12(self, seed):
+        count = 0
+        print_at = 100
+        for c12 in Corner12.objects.filter(seed=seed).iterator(chunk_size=1000):
             self._iter_c34(c12)
+
+            count += 1
+            if count >= print_at:
+                self.stdout.write('[INFO] Tried %s Corner12' % count)
+                print_at += 100
         # for
+
+        self.stdout.write('[INFO] Tried %s Corner12' % count)
 
     def handle(self, *args, **options):
 
-        Ring1.objects.all().delete()
+        seed = options['seed']
+
+        Ring1.objects.filter(seed=seed).delete()
 
         try:
-            self._iter_c12()
+            self._iter_c12(seed)
         except KeyboardInterrupt:
             pass
 

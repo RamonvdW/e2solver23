@@ -31,6 +31,9 @@ class Command(BaseCommand):
 
         self.count = 0
 
+    def add_arguments(self, parser):
+        parser.add_argument('seed', type=int, help='Randomization seed')
+
     def reverse_sides(self, sides):
         return [self.twoside2reverse[side] for side in sides]
 
@@ -39,6 +42,8 @@ class Command(BaseCommand):
         p32 = Piece2x2.objects.get(nr=c2.loc32)
 
         c12 = Corner12(
+                    seed=c1.seed,
+
                     c1=c1.nr,
                     c2=c2.nr,
 
@@ -54,7 +59,7 @@ class Command(BaseCommand):
         # for
 
         c12.save()
-        print('saved Corner12 pk=%s' % c12.pk)
+        self.stdout.write('saved Corner12 pk=%s' % c12.pk)
         self.count += 1
 
     def _check(self, c1, c2):
@@ -91,6 +96,8 @@ class Command(BaseCommand):
                 break
         # for
 
+        # TODO: check solution for locs 19, 26, 22, 31 with remaining unused pieces
+
         if found:
             self._save(c1, c2)
         
@@ -104,7 +111,8 @@ class Command(BaseCommand):
 
         for c2 in (Corner2
                    .objects
-                   .filter(side4=exp_s4)
+                   .filter(seed=c1.seed,
+                           side4=exp_s4)
                    .exclude(nr1__in=used)
                    .exclude(nr2__in=used)
                    .exclude(nr3__in=used)
@@ -149,17 +157,19 @@ class Command(BaseCommand):
             self._check(c1, c2)
         # for
 
-    def _iter_c1(self):
-        for c1 in Corner1.objects.all().iterator(chunk_size=1000):
+    def _iter_c1(self, seed):
+        for c1 in Corner1.objects.filter(seed=seed).iterator(chunk_size=1000):
             self._iter_c2(c1)
         # for
 
     def handle(self, *args, **options):
 
-        Corner12.objects.all().delete()
+        seed = options['seed']
+
+        Corner12.objects.filter(seed=seed).delete()
 
         try:
-            self._iter_c1()
+            self._iter_c1(seed)
         except KeyboardInterrupt:
             pass
 

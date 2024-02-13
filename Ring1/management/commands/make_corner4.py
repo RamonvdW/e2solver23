@@ -88,6 +88,9 @@ class Command(BaseCommand):
         self.count_print = 5000
         self.bulk = list()
 
+    def add_arguments(self, parser):
+        parser.add_argument('seed', type=int, help='Randomization seed')
+
     def _fill_unused(self, seed):
         self.stdout.write('[INFO] Seed: %s' % seed)
 
@@ -136,9 +139,6 @@ class Command(BaseCommand):
         # reminder: all corners and all borders
         self.unused.extend(self.select_corners)
         self.unused.extend(self.select_borders)
-
-    def add_arguments(self, parser):
-        parser.add_argument('seed', type=int, help='Randomization seed')
 
     def _save(self, c4):
         self.count += 1
@@ -494,9 +494,9 @@ class Command(BaseCommand):
         self._fill_unused(seed)
         # self.stdout.write('[INFO] Selected base pieces: %s' % repr(self.unused))
 
-        Corner4.objects.all().delete()
+        Corner4.objects.filter(seed=seed).delete()
 
-        c4 = Corner4()
+        c4 = Corner4(seed=seed)
         try:
             self._find_nr50(c4)
         except KeyboardInterrupt:

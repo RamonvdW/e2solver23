@@ -32,9 +32,7 @@ class Ring1(models.Model):
 
     nr = models.AutoField(primary_key=True)
 
-    # which instance is processing this?
-    processor = models.PositiveIntegerField(default=0)
-    is_processed = models.BooleanField(default=False)
+    seed = models.PositiveIntegerField(default=0)
 
     # reference to Piece2x2 numbers
     nr1 = models.PositiveIntegerField()
@@ -111,6 +109,8 @@ class Corner1(models.Model):
     """
 
     nr = models.AutoField(primary_key=True)
+
+    seed = models.PositiveIntegerField(default=0)
 
     side3 = models.PositiveIntegerField()       # loc25 side3
     side2 = models.PositiveIntegerField()       # loc4 side2
@@ -218,6 +218,7 @@ class Corner1(models.Model):
             models.Index(fields=['nr38']),
             models.Index(fields=['nr39']),
             models.Index(fields=['nr40']),
+            models.Index(fields=['seed']),
         ]
 
     objects = models.Manager()  # for the editor only
@@ -239,6 +240,8 @@ class Corner2(models.Model):
     """
 
     nr = models.AutoField(primary_key=True)
+
+    seed = models.PositiveIntegerField(default=0)
 
     side4 = models.PositiveIntegerField()       # loc5 side4
     side3 = models.PositiveIntegerField()       # loc32 side3
@@ -346,6 +349,7 @@ class Corner2(models.Model):
             models.Index(fields=['nr38']),
             models.Index(fields=['nr39']),
             models.Index(fields=['nr40']),
+            models.Index(fields=['seed']),
         ]
 
     objects = models.Manager()  # for the editor only
@@ -367,6 +371,8 @@ class Corner3(models.Model):
     """
 
     nr = models.AutoField(primary_key=True)
+
+    seed = models.PositiveIntegerField(default=0)
 
     side1 = models.PositiveIntegerField()       # loc40 side1
     side4 = models.PositiveIntegerField()       # loc61 side4
@@ -474,6 +480,7 @@ class Corner3(models.Model):
             models.Index(fields=['nr38']),
             models.Index(fields=['nr39']),
             models.Index(fields=['nr40']),
+            models.Index(fields=['seed']),
         ]
 
     objects = models.Manager()  # for the editor only
@@ -495,6 +502,8 @@ class Corner4(models.Model):
     """
 
     nr = models.AutoField(primary_key=True)
+
+    seed = models.PositiveIntegerField(default=0)
 
     side2 = models.PositiveIntegerField()       # loc60 side2
     side1 = models.PositiveIntegerField()       # loc33 side1
@@ -602,6 +611,7 @@ class Corner4(models.Model):
             models.Index(fields=['nr38']),
             models.Index(fields=['nr39']),
             models.Index(fields=['nr40']),
+            models.Index(fields=['seed']),
         ]
 
     objects = models.Manager()  # for the editor only
@@ -613,6 +623,8 @@ class Corner12(models.Model):
     """
 
     nr = models.AutoField(primary_key=True)
+
+    seed = models.PositiveIntegerField(default=0)
 
     side3_left = models.PositiveIntegerField()        # loc25 side3
     side3_right = models.PositiveIntegerField()       # loc32 side3
@@ -789,6 +801,7 @@ class Corner12(models.Model):
             models.Index(fields=['nr78']),
             models.Index(fields=['nr79']),
             models.Index(fields=['nr80']),
+            models.Index(fields=['seed']),
         ]
 
     objects = models.Manager()  # for the editor only
@@ -800,6 +813,8 @@ class Corner34(models.Model):
     """
 
     nr = models.AutoField(primary_key=True)
+
+    seed = models.PositiveIntegerField(default=0)
 
     side1_left = models.PositiveIntegerField()        # loc33 side1
     side1_right = models.PositiveIntegerField()       # loc40 side1
@@ -976,6 +991,7 @@ class Corner34(models.Model):
             models.Index(fields=['nr78']),
             models.Index(fields=['nr79']),
             models.Index(fields=['nr80']),
+            models.Index(fields=['seed']),
         ]
 
     objects = models.Manager()  # for the editor only
