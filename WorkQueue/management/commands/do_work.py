@@ -122,8 +122,8 @@ class Command(BaseCommand):
             self.stdout.write('[ERROR] Unsupported job_type %s in work pk=%s' % (repr(work.job_type), work.pk))
 
         if do_later:
-            self.stdout.write('[INFO] Delaying work pk=%s with 30 minutes' % work.pk)
-            work.start_after = timezone.now() + datetime.timedelta(minutes=30)
+            self.stdout.write('[INFO] Delaying work pk=%s with 5 minutes' % work.pk)
+            work.start_after = timezone.now() + datetime.timedelta(minutes=5)
             work.doing = False
             work.save(update_fields=['start_after', 'doing'])
 
