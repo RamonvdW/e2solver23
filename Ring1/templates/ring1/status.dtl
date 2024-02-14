@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <style>
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+            padding: 5px;
+            text-align: center;
+            font-size: 15px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Status</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <td>Seed</td>
+                <td>Corner1</td>
+                <td>Corner2</td>
+                <td>Corner3</td>
+                <td>Corner4</td>
+                <td>Corner12</td>
+                <td>Corner34</td>
+                <td>Ring1</td>
+            </tr>
+        </thead>
+
+        {% for seed in seeds %}
+            <tr>
+                <td>{{ seed.seed }}</td>
+                <td>{{ seed.c1_count }}{% if seed.c1_work %} ({% if seed.c1_work.doing %}doing{% elif seed.c1_work.done %}done{% endif %}){% endif %}</td>
+                <td>{{ seed.c2_count }}{% if seed.c2_work %} ({% if seed.c2_work.doing %}doing{% elif seed.c2_work.done %}done{% endif %}){% endif %}</td>
+                <td>{{ seed.c3_count }}{% if seed.c3_work %} ({% if seed.c3_work.doing %}doing{% elif seed.c3_work.done %}done{% endif %}){% endif %}</td>
+                <td>{{ seed.c4_count }}{% if seed.c4_work %} ({% if seed.c4_work.doing %}doing{% elif seed.c4_work.done %}done{% endif %}){% endif %}</td>
+                <td>{{ seed.c12_count }}{% if seed.c12_work %} ({% if seed.c12_work.doing %}doing{% elif seed.c12_work.done %}done{% endif %}){% endif %}</td>
+                <td>{{ seed.c34_count }}{% if seed.c34_work %} ({% if seed.c34_work.doing %}doing{% elif seed.c34_work.done %}done{% endif %}){% endif %}</td>
+                <td>{{ seed.r1_count }}{% if seed.r1_work %} ({% if seed.r1_work.doing %}doing{% elif seed.r1_work.done %}done{% endif %}){% endif %}</td>
+            </tr>
+        {% endfor %}
+    </table>
+
+</body>
+</html>
