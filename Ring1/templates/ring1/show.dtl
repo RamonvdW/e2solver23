@@ -44,6 +44,9 @@
                         <tr>
                             <td colspan="8">Nr {{ solution.nr }}</td>
                         </tr>
+                        <tr>
+                            <td colspan="8">Seed: {{ solution.seed }}</td>
+                        </tr>
                     </thead>
 
                     <tr style="padding:0">

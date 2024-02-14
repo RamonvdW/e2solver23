@@ -12,6 +12,10 @@ app_name = 'Ring1'
 # base = /ring1/
 
 urlpatterns = [
+    path('status/',
+         views.StatusView.as_view(),
+         name='status'),
+
     path('view/<nr>/',
          views.ShowRing1View.as_view(),
          name='show'),
