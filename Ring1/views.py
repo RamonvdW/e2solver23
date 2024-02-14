@@ -784,7 +784,7 @@ class StatusView(TemplateView):
                 row.c34_work = Work.objects.filter(job_type='make_c34', seed=seed).first()
 
             if seed in r1_seeds:
-                row.r1_count = Corner34.objects.filter(seed=seed).count()
+                row.r1_count = Ring1.objects.filter(seed=seed).count()
                 row.r1_work = Work.objects.filter(job_type='make_ring1', seed=seed).first()
 
             table.append(row)
