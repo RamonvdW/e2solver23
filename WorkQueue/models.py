@@ -18,6 +18,9 @@ class Work(models.Model):
     # after restarting the worker queue all 'doing' tasks are reset
     doing = models.BooleanField(default=False)
 
+    # delayed start?
+    start_after = models.DateTimeField(auto_now_add=True)
+
     # free-format description of the task to execute
     job_type = models.CharField(max_length=20, default='')
 
@@ -41,9 +44,6 @@ class Work(models.Model):
     when_added = models.DateTimeField(auto_now_add=True)
 
     when_done = models.DateTimeField(auto_now_add=True)
-
-    # delayed start?
-    start_after = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return '[%s] %s %s %s %s' % (self.pk,

@@ -10,7 +10,9 @@ from WorkQueue.models import Work, ProcessorUsedPieces
 
 class WorkAdmin(admin.ModelAdmin):
 
-    list_filter = ('done', 'doing', 'priority', 'processor', 'job_type', 'location')
+    list_filter = ('done', 'doing', 'job_type', 'priority', 'seed', 'processor', 'location')
+
+    readonly_fields = ('start_after', 'when_added', 'when_done')
 
 
 class ProcessorUsedPiecesAdmin(admin.ModelAdmin):

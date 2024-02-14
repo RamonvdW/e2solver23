@@ -735,6 +735,23 @@ class StatusView(TemplateView):
         c34_seeds = list(Corner34.objects.distinct('seed').values_list('seed', flat=True))
         r1_seeds = list(Ring1.objects.distinct('seed').values_list('seed', flat=True))
 
+        for work in Work.objects.exclude(seed=0):
+            if work.job_type == 'make_c1':
+                c1_seeds.append(work.seed)
+            if work.job_type == 'make_c2':
+                c2_seeds.append(work.seed)
+            if work.job_type == 'make_c3':
+                c3_seeds.append(work.seed)
+            if work.job_type == 'make_c4':
+                c4_seeds.append(work.seed)
+            if work.job_type == 'make_c12':
+                c12_seeds.append(work.seed)
+            if work.job_type == 'make_c34':
+                c34_seeds.append(work.seed)
+            if work.job_type == 'make_ring1':
+                r1_seeds.append(work.seed)
+        # for
+
         all_seeds = frozenset(c1_seeds + c2_seeds + c3_seeds + c4_seeds + c12_seeds + c34_seeds + r1_seeds)
 
         context['seeds'] = table = list()
@@ -768,7 +785,7 @@ class StatusView(TemplateView):
 
             if seed in r1_seeds:
                 row.r1_count = Corner34.objects.filter(seed=seed).count()
-                row.r1_work = Work.objects.filter(job_type='make_c34', seed=seed).first()
+                row.r1_work = Work.objects.filter(job_type='make_ring1', seed=seed).first()
 
             table.append(row)
         # for
