@@ -36,13 +36,13 @@
         {% for seed in seeds %}
             <tr>
                 <td>{{ seed.seed }}</td>
-                <td>{{ seed.c1_count }}{% if seed.c1_work %} ({% if seed.c1_work.doing %}doing{% elif seed.c1_work.done %}done{% endif %}){% endif %}</td>
-                <td>{{ seed.c2_count }}{% if seed.c2_work %} ({% if seed.c2_work.doing %}doing{% elif seed.c2_work.done %}done{% endif %}){% endif %}</td>
-                <td>{{ seed.c3_count }}{% if seed.c3_work %} ({% if seed.c3_work.doing %}doing{% elif seed.c3_work.done %}done{% endif %}){% endif %}</td>
-                <td>{{ seed.c4_count }}{% if seed.c4_work %} ({% if seed.c4_work.doing %}doing{% elif seed.c4_work.done %}done{% endif %}){% endif %}</td>
-                <td>{{ seed.c12_count }}{% if seed.c12_work %} ({% if seed.c12_work.doing %}doing{% elif seed.c12_work.done %}done{% else %}after {{ seed.c12_work.start_after|time }}{% endif %}){% endif %}</td>
-                <td>{{ seed.c34_count }}{% if seed.c34_work %} ({% if seed.c34_work.doing %}doing{% elif seed.c34_work.done %}done{% else %}after {{ seed.c34_work.start_after|time }}{% endif %}){% endif %}</td>
-                <td>{{ seed.r1_count }}{% if seed.r1_work %} ({% if seed.r1_work.doing %}doing{% elif seed.r1_work.done %}done{% else %}after {{ seed.r1_work.start_after|time }}{% endif %}){% endif %}</td>
+                <td{% if seed.c1_work.doing %} style="border:2px solid blue"{% endif %}>{{ seed.c1_count }}{% if seed.c1_work %} ({% if seed.c1_work.doing %}doing{% elif seed.c1_work.done %}done{% endif %}){% endif %}</td>
+                <td{% if seed.c2_work.doing %} style="border:2px solid blue"{% endif %}>{{ seed.c2_count }}{% if seed.c2_work %} ({% if seed.c2_work.doing %}doing{% elif seed.c2_work.done %}done{% endif %}){% endif %}</td>
+                <td{% if seed.c3_work.doing %} style="border:2px solid blue"{% endif %}>{{ seed.c3_count }}{% if seed.c3_work %} ({% if seed.c3_work.doing %}doing{% elif seed.c3_work.done %}done{% endif %}){% endif %}</td>
+                <td{% if seed.c4_work.doing %} style="border:2px solid blue"{% endif %}>{{ seed.c4_count }}{% if seed.c4_work %} ({% if seed.c4_work.doing %}doing{% elif seed.c4_work.done %}done{% endif %}){% endif %}</td>
+                <td{% if seed.c12_work.doing %} style="border:2px solid blue"{% endif %}>{{ seed.c12_count }}{% if seed.c12_work %} ({% if seed.c12_work.doing %}doing{% elif seed.c12_work.done %}done{% else %}after {{ seed.c12_work.start_after|time }}{% endif %}){% endif %}</td>
+                <td{% if seed.c34_work.doing %} style="border:2px solid blue"{% endif %}>{{ seed.c34_count }}{% if seed.c34_work %} ({% if seed.c34_work.doing %}doing{% elif seed.c34_work.done %}done{% else %}after {{ seed.c34_work.start_after|time }}{% endif %}){% endif %}</td>
+                <td{% if seed.r1_work.doing %} style="border:2px solid blue"{% endif %}>{{ seed.r1_count }}{% if seed.r1_work %} ({% if seed.r1_work.doing %}doing{% elif seed.r1_work.done %}done{% else %}after {{ seed.r1_work.start_after|time }}{% endif %}){% endif %}</td>
             </tr>
         {% endfor %}
     </table>

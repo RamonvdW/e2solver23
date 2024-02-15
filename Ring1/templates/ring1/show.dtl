@@ -22,6 +22,8 @@
     <p>
         {% if url_first %}
             <a href="{{ url_first }}">first</a>
+        {% elif is_empty %}
+            Nothing available
         {% else %}
             {% if url_prev1000 %}<a style="margin:10px" href="{{ url_prev1000 }}">-1000</a>{%  else %}<span style="margin:10px">-1000</span>{% endif %}
             {% if url_prev100  %}<a style="margin:10px" href="{{ url_prev100  }}">-100</a>{%   else %}<span style="margin:10px">-100</span>{% endif %}
@@ -34,48 +36,50 @@
         {% endif %}
     </p>
 
-    <table style="margin-left:auto; margin-right:auto; border:0">
-        <tr style="border:0; vertical-align:top">
+    {% if not is_empty %}
+        <table style="margin-left:auto; margin-right:auto; border:0">
+            <tr style="border:0; vertical-align:top">
 
-            <td style="border:0">
-                <!-- solution -->
-                <table>
-                    <thead>
-                        <tr>
-                            <td colspan="8">Nr {{ solution.nr }}</td>
-                        </tr>
-                        <tr>
-                            <td colspan="8">Seed: {{ solution.seed }}</td>
-                        </tr>
-                    </thead>
+                <td style="border:0">
+                    <!-- solution -->
+                    <table>
+                        <thead>
+                            <tr>
+                                <td colspan="8">Nr {{ solution.nr }}</td>
+                            </tr>
+                            <tr>
+                                <td colspan="8">Seed: {{ solution.seed }}</td>
+                            </tr>
+                        </thead>
 
-                    <tr style="padding:0">
-                        {% for piece in solution.p2x2s %}
-                            <td style="padding:0">
-                                {% if piece.is_empty %}
-                                    <div style="width:80px; height:80px"></div>
-                                {% else %}
-                                    <div style="display:flex">
-                                        <img src="{{ piece.img1 }}" width=40 height=40 style="transform: {{ piece.transform1 }}">
-                                        <img src="{{ piece.img2 }}" width=40 height=40 style="transform: {{ piece.transform2 }}">
-                                    </div>
-                                    <div style="display:flex">
-                                        <img src="{{ piece.img3 }}" width=40 height=40 style="transform: {{ piece.transform3 }}">
-                                        <img src="{{ piece.img4 }}" width=40 height=40 style="transform: {{ piece.transform4 }}">
-                                    </div>
+                        <tr style="padding:0">
+                            {% for piece in solution.p2x2s %}
+                                <td style="padding:0">
+                                    {% if piece.is_empty %}
+                                        <div style="width:80px; height:80px"></div>
+                                    {% else %}
+                                        <div style="display:flex">
+                                            <img src="{{ piece.img1 }}" width=40 height=40 style="transform: {{ piece.transform1 }}">
+                                            <img src="{{ piece.img2 }}" width=40 height=40 style="transform: {{ piece.transform2 }}">
+                                        </div>
+                                        <div style="display:flex">
+                                            <img src="{{ piece.img3 }}" width=40 height=40 style="transform: {{ piece.transform3 }}">
+                                            <img src="{{ piece.img4 }}" width=40 height=40 style="transform: {{ piece.transform4 }}">
+                                        </div>
+                                    {% endif %}
+                                </td>
+                                {% if piece.break_after %}
+                                    </tr>
+                                    <tr>
                                 {% endif %}
-                            </td>
-                            {% if piece.break_after %}
-                                </tr>
-                                <tr>
-                            {% endif %}
 
-                        {% endfor %}
-                    </tr>
-                </table>
-            </td>
-        </tr>
-    </table>
+                            {% endfor %}
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    {% endif %}
 
     {% if base_nrs %}
         <p>Used nrs: {{ base_nrs }}</p>

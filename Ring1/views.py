@@ -60,6 +60,8 @@ class ShowRing1View(TemplateView):
             first = Ring1.objects.order_by('nr').first()
             if first:
                 context['url_first'] = reverse('Ring1:show', kwargs={'nr': first.pk})
+            else:
+                context['is_empty'] = True
         else:
             context['solution'] = ring1
             ring1.p2x2s = list()
@@ -753,6 +755,8 @@ class StatusView(TemplateView):
         # for
 
         all_seeds = frozenset(c1_seeds + c2_seeds + c3_seeds + c4_seeds + c12_seeds + c34_seeds + r1_seeds)
+        all_seeds = list(all_seeds)
+        all_seeds.sort()
 
         context['seeds'] = table = list()
 
