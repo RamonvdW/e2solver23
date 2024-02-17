@@ -16,6 +16,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('seed', type=int, help='Randomization seed')
+        parser.add_argument('corner', type=int, help='Corner to work on (0 = none)')
 
     @staticmethod
     def _needs_c4():
@@ -510,17 +511,21 @@ class Command(BaseCommand):
         # for
 
     def handle(self, *args, **options):
-        #self._needs_c1()
-        #self._needs_c2()
-        #self._needs_c3()
-        self._needs_c4()
-        return
+        corner = options['corner']
 
-        seed = options['seed']
-        gen = GenerateBorder(seed)
-        for sol in gen.iter_solutions():
-            #print('solution: %s' % repr(sol))
-            print('c1.nr4=%s' % repr(list(Piece2x2.objects.filter(nr3=sol[6], nr1=sol[7], nr2=sol[8]).distinct('nr4').values_list('nr4', flat=True))))
+        if corner == 1:
+            self._needs_c1()
+        elif corner == 2:
+            self._needs_c2()
+        elif corner == 3:
+            self._needs_c3()
+        elif corner == 4:
+            self._needs_c4()
 
+        if corner == 0:
+            seed = options['seed']
+            gen = GenerateBorder(seed)
+            for sol in gen.iter_solutions():
+                print('solution: %s' % repr(sol))
 
 # end of file
