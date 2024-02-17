@@ -6,6 +6,7 @@
 
 from django.core.management.base import BaseCommand
 from Ring1.models import Corner1, Corner2, Corner3, Corner4, Corner12, Corner34
+from WorkQueue.models import Work
 
 
 class Command(BaseCommand):
@@ -39,6 +40,9 @@ class Command(BaseCommand):
 
         self.stdout.write('[INFO] Deleting all Corner34 with seed=%s' % seed)
         Corner34.objects.filter(seed=seed).delete()
+
+        self.stdout.write('[INFO] Deleting all Work with seed=%s' % seed)
+        Work.objects.filter(seed=seed).delete()
 
 
 # end of file

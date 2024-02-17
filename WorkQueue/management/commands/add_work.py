@@ -40,7 +40,7 @@ class Command(BaseCommand):
 
         if job_type == 'scan1':
             job_type = 'eval_loc_1'
-            self.stdout.write('[INFO] Adding work: %s %s %s {1..64}' % (processor, job_type, priority))
+            self.stdout.write('[INFO] Adding work: %s %s %s {1..64}' % (processor, job_type, prio_seed))
 
             try:
                 used = ProcessorUsedPieces.objects.get(processor=processor)

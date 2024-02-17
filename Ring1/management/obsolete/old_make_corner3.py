@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
+from BasePieces.border import GenerateBorder
 from Pieces2x2.models import TwoSide, Piece2x2
 from Ring1.models import Corner3
 from copy import deepcopy
@@ -47,9 +48,9 @@ class Command(BaseCommand):
         # for
 
         self.select_central = 136
-        self.select_corners = (1, 2, 3, 4)
+        # self.select_corners = (1, 2, 3, 4)
         self.select_hints = (208, 255, 249, 181)
-        self.select_borders = list(range(5, 60+1))
+        # self.select_borders = list(range(5, 60+1))
         self.select_rest = list(range(61, 256+1))
         self.select_rest.remove(self.select_central)
         for hint in self.select_hints:
@@ -93,7 +94,70 @@ class Command(BaseCommand):
 
     def _fill_unused(self, seed):
         self.stdout.write('[INFO] Seed: %s' % seed)
+        self.unused = list()
 
+        corner_claims = {1: [], 2: [], 3: [], 4: []}
+        gen = GenerateBorder(seed)
+        borders = gen.get_first_solution()
+        for corner in (1, 2, 3, 4):
+            sub = borders[(corner - 1) * 15:]
+            bcb_nrs = sub[6:6+3]
+            # print('bcb = %s' % repr(bcb_nrs))
+            if corner == 1:
+                d = list(Piece2x2.objects.filter(nr3=bcb_nrs[0], nr1=bcb_nrs[1], nr2=bcb_nrs[2])
+                         .distinct('nr4').values_list('nr4', flat=True))
+                # print('p2x2 count for c1.nr4: %s' % repr(d))
+            elif corner == 2:
+                d = list(Piece2x2.objects.filter(nr1=bcb_nrs[0], nr2=bcb_nrs[1], nr4=bcb_nrs[2])
+                         .distinct('nr3').values_list('nr3', flat=True))
+                # print('p2x2 count for c2.nr3: %s' % repr(d))
+            elif corner == 3:
+                d = list(Piece2x2.objects.filter(nr2=bcb_nrs[0], nr4=bcb_nrs[1], nr3=bcb_nrs[2])
+                         .distinct('nr1').values_list('nr1', flat=True))
+                # print('p2x2 count for c3.nr1: %s' % repr(d))
+            else:
+                d = list(Piece2x2.objects.filter(nr4=bcb_nrs[0], nr3=bcb_nrs[1], nr1=bcb_nrs[2])
+                         .distinct('nr2').values_list('nr2', flat=True))
+                # print('p2x2 count for c4.nr2: %s' % repr(d))
+            corner_claims[corner].extend(d)
+        # for
+
+        borders = borders[(self.corner - 1) * 15:]
+        self.unused.extend(borders[:15])
+        del gen
+        del borders
+
+        # divide the corner claims for this seed
+        done = False
+        idx = 1
+        while not done:
+            done = True
+
+            try:
+                claim = corner_claims[idx].pop(0)
+            except IndexError:
+                # empty list
+                pass
+            else:
+                # give this claim
+                if idx == self.corner:
+                    print('adding corner claim %s' % claim)
+                    self.unused.append(claim)
+                self.select_rest.remove(claim)
+
+                # remove this claim from all other corner claims
+                for corner in (1, 2, 3, 4):
+                    try:
+                        corner_claims[corner].remove(claim)
+                    except ValueError:
+                        pass
+                # for
+            idx += 1
+            if idx > 4:
+                idx = 1
+        # while
+
+        # select_rest are all non-border/corner pieces except the hints
         r = random.Random(seed)
         upper = len(self.select_rest)
         for lp in range(100000):
@@ -104,8 +168,11 @@ class Command(BaseCommand):
 
         uniq_nrs = frozenset(self.uniq_nrs[1] + self.uniq_nrs[2] + self.uniq_nrs[3] + self.uniq_nrs[4])
 
-        self.unused = list()
-        self.unused.extend(self.uniq_nrs[self.corner])
+        for nr in self.uniq_nrs[self.corner]:
+            if nr in self.select_rest:
+                self.unused.append(nr)
+        # for
+
         counts = {
             1: len(self.uniq_nrs[1]),
             2: len(self.uniq_nrs[2]),
@@ -119,6 +186,7 @@ class Command(BaseCommand):
             if nr in uniq_nrs:
                 continue
 
+            # idx: 1, 2, 3, 4, (repeat)
             if idx == self.corner:
                 self.unused.append(nr)
 
@@ -135,10 +203,6 @@ class Command(BaseCommand):
             # while
 
         # while
-
-        # reminder: all corners and all borders
-        self.unused.extend(self.select_corners)
-        self.unused.extend(self.select_borders)
 
     def _save(self, c3):
         self.count += 1
@@ -491,7 +555,7 @@ class Command(BaseCommand):
 
         seed = options['seed']
         self._fill_unused(seed)
-        # self.stdout.write('[INFO] Selected base pieces: %s' % repr(self.unused))
+        self.stdout.write('[INFO] Selected base pieces: %s' % repr(self.unused))
 
         Corner3.objects.filter(seed=seed).delete()
 
@@ -500,15 +564,15 @@ class Command(BaseCommand):
             self._find_nr55(c3)
         except KeyboardInterrupt:
             pass
+        else:
+            if len(self.bulk):
+                Corner3.objects.bulk_create(self.bulk)
+                self.bulk = list()
 
-        if len(self.bulk):
-            Corner3.objects.bulk_create(self.bulk)
-            self.bulk = list()
+            self.stdout.write('[INFO] Created %s Corner3' % self.count)
 
-        self.stdout.write('[INFO] Created %s Corner3' % self.count)
-
-        count1 = Corner3.objects.distinct('side1').count()
-        count2 = Corner3.objects.distinct('side4').count()
-        self.stdout.write('[INFO] Distinct sides: %s, %s' % (count1, count2))
+            count1 = Corner3.objects.filter(seed=seed).distinct('side1').count()
+            count2 = Corner3.objects.filter(seed=seed).distinct('side4').count()
+            self.stdout.write('[INFO] Distinct sides: %s, %s' % (count1, count2))
 
 # end of file
