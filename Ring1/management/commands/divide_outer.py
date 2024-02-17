@@ -305,7 +305,7 @@ class Command(BaseCommand):
                         nr2=255,
                         nr1__in=unused, nr3__in=unused, nr4__in=unused))
         loc15_sides2 = list(qset.distinct('side2').values_list('side2', flat=True))
-        loc15_sides1 = list(qset.distinct('side4').values_list('side4', flat=True))
+        loc15_sides1 = list(qset.distinct('side1').values_list('side1', flat=True))
 
         todo = len(loc15_sides1)
         for loc15_side1 in loc15_sides1:
