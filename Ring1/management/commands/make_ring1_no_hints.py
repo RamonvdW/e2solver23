@@ -157,102 +157,102 @@ class Command(BaseCommand):
                                        side1=self.exp_loc10_s1, side4=self.exp_loc10_s4)
         return qset.first() is not None
 
-    def _find_loc42(self):
-        qset = Piece2x2.objects.filter(nr1__in=self.unused, nr2__in=self.unused,
-                                       nr3__in=self.unused, nr4__in=self.unused,
-                                       side3=self.exp_loc42_s3, side4=self.exp_loc42_s4)
-        for p in qset:
-            self.ring1.nr42 = p.nr
-            p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
-            self._make_used(p_nrs)
-            self._save_ring1()
-            self._make_unused(p_nrs)
-        # for
-
-    def _find_loc51(self):
-        qset = Piece2x2.objects.filter(nr1__in=self.unused, nr2__in=self.unused,
-                                       nr3__in=self.unused, nr4__in=self.unused,
-                                       side3=self.exp_loc51_s3, side4=self.exp_loc51_s4)
-        for p in qset:
-            self.ring1.nr51 = p.nr
-            p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
-            self._make_used(p_nrs)
-            self._find_loc42()
-            self._make_unused(p_nrs)
-        # for
-
-    def _find_loc54(self):
-        qset = Piece2x2.objects.filter(nr1__in=self.unused, nr2__in=self.unused,
-                                       nr3__in=self.unused, nr4__in=self.unused,
-                                       side2=self.exp_loc54_s2, side3=self.exp_loc54_s3)
-        for p in qset:
-            self.ring1.nr54 = p.nr
-            p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
-            self._make_used(p_nrs)
-            self._find_loc51()
-            self._make_unused(p_nrs)
-        # for
-
-    def _find_loc47(self):
-        qset = Piece2x2.objects.filter(nr1__in=self.unused, nr2__in=self.unused,
-                                       nr3__in=self.unused, nr4__in=self.unused,
-                                       side2=self.exp_loc47_s2, side3=self.exp_loc47_s3)
-        for p in qset:
-            self.ring1.nr47 = p.nr
-            p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
-            self._make_used(p_nrs)
-            self._find_loc54()
-            self._make_unused(p_nrs)
-        # for
-
-    def _find_loc23(self):
-        qset = Piece2x2.objects.filter(nr1__in=self.unused, nr2__in=self.unused,
-                                       nr3__in=self.unused, nr4__in=self.unused,
-                                       side1=self.exp_loc23_s1, side2=self.exp_loc23_s2)
-        for p in qset:
-            self.ring1.nr23 = p.nr
-            p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
-            self._make_used(p_nrs)
-            self._find_loc47()
-            self._make_unused(p_nrs)
-        # for
-
-    def _find_loc14(self):
-        qset = Piece2x2.objects.filter(nr1__in=self.unused, nr2__in=self.unused,
-                                       nr3__in=self.unused, nr4__in=self.unused,
-                                       side1=self.exp_loc14_s1, side2=self.exp_loc14_s2)
-        for p in qset:
-            self.ring1.nr14 = p.nr
-            p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
-            self._make_used(p_nrs)
-            self._find_loc23()
-            self._make_unused(p_nrs)
-        # for
-
-    def _find_loc11(self):
-        qset = Piece2x2.objects.filter(nr1__in=self.unused, nr2__in=self.unused,
-                                       nr3__in=self.unused, nr4__in=self.unused,
-                                       side1=self.exp_loc11_s1, side4=self.exp_loc11_s4)
-        for p in qset:
-            self.ring1.nr11 = p.nr
-            p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
-            self._make_used(p_nrs)
-            self._find_loc14()
-            self._make_unused(p_nrs)
-        # for
-
-    def _find_loc18(self):
-        qset = Piece2x2.objects.filter(nr1__in=self.unused, nr2__in=self.unused,
-                                       nr3__in=self.unused, nr4__in=self.unused,
-                                       side1=self.exp_loc18_s1, side4=self.exp_loc18_s4)
-        for p in qset:
-            self.ring1.nr18 = p.nr
-            p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
-            self._make_used(p_nrs)
-            self._find_loc11()
-            self._make_unused(p_nrs)
-        # for
-
+    # def _find_loc42(self):
+    #     qset = Piece2x2.objects.filter(nr1__in=self.unused, nr2__in=self.unused,
+    #                                    nr3__in=self.unused, nr4__in=self.unused,
+    #                                    side3=self.exp_loc42_s3, side4=self.exp_loc42_s4)
+    #     for p in qset:
+    #         self.ring1.nr42 = p.nr
+    #         p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
+    #         self._make_used(p_nrs)
+    #         self._save_ring1()
+    #         self._make_unused(p_nrs)
+    #     # for
+    #
+    # def _find_loc51(self):
+    #     qset = Piece2x2.objects.filter(nr1__in=self.unused, nr2__in=self.unused,
+    #                                    nr3__in=self.unused, nr4__in=self.unused,
+    #                                    side3=self.exp_loc51_s3, side4=self.exp_loc51_s4)
+    #     for p in qset:
+    #         self.ring1.nr51 = p.nr
+    #         p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
+    #         self._make_used(p_nrs)
+    #         self._find_loc42()
+    #         self._make_unused(p_nrs)
+    #     # for
+    #
+    # def _find_loc54(self):
+    #     qset = Piece2x2.objects.filter(nr1__in=self.unused, nr2__in=self.unused,
+    #                                    nr3__in=self.unused, nr4__in=self.unused,
+    #                                    side2=self.exp_loc54_s2, side3=self.exp_loc54_s3)
+    #     for p in qset:
+    #         self.ring1.nr54 = p.nr
+    #         p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
+    #         self._make_used(p_nrs)
+    #         self._find_loc51()
+    #         self._make_unused(p_nrs)
+    #     # for
+    #
+    # def _find_loc47(self):
+    #     qset = Piece2x2.objects.filter(nr1__in=self.unused, nr2__in=self.unused,
+    #                                    nr3__in=self.unused, nr4__in=self.unused,
+    #                                    side2=self.exp_loc47_s2, side3=self.exp_loc47_s3)
+    #     for p in qset:
+    #         self.ring1.nr47 = p.nr
+    #         p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
+    #         self._make_used(p_nrs)
+    #         self._find_loc54()
+    #         self._make_unused(p_nrs)
+    #     # for
+    #
+    # def _find_loc23(self):
+    #     qset = Piece2x2.objects.filter(nr1__in=self.unused, nr2__in=self.unused,
+    #                                    nr3__in=self.unused, nr4__in=self.unused,
+    #                                    side1=self.exp_loc23_s1, side2=self.exp_loc23_s2)
+    #     for p in qset:
+    #         self.ring1.nr23 = p.nr
+    #         p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
+    #         self._make_used(p_nrs)
+    #         self._find_loc47()
+    #         self._make_unused(p_nrs)
+    #     # for
+    #
+    # def _find_loc14(self):
+    #     qset = Piece2x2.objects.filter(nr1__in=self.unused, nr2__in=self.unused,
+    #                                    nr3__in=self.unused, nr4__in=self.unused,
+    #                                    side1=self.exp_loc14_s1, side2=self.exp_loc14_s2)
+    #     for p in qset:
+    #         self.ring1.nr14 = p.nr
+    #         p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
+    #         self._make_used(p_nrs)
+    #         self._find_loc23()
+    #         self._make_unused(p_nrs)
+    #     # for
+    #
+    # def _find_loc11(self):
+    #     qset = Piece2x2.objects.filter(nr1__in=self.unused, nr2__in=self.unused,
+    #                                    nr3__in=self.unused, nr4__in=self.unused,
+    #                                    side1=self.exp_loc11_s1, side4=self.exp_loc11_s4)
+    #     for p in qset:
+    #         self.ring1.nr11 = p.nr
+    #         p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
+    #         self._make_used(p_nrs)
+    #         self._find_loc14()
+    #         self._make_unused(p_nrs)
+    #     # for
+    #
+    # def _find_loc18(self):
+    #     qset = Piece2x2.objects.filter(nr1__in=self.unused, nr2__in=self.unused,
+    #                                    nr3__in=self.unused, nr4__in=self.unused,
+    #                                    side1=self.exp_loc18_s1, side4=self.exp_loc18_s4)
+    #     for p in qset:
+    #         self.ring1.nr18 = p.nr
+    #         p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
+    #         self._make_used(p_nrs)
+    #         self._find_loc11()
+    #         self._make_unused(p_nrs)
+    #     # for
+    #
     def _find_loc55(self):
         qset = Piece2x2.objects.filter(nr1__in=self.unused, nr2__in=self.unused,
                                        nr3__in=self.unused, nr4__in=self.unused,
@@ -264,7 +264,7 @@ class Command(BaseCommand):
             p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
             self._make_used(p_nrs)
             if self._check_loc47() and self._check_loc54():
-                self._find_loc18()
+                self._save_ring1()
             self._make_unused(p_nrs)
         # for
 
