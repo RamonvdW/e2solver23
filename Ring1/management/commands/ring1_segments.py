@@ -8,6 +8,7 @@ from django.core.management.base import BaseCommand
 from Pieces2x2.models import TwoSideOptions, TwoSide, Piece2x2
 from Pieces2x2.helpers import calc_segment
 from Ring1.models import Ring1
+from WorkQueue.models import ProcessorUsedPieces
 
 
 class Command(BaseCommand):
@@ -101,5 +102,9 @@ class Command(BaseCommand):
 
         self.stdout.write('[INFO] Creating %s records' % len(bulk2))
         TwoSideOptions.objects.bulk_create(bulk2)
+
+        self.stdout.write('[INFO] Creating ProcessorUsedPieces')
+        ProcessorUsedPieces(processor=processor).save()
+
 
 # end of file

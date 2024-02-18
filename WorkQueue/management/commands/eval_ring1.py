@@ -153,17 +153,17 @@ class Command(BaseCommand):
         if 36 not in self.locs and 139 in unused:
             unused.remove(139)
 
-        if 10 not in self.locs and 208 in unused:
-            unused.remove(208)
-
-        if 15 not in self.locs and 255 in unused:
-            unused.remove(255)
-
-        if 50 not in self.locs and 181 in unused:
-            unused.remove(181)
-
-        if 55 not in self.locs and 249 in unused:
-            unused.remove(249)
+        # if 10 not in self.locs and 208 in unused:
+        #     unused.remove(208)
+        #
+        # if 15 not in self.locs and 255 in unused:
+        #     unused.remove(255)
+        #
+        # if 50 not in self.locs and 181 in unused:
+        #     unused.remove(181)
+        #
+        # if 55 not in self.locs and 249 in unused:
+        #     unused.remove(249)
 
         self.stdout.write('[INFO] %s base pieces in use' % (256 - len(unused)))
         return unused
@@ -232,17 +232,17 @@ class Command(BaseCommand):
         # if loc != 36 and 139 in unused:
         #     unused.remove(139)
 
-        if loc != 10 and 208 in unused:
-            unused.remove(208)
-
-        if loc != 15 and 255 in unused:
-            unused.remove(255)
-
-        if loc != 50 and 181 in unused:
-            unused.remove(181)
-
-        if loc != 55 and 249 in unused:
-            unused.remove(249)
+        # if loc != 10 and 208 in unused:
+        #     unused.remove(208)
+        #
+        # if loc != 15 and 255 in unused:
+        #     unused.remove(255)
+        #
+        # if loc != 50 and 181 in unused:
+        #     unused.remove(181)
+        #
+        # if loc != 55 and 249 in unused:
+        #     unused.remove(249)
 
         for p in (Piece2x2
                   .objects

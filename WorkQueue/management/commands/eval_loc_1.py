@@ -50,17 +50,17 @@ class Command(BaseCommand):
         if self.loc != 36 and 139 in unused:
             unused.remove(139)
 
-        if self.loc != 10 and 208 in unused:
-            unused.remove(208)
-
-        if self.loc != 15 and 255 in unused:
-            unused.remove(255)
-
-        if self.loc != 50 and 181 in unused:
-            unused.remove(181)
-
-        if self.loc != 55 and 249 in unused:
-            unused.remove(249)
+        # if self.loc != 10 and 208 in unused:
+        #     unused.remove(208)
+        #
+        # if self.loc != 15 and 255 in unused:
+        #     unused.remove(255)
+        #
+        # if self.loc != 50 and 181 in unused:
+        #     unused.remove(181)
+        #
+        # if self.loc != 55 and 249 in unused:
+        #     unused.remove(249)
 
         for claim in claimed:
             if claim in unused:
@@ -133,16 +133,16 @@ class Command(BaseCommand):
                         nr3__in=unused,
                         nr4__in=unused))
 
-        if self.loc == 10:
-            qset = qset.filter(nr1=208)
-        elif self.loc == 15:
-            qset = qset.filter(nr2=255)
-        elif self.loc == 36:
+        if self.loc == 36:
             qset = qset.filter(nr2=139)
-        elif self.loc == 50:
-            qset = qset.filter(nr3=181)
-        elif self.loc == 55:
-            qset = qset.filter(nr4=249)
+        # elif self.loc == 10:
+        #     qset = qset.filter(nr1=208)
+        # elif self.loc == 15:
+        #     qset = qset.filter(nr2=255)
+        # elif self.loc == 50:
+        #     qset = qset.filter(nr3=181)
+        # elif self.loc == 55:
+        #     qset = qset.filter(nr4=249)
 
         count = qset.count()
 

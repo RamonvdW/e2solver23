@@ -164,17 +164,17 @@ class Command(BaseCommand):
         if 36 not in self.locs and 139 in unused:
             unused.remove(139)
 
-        if 10 not in self.locs and 208 in unused:
-            unused.remove(208)
-
-        if 15 not in self.locs and 255 in unused:
-            unused.remove(255)
-
-        if 50 not in self.locs and 181 in unused:
-            unused.remove(181)
-
-        if 55 not in self.locs and 249 in unused:
-            unused.remove(249)
+        # if 10 not in self.locs and 208 in unused:
+        #     unused.remove(208)
+        #
+        # if 15 not in self.locs and 255 in unused:
+        #     unused.remove(255)
+        #
+        # if 50 not in self.locs and 181 in unused:
+        #     unused.remove(181)
+        #
+        # if 55 not in self.locs and 249 in unused:
+        #     unused.remove(249)
 
         self.stdout.write('[INFO] %s base pieces in use' % (256 - len(unused)))
         return unused
