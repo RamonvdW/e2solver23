@@ -92,7 +92,19 @@ class Command(BaseCommand):
         self.exp_loc16_s4_set = list(TwoSide.objects.filter(two_sides__in=seg144_inv_set).values_list('nr', flat=True))
 
         # hint 3
+        seg184_set = ['VU', 'JU', 'SU', 'GU', 'CU', 'HU', 'NU', 'LU', 'BU', 'DU', 'FU', 'RU', 'TU', 'PU', 'KU', 'OU']
+        seg184_inv_set = [bb[::-1] for bb in seg184_set]
+        self.exp_loc56_s4_set = list(TwoSide.objects.filter(two_sides__in=seg184_inv_set).values_list('nr', flat=True))
+
+        seg63_set = ['UO', 'GO', 'RO', 'PO', 'LO', 'HO', 'JO', 'KO', 'BO', 'VO', 'FO', 'OO', 'SO', 'DO', 'NO', 'TO', 'CO']
+        self.exp_loc63_s1_set = list(TwoSide.objects.filter(two_sides__in=seg63_set).values_list('nr', flat=True))
+
         # hint 4
+        seg58_set = ['UB', 'UR', 'UN', 'UK', 'UT', 'UV', 'UO', 'UH', 'US', 'UC', 'UF', 'UD', 'UU', 'UJ', 'UP', 'UL']
+        self.exp_loc58_s1_set = list(TwoSide.objects.filter(two_sides__in=seg58_set).values_list('nr', flat=True))
+
+        seg178_set = ['CK', 'LK', 'UK', 'FK', 'NK', 'TK', 'DK', 'KK', 'SK', 'OK', 'BK', 'JK', 'RK', 'HK', 'GK', 'VK']
+        self.exp_loc49_s2_set = list(TwoSide.objects.filter(two_sides__in=seg178_set).values_list('nr', flat=True))
 
     def add_arguments(self, parser):
         parser.add_argument('seed', type=int, help='Randomization seed')
@@ -146,16 +158,51 @@ class Command(BaseCommand):
                                     side1=self.exp_loc15_s1, side2=self.exp_loc15_s2).first()
         return p is not None
 
+    def _check_loc55_c3(self):
+        p = Piece2x2.objects.filter(has_hint=True,
+                                    nr4=249,
+                                    #nr1__in=self.unused, nr2__in=self.unused, nr3__in=self.unused,
+                                    side2=self.exp_loc55_s2, side3=self.exp_loc55_s3).first()
+        return p is not None
+
     def _count(self):
         self.count += 1
         if self.count > self.count_print:
             print('count = %s' % self.count)
             self.count_print += 100
 
-    def _find_loc56_c3(self):
+    def _find_loc63_c3(self):
         #self._count()
         #self._save_ring1()
         self._add_hints_and_save()
+        b = self.bcb3[9:9+2]
+        for p in Piece2x2.objects.filter(nr4=b[0], nr3=b[1],
+                                         nr1__in=self.unused, nr2__in=self.unused,
+                                         side1__in=self.exp_loc63_s1_set, side2=self.exp_loc63_s2):
+            self.ring1.nr63 = p.nr
+            self.exp_loc62_s2 = self.twoside2reverse[p.side4]
+            self.exp_loc55_s3 = self.twoside2reverse[p.side1]
+            p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
+            self._make_used(p_nrs)
+            if self._check_loc55_c3() and self._check_loc15_c2() and self._check_loc10_c1():
+                self._add_hints_and_save()
+                #self._find_loc63_c3()
+            self._make_unused(p_nrs)
+        # for
+
+    def _find_loc56_c3(self):
+        b = self.bcb3[4:4+2]
+        for p in Piece2x2.objects.filter(nr2=b[0], nr4=b[1],
+                                         nr1__in=self.unused, nr3__in=self.unused,
+                                         side3=self.exp_loc56_s3, side4__in=self.exp_loc56_s4_set):
+            self.ring1.nr56 = p.nr
+            self.exp_loc55_s2 = self.twoside2reverse[p.side4]
+            self.exp_loc48_s3 = self.twoside2reverse[p.side1]
+            p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
+            self._make_used(p_nrs)
+            self._find_loc63_c3()
+            self._make_unused(p_nrs)
+        # for
 
     def _find_loc16_c2(self):
         b = self.bcb2[9:9+2]
@@ -272,10 +319,10 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
-        # seg = 144
+        # seg = 178
         # two_sides = TwoSideOptions.objects.filter(processor=1, segment=seg).values_list('two_side', flat=True)
         # bb = list(TwoSide.objects.filter(nr__in=two_sides).values_list('two_sides', flat=True))
-        # print('segment %s: %s' % (seg, repr(bb)))
+        # print('seg%s_set = %s' % (seg, repr(bb)))
         # return
 
         seed = options['seed']
@@ -283,8 +330,10 @@ class Command(BaseCommand):
 
         Ring1.objects.all().delete()
 
+        # print('generate border')
         gen = GenerateBorder(seed)
         sol = gen.get_first_solution()
+        print('[INFO] Outer ring = %s' % repr(sol))
 
         self.bcb1 = sol[:15]
         self.bcb2 = sol[15:30]
