@@ -13,7 +13,7 @@ from Ring1.models import Ring1
 
 class Command(BaseCommand):
 
-    help = "Load progress from a solution"
+    help = "Load progress from a ring1"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -83,19 +83,23 @@ class Command(BaseCommand):
         processor = ProcessorUsedPieces.objects.get(processor=self.processor)
 
         locs = (1, 2, 3, 4, 5, 6, 7, 8,
-                9, 16, 17, 24, 25, 32, 33, 40, 41, 48, 49, 56,
-                57, 58, 59, 60, 61, 62, 63, 64,
-                10, 15, 50, 55)
+                9, 10, 11, 14, 15, 16,
+                17, 18, 23, 24,
+                25, 32,
+                33, 40,
+                41, 42, 47, 48,
+                49, 50, 51, 54, 55, 56,
+                57, 58, 59, 60, 61, 62, 63, 64)
 
         for loc in locs:
 
             field_str = 'nr%s' % loc
             p2x2_nr = getattr(ring1, field_str)
+            print('loc %s ring1 %s = %s' % (loc, field_str, p2x2_nr))
             if p2x2_nr > 0:
 
                 field_str = 'loc%s' % loc
                 setattr(processor, field_str, p2x2_nr)
-
                 p2x2 = Piece2x2.objects.get(nr=p2x2_nr)
 
                 for base_nr in (p2x2.nr1, p2x2.nr2, p2x2.nr3, p2x2.nr4):

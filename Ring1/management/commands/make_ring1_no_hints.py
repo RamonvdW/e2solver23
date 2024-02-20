@@ -8,7 +8,8 @@ from django.core.management.base import BaseCommand
 from BasePieces.border import GenerateBorder
 from BasePieces.hints import CENTER_NR
 from BasePieces.models import BasePiece
-from Pieces2x2.models import Piece2x2, TwoSide
+from Pieces2x2.helpers import calc_segment
+from Pieces2x2.models import Piece2x2, TwoSide, TwoSideOptions
 from Ring1.models import Ring1
 
 
@@ -62,6 +63,25 @@ class Command(BaseCommand):
         parser.add_argument('seed', type=int, help='Randomization seed')
         parser.add_argument('--clean', action='store_true')
 
+    def _reverse_sides(self, options):
+        return [self.twoside2reverse[two_side] for two_side in options]
+
+    def _get_side_options(self, loc, side_nr):
+        segment = calc_segment(loc, side_nr)
+        options = (TwoSideOptions
+                   .objects
+                   .filter(processor=self.processor,
+                           segment=segment)
+                   .values_list('two_side', flat=True))
+        options = list(options)
+
+        if side_nr >= 3:
+            # sides 3 and 4 need to be reversed
+            options = self._reverse_sides(options)
+
+        # print('segment %s options: %s' % (segment, repr(options)))
+        return options
+
     def _make_used(self, p_nrs: tuple | list):
         for nr in p_nrs:
             self.unused.remove(nr)
@@ -84,6 +104,74 @@ class Command(BaseCommand):
         if self.count > self.count_print:
             print('count = %s' % self.count)
             self.count_print += 100
+
+    def _check_claims(self):
+        # check the claims on critical positions
+
+        claimed_nrs = list()
+
+        # loc, loc1..4 (on side 1..4)
+        for tup in ((12, 4, 0, 0, 11),
+                    (13, 5, 14, 0, 0),
+                    (22, 14, 23, 0, 0),
+                    (31, 23, 32, 0, 0),
+                    (39, 0, 40, 47, 0),
+                    (46, 0, 47, 54, 0),
+                    (53, 0, 54, 61, 0),
+                    (52, 0, 0, 60, 51),
+                    (43, 0, 0, 51, 42),
+                    (34, 0, 0, 42, 33),
+                    (26, 18, 0, 0, 25),
+                    (19, 11, 0, 0, 18)):
+
+            loc, loc1, loc2, loc3, loc4 = tup
+
+            unused = self.unused[:]
+            if loc != 36 and 139 in unused:
+                unused.remove(139)
+
+            qset = Piece2x2.objects.filter(nr1__in=unused, nr2__in=unused,
+                                           nr3__in=unused, nr4__in=unused)
+
+            if loc1:
+                nr_str = 'nr%s' % loc1
+                nr1 = getattr(self.ring1, nr_str)
+                p2x2 = Piece2x2.objects.get(nr=nr1)
+                exp_s1 = self.twoside2reverse[p2x2.side3]
+                qset = qset.filter(side1=exp_s1)
+
+            if loc2:
+                nr_str = 'nr%s' % loc2
+                nr2 = getattr(self.ring1, nr_str)
+                p2x2 = Piece2x2.objects.get(nr=nr2)
+                exp_s2 = self.twoside2reverse[p2x2.side4]
+                qset = qset.filter(side2=exp_s2)
+
+            if loc3:
+                nr_str = 'nr%s' % loc3
+                nr3 = getattr(self.ring1, nr_str)
+                p2x2 = Piece2x2.objects.get(nr=nr3)
+                exp_s3 = self.twoside2reverse[p2x2.side1]
+                qset = qset.filter(side3=exp_s3)
+
+            if loc4:
+                nr_str = 'nr%s' % loc4
+                nr4 = getattr(self.ring1, nr_str)
+                p2x2 = Piece2x2.objects.get(nr=nr4)
+                exp_s4 = self.twoside2reverse[p2x2.side2]
+                qset = qset.filter(side4=exp_s4)
+
+            for nr_str in ('nr1', 'nr2', 'nr3', 'nr4'):
+                claim = list(qset.distinct(nr_str).values_list(nr_str, flat=True))
+                if len(claim) == 1:
+                    nr = claim[0]
+                    if nr in claimed_nrs:
+                        # duplicate claim for the same nr
+                        return
+                    claimed_nrs.append(nr)
+        # for
+
+        self._save_ring1()
 
     def _check_loc42(self):
         qset = Piece2x2.objects.filter(nr1__in=self.unused, nr2__in=self.unused,
@@ -165,7 +253,7 @@ class Command(BaseCommand):
             self.ring1.nr42 = p.nr
             p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
             self._make_used(p_nrs)
-            self._save_ring1()
+            self._check_claims()
             self._make_unused(p_nrs)
         # for
 
