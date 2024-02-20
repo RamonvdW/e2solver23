@@ -49,9 +49,11 @@ class Command(BaseCommand):
             twoside2reverse[nr] = rev_nr
         # for
 
+        used = ProcessorUsedPieces(processor=processor)
+
         bulk = list()
         for loc in range(1, 64+1):
-            if loc not in (11, 18, 14, 23, 47, 54, 42, 51, 36):
+            if True:    # loc not in (11, 18, 14, 23, 47, 54, 42, 51, 36):
                 nr_str = 'nr%s' % loc
                 p_nr = getattr(ring1, nr_str, None)
 
@@ -81,6 +83,14 @@ class Command(BaseCommand):
                                     segment=calc_segment(loc, 4),
                                     two_side=twoside2reverse[p2x2.side4])
                     bulk.append(options)
+
+                    # update ProcessorUsedPieces
+                    loc_str = 'loc%s' % loc
+                    setattr(used, loc_str, p_nr)
+                    for nr in (p2x2.nr1, p2x2.nr2, p2x2.nr3, p2x2.nr4):
+                        nr_str = 'nr%s' % nr
+                        setattr(used, nr_str, True)
+                    # for
         # for
 
         # remove dupes
@@ -104,7 +114,7 @@ class Command(BaseCommand):
         TwoSideOptions.objects.bulk_create(bulk2)
 
         self.stdout.write('[INFO] Creating ProcessorUsedPieces')
-        ProcessorUsedPieces(processor=processor).save()
+        used.save()
 
 
 # end of file
