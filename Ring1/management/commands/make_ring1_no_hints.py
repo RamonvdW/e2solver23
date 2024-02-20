@@ -270,15 +270,60 @@ class Command(BaseCommand):
         # for
         return True
 
+    def _check_loc52_loc53(self):
+        qset52 = Piece2x2.objects.filter(nr1__in=self.unused, nr2__in=self.unused,
+                                         nr3__in=self.unused, nr4__in=self.unused,
+                                         side4=self.exp_loc52_s4, side3=self.exp_loc52_s3)
+
+        for p in qset52:
+            exp_loc53_s4 = self.twoside2reverse[p.side2]
+
+            unused = self.unused[:]
+            for nr in (p.nr1, p.nr2, p.nr3, p.nr4):
+                unused.remove(nr)
+            # for
+
+            qset53 = Piece2x2.objects.filter(nr1__in=unused, nr2__in=unused,
+                                             nr3__in=unused, nr4__in=unused,
+                                             side2=self.exp_loc53_s2, side3=self.exp_loc53_s3, side4=exp_loc53_s4)
+            if qset53.count() == 0:
+                # no solution
+                return False
+        # for
+        return True
+
+    def _check_loc26_loc34(self):
+        qset26 = Piece2x2.objects.filter(nr1__in=self.unused, nr2__in=self.unused,
+                                         nr3__in=self.unused, nr4__in=self.unused,
+                                         side1=self.exp_loc26_s1, side4=self.exp_loc26_s4)
+
+        for p in qset26:
+            exp_loc34_s1 = self.twoside2reverse[p.side3]
+
+            unused = self.unused[:]
+            for nr in (p.nr1, p.nr2, p.nr3, p.nr4):
+                unused.remove(nr)
+            # for
+
+            qset34 = Piece2x2.objects.filter(nr1__in=unused, nr2__in=unused,
+                                             nr3__in=unused, nr4__in=unused,
+                                             side1=exp_loc34_s1, side3=self.exp_loc34_s3, side4=self.exp_loc34_s4)
+            if qset34.count() == 0:
+                # no solution
+                return False
+        # for
+        return True
+
     def _find_loc42(self):
         qset = Piece2x2.objects.filter(nr1__in=self.unused, nr2__in=self.unused,
                                        nr3__in=self.unused, nr4__in=self.unused,
                                        side3=self.exp_loc42_s3, side4=self.exp_loc42_s4)
         for p in qset:
             self.ring1.nr42 = p.nr
+            self.exp_loc34_s3 = self.twoside2reverse[p.side1]
             p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
             self._make_used(p_nrs)
-            if self._check_loc12_loc13() and self._check_loc31_loc39():
+            if self._check_loc12_loc13() and self._check_loc31_loc39() and self._check_loc52_loc53():
                 self._check_claims()
             self._make_unused(p_nrs)
         # for
@@ -289,6 +334,7 @@ class Command(BaseCommand):
                                        side3=self.exp_loc51_s3, side4=self.exp_loc51_s4)
         for p in qset:
             self.ring1.nr51 = p.nr
+            self.exp_loc52_s4 = self.twoside2reverse[p.side2]
             p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
             self._make_used(p_nrs)
             self._find_loc42()
@@ -301,6 +347,7 @@ class Command(BaseCommand):
                                        side2=self.exp_loc54_s2, side3=self.exp_loc54_s3)
         for p in qset:
             self.ring1.nr54 = p.nr
+            self.exp_loc53_s2 = self.twoside2reverse[p.side4]
             p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
             self._make_used(p_nrs)
             self._find_loc51()
@@ -365,6 +412,7 @@ class Command(BaseCommand):
                                        side1=self.exp_loc18_s1, side4=self.exp_loc18_s4)
         for p in qset:
             self.ring1.nr18 = p.nr
+            self.exp_loc26_s1 = self.twoside2reverse[p.side3]
             p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
             self._make_used(p_nrs)
             self._find_loc11()
@@ -439,6 +487,7 @@ class Command(BaseCommand):
                                        side1=self.exp_loc25_s1, side3=self.exp_loc25_s3)
         for p in qset:
             self.ring1.nr25 = p.nr
+            self.exp_loc26_s4 = self.twoside2reverse[p.side2]
             p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
             self._make_used(p_nrs)
             self._find_loc10()
@@ -453,6 +502,7 @@ class Command(BaseCommand):
         for p in qset:
             self.ring1.nr33 = p.nr
             self.exp_loc25_s3 = self.twoside2reverse[p.side1]
+            self.exp_loc34_s4 = self.twoside2reverse[p.side2]
             p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
             self._make_used(p_nrs)
             self._find_loc25_c1()
@@ -465,6 +515,7 @@ class Command(BaseCommand):
                                          nr1__in=self.unused, nr2__in=self.unused,
                                          side4=self.exp_loc60_s4, side2=self.exp_loc60_s2):
             self.ring1.nr60 = p.nr
+            self.exp_loc52_s3 = self.twoside2reverse[p.side1]
             p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
             self._make_used(p_nrs)
             self._find_loc33_c4()
@@ -478,6 +529,7 @@ class Command(BaseCommand):
                                          side2=self.exp_loc61_s2):
             self.ring1.nr61 = p.nr
             self.exp_loc60_s2 = self.twoside2reverse[p.side4]
+            self.exp_loc53_s3 = self.twoside2reverse[p.side1]
             p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
             self._make_used(p_nrs)
             self._find_loc60_c4()
