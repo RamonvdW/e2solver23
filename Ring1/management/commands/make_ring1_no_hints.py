@@ -140,6 +140,7 @@ class Command(BaseCommand):
             count = qset.count()
             if count == 0:
                 # no solution
+                self.stdout.write('[DEBUG] No solution for loc %s' % loc)
                 return
 
             for nr_str in ('nr1', 'nr2', 'nr3', 'nr4'):
@@ -148,6 +149,7 @@ class Command(BaseCommand):
                     nr = claim[0]
                     if nr in claimed_nrs:
                         # duplicate claim for the same nr
+                        self.stdout.write('[DEBUG] Duplicate claims for base piece %s' % nr)
                         return
                     claimed_nrs.append(nr)
         # for
@@ -244,6 +246,7 @@ class Command(BaseCommand):
                                              side1=self.exp_loc13_s1, side2=self.exp_loc13_s2, side4=exp_loc13_s4)
             if qset13.count() == 0:
                 # no solution
+                self.stdout.write('[DEBUG] loc12+13: no solution')
                 return False
         # for
         return True
@@ -266,6 +269,7 @@ class Command(BaseCommand):
                                              side1=exp_loc39_s1, side2=self.exp_loc39_s2, side3=self.exp_loc39_s3)
             if qset39.count() == 0:
                 # no solution
+                self.stdout.write('[DEBUG] loc31+39: no solution')
                 return False
         # for
         return True
@@ -288,6 +292,7 @@ class Command(BaseCommand):
                                              side2=self.exp_loc53_s2, side3=self.exp_loc53_s3, side4=exp_loc53_s4)
             if qset53.count() == 0:
                 # no solution
+                self.stdout.write('[DEBUG] loc52+53: no solution')
                 return False
         # for
         return True
@@ -310,6 +315,7 @@ class Command(BaseCommand):
                                              side1=exp_loc34_s1, side3=self.exp_loc34_s3, side4=self.exp_loc34_s4)
             if qset34.count() == 0:
                 # no solution
+                self.stdout.write('[DEBUG] loc26+34: no solution')
                 return False
         # for
         return True
@@ -323,7 +329,7 @@ class Command(BaseCommand):
             self.exp_loc34_s3 = self.twoside2reverse[p.side1]
             p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
             self._make_used(p_nrs)
-            if self._check_loc12_loc13() and self._check_loc31_loc39() and self._check_loc52_loc53():
+            if self._check_loc12_loc13() and self._check_loc31_loc39() and self._check_loc52_loc53() and self._check_loc26_loc34():
                 self._check_claims()
             self._make_unused(p_nrs)
         # for
