@@ -244,12 +244,11 @@ class Command(BaseCommand):
             qset13 = Piece2x2.objects.filter(nr1__in=unused, nr2__in=unused,
                                              nr3__in=unused, nr4__in=unused,
                                              side1=self.exp_loc13_s1, side2=self.exp_loc13_s2, side4=exp_loc13_s4)
-            if qset13.count() == 0:
-                # no solution
-                self.stdout.write('[DEBUG] loc12+13: no solution')
-                return False
+            if qset13.count() > 0:
+                # found a solution
+                return True
         # for
-        return True
+        return False
 
     def _check_loc31_loc39(self):
         qset31 = Piece2x2.objects.filter(nr1__in=self.unused, nr2__in=self.unused,
@@ -267,12 +266,11 @@ class Command(BaseCommand):
             qset39 = Piece2x2.objects.filter(nr1__in=unused, nr2__in=unused,
                                              nr3__in=unused, nr4__in=unused,
                                              side1=exp_loc39_s1, side2=self.exp_loc39_s2, side3=self.exp_loc39_s3)
-            if qset39.count() == 0:
-                # no solution
-                self.stdout.write('[DEBUG] loc31+39: no solution')
-                return False
+            if qset39.count() > 0:
+                # found a solution
+                return True
         # for
-        return True
+        return False
 
     def _check_loc52_loc53(self):
         qset52 = Piece2x2.objects.filter(nr1__in=self.unused, nr2__in=self.unused,
@@ -291,11 +289,10 @@ class Command(BaseCommand):
                                              nr3__in=unused, nr4__in=unused,
                                              side2=self.exp_loc53_s2, side3=self.exp_loc53_s3, side4=exp_loc53_s4)
             if qset53.count() == 0:
-                # no solution
-                self.stdout.write('[DEBUG] loc52+53: no solution')
-                return False
+                # found a solution
+                return True
         # for
-        return True
+        return False
 
     def _check_loc26_loc34(self):
         qset26 = Piece2x2.objects.filter(nr1__in=self.unused, nr2__in=self.unused,
@@ -314,11 +311,10 @@ class Command(BaseCommand):
                                              nr3__in=unused, nr4__in=unused,
                                              side1=exp_loc34_s1, side3=self.exp_loc34_s3, side4=self.exp_loc34_s4)
             if qset34.count() == 0:
-                # no solution
-                self.stdout.write('[DEBUG] loc26+34: no solution')
-                return False
+                # found a solution
+                return True
         # for
-        return True
+        return False
 
     def _find_loc42(self):
         qset = Piece2x2.objects.filter(nr1__in=self.unused, nr2__in=self.unused,
@@ -329,7 +325,11 @@ class Command(BaseCommand):
             self.exp_loc34_s3 = self.twoside2reverse[p.side1]
             p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
             self._make_used(p_nrs)
-            if self._check_loc12_loc13() and self._check_loc31_loc39() and self._check_loc52_loc53() and self._check_loc26_loc34():
+            if (self._check_loc12_loc13() and
+                    self._check_loc31_loc39() and
+                    self._check_loc52_loc53() and
+                    self._check_loc26_loc34()):
+
                 self._check_claims()
             self._make_unused(p_nrs)
         # for
