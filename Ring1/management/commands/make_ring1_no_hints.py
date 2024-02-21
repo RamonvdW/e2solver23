@@ -891,6 +891,7 @@ class Command(BaseCommand):
         if options['clean']:
             self.stdout.write('[WARNING] Deleting all Ring1')
             Ring1.objects.all().delete()
+            return
 
         # print('generate border')
         gen = GenerateBorder(seed)
