@@ -67,7 +67,16 @@ class Migration(migrations.Migration):
             options={
                 'verbose_name': 'Piece 2x2',
                 'verbose_name_plural': 'Pieces 2x2',
-                'indexes': [models.Index(fields=['is_border'], name='Pieces2x2_p_is_bord_14ca88_idx'), models.Index(fields=['has_hint'], name='Pieces2x2_p_has_hin_f9193d_idx'), models.Index(fields=['nr1'], name='Pieces2x2_p_nr1_7f9b6f_idx'), models.Index(fields=['nr2'], name='Pieces2x2_p_nr2_44ea46_idx'), models.Index(fields=['nr3'], name='Pieces2x2_p_nr3_3f9d20_idx'), models.Index(fields=['nr4'], name='Pieces2x2_p_nr4_ac6d56_idx'), models.Index(fields=['side1'], name='Pieces2x2_p_side1_b2958d_idx'), models.Index(fields=['side2'], name='Pieces2x2_p_side2_d46a88_idx'), models.Index(fields=['side3'], name='Pieces2x2_p_side3_83760f_idx'), models.Index(fields=['side4'], name='Pieces2x2_p_side4_6c4d30_idx')],
+                'indexes': [models.Index(fields=['is_border'], name='Pieces2x2_p_is_bord_14ca88_idx'),
+                            models.Index(fields=['has_hint'], name='Pieces2x2_p_has_hin_f9193d_idx'),
+                            models.Index(fields=['nr1'], name='Pieces2x2_p_nr1_7f9b6f_idx'),
+                            models.Index(fields=['nr2'], name='Pieces2x2_p_nr2_44ea46_idx'),
+                            models.Index(fields=['nr3'], name='Pieces2x2_p_nr3_3f9d20_idx'),
+                            models.Index(fields=['nr4'], name='Pieces2x2_p_nr4_ac6d56_idx'),
+                            models.Index(fields=['side1'], name='Pieces2x2_p_side1_b2958d_idx'),
+                            models.Index(fields=['side2'], name='Pieces2x2_p_side2_d46a88_idx'),
+                            models.Index(fields=['side3'], name='Pieces2x2_p_side3_83760f_idx'),
+                            models.Index(fields=['side4'], name='Pieces2x2_p_side4_6c4d30_idx')],
             },
         ),
     ]

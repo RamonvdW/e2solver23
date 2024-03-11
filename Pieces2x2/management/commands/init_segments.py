@@ -5,7 +5,6 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from django.utils import timezone
 from Pieces2x2.models import TwoSide, TwoSideOptions, Piece2x2, EvalProgress
 from Pieces2x2.helpers import LOC_CORNERS, LOC_BORDERS, LOC_HINTS, calc_segment
 from WorkQueue.operations import used_note_add

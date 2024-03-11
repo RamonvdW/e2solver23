@@ -24,7 +24,7 @@ class Piece2x2Admin(admin.ModelAdmin):
 
 
 admin.site.register(TwoSide)
-admin.site.register(TwoSideOptions,TwoSideOptionsAdmin)
+admin.site.register(TwoSideOptions, TwoSideOptionsAdmin)
 admin.site.register(EvalProgress, ProgressAdmin)
 admin.site.register(Piece2x2, Piece2x2Admin)
 

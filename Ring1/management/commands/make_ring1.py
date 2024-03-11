@@ -317,6 +317,33 @@ class Command(BaseCommand):
             self._make_unused(p_nrs)
         # for
 
+    def _find_best(self):
+        if self.ring1.nr15 > 0:
+            return 12
+        if self.ring1.nr10 > 0:
+            return 11
+        if self.ring1.nr63 > 0:
+            return 10
+        if self.ring1.nr56 > 0:
+            return 9
+        if self.ring1.nr16 > 0:
+            return 8
+        if self.ring1.nr7 > 0:
+            return 7
+        if self.ring1.nr9 > 0:
+            return 6
+        if self.ring1.nr2 > 0:
+            return 5
+        if self.ring1.nr57 > 0:
+            return 4
+        if self.ring1.nr64 > 0:
+            return 3
+        if self.ring1.nr8 > 0:
+            return 2
+        if self.ring1.nr1 > 0:
+            return 1
+        return 0
+
     def handle(self, *args, **options):
 
         # seg = 178
@@ -339,13 +366,18 @@ class Command(BaseCommand):
         self.bcb2 = sol[15:30]
         self.bcb3 = sol[30:45]
         self.bcb4 = sol[45:]
+        # print('bcb1: %s' % repr(self.bcb1))
+        # print('bcb2: %s' % repr(self.bcb2))
+        # print('bcb3: %s' % repr(self.bcb3))
+        # print('bcb4: %s' % repr(self.bcb4))
 
         try:
             self._find_loc1_c1()
         except KeyboardInterrupt:
             pass
         else:
-            print('[INFO] Counted: %s' % self.count)
+            best = self._find_best()
+            print('[INFO] Counted: %s; Best: %s' % (self.count, best))
 
 
 # end of file

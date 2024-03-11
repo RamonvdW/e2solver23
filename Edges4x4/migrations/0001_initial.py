@@ -34,7 +34,10 @@ class Migration(migrations.Migration):
             options={
                 'verbose_name': 'Edge 4x4',
                 'verbose_name_plural': 'Edges 4x4',
-                'indexes': [models.Index(fields=['side1'], name='Edges4x4_ed_side1_184c26_idx'), models.Index(fields=['side2'], name='Edges4x4_ed_side2_60b50c_idx'), models.Index(fields=['side3'], name='Edges4x4_ed_side3_df9c07_idx'), models.Index(fields=['side4'], name='Edges4x4_ed_side4_f08747_idx')],
+                'indexes': [models.Index(fields=['side1'], name='Edges4x4_ed_side1_184c26_idx'),
+                            models.Index(fields=['side2'], name='Edges4x4_ed_side2_60b50c_idx'),
+                            models.Index(fields=['side3'], name='Edges4x4_ed_side3_df9c07_idx'),
+                            models.Index(fields=['side4'], name='Edges4x4_ed_side4_f08747_idx')],
             },
         ),
     ]

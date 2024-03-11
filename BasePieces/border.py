@@ -60,7 +60,7 @@ class GenerateBorder(object):
 
         # the allowed inner side for the border piece just before/after a corner
         self.inner_b_requirements = {
-            # c,b: corner, base nr
+            # c,b: c=first to fourth corner placed, b=corner base nr
             (1, 1): ('BB', 'BD', 'BF', 'BJ', 'BL', 'BO', 'BR', 'BT', 'BU', 'GB', 'GD', 'GL', 'GO', 'GP', 'GT', 'GU',
                      'HB', 'HD', 'HF', 'HJ', 'HL', 'HO', 'HP', 'HU', 'JD', 'JF', 'JJ', 'JO', 'JP', 'JR', 'JT', 'JU',
                      'OB', 'OD', 'OF', 'OJ', 'OL', 'OO', 'OT', 'OU', 'PB', 'PD', 'PF', 'PJ', 'PL', 'PO', 'PR', 'PT',
@@ -154,7 +154,9 @@ class GenerateBorder(object):
     def _iter_recurse(self):
         # print("(%s) %s" % (len(self.solve_order), self.solve_order))
         if len(self.solve_order) == 60:
+            # solution is complete, but is it correct?
             if self.side_order[0] == self.side_order[-1]:
+                # the sides match
                 # final inner check
                 corner = 1
                 c = self.solve_order[0]
@@ -172,50 +174,54 @@ class GenerateBorder(object):
                     sol = self.solve_order[-7:] + self.solve_order[:-7]
                     yield sol
 
+        elif len(self.solve_order) in (0, 15, 30, 45):
+            # add a corner
+            prev_side = self.side_order[-1]
+            for c in self.c_nrs:
+                if c not in self.solve_order:
+                    # corner is unused
+                    side_in, side_out = self.c_in_out[c]
+                    if side_in == prev_side:
+                        # corner fits
+                        self.solve_order.append(c)
+                        self.side_order.append(side_out)
+
+                        yield from self._iter_recurse()
+
+                        self.solve_order = self.solve_order[:-1]
+                        self.side_order = self.side_order[:-1]
+            # for
         else:
-            if len(self.solve_order) in (0, 15, 30, 45):
-                # add a corner
-                prev_side = self.side_order[-1]
-                for c in self.c_nrs:
-                    if c not in self.solve_order:
-                        side_in, side_out = self.c_in_out[c]
-                        if side_in == prev_side:
-                            self.solve_order.append(c)
+            # add a border
+            prev_side = self.side_order[-1]
+            nrs = self.in2b_nrs[prev_side]      # all possible pieces with that specific side
+            for b in nrs:
+                if b not in self.solve_order:
+                    # base piece is unused
+                    side_in, side_out = self.b_in_out[b]
+                    if side_in == prev_side:
+                        # piece fits
+                        ok = True
+                        if len(self.solve_order) in (16, 31, 46):
+                            # just beyond a corner
+                            corner = 1 + int((len(self.solve_order) - 1) / 15)
+                            # corner: 2, 3 or 4
+                            c = self.solve_order[-1]        # corner base nr
+                            req = self.inner_b_requirements[(corner, c)]
+                            prev_b = self.solve_order[-2]
+                            bb = self.b_inner[prev_b] + self.b_inner[b]
+                            ok = bb in req
+                            # print('bb %s is %s' % (bb, ok))
+
+                        if ok:
+                            self.solve_order.append(b)
                             self.side_order.append(side_out)
 
-                            yield from  self._iter_recurse()
+                            yield from self._iter_recurse()
 
                             self.solve_order = self.solve_order[:-1]
                             self.side_order = self.side_order[:-1]
-                # for
-            else:
-                # add a border
-                prev_side = self.side_order[-1]
-                nrs = self.in2b_nrs[prev_side]
-                for b in nrs:
-                    if b not in self.solve_order:
-                        side_in, side_out = self.b_in_out[b]
-                        if side_in == prev_side:
-                            ok = True
-                            if len(self.solve_order) in (16, 31, 46):
-                                corner = 1 + int((len(self.solve_order) - 1) / 15)
-                                c = self.solve_order[-1]
-                                req = self.inner_b_requirements[(corner, c)]
-                                if len(req) > 0:
-                                    prev_b = self.solve_order[-2]
-                                    bb = self.b_inner[prev_b] + self.b_inner[b]
-                                    ok = bb in req
-                                    # print('bb %s is %s' % (bb, ok))
-
-                            if ok:
-                                self.solve_order.append(b)
-                                self.side_order.append(side_out)
-
-                                yield from self._iter_recurse()
-
-                                self.solve_order = self.solve_order[:-1]
-                                self.side_order = self.side_order[:-1]
-                # for
+            # for
 
     def iter_solutions(self):
         self.solve_order = list()

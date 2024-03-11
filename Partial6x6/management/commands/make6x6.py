@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -835,7 +835,7 @@ class Command(BaseCommand):
         if count > 0:
             count = self._generate_quart6(14, 15, 23, (13, 31))
         if count > 0:
-            count =self._generate_quart6(51, 50, 42, (34, 52))
+            count = self._generate_quart6(51, 50, 42, (34, 52))
         if count > 0:
             count = self._generate_quart6(47, 55, 54, (39, 53))
         return count

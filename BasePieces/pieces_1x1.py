@@ -9,6 +9,7 @@
 
 # TODO: verify against own set
 
+# noinspection SpellCheckingInspection
 PIECES = [
     "AQXX",     # 1 = first corner
     "AEXX",

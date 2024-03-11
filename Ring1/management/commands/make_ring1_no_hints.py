@@ -88,6 +88,9 @@ class Command(BaseCommand):
     def _check_claims(self):
         # check the claims on critical positions
 
+        self._save_ring1()
+        raise ValueError("end")
+
         unused = self.unused[:]
         claimed_nrs = list()
 
