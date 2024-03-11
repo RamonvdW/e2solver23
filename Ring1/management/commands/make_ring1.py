@@ -355,7 +355,7 @@ class Command(BaseCommand):
         seed = options['seed']
         self.ring1.seed = seed
 
-        Ring1.objects.all().delete()
+        # Ring1.objects.all().delete()
 
         # print('generate border')
         gen = GenerateBorder(seed)
