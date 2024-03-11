@@ -108,6 +108,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('seed', type=int, help='Randomization seed')
+        parser.add_argument('--clean', action='store_true')
 
     def _make_used(self, p_nrs: tuple | list):
         for nr in p_nrs:
@@ -174,7 +175,7 @@ class Command(BaseCommand):
     def _find_loc63_c3(self):
         #self._count()
         #self._save_ring1()
-        self._add_hints_and_save()
+        #self._add_hints_and_save()
         b = self.bcb3[9:9+2]
         for p in Piece2x2.objects.filter(nr4=b[0], nr3=b[1],
                                          nr1__in=self.unused, nr2__in=self.unused,
@@ -355,7 +356,10 @@ class Command(BaseCommand):
         seed = options['seed']
         self.ring1.seed = seed
 
-        # Ring1.objects.all().delete()
+        if options['clean']:
+            self.stdout.write('[WARNING] Deleting all Ring1')
+            Ring1.objects.all().delete()
+            return
 
         # print('generate border')
         gen = GenerateBorder(seed)
