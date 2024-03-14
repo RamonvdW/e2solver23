@@ -509,6 +509,7 @@ class Command(BaseCommand):
         # for
 
     def handle(self, *args, **options):
+        corner = options['corner']
         if corner == 1:
             self._needs_c1()
         elif corner == 2:
