@@ -19,6 +19,15 @@ class Command(BaseCommand):
         seed = options['seed']
         gen = GenerateBorder(seed)
         for sol in gen.iter_solutions():
-            print('solution: %s' % repr(sol))
+            chk = frozenset(sol)
+            if len(chk) != len(sol):
+                print('BAD solution: %s' % repr(sol))
+                chk = list(frozenset(sol))
+                chk.sort()
+                print('              %s' % repr(chk))
+                sol.sort()
+                print('              %s' % repr(sol))
+            else:
+                print('solution: %s' % repr(sol))
 
 # end of file

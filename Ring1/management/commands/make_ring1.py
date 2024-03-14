@@ -8,7 +8,7 @@ from django.core.management.base import BaseCommand
 from BasePieces.border import GenerateBorder
 from BasePieces.hints import ALL_HINT_NRS
 from BasePieces.models import BasePiece
-from Pieces2x2.models import Piece2x2, TwoSide, TwoSideOptions
+from Pieces2x2.models import Piece2x2, TwoSide
 from Ring1.models import Ring1
 
 
@@ -73,11 +73,6 @@ class Command(BaseCommand):
         self.count = 0
         self.count_print = 100
         self.bulk = list()
-
-        self.learn_c1_p4 = list()
-        self.learn_c2_p3 = list()
-        self.learn_c3_p1 = list()
-        self.learn_c4_p2 = list()
 
         # hint 1
         seg10_set = ['VB', 'VU', 'VR', 'VG', 'VC', 'VF', 'VN', 'VO', 'VT', 'VH', 'VS', 'VP', 'VD', 'VJ', 'VK', 'VL', 'VV']
@@ -221,9 +216,6 @@ class Command(BaseCommand):
             p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
             self._make_used(p_nrs)
             if self._check_loc15_c2() and self._check_loc10_c1():
-                if p.nr3 not in self.learn_c2_p3:
-                    self.learn_c2_p3.append(p.nr3)
-
                 self._find_loc56_c3()
             self._make_unused(p_nrs)
         # for
@@ -254,9 +246,6 @@ class Command(BaseCommand):
             p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
             self._make_used(p_nrs)
             if self._check_loc10_c1():
-                if p.nr4 not in self.learn_c1_p4:
-                    self.learn_c1_p4.append(p.nr4)
-
                 self._find_loc7_c2()
             self._make_unused(p_nrs)
         # for
@@ -393,11 +382,5 @@ class Command(BaseCommand):
         else:
             best = self._find_best()
             print('[INFO] Counted: %s; Best: %s' % (self.count, best))
-
-            if len(self.learn_c1_p4) > 0:
-                print('[DEBUG] learn_c1_p4: %s --> %s' % (self.bcb1[7], repr(self.learn_c1_p4)))
-
-            if len(self.learn_c2_p3) > 0:
-                print('[DEBUG] learn_c2_p3: %s --> %s' % (self.bcb2[7], repr(self.learn_c2_p3)))
 
 # end of file
