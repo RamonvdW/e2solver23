@@ -84,11 +84,27 @@ class Command(BaseCommand):
             p9_exp_s1 = self.twoside2reverse[p1.side3]
             used1 = [p1.nr1, p1.nr2, p1.nr3, p1.nr4]
 
-            for p2 in Piece2x2.objects.filter(side4=p2_exp_s4, side3__in=p2_exp_s3_set).exclude(nr1__in=used1).exclude(nr2__in=used1).exclude(nr3__in=used1).exclude(nr4__in=used1):
+            for p2 in (Piece2x2
+                       .objects
+                       .filter(side4=p2_exp_s4,
+                               side3__in=p2_exp_s3_set)
+                       .exclude(nr1__in=used1)
+                       .exclude(nr2__in=used1)
+                       .exclude(nr3__in=used1)
+                       .exclude(nr4__in=used1)):
+
                 used2 = used1[:]
                 used2.extend([p2.nr1, p2.nr2, p2.nr3, p2.nr4])
 
-                for p9 in Piece2x2.objects.filter(side1=p9_exp_s1, side2__in=p9_exp_s2_set).exclude(nr1__in=used2).exclude(nr2__in=used2).exclude(nr3__in=used2).exclude(nr4__in=used2):
+                for p9 in (Piece2x2
+                           .objects
+                           .filter(side1=p9_exp_s1,
+                                   side2__in=p9_exp_s2_set)
+                           .exclude(nr1__in=used2)
+                           .exclude(nr2__in=used2)
+                           .exclude(nr3__in=used2)
+                           .exclude(nr4__in=used2)):
+
                     bbbcbbb = (p9.nr3, p9.nr1, p1.nr3, p1.nr1, p1.nr2, p2.nr1, p2.nr2)
                     self._add_bbbcbbb(bbbcbbb)
                 # for
@@ -107,11 +123,27 @@ class Command(BaseCommand):
             p16_exp_s1 = self.twoside2reverse[p8.side3]
             used1 = [p8.nr1, p8.nr2, p8.nr3, p8.nr4]
 
-            for p7 in Piece2x2.objects.filter(side2=p7_exp_s2, side3__in=p7_exp_s3_set).exclude(nr1__in=used1).exclude(nr2__in=used1).exclude(nr3__in=used1).exclude(nr4__in=used1):
+            for p7 in (Piece2x2
+                       .objects
+                       .filter(side2=p7_exp_s2,
+                               side3__in=p7_exp_s3_set)
+                       .exclude(nr1__in=used1)
+                       .exclude(nr2__in=used1)
+                       .exclude(nr3__in=used1)
+                       .exclude(nr4__in=used1)):
+
                 used2 = used1[:]
                 used2.extend([p7.nr1, p7.nr2, p7.nr3, p7.nr4])
 
-                for p16 in Piece2x2.objects.filter(side1=p16_exp_s1, side4__in=p16_exp_s4_set).exclude(nr1__in=used2).exclude(nr2__in=used2).exclude(nr3__in=used2).exclude(nr4__in=used2):
+                for p16 in (Piece2x2
+                            .objects
+                            .filter(side1=p16_exp_s1,
+                                    side4__in=p16_exp_s4_set)
+                            .exclude(nr1__in=used2)
+                            .exclude(nr2__in=used2)
+                            .exclude(nr3__in=used2)
+                            .exclude(nr4__in=used2)):
+
                     bbbcbbb = (p7.nr1, p7.nr2, p8.nr1, p8.nr2, p8.nr4, p16.nr2, p16.nr4)
                     self._add_bbbcbbb(bbbcbbb)
                 # for
@@ -130,11 +162,27 @@ class Command(BaseCommand):
             p56_exp_s3 = self.twoside2reverse[p64.side1]
             used1 = [p64.nr1, p64.nr2, p64.nr3, p64.nr4]
 
-            for p63 in Piece2x2.objects.filter(side2=p63_exp_s2, side1__in=p63_exp_s1_set).exclude(nr1__in=used1).exclude(nr2__in=used1).exclude(nr3__in=used1).exclude(nr4__in=used1):
+            for p63 in (Piece2x2
+                        .objects
+                        .filter(side2=p63_exp_s2,
+                                side1__in=p63_exp_s1_set)
+                        .exclude(nr1__in=used1)
+                        .exclude(nr2__in=used1)
+                        .exclude(nr3__in=used1)
+                        .exclude(nr4__in=used1)):
+
                 used2 = used1[:]
                 used2.extend([p63.nr1, p63.nr2, p63.nr3, p63.nr4])
 
-                for p56 in Piece2x2.objects.filter(side3=p56_exp_s3, side4__in=p56_exp_s4_set).exclude(nr1__in=used2).exclude(nr2__in=used2).exclude(nr3__in=used2).exclude(nr4__in=used2):
+                for p56 in (Piece2x2
+                            .objects
+                            .filter(side3=p56_exp_s3,
+                                    side4__in=p56_exp_s4_set)
+                            .exclude(nr1__in=used2)
+                            .exclude(nr2__in=used2)
+                            .exclude(nr3__in=used2)
+                            .exclude(nr4__in=used2)):
+
                     bbbcbbb = (p56.nr2, p56.nr4, p64.nr2, p64.nr4, p64.nr3, p63.nr4, p63.nr3)
                     self._add_bbbcbbb(bbbcbbb)
                 # for
@@ -153,11 +201,27 @@ class Command(BaseCommand):
             p49_exp_s3 = self.twoside2reverse[p57.side1]
             used1 = [p57.nr1, p57.nr2, p57.nr3, p57.nr4]
 
-            for p58 in Piece2x2.objects.filter(side4=p58_exp_s4, side1__in=p58_exp_s1_set).exclude(nr1__in=used1).exclude(nr2__in=used1).exclude(nr3__in=used1).exclude(nr4__in=used1):
+            for p58 in (Piece2x2
+                        .objects
+                        .filter(side4=p58_exp_s4,
+                                side1__in=p58_exp_s1_set)
+                        .exclude(nr1__in=used1)
+                        .exclude(nr2__in=used1)
+                        .exclude(nr3__in=used1)
+                        .exclude(nr4__in=used1)):
+
                 used2 = used1[:]
                 used2.extend([p58.nr1, p58.nr2, p58.nr3, p58.nr4])
 
-                for p49 in Piece2x2.objects.filter(side3=p49_exp_s3, side2__in=p49_exp_s2_set).exclude(nr1__in=used2).exclude(nr2__in=used2).exclude(nr3__in=used2).exclude(nr4__in=used2):
+                for p49 in (Piece2x2
+                            .objects
+                            .filter(side3=p49_exp_s3,
+                                    side2__in=p49_exp_s2_set)
+                        .exclude(nr1__in=used2)
+                        .exclude(nr2__in=used2)
+                        .exclude(nr3__in=used2)
+                        .exclude(nr4__in=used2)):
+
                     bbbcbbb = (p58.nr4, p58.nr3, p57.nr4, p57.nr3, p57.nr1, p49.nr3, p49.nr1)
                     self._add_bbbcbbb(bbbcbbb)
                 # for

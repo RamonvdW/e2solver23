@@ -136,33 +136,51 @@ class Command(BaseCommand):
                                     side1=self.exp_loc15_s1, side2=self.exp_loc15_s2).first()
         self.ring1.nr15 = p.nr
 
+        p = Piece2x2.objects.filter(has_hint=True,
+                                    nr4=249,
+                                    nr1__in=self.unused, nr2__in=self.unused, nr3__in=self.unused,
+                                    side2=self.exp_loc55_s2, side3=self.exp_loc55_s3).first()
+        self.ring1.nr55 = p.nr
+
+        p = Piece2x2.objects.filter(has_hint=True,
+                                    nr3=181,
+                                    nr1__in=self.unused, nr2__in=self.unused, nr4__in=self.unused,
+                                    side3=self.exp_loc50_s3, side4=self.exp_loc50_s4).first()
+        self.ring1.nr50 = p.nr
+
         self._save_ring1()
 
         self.ring1.nr10 = 0
         self.ring1.nr15 = 0
+        self.ring1.nr55 = 0
+        self.ring1.nr50 = 0
 
     def _check_loc10_c1(self):
-        return True
         p = Piece2x2.objects.filter(has_hint=True,
                                     nr1=208,
-                                    #nr2__in=self.unused, nr3__in=self.unused, nr4__in=self.unused,
+                                    # nr2__in=self.unused, nr3__in=self.unused, nr4__in=self.unused,
                                     side1=self.exp_loc10_s1, side4=self.exp_loc10_s4).first()
         return p is not None
 
     def _check_loc15_c2(self):
-        return True
         p = Piece2x2.objects.filter(has_hint=True,
                                     nr2=255,
-                                    #nr1__in=self.unused, nr3__in=self.unused, nr4__in=self.unused,
+                                    # nr1__in=self.unused, nr3__in=self.unused, nr4__in=self.unused,
                                     side1=self.exp_loc15_s1, side2=self.exp_loc15_s2).first()
         return p is not None
 
     def _check_loc55_c3(self):
-        return True
         p = Piece2x2.objects.filter(has_hint=True,
                                     nr4=249,
-                                    #nr1__in=self.unused, nr2__in=self.unused, nr3__in=self.unused,
+                                    # nr1__in=self.unused, nr2__in=self.unused, nr3__in=self.unused,
                                     side2=self.exp_loc55_s2, side3=self.exp_loc55_s3).first()
+        return p is not None
+
+    def _check_loc50_c4(self):
+        p = Piece2x2.objects.filter(has_hint=True,
+                                    nr3=181,
+                                    # nr1__in=self.unused, nr2__in=self.unused, nr4__in=self.unused,
+                                    side3=self.exp_loc50_s3, side4=self.exp_loc50_s4).first()
         return p is not None
 
     def _count(self):
@@ -171,39 +189,60 @@ class Command(BaseCommand):
             print('count = %s' % self.count)
             self.count_print += 100
 
+    def _find_loc49_c4(self):
+        b = self.bcb4[9:9+2]
+        qset = Piece2x2.objects.filter(nr3=b[0], nr1=b[1],
+                                       nr2__in=self.unused, nr4__in=self.unused,
+                                       side3=self.exp_loc49_s3, side2__in=self.exp_loc49_s2_set)
+        for p in qset:
+            self.ring1.nr49 = p.nr
+            self.exp_loc33_s3 = self.twoside2reverse[p.side1]
+            self.exp_loc50_s4 = self.twoside2reverse[p.side2]
+            p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
+            self._make_used(p_nrs)
+            if self._check_loc50_c4():
+                self._add_hints_and_save()
+            self._make_unused(p_nrs)
+        # for
+
+    def _find_loc58_c4(self):
+        b = self.bcb4[4:4+2]
+        for p in Piece2x2.objects.filter(nr4=b[0], nr3=b[1],
+                                         nr1__in=self.unused, nr2__in=self.unused,
+                                         side1__in=self.exp_loc58_s1_set, side4=self.exp_loc58_s4):
+            self.ring1.nr58 = p.nr
+            self.exp_loc50_s3 = self.twoside2reverse[p.side1]
+            self.exp_loc59_s4 = self.twoside2reverse[p.side2]
+            p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
+            self._make_used(p_nrs)
+            self._find_loc49_c4()
+            self._make_unused(p_nrs)
+        # for
+
     def _find_loc63_c3(self):
-        self._count()
-        #self._save_ring1()
-        #self._add_hints_and_save()
         b = self.bcb3[9:9+2]
         for p in Piece2x2.objects.filter(nr4=b[0], nr3=b[1],
-                                         #nr1__in=self.unused, nr2__in=self.unused,
+                                         nr1__in=self.unused, nr2__in=self.unused,
                                          side1__in=self.exp_loc63_s1_set, side2=self.exp_loc63_s2):
             self.ring1.nr63 = p.nr
             self.exp_loc62_s2 = self.twoside2reverse[p.side4]
             self.exp_loc55_s3 = self.twoside2reverse[p.side1]
-            # p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
-            p_nrs = (p.nr3, p.nr4)
+            p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
             self._make_used(p_nrs)
-
-            self._count()
-            self._save_ring1()
-            # if self._check_loc55_c3() and self._check_loc15_c2() and self._check_loc10_c1():
-            #     self._find_loc63_c3()
-
+            if self._check_loc55_c3() and self._check_loc15_c2() and self._check_loc10_c1():
+                self._find_loc58_c4()
             self._make_unused(p_nrs)
         # for
 
     def _find_loc56_c3(self):
         b = self.bcb3[4:4+2]
         for p in Piece2x2.objects.filter(nr2=b[0], nr4=b[1],
-                                         #nr1__in=self.unused, nr3__in=self.unused,
+                                         nr1__in=self.unused, nr3__in=self.unused,
                                          side3=self.exp_loc56_s3, side4__in=self.exp_loc56_s4_set):
             self.ring1.nr56 = p.nr
             self.exp_loc55_s2 = self.twoside2reverse[p.side4]
             self.exp_loc48_s3 = self.twoside2reverse[p.side1]
-            # p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
-            p_nrs = (p.nr2, p.nr4)
+            p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
             self._make_used(p_nrs)
             self._find_loc63_c3()
             self._make_unused(p_nrs)
@@ -219,21 +258,17 @@ class Command(BaseCommand):
             self.exp_loc24_s1 = self.twoside2reverse[p.side3]
             p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
             self._make_used(p_nrs)
-            if self._check_loc15_c2():# and self._check_loc10_c1():
-                #self._find_loc56_c3()
-                self._save_ring1()
-
+            if self._check_loc15_c2() and self._check_loc10_c1():
+                self._find_loc56_c3()
             self._make_unused(p_nrs)
         # for
 
     def _find_loc7_c2(self):
         b = self.bcb2[4:4+2]
-        print(b)
         for p in Piece2x2.objects.filter(nr1=b[0], nr2=b[1],
                                          nr3__in=self.unused, nr4__in=self.unused,
                                          side2=self.exp_loc7_s2, side3__in=self.exp_loc7_s3_set):
             self.ring1.nr7 = p.nr
-            print('loc7=%s' % p.nr)
             self.exp_loc6_s2 = self.twoside2reverse[p.side4]
             self.exp_loc15_s1 = self.twoside2reverse[p.side3]
             p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
@@ -254,8 +289,7 @@ class Command(BaseCommand):
             p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
             self._make_used(p_nrs)
             if self._check_loc10_c1():
-                #self._find_loc7_c2()
-                self._save_ring1()
+                self._find_loc7_c2()
             self._make_unused(p_nrs)
         # for
 
@@ -309,8 +343,7 @@ class Command(BaseCommand):
             self.exp_loc16_s1 = self.twoside2reverse[p.side3]
             p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
             self._make_used(p_nrs)
-            #self._find_loc64_c3()
-            self._find_loc7_c2()
+            self._find_loc64_c3()
             self._make_unused(p_nrs)
         # for
 
@@ -323,28 +356,40 @@ class Command(BaseCommand):
             self.exp_loc9_s1 = self.twoside2reverse[p.side3]
             p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
             self._make_used(p_nrs)
-            #self._find_loc8_c2()
-            self._find_loc2_c1()
+            self._find_loc8_c2()
             self._make_unused(p_nrs)
         # for
 
     def _find_best(self):
+        if self.ring1.nr50 > 0:
+            return 23
+        if self.ring1.nr55 > 0:
+            return 22
         if self.ring1.nr15 > 0:
-            return 12
+            return 21
         if self.ring1.nr10 > 0:
+            return 20
+
+        if self.ring1.nr49 > 0:
+            return 12
+        if self.ring1.nr58 > 0:
             return 11
+
         if self.ring1.nr63 > 0:
             return 10
         if self.ring1.nr56 > 0:
             return 9
+
         if self.ring1.nr16 > 0:
             return 8
         if self.ring1.nr7 > 0:
             return 7
+
         if self.ring1.nr9 > 0:
             return 6
         if self.ring1.nr2 > 0:
             return 5
+
         if self.ring1.nr57 > 0:
             return 4
         if self.ring1.nr64 > 0:
@@ -384,29 +429,28 @@ class Command(BaseCommand):
         # print('bcb2: %s' % repr(self.bcb2))
         # print('bcb3: %s' % repr(self.bcb3))
         # print('bcb4: %s' % repr(self.bcb4))
-        for bcb in (self.bcb1, self.bcb2, self.bcb3, self.bcb4):
-            bcb = bcb[:8] + bcb[7:]     # dupe corner
-            while len(bcb) > 0:
-                bb = bcb[:2]
-                bcb = bcb[2:]
-                qset = Piece2x2.objects.filter(nr1=bb[0], nr2=bb[1])
-                print(bb,
-                      qset.count(),
-                      qset.distinct('nr3').count(),
-                      qset.distinct('nr4').count())
-            # while
-        # for
 
+        # for bcb in (self.bcb1, self.bcb2, self.bcb3, self.bcb4):
+        #     bcb = bcb[:8] + bcb[7:]     # dupe corner
+        #     while len(bcb) > 0:
+        #         bb = bcb[:2]
+        #         bcb = bcb[2:]
+        #         qset = Piece2x2.objects.filter(nr1=bb[0], nr2=bb[1])
+        #         print(bb,
+        #               qset.count(),
+        #               qset.distinct('nr3').count(),
+        #               qset.distinct('nr4').count())
+        #     # while
+        # # for
 
-        print('[DEBUG] unused=%s' % len(frozenset(self.unused)))
+        # print('[DEBUG] unused=%s' % len(frozenset(self.unused)))
 
         try:
-            #self._find_loc1_c1()
-            self._find_loc8_c2()
+            self._find_loc1_c1()
         except KeyboardInterrupt:
             pass
         else:
-            print('[DEBUG] unused=%s' % len(frozenset(self.unused)))
+            # print('[DEBUG] unused=%s' % len(frozenset(self.unused)))
             best = self._find_best()
             print('[INFO] Counted: %s; Best: %s' % (self.count, best))
 
