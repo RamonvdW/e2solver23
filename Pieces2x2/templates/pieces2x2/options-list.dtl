@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Work</title>
+    <style>
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+            padding: 5px 10px 5px 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Work</h1>
+
+
+    <h2>Ongoing</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Processor</th>
+                <th>Ring1</th>
+            </tr>
+        </thead>
+        {% for proc in work %}
+            {% if not proc.reached_dead_end %}
+                <tr>
+                    <td><a href="{{ proc.url }}" target="_blank">{{ proc.processor }}</a></td>
+                    <td>{{ proc.from_ring1 }}</td>
+                </tr>
+            {% endif %}
+        {% endfor %}
+    </table>
+
+
+    <h2>Ended</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Processor</th>
+                <th>Ring1</th>
+            </tr>
+        </thead>
+        {% for proc in work %}
+            {% if proc.reached_dead_end %}
+                <tr>
+                    <td><a href="{{ proc.url }}" target="_blank">{{ proc.processor }}</a></td>
+                    <td>{{ proc.from_ring1 }}</td>
+                </tr>
+            {% endif %}
+        {% endfor %}
+    </table>
+
+
+
+</body>
+</html>

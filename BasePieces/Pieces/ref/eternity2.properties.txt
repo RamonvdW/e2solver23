@@ -12,7 +12,7 @@
 # os = oranje sleutel (blauwe achtergrond)
 
 # b* = blauwe ster (gele achtergrond)
-# p* = paarse ster (orandje achtergrond)
+# p* = paarse ster (oranje achtergrond)
 # g* = gele ster (bruine achtergrond)
 
 # rt = rose toren (blauwe achtergrond) (soort plattegrond v.e. kasteel)

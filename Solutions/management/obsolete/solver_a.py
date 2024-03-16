@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -20,14 +20,14 @@ class Command(BaseCommand):
         self.board = dict()             # [nr] = Piece2x2
         self.board_options = dict()     # [nr] = count of possible Piece2x2
         self.board_gap_count = 0
-        self.board_unused_nrs = list()
+        self.board_unused_nrs = []
         self.lowest_gap_count = 0
         self.last_used_state = 0
         self.neighbours = dict()     # [nr] = (side 1, 2, 3, 4 neighbour nrs)
-        self._evict_cache = list()
+        self._evict_cache = []
         self._solve_nr = 0
         self._count_cache = dict()
-        self.board_solve_order = list()     # [nr, nr, ..]
+        self.board_solve_order = []     # [nr, nr, ..]
 
         self._calc_neighbours()
 
@@ -204,7 +204,7 @@ class Command(BaseCommand):
         # for
 
     def _save_board(self):
-        base_nrs = list()
+        base_nrs = []
         p_count = 0
         nrs = [0]
         for nr in range(1, 64+1):
@@ -499,7 +499,7 @@ class Command(BaseCommand):
         while self.board_gap_count > 0:
 
             # find spot with fewest options
-            best_spot = list()
+            best_spot = []
             for nr in range(1, 64+1):
                 p = self.board[nr]
                 if not p:

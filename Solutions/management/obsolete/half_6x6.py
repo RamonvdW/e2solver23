@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -37,11 +37,11 @@ class Command(BaseCommand):
         self.board_criticality = dict()  # [nr] = number (lower is more critical)
         self.board_freedom = dict()  # [nr] = "statement"
         self.board_gap_count = 0
-        self.board_unused_nrs = list()
+        self.board_unused_nrs = []
         self.neighbours = dict()  # [nr] = (side 1, 2, 3, 4 neighbour nrs)
         self._count_freedom_cache = dict()
-        self.board_solve_order = list()  # [nr, nr, ..]
-        # self.all_unused_nrs = list()
+        self.board_solve_order = []  # [nr, nr, ..]
+        # self.all_unused_nrs = []
         self.based_on = 0
         self.interval_mins = 15
         self.my_processor = int(time.time() - 946684800.0)     # seconds since Jan 1, 2000
@@ -124,7 +124,7 @@ class Command(BaseCommand):
                 elif nr == 55:
                     p4 = 249
 
-        must_have_nrs = list()
+        must_have_nrs = []
 
         tup = (s1, s2, s3, s4, p1, p2, p3, p4, x1, x2, x3, x4, tuple(unused_nrs))
         try:
@@ -306,7 +306,7 @@ class Command(BaseCommand):
         # for
 
     def _save_board6x6(self):
-        base_nrs = list()
+        base_nrs = []
         p_count = 0
         nrs = [0]
         for nr in range(1, 64+1):
@@ -466,7 +466,7 @@ class Command(BaseCommand):
 
         qset = Piece2x2.objects.filter(nr__gt=greater_than).order_by('nr')
 
-        reserved_nrs = list()
+        reserved_nrs = []
         for chk_nr in range(1, 64+1):
             if chk_nr != nr:
                 reserved_nrs.extend(self.board_must_have[chk_nr])
@@ -559,7 +559,7 @@ class Command(BaseCommand):
         self.board_gap_count = 64 - 16
         # self.all_unused_nrs = self.board_unused_nrs[:]      # copy
         self._count_freedom_cache = dict()
-        self.board_solve_order = list()     # [nr, nr, ..]
+        self.board_solve_order = []     # [nr, nr, ..]
         self.based_on = sol.pk
 
         # lst = self.board_unused_nrs[:]
@@ -870,7 +870,7 @@ class Command(BaseCommand):
         if len(sides_todo) <= 1:
             self._save_board6x6()
 
-        order = list()
+        order = []
         for s in sides_todo:
             tup = (self._count_block_n(s), s)
             order.append(tup)
@@ -903,7 +903,7 @@ class Command(BaseCommand):
         self.stdout.write('[INFO] Start solving')
 
         for nr in range(1, 64+1):
-            self.board_must_have[nr] = list()
+            self.board_must_have[nr] = []
         # for
 
         self._save_board6x6()
@@ -1009,7 +1009,7 @@ class Command(BaseCommand):
         big_side = [self.side_nr2reverse[self.board[nr].side1] for nr in self.NRS_4X4_SIDE1]
         always = {nr: 0 for nr in range(1, 256+1)}
         count = 0
-        bulk = list()
+        bulk = []
         unused_nrs0 = [nr for nr in self.board_unused_nrs if nr > 60]       # skip borders
         unused_nrs0 = [nr for nr in unused_nrs0 if nr not in avoid_nrs]
         unused_nrs = set(unused_nrs0)
@@ -1076,7 +1076,7 @@ class Command(BaseCommand):
 
                                         if len(bulk) >= 1000:
                                             Block2x8.objects.bulk_create(bulk)
-                                            bulk = list()
+                                            bulk = []
                                 # for
                         # for
                 # for
@@ -1099,7 +1099,7 @@ class Command(BaseCommand):
         big_side = [self.side_nr2reverse[self.board[nr].side2] for nr in self.NRS_4X4_SIDE2]
         always = {nr: 0 for nr in range(1, 256+1)}
         count = 0
-        bulk = list()
+        bulk = []
         unused_nrs0 = [nr for nr in self.board_unused_nrs if nr > 60]       # skip borders
         unused_nrs0 = [nr for nr in unused_nrs0 if nr not in avoid_nrs]
         unused_nrs = set(unused_nrs0)
@@ -1168,7 +1168,7 @@ class Command(BaseCommand):
 
                                         if len(bulk) >= 1000:
                                             Block2x8.objects.bulk_create(bulk)
-                                            bulk = list()
+                                            bulk = []
                                 # for
                         # for
                 # for
@@ -1191,7 +1191,7 @@ class Command(BaseCommand):
         big_side = [self.side_nr2reverse[self.board[nr].side3] for nr in self.NRS_4X4_SIDE3]
         always = {nr: 0 for nr in range(1, 256+1)}
         count = 0
-        bulk = list()
+        bulk = []
         unused_nrs0 = [nr for nr in self.board_unused_nrs if nr > 60]       # skip borders
         unused_nrs0 = [nr for nr in unused_nrs0 if nr not in avoid_nrs]
         unused_nrs = set(unused_nrs0)
@@ -1260,7 +1260,7 @@ class Command(BaseCommand):
 
                                         if len(bulk) >= 1000:
                                             Block2x8.objects.bulk_create(bulk)
-                                            bulk = list()
+                                            bulk = []
                                 # for
                         # for
                 # for
@@ -1283,7 +1283,7 @@ class Command(BaseCommand):
         big_side = [self.side_nr2reverse[self.board[nr].side4] for nr in self.NRS_4X4_SIDE4]
         always = {nr: 0 for nr in range(1, 256+1)}
         count = 0
-        bulk = list()
+        bulk = []
         unused_nrs0 = [nr for nr in self.board_unused_nrs if nr > 60]       # skip borders
         unused_nrs0 = [nr for nr in unused_nrs0 if nr not in avoid_nrs]
         unused_nrs = set(unused_nrs0)
@@ -1351,7 +1351,7 @@ class Command(BaseCommand):
 
                                         if len(bulk) >= 1000:
                                             Block2x8.objects.bulk_create(bulk)
-                                            bulk = list()
+                                            bulk = []
                                 # for
                         # for
                 # for
@@ -1367,9 +1367,9 @@ class Command(BaseCommand):
     def _generate_2x8_blocks(self):
         self.stdout.write('[INFO] Generating Block2x8')
 
-        avoid_nrs2 = list()
-        avoid_nrs3 = list()
-        avoid_nrs4 = list()
+        avoid_nrs2 = []
+        avoid_nrs3 = []
+        avoid_nrs4 = []
         prev_count = 0
         new_count = 999
 
@@ -1656,7 +1656,7 @@ class Command(BaseCommand):
 
                 self.load_board_4x4(sol)
                 for nr in range(1, 64 + 1):
-                    self.board_must_have[nr] = list()
+                    self.board_must_have[nr] = []
                 # for
 
                 try:

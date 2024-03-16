@@ -70,7 +70,7 @@ class Command(BaseCommand):
         self.segment_options = dict()       # [segment] = side_options
         self.reductions = 0
 
-        self.unused0 = list()
+        self.unused0 = []
 
         self.do_commit = True
 
@@ -116,12 +116,12 @@ class Command(BaseCommand):
             self.board[p_nr] = None
         # for
 
-        self.board_order = list()   # solve order (for popping)
-        self.board_unused = list()
-        self.p_nrs_order = list()
+        self.board_order = []   # solve order (for popping)
+        self.board_unused = []
+        self.p_nrs_order = []
 
-        self.skip_p_nrs = list()
-        self.skip_locs = list()
+        self.skip_p_nrs = []
+        self.skip_locs = []
 
         self.prev_tick = 0
         self.progress = None
@@ -419,7 +419,7 @@ class Command(BaseCommand):
 
     def _check_open_ends_1(self):
         #  verify each twoside open end can still be solved
-        twoside_open = list()
+        twoside_open = []
         empty_nrs = [nr
                      for nr in range(len(self.locs))
                      if not self.board[nr]]
@@ -516,7 +516,7 @@ class Command(BaseCommand):
                                        nr3__in=self.board_unused,
                                        nr4__in=self.board_unused)
 
-        p_nr_counts = list()
+        p_nr_counts = []
         for p_nr in range(len(self.locs)):
             if self.board[p_nr] is None:
                 # empty position on the board
@@ -683,7 +683,7 @@ class Command(BaseCommand):
         sides = self.segment_options[self.segment]
         todo = len(sides)
         self.stdout.write('[INFO] Checking %s options in segment %s' % (len(sides), self.segment))
-        self.p_nrs_order = list()       # allow deciding optimal order anew
+        self.p_nrs_order = []       # allow deciding optimal order anew
         loc, side_n = self._segment_to_loc(self.segment)
         p_nr = self.locs.index(loc)
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -41,7 +41,7 @@ class Command(BaseCommand):
             nr2side3[four.nr] = four.four_sides[:2]
         # for
 
-        all_long_sides = list()
+        all_long_sides = []
         print_len = 1000
         count = 0
         for edge in Edge4x4.objects.distinct('side2', 'side3').iterator(chunk_size=10000):

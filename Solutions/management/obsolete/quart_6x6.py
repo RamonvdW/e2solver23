@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -37,11 +37,11 @@ class Command(BaseCommand):
         self.board_criticality = dict()  # [nr] = number (lower is more critical)
         self.board_freedom = dict()  # [nr] = "statement"
         self.board_gap_count = 0
-        self.board_unused_nrs = list()
+        self.board_unused_nrs = []
         self.neighbours = dict()  # [nr] = (side 1, 2, 3, 4 neighbour nrs)
         self._count_freedom_cache = dict()
-        self.board_solve_order = list()  # [nr, nr, ..]
-        # self.all_unused_nrs = list()
+        self.board_solve_order = []  # [nr, nr, ..]
+        # self.all_unused_nrs = []
         self.based_on = 0
         self.interval_mins = 15
         self.my_processor = int(time.time() - 946684800.0)     # seconds since Jan 1, 2000
@@ -124,7 +124,7 @@ class Command(BaseCommand):
                 elif nr == 55:
                     p4 = 249
 
-        must_have_nrs = list()
+        must_have_nrs = []
 
         tup = (s1, s2, s3, s4, p1, p2, p3, p4, x1, x2, x3, x4, tuple(unused_nrs))
         try:
@@ -306,7 +306,7 @@ class Command(BaseCommand):
         # for
 
     def _save_board6x6(self):
-        base_nrs = list()
+        base_nrs = []
         p_count = 0
         nrs = [0]
         for nr in range(1, 64+1):
@@ -466,7 +466,7 @@ class Command(BaseCommand):
 
         qset = Piece2x2.objects.order_by('nr')
 
-        reserved_nrs = list()
+        reserved_nrs = []
         for chk_nr in range(1, 64+1):
             if chk_nr != nr:
                 reserved_nrs.extend(self.board_must_have[chk_nr])
@@ -559,7 +559,7 @@ class Command(BaseCommand):
         self.board_gap_count = 64 - 16
         # self.all_unused_nrs = self.board_unused_nrs[:]      # copy
         self._count_freedom_cache = dict()
-        self.board_solve_order = list()     # [nr, nr, ..]
+        self.board_solve_order = []     # [nr, nr, ..]
         self.based_on = sol.pk
 
         # lst = self.board_unused_nrs[:]
@@ -808,7 +808,7 @@ class Command(BaseCommand):
     #     self.stdout.write('[INFO] Start solving')
     #
     #     for nr in range(1, 64+1):
-    #         self.board_must_have[nr] = list()
+    #         self.board_must_have[nr] = []
     #     # for
     #
     #     self._save_board6x6()
@@ -1005,7 +1005,7 @@ class Command(BaseCommand):
         self.stdout.write('[INFO] Start solving')
 
         for nr in range(1, 64+1):
-            self.board_must_have[nr] = list()
+            self.board_must_have[nr] = []
         # for
 
         # gap count: 48
@@ -1037,7 +1037,7 @@ class Command(BaseCommand):
 
     def _generate_quart6(self, nr_p1, nr_c, nr_p2, nr_m1, nr_m2):
         count = 0
-        bulk = list()
+        bulk = []
         for c1 in self._iter_for_nr(nr_c):
             self._board_fill_nr(nr_c, c1)
 
@@ -1073,7 +1073,7 @@ class Command(BaseCommand):
                             count += len(bulk)
                             print('Quart6 type %s: %s' % (nr_c, count))
                             Quart6.objects.bulk_create(bulk)
-                            bulk = list()
+                            bulk = []
 
                     self._board_free_nr(nr_p2)
                 # for
@@ -1120,7 +1120,7 @@ class Command(BaseCommand):
 
                 self.load_board_4x4(sol)
                 for nr in range(1, 64 + 1):
-                    self.board_must_have[nr] = list()
+                    self.board_must_have[nr] = []
                 # for
 
                 try:

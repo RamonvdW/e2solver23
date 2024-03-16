@@ -11,7 +11,7 @@ from WorkQueue.models import ProcessorUsedPieces
 
 class Command(BaseCommand):
 
-    help = "Duplicate the latest TwoSideOptions"
+    help = "Duplicate work (TwoSideOptions + ProcessorUsedPieces) from specific source to selected number"
 
     def add_arguments(self, parser):
         parser.add_argument('source', type=int, help='Processor number to copy from')
@@ -33,7 +33,7 @@ class Command(BaseCommand):
 
         self.stdout.write('[INFO] Duplicating processor %s to %s' % (source, processor))
 
-        bulk = list()
+        bulk = []
         for options in TwoSideOptions.objects.filter(processor=source):
             option = TwoSideOptions(
                         processor=processor,

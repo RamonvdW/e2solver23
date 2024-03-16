@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -49,7 +49,7 @@ class Command(BaseCommand):
             self.stdout.write('[INFO] Generating FourSides (was: %s)' % count)
             FourSides.objects.all().delete()
             sides.sort()
-            bulk = list()
+            bulk = []
             nr = 1
             for side1 in sides:
                 for side2 in sides:
@@ -59,7 +59,7 @@ class Command(BaseCommand):
                     nr += 1
                     if len(bulk) >= 1000:
                         FourSides.objects.bulk_create(bulk)
-                        bulk = list()
+                        bulk = []
                 # for
             # for
             FourSides.objects.bulk_create(bulk)
@@ -102,7 +102,7 @@ class Command(BaseCommand):
         else:
             nr = 0
 
-        bulk = list()
+        bulk = []
         for p1 in qset.all().iterator(chunk_size=1000):
 
             print('p1: %s' % p1.nr)
@@ -131,7 +131,7 @@ class Command(BaseCommand):
 
                             if len(bulk) > 1000:
                                 Edge4x4.objects.bulk_create(bulk)
-                                bulk = list()
+                                bulk = []
                                 print(nr)
                     # for
                 # for

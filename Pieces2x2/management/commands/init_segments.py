@@ -31,8 +31,8 @@ class Command(BaseCommand):
             self.twoside2reverse[nr] = rev_nr
         # for
 
-        self._used_options = list()
-        self._segment_done = list()
+        self._used_options = []
+        self._segment_done = []
 
     def add_arguments(self, parser):
         parser.add_argument('--confirm', action='store_true')
@@ -136,7 +136,7 @@ class Command(BaseCommand):
         return twosides_side1, twosides_side2, twosides_side3, twosides_side4
 
     def _save_options(self, loc, side, twosides):
-        bulk = list()
+        bulk = []
 
         segment = calc_segment(loc, side)
         if segment in self._segment_done:

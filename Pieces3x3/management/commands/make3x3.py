@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -45,15 +45,15 @@ class Command(BaseCommand):
         self.allow_hint_piece_nrs = (208, 255, 181, 249, 139)
 
     def _make_cache_base_with_side(self):
-        all_sides = list()
+        all_sides = []
         for piece in BasePiece.objects.exclude(nr__in=self.exclude_piece_nrs):
             side = piece.side4          # the only side where all possibilities are found
             if side not in all_sides:
                 all_sides.append(side)
-                self.base_with_side1[side] = list()
-                self.base_with_side2[side] = list()
-                self.base_with_side3[side] = list()
-                self.base_with_side4[side] = list()
+                self.base_with_side1[side] = []
+                self.base_with_side2[side] = []
+                self.base_with_side3[side] = []
+                self.base_with_side4[side] = []
         # for
         all_sides.sort()
 
@@ -336,7 +336,7 @@ class Command(BaseCommand):
         nr = 0
         print_nr = print_interval = 100000
 
-        bulk = list()
+        bulk = []
         for row1 in self._iter_row1(p1_nr):
             for row2 in self._iter_row2(row1):
                 for row3 in self._iter_row3(row1, row2):
@@ -395,7 +395,7 @@ class Command(BaseCommand):
 
                     if len(bulk) >= 10000:
                         Piece3x3.objects.bulk_create(bulk)
-                        bulk = list()
+                        bulk = []
 
                     if nr > print_nr:
                         print_nr += print_interval

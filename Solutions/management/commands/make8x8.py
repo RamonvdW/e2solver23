@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -40,11 +40,11 @@ class Command(BaseCommand):
         self.board_must_have = dict()       # [nr] = list(base nrs)
         self.board_freedom = dict()         # [nr] = "statement"
         self.board_gap_count = 0
-        self.board_unused_nrs = list()
+        self.board_unused_nrs = []
         self.neighbours = dict()            # [nr] = (side 1, 2, 3, 4 neighbour nrs)
         self._count_freedom_cache = dict()
-        self.board_solve_order = list()     # [nr, nr, ..]
-        # self.all_unused_nrs = list()
+        self.board_solve_order = []     # [nr, nr, ..]
+        # self.all_unused_nrs = []
         self.based_on = 0
         self.interval_mins = 15
         self.my_processor = int(time.time() - 946684800.0)     # seconds since Jan 1, 2000
@@ -66,7 +66,7 @@ class Command(BaseCommand):
     def _calc_neighbours(self):
         # order of the entries: side 1, 2, 3, 4
         for nr in range(1, 64+1):
-            n = list()
+            n = []
 
             # side 1
             if nr > 8:
@@ -139,7 +139,7 @@ class Command(BaseCommand):
         else:
             x1 = x2 = x3 = x4 = self.twoside_border
 
-        must_have_nrs = list()
+        must_have_nrs = []
 
         qset = Piece2x2.objects.all()
 
@@ -239,7 +239,7 @@ class Command(BaseCommand):
         # for
 
     def _save_board8x8(self):
-        base_nrs = list()
+        base_nrs = []
         p_count = 0
         nrs = [0]
         for nr in range(1, 64+1):
@@ -372,7 +372,7 @@ class Command(BaseCommand):
 
         qset = Piece2x2.objects.filter(nr__gt=greater_than).order_by('nr')
 
-        reserved_nrs = list()
+        reserved_nrs = []
         for chk_nr in NRS_ADDED_IN_8X8:
             if chk_nr != nr:
                 reserved_nrs.extend(self.board_must_have[chk_nr])
@@ -440,7 +440,7 @@ class Command(BaseCommand):
         # for
 
         self.board_gap_count = 64 - 36
-        self.board_solve_order = list()     # [nr, nr, ..]
+        self.board_solve_order = []     # [nr, nr, ..]
         self.based_on = sol36.pk
 
     def _find_most_critical_nr(self):

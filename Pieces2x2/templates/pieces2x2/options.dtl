@@ -19,6 +19,8 @@
 
     <h1>Options</h1>
 
+    <a class="button" href="{% url 'Pieces2x2:options-list' %}">List</a><br>
+
     <table style="margin-left:auto; margin-right:auto; border:0">
         <tr style="border:0; vertical-align:top">
             <td style="border:0">
@@ -33,7 +35,7 @@
                                 {% endif %}
                             </td>
 
-                            <td colspan="9">Processor: {{ processor }}</td>
+                            <td colspan="9">Processor: {{ processor }}{% if used.from_ring1 %}<br>Ring1: {{ used.from_ring1 }}{% endif %}</td>
 
                             <td colspan="4">
                                 {% if url_next %}

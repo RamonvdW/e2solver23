@@ -34,7 +34,7 @@ class Command(BaseCommand):
         self.loc = 0
         self.processor = 0
         self.reductions = {1: 0, 2: 0, 3: 0, 4: 0}     # [side_nr] = count
-        self.unused = list()
+        self.unused = []
         self.do_commit = False
         self.bulk_reduce = dict()       # [segment] = [two_side, ..]
 

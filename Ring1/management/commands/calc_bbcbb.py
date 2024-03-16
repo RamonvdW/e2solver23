@@ -54,7 +54,7 @@ class Command(BaseCommand):
             self.twoside2reverse[nr] = rev_nr
         # for
 
-        self.bbcbb = list()
+        self.bbcbb = []
         self._print = -1
 
     def add_arguments(self, parser):

@@ -22,9 +22,9 @@ class Command(BaseCommand):
         self.verbose = 0
         self.board = dict()  # [nr] = Piece2x2
         self.board_gap_count = 0
-        self.board_unused_nrs = list()
-        self.board_solve_order = list()  # [nr, nr, ..]
-        # self.all_unused_nrs = list()
+        self.board_unused_nrs = []
+        self.board_solve_order = []  # [nr, nr, ..]
+        # self.all_unused_nrs = []
         self.based_on = 0
         self.interval_mins = 15
         self.my_processor = int(time.time() - 946684800.0)     # seconds since Jan 1, 2000
@@ -99,7 +99,7 @@ class Command(BaseCommand):
                     p4 = 249
 
         unused_nrs = self.board_unused_nrs
-        must_have_nrs = list()
+        must_have_nrs = []
 
         qset = Piece2x2.objects.all()
 
@@ -184,7 +184,7 @@ class Command(BaseCommand):
         # for
 
     def _save_board6x6(self):
-        base_nrs = list()
+        base_nrs = []
         p_count = 0
         nrs = [0]
         for nr in range(1, 64+1):
@@ -373,7 +373,7 @@ class Command(BaseCommand):
         # for
 
         self.board_gap_count = 64 - 16
-        self.board_solve_order = list()     # [nr, nr, ..]
+        self.board_solve_order = []     # [nr, nr, ..]
         self.based_on = sol.pk
 
     def _can_fill_nrs_no_borders(self, nrs):
@@ -590,7 +590,7 @@ class Command(BaseCommand):
         return list(qset.values_list('nr', flat=True))
 
     def _get_candidates_p11(self):
-        nrs = list()
+        nrs = []
         p10 = self.board[10]
         p19 = self.board[19]
         for p11 in self._iter_no_border(11, side4=p10.exp_s4, side3=p19.exp_s3):
@@ -608,7 +608,7 @@ class Command(BaseCommand):
         return nrs
 
     def _get_candidates_p14(self):
-        nrs = list()
+        nrs = []
         p15 = self.board[15]
         p22 = self.board[22]
         for p14 in self._iter_no_border(14, side2=p15.exp_s2, side3=p22.exp_s3):
@@ -626,7 +626,7 @@ class Command(BaseCommand):
         return nrs
 
     def _get_candidates_p18(self):
-        nrs = list()
+        nrs = []
         p10 = self.board[10]
         p19 = self.board[19]
         for p18 in self._iter_no_border(18, side1=p10.exp_s1, side2=p19.exp_s2):
@@ -644,7 +644,7 @@ class Command(BaseCommand):
         return nrs
 
     def _get_candidates_p23(self):
-        nrs = list()
+        nrs = []
         p15 = self.board[15]
         p22 = self.board[22]
         for p23 in self._iter_no_border(23, side1=p15.exp_s1, side4=p22.exp_s4):
@@ -662,7 +662,7 @@ class Command(BaseCommand):
         return nrs
 
     def _get_candidates_p42(self):
-        nrs = list()
+        nrs = []
         p50 = self.board[50]
         p43 = self.board[43]
         for p42 in self._iter_no_border(42, side3=p50.exp_s3, side2=p43.exp_s2):
@@ -680,7 +680,7 @@ class Command(BaseCommand):
         return nrs
 
     def _get_candidates_p47(self):
-        nrs = list()
+        nrs = []
         p55 = self.board[55]
         p46 = self.board[46]
         for p47 in self._iter_no_border(47, side3=p55.exp_s3, side4=p46.exp_s4):
@@ -698,7 +698,7 @@ class Command(BaseCommand):
         return nrs
 
     def _get_candidates_p51(self):
-        nrs = list()
+        nrs = []
         p50 = self.board[50]
         p43 = self.board[43]
         for p51 in self._iter_no_border(51, side4=p50.exp_s4, side1=p43.exp_s1):
@@ -716,7 +716,7 @@ class Command(BaseCommand):
         return nrs
 
     def _get_candidates_p54(self):
-        nrs = list()
+        nrs = []
         p55 = self.board[55]
         p46 = self.board[46]
         for p54 in self._iter_no_border(54, side2=p55.exp_s2, side1=p46.exp_s1):
@@ -761,7 +761,7 @@ class Command(BaseCommand):
     def _generate_quart6(self, nr_p1, nr_c, nr_p2, nrs_chk):
         count = 0
         reject1_count = reject2_count = 0
-        bulk = list()
+        bulk = []
         for c1 in self._iter_for_nr_no_borders(nr_c):
             self._board_fill_nr(nr_c, c1)
 
@@ -807,7 +807,7 @@ class Command(BaseCommand):
                                         print('Quart6 type %s: %s (reject1 %s, reject2 %s)' % (
                                                 nr_c, count, reject1_count, reject2_count))
                                         Quart6.objects.bulk_create(bulk)
-                                        bulk = list()
+                                        bulk = []
                                 else:
                                     reject1_count += 1
 

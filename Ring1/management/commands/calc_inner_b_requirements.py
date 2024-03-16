@@ -18,7 +18,7 @@ class Command(BaseCommand):
 
     @staticmethod
     def _needs_c4():
-        c4s = list()
+        c4s = []
         zs = {1: [], 2: [], 3: [], 4: []}
 
         twoside_border = TwoSide.objects.get(two_sides='XX').nr
@@ -141,7 +141,7 @@ class Command(BaseCommand):
 
     @staticmethod
     def _needs_c3():
-        c3s = list()
+        c3s = []
         zs = {1: [], 2: [], 3: [], 4: []}
 
         twoside_border = TwoSide.objects.get(two_sides='XX').nr
@@ -264,7 +264,7 @@ class Command(BaseCommand):
 
     @staticmethod
     def _needs_c2():
-        c2s = list()
+        c2s = []
         zs = {1: [], 2: [], 3: [], 4: []}
 
         twoside_border = TwoSide.objects.get(two_sides='XX').nr
@@ -387,7 +387,7 @@ class Command(BaseCommand):
 
     @staticmethod
     def _needs_c1():
-        c1s = list()
+        c1s = []
         zs = {1: [], 2: [], 3: [], 4: []}
 
         twoside_border = TwoSide.objects.get(two_sides='XX').nr

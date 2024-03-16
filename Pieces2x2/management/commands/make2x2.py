@@ -33,15 +33,15 @@ class Command(BaseCommand):
         self.allow_hint_piece_nrs = (208, 255, 181, 249, 139)
 
     def _make_cache_base_with_side(self):
-        all_sides = list()
+        all_sides = []
         for piece in BasePiece.objects.exclude(nr__in=self.exclude_piece_nrs):
             side = piece.side4          # the only side where all possibilities are found
             if side not in all_sides:
                 all_sides.append(side)
-                self.base_with_side1[side] = list()
-                self.base_with_side2[side] = list()
-                self.base_with_side3[side] = list()
-                self.base_with_side4[side] = list()
+                self.base_with_side1[side] = []
+                self.base_with_side2[side] = []
+                self.base_with_side3[side] = []
+                self.base_with_side4[side] = []
         # for
         all_sides.sort()
 
@@ -140,7 +140,7 @@ class Command(BaseCommand):
         nr = 0
         print_nr = print_interval = 100000
 
-        bulk = list()
+        bulk = []
         for piece1, rot1 in self._iter_piece1():
             piece1_side1 = piece1.get_side(1, rot1)
             piece1_side2 = piece1.get_side(2, rot1)
@@ -293,7 +293,7 @@ class Command(BaseCommand):
 
                         if len(bulk) >= 10000:
                             Piece2x2.objects.bulk_create(bulk)
-                            bulk = list()
+                            bulk = []
 
                         if nr > print_nr:
                             print_nr += print_interval

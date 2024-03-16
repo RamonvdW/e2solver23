@@ -47,7 +47,7 @@ class Command(BaseCommand):
             except ProcessorUsedPieces.DoesNotExist:
                 used = ProcessorUsedPieces()
 
-            bulk = list()
+            bulk = []
             for loc in range(1, 64+1):
                 loc_str = 'loc%s' % loc
                 if getattr(used, loc_str) == 0:

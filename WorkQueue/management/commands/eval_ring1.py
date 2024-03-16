@@ -85,10 +85,10 @@ class Command(BaseCommand):
         for loc in self.locs:
             self.board[loc] = None
 
-        self.board_order = list()   # solve order (for popping)
-        self.board_unused = list()
-        self.solve_order = list()
-        self.requested_order = list()
+        self.board_order = []   # solve order (for popping)
+        self.board_unused = []
+        self.solve_order = []
+        self.requested_order = []
         self.prev_tick = time.monotonic()
         self.deadline = 0
         self.progress = None
@@ -107,7 +107,7 @@ class Command(BaseCommand):
         # order of the entries: side 1, 2, 3, 4
         for nr in range(1, 64+1):
             if nr in self.locs:
-                n = list()
+                n = []
                 col = (nr - 1) % 8
                 row = int((nr - 1) / 8)
 
@@ -271,7 +271,7 @@ class Command(BaseCommand):
 
     def _check_open_ends(self):
         #  verify each twoside open end can still be solved
-        twoside_open = list()
+        twoside_open = []
         empty_locs = [loc
                       for loc in self.locs
                       if not self.board[loc]]
@@ -324,7 +324,7 @@ class Command(BaseCommand):
                                        nr3__in=self.board_unused,
                                        nr4__in=self.board_unused)
 
-        loc_counts = list()
+        loc_counts = []
         for loc in self.locs:
             if self.board[loc] is None:
                 # empty position on the board

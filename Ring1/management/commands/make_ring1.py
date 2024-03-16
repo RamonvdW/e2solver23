@@ -49,12 +49,12 @@ class Command(BaseCommand):
             self.unused.remove(nr)
         # for
 
-        self.used = list()
+        self.used = []
 
-        self.bcb1 = list()
-        self.bcb2 = list()
-        self.bcb3 = list()
-        self.bcb4 = list()
+        self.bcb1 = []
+        self.bcb2 = []
+        self.bcb3 = []
+        self.bcb4 = []
 
         self.exp_loc2_s4 = 0
         self.exp_loc3_s4 = 0
@@ -72,7 +72,7 @@ class Command(BaseCommand):
 
         self.count = 0
         self.count_print = 100
-        self.bulk = list()
+        self.bulk = []
 
         # hint 1
         qset = Piece2x2.objects.filter(nr1=208)
@@ -250,8 +250,11 @@ class Command(BaseCommand):
             self.ring1.nr55 = p.nr
             self.exp_loc47_s3 = self.twoside2reverse[p.side1]
             self.exp_loc54_s2 = self.twoside2reverse[p.side4]
+            p_nrs = (p.nr1, p.nr2, p.nr4)
+            self._make_used(p_nrs)
             if self._check_loc47_c3() and self._check_loc54_c3():
                 self._save_ring1()
+            self._make_unused(p_nrs)
         # for
 
     def _find_loc50(self):
@@ -271,6 +274,7 @@ class Command(BaseCommand):
         # for
 
     def _find_loc15(self):
+        solution = False
         qset = Piece2x2.objects.filter(has_hint=True,
                                        nr2=255,
                                        nr1__in=self.unused, nr3__in=self.unused, nr4__in=self.unused,

@@ -9,13 +9,11 @@ from django.urls import reverse
 from django.views.generic import TemplateView
 from django.templatetags.static import static
 from Pieces2x2.models import Piece2x2
-from Ring1.models import Ring1, Corner1, Corner2, Corner3, Corner4, Corner12, Corner34
-from WorkQueue.models import Work
+from Ring1.models import Ring1
 from types import SimpleNamespace
 
 
 TEMPLATE_SHOW = 'ring1/show.dtl'
-TEMPLATE_STATUS = 'ring1/status.dtl'
 
 
 class ShowRing1View(TemplateView):
@@ -58,14 +56,17 @@ class ShowRing1View(TemplateView):
             ring1 = Ring1.objects.get(nr=nr)
         except Ring1.DoesNotExist:
             first = Ring1.objects.order_by('nr').first()
+            last = Ring1.objects.order_by('nr').last()
             if first:
                 context['url_first'] = reverse('Ring1:show', kwargs={'nr': first.pk})
+                if last.pk != first.pk:
+                    context['url_last'] = reverse('Ring1:show', kwargs={'nr': last.pk})
             else:
                 context['is_empty'] = True
         else:
             context['solution'] = ring1
-            ring1.p2x2s = list()
-            base_nrs = list()
+            ring1.p2x2s = []
+            base_nrs = []
 
             for p_nr in range(1, 64+1):
                 if p_nr in (1, 2, 3, 4, 5, 6, 7, 8,
@@ -163,8 +164,8 @@ class ShowCorner1View(TemplateView):
             # for
 
             context['solution'] = ring1
-            ring1.p2x2s = list()
-            base_nrs = list()
+            ring1.p2x2s = []
+            base_nrs = []
 
             for p_nr in range(1, 64+1):
                 if p_nr in (1, 2, 3, 4, 5, 6, 7, 8,
@@ -262,8 +263,8 @@ class ShowCorner2View(TemplateView):
             # for
 
             context['solution'] = ring1
-            ring1.p2x2s = list()
-            base_nrs = list()
+            ring1.p2x2s = []
+            base_nrs = []
 
             for p_nr in range(1, 64+1):
                 if p_nr in (1, 2, 3, 4, 5, 6, 7, 8,
@@ -361,8 +362,8 @@ class ShowCorner3View(TemplateView):
             # for
 
             context['solution'] = ring1
-            ring1.p2x2s = list()
-            base_nrs = list()
+            ring1.p2x2s = []
+            base_nrs = []
 
             for p_nr in range(1, 64+1):
                 if p_nr in (1, 2, 3, 4, 5, 6, 7, 8,
@@ -460,8 +461,8 @@ class ShowCorner4View(TemplateView):
             # for
 
             context['solution'] = ring1
-            ring1.p2x2s = list()
-            base_nrs = list()
+            ring1.p2x2s = []
+            base_nrs = []
 
             for p_nr in range(1, 64+1):
                 if p_nr in (1, 2, 3, 4, 5, 6, 7, 8,
@@ -567,8 +568,8 @@ class ShowCorner12View(TemplateView):
             # for
 
             context['solution'] = ring1
-            ring1.p2x2s = list()
-            base_nrs = list()
+            ring1.p2x2s = []
+            base_nrs = []
 
             for p_nr in range(1, 64+1):
                 if p_nr in (1, 2, 3, 4, 5, 6, 7, 8,
@@ -674,8 +675,8 @@ class ShowCorner34View(TemplateView):
             # for
 
             context['solution'] = ring1
-            ring1.p2x2s = list()
-            base_nrs = list()
+            ring1.p2x2s = []
+            base_nrs = []
 
             for p_nr in range(1, 64+1):
                 if p_nr in (1, 2, 3, 4, 5, 6, 7, 8,
@@ -717,82 +718,6 @@ class ShowCorner34View(TemplateView):
 
             base_nrs.sort()
             context['base_nrs'] = base_nrs
-
-        return context
-
-
-class StatusView(TemplateView):
-
-    template_name = TEMPLATE_STATUS
-
-    def get_context_data(self, **kwargs):
-        """ called by the template system to get the context data for the template """
-        context = super().get_context_data(**kwargs)
-
-        c1_seeds = list(Corner1.objects.distinct('seed').values_list('seed', flat=True))
-        c2_seeds = list(Corner2.objects.distinct('seed').values_list('seed', flat=True))
-        c3_seeds = list(Corner3.objects.distinct('seed').values_list('seed', flat=True))
-        c4_seeds = list(Corner4.objects.distinct('seed').values_list('seed', flat=True))
-        c12_seeds = list(Corner12.objects.distinct('seed').values_list('seed', flat=True))
-        c34_seeds = list(Corner34.objects.distinct('seed').values_list('seed', flat=True))
-        r1_seeds = list(Ring1.objects.distinct('seed').values_list('seed', flat=True))
-
-        for work in Work.objects.exclude(seed=0):
-            if work.job_type == 'make_c1':
-                c1_seeds.append(work.seed)
-            if work.job_type == 'make_c2':
-                c2_seeds.append(work.seed)
-            if work.job_type == 'make_c3':
-                c3_seeds.append(work.seed)
-            if work.job_type == 'make_c4':
-                c4_seeds.append(work.seed)
-            if work.job_type == 'make_c12':
-                c12_seeds.append(work.seed)
-            if work.job_type == 'make_c34':
-                c34_seeds.append(work.seed)
-            if work.job_type == 'make_ring1':
-                r1_seeds.append(work.seed)
-        # for
-
-        all_seeds = frozenset(c1_seeds + c2_seeds + c3_seeds + c4_seeds + c12_seeds + c34_seeds + r1_seeds)
-        all_seeds = list(all_seeds)
-        all_seeds.sort()
-
-        context['seeds'] = table = list()
-
-        for seed in all_seeds:
-            row = SimpleNamespace(seed=seed)
-
-            if seed in c1_seeds:
-                row.c1_count = Corner1.objects.filter(seed=seed).count()
-                row.c1_work = Work.objects.filter(job_type='make_c1', seed=seed).first()
-
-            if seed in c2_seeds:
-                row.c2_count = Corner2.objects.filter(seed=seed).count()
-                row.c2_work = Work.objects.filter(job_type='make_c2', seed=seed).first()
-
-            if seed in c3_seeds:
-                row.c3_count = Corner3.objects.filter(seed=seed).count()
-                row.c3_work = Work.objects.filter(job_type='make_c3', seed=seed).first()
-
-            if seed in c4_seeds:
-                row.c4_count = Corner4.objects.filter(seed=seed).count()
-                row.c4_work = Work.objects.filter(job_type='make_c4', seed=seed).first()
-
-            if seed in c12_seeds:
-                row.c12_count = Corner12.objects.filter(seed=seed).count()
-                row.c12_work = Work.objects.filter(job_type='make_c12', seed=seed).first()
-
-            if seed in c34_seeds:
-                row.c34_count = Corner34.objects.filter(seed=seed).count()
-                row.c34_work = Work.objects.filter(job_type='make_c34', seed=seed).first()
-
-            if seed in r1_seeds:
-                row.r1_count = Ring1.objects.filter(seed=seed).count()
-                row.r1_work = Work.objects.filter(job_type='make_ring1', seed=seed).first()
-
-            table.append(row)
-        # for
 
         return context
 

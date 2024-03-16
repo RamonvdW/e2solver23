@@ -27,8 +27,8 @@ class Command(BaseCommand):
             self.twoside2reverse[nr] = rev_nr
         # for
 
-        self._used_options = list()
-        self._segment_done = list()
+        self._used_options = []
+        self._segment_done = []
 
     def add_arguments(self, parser):
         parser.add_argument('processor', type=int, help='Processor to use')

@@ -150,10 +150,10 @@ class Command(BaseCommand):
                                                   15: None, 16: None, 17: None, 18: None, 19: None,
                                                   20: None, 21: None, 22: None, 23: None, 24: None}
 
-        self.board_order = list()   # solve order (for popping)
-        self.board_unused = list()
-        self.p_nrs_order = list()
-        self.requested_order = list()
+        self.board_order = []   # solve order (for popping)
+        self.board_unused = []
+        self.p_nrs_order = []
+        self.requested_order = []
         self.prev_tick = 0
         self.progress = None
 
@@ -444,7 +444,7 @@ class Command(BaseCommand):
 
     def _check_open_ends_1(self):
         #  verify each twoside open end can still be solved
-        twoside_open = list()
+        twoside_open = []
         empty_nrs = [nr
                      for nr in range(len(self.locs))
                      if not self.board[nr]]
@@ -541,7 +541,7 @@ class Command(BaseCommand):
                                        nr3__in=self.board_unused,
                                        nr4__in=self.board_unused)
 
-        p_nr_counts = list()
+        p_nr_counts = []
         for p_nr in range(len(self.locs)):
             if self.board[p_nr] is None:
                 # empty position on the board

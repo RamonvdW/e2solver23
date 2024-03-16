@@ -131,7 +131,7 @@ def _sol_add_stats_1x1(sol, neighbours):
             # for
     # for
 
-    sol.s1_counts = list()
+    sol.s1_counts = []
     for s1, s_max in s1_max.items():
         s_open = s1_open[s1]
         s_used = s1_used[s1]
@@ -152,7 +152,7 @@ def _sol_add_stats_1x1(sol, neighbours):
 
 def _sol_add_stats_2x2(sol: Solution8x8, neighbours):
 
-    empty_locs = list()
+    empty_locs = []
     unused_nrs = list(range(1, 256+1))
 
     for p in sol.p2x2s:
@@ -174,7 +174,7 @@ def _sol_add_stats_2x2(sol: Solution8x8, neighbours):
     for p in sol.p2x2s:
         if not p.is_empty:
             nrs = neighbours[p.loc]
-            side_nrs = list()
+            side_nrs = []
 
             # side1
             if nrs[0] in empty_locs:
@@ -217,7 +217,7 @@ def _sol_add_stats_2x2(sol: Solution8x8, neighbours):
 
     qset = Piece2x2.objects.filter(nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs)
 
-    sol.s2_counts = list()
+    sol.s2_counts = []
     for side_nr, c_open in s2_open.items():
         is_border = side_nr_is_border[side_nr]
         rev_nr = side_nr2reverse[side_nr]
@@ -239,7 +239,7 @@ def _fill_sol(sol):
 
     _sol_add_stats_1x1(sol, neighbours)
 
-    sol.p2x2s = list()
+    sol.p2x2s = []
     for nr in range(1, 64 + 1):
         field_nr = 'nr%s' % nr
         field_note = 'note%s' % nr
@@ -271,7 +271,7 @@ def _analyze_chains(sol):
 
     qset = Piece2x2.objects.filter(nr1__in=sol.unused, nr2__in=sol.unused, nr3__in=sol.unused, nr4__in=sol.unused)
 
-    chains = list()
+    chains = []
 
     # left to right
     for nr1, nr8 in ((9, 16), (17, 24), (25, 32), (33, 40), (41, 48), (49, 56)):

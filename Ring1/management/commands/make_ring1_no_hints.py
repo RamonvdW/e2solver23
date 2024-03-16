@@ -47,16 +47,16 @@ class Command(BaseCommand):
         self.unused = list(range(1, 256+1))
         self.unused.remove(CENTER_NR)
 
-        self.used = list()
+        self.used = []
 
-        self.bcb1 = list()
-        self.bcb2 = list()
-        self.bcb3 = list()
-        self.bcb4 = list()
+        self.bcb1 = []
+        self.bcb2 = []
+        self.bcb3 = []
+        self.bcb4 = []
 
         self.count = 0
         self.count_print = 100
-        self.bulk = list()
+        self.bulk = []
 
     def add_arguments(self, parser):
         parser.add_argument('seed', type=int, help='Randomization seed')
@@ -92,7 +92,7 @@ class Command(BaseCommand):
         raise ValueError("end")
 
         unused = self.unused[:]
-        claimed_nrs = list()
+        claimed_nrs = []
 
         # loc, loc1..4 (on side 1..4)
         for tup in ((12, 4, 0, 0, 11),

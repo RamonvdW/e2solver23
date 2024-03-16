@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -101,7 +101,7 @@ def _fill_sol(sol):
 
     neighbours = _calc_neighbours()
 
-    sol.p2x2s = list()
+    sol.p2x2s = []
 
     s1_open = dict()         # ["side"] = count
     s1_used = dict()         # ["side"] = count
@@ -120,7 +120,7 @@ def _fill_sol(sol):
         # for
     # for
 
-    hint_nrs = list()
+    hint_nrs = []
     for nr in range(1, 64 + 1):
         field_nr = 'nr%s' % nr
         field_note = 'note%s' % nr
@@ -167,7 +167,7 @@ def _fill_sol(sol):
             # for
     # for
 
-    sol.s1_counts = list()
+    sol.s1_counts = []
     for s1, s_max in s1_max.items():
         s_open = s1_open[s1]
         s_used = s1_used[s1]

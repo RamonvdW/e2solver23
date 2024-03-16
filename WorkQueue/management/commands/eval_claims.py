@@ -33,14 +33,14 @@ class Command(BaseCommand):
 
         self.processor = 0
         self.small_limit = 3
-        self.unused = list()
+        self.unused = []
 
         self.nr_claims = dict()     # [loc, 1/2/3/4] = [nr, ..]
         for loc in range(1, 64+1):
-            self.nr_claims[(loc, 1)] = list()
-            self.nr_claims[(loc, 2)] = list()
-            self.nr_claims[(loc, 3)] = list()
-            self.nr_claims[(loc, 4)] = list()
+            self.nr_claims[(loc, 1)] = []
+            self.nr_claims[(loc, 2)] = []
+            self.nr_claims[(loc, 3)] = []
+            self.nr_claims[(loc, 4)] = []
         # for
 
         self.reached_dead_end = False
@@ -153,8 +153,8 @@ class Command(BaseCommand):
     def _limit_base_pieces(self, used):
         multi_claims = dict()        # [claim] = count
         changed = True
-        claimed = list()
-        single_nrs = list()
+        claimed = []
+        single_nrs = []
         while changed:
             changed = False
 
@@ -206,7 +206,7 @@ class Command(BaseCommand):
                 self.stdout.write('%s.nr%s: %s%s' % (loc, nr, repr(nrs), multi_str))
         # for
 
-        claimed_nrs = list()
+        claimed_nrs = []
         single_nrs.sort()
         for nr, loc in single_nrs:
             # self.stdout.write('[WARNING] Single claim: %s needs %s' % (loc, nr))

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -46,11 +46,11 @@ class Command(BaseCommand):
         self.board_options = dict()     # [nr] = count of possible Piece2x2
         self.board_freedom = dict()     # [nr] = "statement"
         self.board_gap_count = 0
-        self.board_unused_nrs = list()
+        self.board_unused_nrs = []
         self.neighbours = dict()        # [nr] = (side 1, 2, 3, 4 neighbour nrs)
         self._solve_nr = 0
         self._count_cache = dict()
-        self.board_solve_order = list()     # [nr, nr, ..]
+        self.board_solve_order = []     # [nr, nr, ..]
 
         self._calc_neighbours()
 
@@ -242,7 +242,7 @@ class Command(BaseCommand):
         # for
 
     def _save_partial4x4(self):
-        base_nrs = list()
+        base_nrs = []
         p_count = 0
         nrs = [0]
         for nr in range(1, 64+1):

@@ -22,6 +22,9 @@
     <p>
         {% if url_first %}
             <a href="{{ url_first }}">first</a>
+            {% if url_last %}
+                <a href="{{ url_last }}">last</a>
+            {% endif %}
         {% elif is_empty %}
             Nothing available
         {% else %}

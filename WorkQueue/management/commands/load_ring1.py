@@ -38,7 +38,6 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('nr', type=int, help='Ring1 to load')
         parser.add_argument('processor', type=int, help='Into which processor to load')
-        parser.add_argument('--commit', action='store_true')
 
     def _reverse_sides(self, options):
         return [self.twoside2reverse[two_side] for two_side in options]
@@ -72,15 +71,21 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
-        self.do_commit = options['commit']
-        self.processor = options['processor']
-        self.stdout.write('[INFO] Processor is %s' % self.processor)
-
         nr = options['nr']
-        self.stdout.write('[INFO] Loading ring1 %s' % nr)
-        ring1 = Ring1.objects.get(nr=nr)
+        self.processor = options['processor']
+        self.stdout.write('[INFO] Loading ring1 %s into processor %s' % (nr, self.processor))
 
-        processor = ProcessorUsedPieces.objects.get(processor=self.processor)
+        try:
+            ring1 = Ring1.objects.get(nr=nr)
+        except Ring1.DoesNotExist:
+            self.stderr.write('[ERROR] Ring1 not found')
+            return
+
+        try:
+            processor = ProcessorUsedPieces.objects.get(processor=self.processor)
+        except ProcessorUsedPieces.DoesNotExist:
+            self.stderr.write('[ERROR] Processor not found')
+            return
 
         locs = (1, 2, 3, 4, 5, 6, 7, 8,
                 9, 10, 11, 14, 15, 16,
@@ -95,7 +100,7 @@ class Command(BaseCommand):
 
             field_str = 'nr%s' % loc
             p2x2_nr = getattr(ring1, field_str)
-            print('loc %s ring1 %s = %s' % (loc, field_str, p2x2_nr))
+            # print('loc %s ring1 %s = %s' % (loc, field_str, p2x2_nr))
             if p2x2_nr > 0:
 
                 field_str = 'loc%s' % loc
@@ -125,8 +130,8 @@ class Command(BaseCommand):
 
         # for
 
-        if self.do_commit:
-            processor.save()
+        processor.from_ring1 = ring1.nr
+        processor.save()
 
         for segment, two_sides in self.bulk_reduce.items():
             qset = TwoSideOptions.objects.filter(processor=self.processor, segment=segment, two_side__in=two_sides)

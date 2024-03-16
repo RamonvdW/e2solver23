@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -96,7 +96,7 @@ class Command(BaseCommand):
                     p4 = 249
 
         unused_nrs = self.board_unused_nrs
-        must_have_nrs = list()
+        must_have_nrs = []
 
         qset = Piece2x2.objects.all()
 
@@ -417,7 +417,7 @@ class Command(BaseCommand):
     def _generate_quart6(self, nr_p1, nr_c, nr_p2, nr_4x4):
         count = 0
         count_rejected1 = count_rejected2 = 0
-        bulk = list()
+        bulk = []
         for c1 in self._iter_for_nr_no_borders(nr_c):
             self._board_fill_nr(nr_c, c1)
 
@@ -457,7 +457,7 @@ class Command(BaseCommand):
                                 print('Quart6 type %s: %s (rejected: %s / %s)' % (
                                         nr_c, count, count_rejected1, count_rejected2))
                                 Quart6.objects.bulk_create(bulk)
-                                bulk = list()
+                                bulk = []
                         else:
                             count_rejected1 += 1
                     else:

@@ -55,8 +55,8 @@ class GenerateBorder(object):
                 self.in2b_nrs[side_in] = [nr]
         # for
 
-        self.solve_order = list()
-        self.side_order = list()
+        self.solve_order = []
+        self.side_order = []
 
         self._randomize(seed)
 
@@ -172,8 +172,8 @@ class GenerateBorder(object):
             # for
 
     def iter_solutions(self):
-        self.solve_order = list()
-        self.side_order = list()
+        self.solve_order = []
+        self.side_order = []
 
         # pick the first corner
         c = self.c_nrs[0]

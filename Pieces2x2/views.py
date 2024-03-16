@@ -17,6 +17,7 @@ import time
 
 TEMPLATE_SHOW = 'pieces2x2/show.dtl'
 TEMPLATE_OPTIONS = 'pieces2x2/options.dtl'
+TEMPLATE_OPTIONS_LIST = 'pieces2x2/options-list.dtl'
 
 
 class ShowView(TemplateView):
@@ -54,8 +55,8 @@ class ShowView(TemplateView):
         context['url_next100'] = reverse('Pieces2x2:show', kwargs={'nr': nr+100})
         context['url_next1000'] = reverse('Pieces2x2:show', kwargs={'nr': nr+1000})
 
-        context['groups'] = groups = list()
-        group = list()
+        context['groups'] = groups = []
+        group = []
         pieces = Piece2x2.objects.filter(nr__gte=nr, nr__lt=nr+20).order_by('nr')
         for piece in pieces:
             piece.img1 = static('pieces/%s.png' % piece.nr1)
@@ -71,7 +72,7 @@ class ShowView(TemplateView):
             group.append(piece)
             if len(group) == 4:
                 groups.append(group)
-                group = list()
+                group = []
         # for
 
         return context
@@ -108,7 +109,7 @@ class OptionsView(TemplateView):
 
         segments = list(segment2count.keys())
         segments.sort()
-        compare = list()
+        compare = []
         for segment in segments:
             count1 = segment2count[segment]
             count2 = prev_segment2count[segment]
@@ -176,7 +177,7 @@ class OptionsView(TemplateView):
         # for
 
         # pack the matrix into an array
-        sq_list = list()
+        sq_list = []
         for y in range(16 + 1):
             for x in range(16 + 1):
                 square = squares[(x, y)]
@@ -309,7 +310,7 @@ class OptionsView(TemplateView):
             obj.segments_todo = self._get_segments(obj)
 
             # split solve_order into several lines of 50 long each
-            obj.solve_lines = list()
+            obj.solve_lines = []
             while len(obj.solve_order) > 50:
                 pos = obj.solve_order.find(',', 50)
                 if pos < 0:
@@ -548,27 +549,28 @@ class OptionsView(TemplateView):
         # while
 
         # convert into an array
-        out = list()
+        out = []
         for base in range(1, 256+1):
             out.append(sol[base])
         # for
         return out
 
-    def _get_used(self, processor):
+    @staticmethod
+    def _get_used(processor):
         try:
             used = ProcessorUsedPieces.objects.get(processor=processor)
         except ProcessorUsedPieces.DoesNotExist:
             # make a new one
             used = ProcessorUsedPieces(processor=processor)
 
-        used_nrs = list()
+        used_nrs = []
         for nr in range(1, 256+1):
             nr_str = 'nr%s' % nr
             if getattr(used, nr_str, False):
                 used_nrs.append(str(nr))
         # for
 
-        blocks = list()
+        blocks = []
         while len(used_nrs) > 15:
             blocks.append(", ".join(used_nrs[:15]) + ',')
             used_nrs = used_nrs[15:]
@@ -638,7 +640,7 @@ class OptionsView(TemplateView):
         try:
             highlight_segments = [segment for segment, _, _, _ in context['compare']]
         except KeyError:
-            highlight_segments = list()
+            highlight_segments = []
         context['squares'] = self._make_squares(segment2count, highlight_segments, processor)
 
         context['solution'] = self._make_solution(processor, used)
@@ -650,6 +652,27 @@ class OptionsView(TemplateView):
         context['duration'] = round(time.monotonic() - start, 2)
 
         context['show_url'] = reverse('Solutions:show-work', kwargs={'processor': processor})
+
+        return context
+
+
+class OptionsListView(TemplateView):
+
+    template_name = TEMPLATE_OPTIONS_LIST
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context['work'] = (ProcessorUsedPieces
+                           .objects
+                           .order_by('processor')          # consistent order
+                           .values('processor',
+                                   'from_ring1',
+                                   'reached_dead_end'))
+
+        for proc in context['work']:
+            print(proc)
+            proc['url'] = reverse('Pieces2x2:options-nr', kwargs={'nr': proc['processor']})
 
         return context
 

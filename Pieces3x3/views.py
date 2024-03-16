@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -49,8 +49,8 @@ class ShowView(TemplateView):
         context['url_next100'] = reverse('Pieces3x3:show', kwargs={'nr': nr+100})
         context['url_next1000'] = reverse('Pieces3x3:show', kwargs={'nr': nr+1000})
 
-        context['groups'] = groups = list()
-        group = list()
+        context['groups'] = groups = []
+        group = []
         pieces = Piece3x3.objects.filter(nr__gte=nr, nr__lt=nr+20).order_by('nr')
         for piece in pieces:
             piece.img1 = static('pieces/%s.png' % piece.nr1)
@@ -76,7 +76,7 @@ class ShowView(TemplateView):
             group.append(piece)
             if len(group) == 4:
                 groups.append(group)
-                group = list()
+                group = []
         # for
 
         return context

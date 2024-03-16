@@ -121,9 +121,9 @@ class Command(BaseCommand):
                                                   8: None, 9: None, 10: None, 11: None,
                                                   12: None, 13: None, 14: None, 15: None}
 
-        self.board_order = list()   # solve order (for popping)
-        self.board_unused = list()
-        self.p_nrs_order = list()
+        self.board_order = []   # solve order (for popping)
+        self.board_unused = []
+        self.p_nrs_order = []
         self.prev_tick = 0
         self.progress = None
 
@@ -369,7 +369,7 @@ class Command(BaseCommand):
                                        nr3__in=self.board_unused,
                                        nr4__in=self.board_unused)
 
-        p_nr_counts = list()
+        p_nr_counts = []
         for p_nr in range(len(self.locs)):
             if self.board[p_nr] is None:
                 # empty position on the board
@@ -490,7 +490,7 @@ class Command(BaseCommand):
         sides = self.side_options[s_nr]
         todo = len(sides)
         self.stdout.write('[INFO] Checking %s options in segment %s' % (len(sides), segment))
-        self.p_nrs_order = list()       # allow deciding optimal order anew
+        self.p_nrs_order = []       # allow deciding optimal order anew
 
         self.progress.segment = segment
         self.progress.todo_count = todo

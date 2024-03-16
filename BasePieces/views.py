@@ -19,14 +19,14 @@ class ShowView(TemplateView):
         """ called by the template system to get the context data for the template """
         context = super().get_context_data(**kwargs)
 
-        context['groups'] = groups = list()
-        group = list()
+        context['groups'] = groups = []
+        group = []
         for nr in range(1, 256+1):
             piece = SimpleNamespace(nr=nr, img=static('pieces/%s.png' % nr))
             group.append(piece)
             if len(group) == 8:
                 groups.append(group)
-                group = list()
+                group = []
         # for
 
         return context

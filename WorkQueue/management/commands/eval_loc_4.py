@@ -48,14 +48,14 @@ class Command(BaseCommand):
         self.side_options = ([], [], [], [], [], [], [], [], [], [], [], [])        # s0..s11
         self.side_options_rev = ([], [], [], [], [], [], [], [], [], [], [], [])    # s0..s11
         self.reductions = 0
-        self.unused0 = list()
+        self.unused0 = []
         self.progress = None
         self.do_commit = True
         self.segment_limit = 100
 
-        self._sides5_seen = list()
-        self._sides6_seen = list()
-        self._sides8_seen = list()
+        self._sides5_seen = []
+        self._sides6_seen = []
+        self._sides8_seen = []
 
     def add_arguments(self, parser):
         parser.add_argument('processor', type=int, help='Processor number to use')
@@ -264,9 +264,9 @@ class Command(BaseCommand):
             if not found:
                 self._reduce(segment, side)
                 # built up history is no longer valid
-                self._sides5_seen = list()
-                self._sides6_seen = list()
-                self._sides8_seen = list()
+                self._sides5_seen = []
+                self._sides6_seen = []
+                self._sides8_seen = []
 
             todo -= 1
             self.stdout.write('[INFO] Left: %s/%s' % (todo, len(sides)))
@@ -356,8 +356,8 @@ class Command(BaseCommand):
             if not found:
                 self._reduce(segment, side)
                 # built up history is no longer valid
-                self._sides6_seen = list()
-                self._sides8_seen = list()
+                self._sides6_seen = []
+                self._sides8_seen = []
 
             todo -= 1
             self.stdout.write('[INFO] Left: %s/%s' % (todo, len(sides)))
@@ -446,7 +446,7 @@ class Command(BaseCommand):
             if not found:
                 self._reduce(segment, side)
                 # built up history is no longer valid
-                self._sides8_seen = list()
+                self._sides8_seen = []
 
             todo -= 1
             self.stdout.write('[INFO] Left: %s/%s' % (todo, len(sides)))

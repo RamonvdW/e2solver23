@@ -26,7 +26,7 @@ def _segment_to_loc_1(segment):
         loc_a = 0
         loc_b = 0
 
-    locs = list()
+    locs = []
     if 1 <= loc_a <= 64:
         locs.append(loc_a)
     if 1 <= loc_b <= 64:
@@ -70,7 +70,7 @@ def _segment_to_loc_4(segment):
         loc_e = loc_b + 1       # 0, -1
         # loc_f = loc_c + 1       # 0, +1
 
-    locs = list()
+    locs = []
     for loc in (loc_b, loc_e):  # (loc_a, loc_b, loc_c, loc_d, loc_e, loc_f):
         if 1 <= loc <= 55 and loc not in (8, 16, 24, 32, 40, 48):
             locs.append(loc)
@@ -130,7 +130,7 @@ def _segment_to_loc_9(segment):
         loc_11 = loc_8 + 8      # -1, +1
         loc_12 = loc_9 + 8      # _0, +1
 
-    locs = list()
+    locs = []
     for loc in (loc_1, loc_2, loc_3, loc_4, loc_5, loc_6, loc_7, loc_8, loc_9, loc_10, loc_11, loc_12):
         if 1 <= loc <= 55 and loc not in (8, 16, 24, 32, 40, 48):
             locs.append(loc)
@@ -265,7 +265,7 @@ def get_unused_for_locs(processor, locs):
 #         # not available; so simple skip
 #         pass
 #     else:
-#         updated = list()
+#         updated = []
 #         for nr in base_nrs:
 #             nr_str = 'nr%s' % nr
 #             setattr(used, nr_str, True)
