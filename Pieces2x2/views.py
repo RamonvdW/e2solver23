@@ -671,8 +671,8 @@ class OptionsListView(TemplateView):
                                    'reached_dead_end'))
 
         for proc in context['work']:
-            print(proc)
             proc['url'] = reverse('Pieces2x2:options-nr', kwargs={'nr': proc['processor']})
+        # for
 
         return context
 
