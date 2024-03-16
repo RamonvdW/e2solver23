@@ -250,7 +250,7 @@ class Command(BaseCommand):
             self.ring1.nr55 = p.nr
             self.exp_loc47_s3 = self.twoside2reverse[p.side1]
             self.exp_loc54_s2 = self.twoside2reverse[p.side4]
-            p_nrs = (p.nr1, p.nr2, p.nr4)
+            p_nrs = (p.nr1, p.nr2, p.nr3)
             self._make_used(p_nrs)
             if self._check_loc47_c3() and self._check_loc54_c3():
                 self._save_ring1()
