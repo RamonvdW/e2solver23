@@ -41,7 +41,7 @@ class Command(BaseCommand):
                         nr1=0, nr2=0, nr3=0, nr4=0, nr5=0, nr6=0, nr7=0, nr8=0, nr9=0, nr16=0, nr17=0, nr24=0, nr25=0,
                         nr32=0, nr33=0, nr40=0, nr41=0, nr48=0, nr49=0, nr56=0, nr57=0, nr58=0, nr59=0, nr60=0, nr61=0,
                         nr62=0, nr63=0, nr64=0, nr10=0, nr11=0, nr18=0, nr14=0, nr15=0, nr23=0, nr42=0, nr50=0, nr51=0,
-                        nr47=0, nr54=0, nr55=0, nr36=0)
+                        nr47=0, nr54=0, nr55=0)
 
         # 1..60 = borders + corners
         self.unused = list(range(1, 256+1))
