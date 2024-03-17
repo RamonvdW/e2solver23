@@ -20,16 +20,16 @@ TEMPLATE_OPTIONS = 'pieces2x2/options.dtl'
 TEMPLATE_OPTIONS_LIST = 'pieces2x2/options-list.dtl'
 
 two2nr = dict()
-for two in TwoSide.objects.all():
-    two2nr[two.two_sides] = two.nr
-# for
-
 twoside2reverse = dict()
-for two_sides, nr in two2nr.items():
-    two_rev = two_sides[1] + two_sides[0]
-    rev_nr = two2nr[two_rev]
-    twoside2reverse[nr] = rev_nr
-# for
+if True:
+    for _two in TwoSide.objects.all():
+        two2nr[_two.two_sides] = _two.nr
+    # for
+    for two_sides, two_nr in two2nr.items():
+        two_rev = two_sides[1] + two_sides[0]
+        rev_nr = two2nr[two_rev]
+        twoside2reverse[two_nr] = rev_nr
+    # for
 
 piece2x2_cache = dict()
 
@@ -107,7 +107,8 @@ class OptionsView(TemplateView):
         hue = int(count * (100 / 289))
         return 100 - hue        # low number = green, higher number = red
 
-    def _compare_pre(self, used):
+    @staticmethod
+    def _compare_pre(used):
         segment2count = dict()       # [segment] = int
         prev_segment2count = dict()  # [segment] = int
         for segment in range(256):
@@ -353,7 +354,7 @@ class OptionsView(TemplateView):
         return work
 
     @staticmethod
-    def _make_sol_loc(loc, sol, seg2sides, twoside2reverse, unused, is_last=False):
+    def _make_sol_loc(loc, sol, seg2sides, unused, is_last=False):
         seg1 = calc_segment(loc, 1)
         seg2 = calc_segment(loc, 2)
         seg3 = calc_segment(loc, 3)
@@ -441,22 +442,22 @@ class OptionsView(TemplateView):
                     sol[base_nr + 17].is_empty = False
                     unused.remove(sol[base_nr + 17].nr)
 
-    def _make_sol(self, sol, seg2sides, twoside2reverse, unused, is_last=False):
+    def _make_sol(self, sol, seg2sides, unused, is_last=False):
         if is_last:
-            self._make_sol_loc(10, sol, seg2sides, twoside2reverse, unused, is_last)
-            self._make_sol_loc(15, sol, seg2sides, twoside2reverse, unused, is_last)
-            self._make_sol_loc(50, sol, seg2sides, twoside2reverse, unused, is_last)
-            self._make_sol_loc(55, sol, seg2sides, twoside2reverse, unused, is_last)
-            self._make_sol_loc(36, sol, seg2sides, twoside2reverse, unused, is_last)
+            self._make_sol_loc(10, sol, seg2sides, unused, is_last)
+            self._make_sol_loc(15, sol, seg2sides, unused, is_last)
+            self._make_sol_loc(50, sol, seg2sides, unused, is_last)
+            self._make_sol_loc(55, sol, seg2sides, unused, is_last)
+            self._make_sol_loc(36, sol, seg2sides, unused, is_last)
             return
 
         for loc in range(1, 64+1):
-            self._make_sol_loc(loc, sol, seg2sides, twoside2reverse, unused, is_last)
+            self._make_sol_loc(loc, sol, seg2sides, unused, is_last)
         # for
 
         if is_last:
             for loc in (55, 10, 15, 50):
-                self._make_sol_loc(loc, sol, seg2sides, twoside2reverse, unused, is_last)
+                self._make_sol_loc(loc, sol, seg2sides, unused, is_last)
             # for
 
         if is_last:
@@ -555,12 +556,12 @@ class OptionsView(TemplateView):
         keep_going = True
         while keep_going:
             prev_len = len(unused)
-            self._make_sol(sol, seg2sides, twoside2reverse, unused)
+            self._make_sol(sol, seg2sides, unused)
 
             if len(unused) == prev_len:
                 keep_going = False
                 # final run
-                self._make_sol(sol, seg2sides, twoside2reverse, unused, True)
+                self._make_sol(sol, seg2sides, unused, True)
         # while
 
         # convert into an array
