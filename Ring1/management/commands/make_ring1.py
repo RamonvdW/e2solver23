@@ -11,6 +11,7 @@ from BasePieces.models import BasePiece
 from Pieces2x2.models import Piece2x2, TwoSide
 from Ring1.models import Ring1
 
+
 class Command(BaseCommand):
 
     help = "Generate a Ring1"
