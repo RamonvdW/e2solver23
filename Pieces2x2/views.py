@@ -19,6 +19,20 @@ TEMPLATE_SHOW = 'pieces2x2/show.dtl'
 TEMPLATE_OPTIONS = 'pieces2x2/options.dtl'
 TEMPLATE_OPTIONS_LIST = 'pieces2x2/options-list.dtl'
 
+two2nr = dict()
+for two in TwoSide.objects.all():
+    two2nr[two.two_sides] = two.nr
+# for
+
+twoside2reverse = dict()
+for two_sides, nr in two2nr.items():
+    two_rev = two_sides[1] + two_sides[0]
+    rev_nr = two2nr[two_rev]
+    twoside2reverse[nr] = rev_nr
+# for
+
+piece2x2_cache = dict()
+
 
 class ShowView(TemplateView):
 
@@ -449,17 +463,6 @@ class OptionsView(TemplateView):
             sol[136].is_empty = False
 
     def _make_solution(self, processor, used):
-        two2nr = dict()
-        for two in TwoSide.objects.all():
-            two2nr[two.two_sides] = two.nr
-        # for
-        twoside2reverse = dict()
-        for two_sides, nr in two2nr.items():
-            two_rev = two_sides[1] + two_sides[0]
-            rev_nr = two2nr[two_rev]
-            twoside2reverse[nr] = rev_nr
-        # for
-
         sol = dict()        # [base] = SimpleNamespace
         wrap = 0
         for base in range(1, 256+1):
@@ -482,27 +485,34 @@ class OptionsView(TemplateView):
 
         qset = TwoSideOptions.objects.filter(processor=processor)
         seg2sides = dict()      # [seg] = list(two_side)
+        for two in qset:
+            try:
+                seg2sides[two.segment].append(two.two_side)
+            except KeyError:
+                seg2sides[two.segment] = [two.two_side]
+        # for
+
         for loc in range(1, 64+1):
-            seg1 = calc_segment(loc, 1)
-            seg2 = calc_segment(loc, 2)
-            seg3 = calc_segment(loc, 3)
-            seg4 = calc_segment(loc, 4)
-
-            if seg1 not in seg2sides:
-                sides1 = qset.filter(segment=seg1).values_list('two_side', flat=True)
-                seg2sides[seg1] = list(sides1)
-
-            if seg2 not in seg2sides:
-                sides2 = qset.filter(segment=seg2).values_list('two_side', flat=True)
-                seg2sides[seg2] = list(sides2)
-
-            if seg3 not in seg2sides:
-                sides3 = qset.filter(segment=seg3).values_list('two_side', flat=True)
-                seg2sides[seg3] = list(sides3)
-
-            if seg4 not in seg2sides:
-                sides4 = qset.filter(segment=seg4).values_list('two_side', flat=True)
-                seg2sides[seg4] = list(sides4)
+            # seg1 = calc_segment(loc, 1)
+            # seg2 = calc_segment(loc, 2)
+            # seg3 = calc_segment(loc, 3)
+            # seg4 = calc_segment(loc, 4)
+            #
+            # if seg1 not in seg2sides:
+            #     sides1 = qset.filter(segment=seg1).values_list('two_side', flat=True)
+            #     seg2sides[seg1] = list(sides1)
+            #
+            # if seg2 not in seg2sides:
+            #     sides2 = qset.filter(segment=seg2).values_list('two_side', flat=True)
+            #     seg2sides[seg2] = list(sides2)
+            #
+            # if seg3 not in seg2sides:
+            #     sides3 = qset.filter(segment=seg3).values_list('two_side', flat=True)
+            #     seg2sides[seg3] = list(sides3)
+            #
+            # if seg4 not in seg2sides:
+            #     sides4 = qset.filter(segment=seg4).values_list('two_side', flat=True)
+            #     seg2sides[seg4] = list(sides4)
 
             loc_str = 'loc%s' % loc
             nr = getattr(used, loc_str)
@@ -511,7 +521,11 @@ class OptionsView(TemplateView):
                 base_nr = 2 * (loc - 1) + row_nr * 16
                 base_nr += 1
                 # print('loc=%s, row_nr=%s, base_nr=%s' % (loc, row_nr, base_nr))
-                p2x2 = Piece2x2.objects.get(nr=nr)
+                try:
+                    p2x2 = piece2x2_cache[nr]
+                except KeyError:
+                    p2x2 = Piece2x2.objects.get(nr=nr)
+                    piece2x2_cache[nr] = p2x2
 
                 sol[base_nr].nr = p2x2.nr1
                 sol[base_nr].is_empty = False
