@@ -686,12 +686,20 @@ class OptionsListView(TemplateView):
                                    'from_ring1',
                                    'reached_dead_end'))
 
+        ongoing1 = Work.objects.filter(doing=True, done=False, priority=1).distinct('processor').values_list('processor', flat=True)
+        ongoing1 = list(ongoing1)
+
         ongoing = Work.objects.filter(doing=True, done=False).distinct('processor').values_list('processor', flat=True)
         ongoing = list(ongoing)
 
         for proc in context['work']:
-            proc['ongoing'] = proc['processor'] in ongoing
             proc['url'] = reverse('Pieces2x2:options-nr', kwargs={'nr': proc['processor']})
+
+            proc['color'] = None
+            if proc['processor'] in ongoing1:
+                proc['color'] = 'cyan'
+            elif proc['processor'] in ongoing:
+                proc['color'] = 'blue'
         # for
 
         return context
