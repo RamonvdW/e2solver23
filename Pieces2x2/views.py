@@ -699,7 +699,7 @@ class OptionsListView(TemplateView):
             if proc['processor'] in ongoing1:
                 proc['color'] = 'cyan'
             elif proc['processor'] in ongoing:
-                proc['color'] = 'blue'
+                proc['color'] = 'skyblue'
         # for
 
         return context
