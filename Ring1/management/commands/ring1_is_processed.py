@@ -32,7 +32,7 @@ class Command(BaseCommand):
                 self.stdout.write('[ERROR] Cannot find Ring1 with nr=%s' % nr)
             else:
                 ring.is_processed = True
-                ring.save(update_fields='is_processed')
+                ring.save(update_fields=['is_processed'])
 
 
 # end of file
