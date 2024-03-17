@@ -51,7 +51,7 @@
             {% if proc.reached_dead_end %}
                 <tr>
                     <td><a href="{{ proc.url }}" target="_blank">{{ proc.processor }}</a></td>
-                    <td>{{ proc.from_ring1 }}</td>
+                    <td{% if proc.ongoing %} style="background:cyan"{% endif %}>{{ proc.from_ring1 }}</td>
                 </tr>
             {% endif %}
         {% endfor %}

@@ -201,7 +201,8 @@ class OptionsView(TemplateView):
 
         return sq_list
 
-    def _get_segments(self, progress):
+    @staticmethod
+    def _get_segments(progress):
         loc = progress.eval_loc
         if progress.eval_size == 4:
             """
@@ -684,7 +685,11 @@ class OptionsListView(TemplateView):
                                    'from_ring1',
                                    'reached_dead_end'))
 
+        ongoing = Work.objects.filter(doing=True, done=False).distinct('processor').values_list('processor', flat=True)
+        ongoing = list(ongoing)
+
         for proc in context['work']:
+            proc['ongoing'] = proc['processor'] in ongoing
             proc['url'] = reverse('Pieces2x2:options-nr', kwargs={'nr': proc['processor']})
         # for
 
