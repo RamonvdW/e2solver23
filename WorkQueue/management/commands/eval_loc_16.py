@@ -126,10 +126,12 @@ class Command(BaseCommand):
         self.p_nrs_order = []
         self.prev_tick = 0
         self.progress = None
+        self.nop = False
 
     def add_arguments(self, parser):
         parser.add_argument('processor', nargs=1, type=int, help='Processor number to use')
         parser.add_argument('loc', nargs=1, type=int, help='Top-left location on the board (1..37)')
+        parser.add_argument('--nop', action='store_true', help='Do not propagate')
         parser.add_argument('--dryrun', action='store_true')
 
     def _get_unused(self):
@@ -307,7 +309,8 @@ class Command(BaseCommand):
             if self.do_commit:
                 qset.delete()
             self.reductions += 1
-            propagate_segment_reduction(self.processor, segment)
+            if not self.nop:
+                propagate_segment_reduction(self.processor, segment)
 
     def _check_open_ends(self):
         #  verify each location can still be filled
@@ -581,6 +584,8 @@ class Command(BaseCommand):
 
         self.processor = options['processor'][0]
         self.stdout.write('[INFO] Processor=%s' % self.processor)
+
+        self.nop = options['nop']
 
         self.board_unused = self._get_unused()
 

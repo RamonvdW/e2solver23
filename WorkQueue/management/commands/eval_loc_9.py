@@ -88,11 +88,13 @@ class Command(BaseCommand):
         self.p_nrs_order = []
         self.prev_tick = 0
         self.progress = None
+        self.nop = False
 
     def add_arguments(self, parser):
         parser.add_argument('processor', type=int, help='Processor number to use')
         parser.add_argument('loc', type=int, help='Top-left location on the board (1..46)')
         parser.add_argument('--limit', default=100, type=int, help='Skip segment evaluation above this limit')
+        parser.add_argument('--nop', action='store_true', help='Do not propagate')
         parser.add_argument('--dryrun', action='store_true')
 
     def _get_unused(self):
@@ -246,7 +248,8 @@ class Command(BaseCommand):
             if self.do_commit:
                 qset.delete()
             self.reductions += 1
-            propagate_segment_reduction(self.processor, segment)
+            if not self.nop:
+                propagate_segment_reduction(self.processor, segment)
 
     def _decide_p_nr_order(self):
         qset = Piece2x2.objects.filter(nr1__in=self.board_unused,
@@ -520,6 +523,8 @@ class Command(BaseCommand):
 
         self.segment_limit = options['limit']
         self.stdout.write('[INFO] Segment limit: %s' % self.segment_limit)
+
+        self.nop = options['nop']
 
         self.board_unused = self._get_unused()
 

@@ -156,15 +156,16 @@ class Command(BaseCommand):
         self.requested_order = []
         self.prev_tick = 0
         self.progress = None
-
         self.progress_15min = -1
+        self.nop = False
 
     def add_arguments(self, parser):
         parser.add_argument('processor', nargs=1, type=int, help='Processor number to use')
         parser.add_argument('loc', nargs=1, type=int, help='Top-left location on board (1..37)')
         parser.add_argument('segment', nargs=1, type=int, help='Segment to work on (1..72, 129..193)')
-        parser.add_argument('--dryrun', action='store_true')
         parser.add_argument('order', nargs='*', type=int, help='Solving order (1..64), max %s' % len(self.locs))
+        parser.add_argument('--dryrun', action='store_true')
+        parser.add_argument('--nop', action='store_true', help='Do not propagate')
 
     def _get_unused(self):
         unused = get_unused_for_locs(self.processor, self.locs)
@@ -439,7 +440,8 @@ class Command(BaseCommand):
             self.stdout.write('[INFO] Reduction segment %s: %s' % (segment, two_side))
             if self.do_commit:
                 qset.delete()
-                propagate_segment_reduction(self.processor, segment)
+                if not self.nop:
+                    propagate_segment_reduction(self.processor, segment)
             self.reductions += 1
 
     def _check_open_ends_1(self):
@@ -767,6 +769,8 @@ class Command(BaseCommand):
                 self.stdout.write('[WARNING] Duplicate in requested order: %s' % loc)
         # for
         self.stdout.write('[INFO] Initial solve order: %s' % repr(self.requested_order))
+
+        self.nop = options['nop']
 
         self.board_unused = self._get_unused()
 

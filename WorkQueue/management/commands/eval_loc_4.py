@@ -57,10 +57,13 @@ class Command(BaseCommand):
         self._sides6_seen = []
         self._sides8_seen = []
 
+        self.nop = False
+
     def add_arguments(self, parser):
         parser.add_argument('processor', type=int, help='Processor number to use')
         parser.add_argument('loc', type=int, help='Top-left location on the board (1..55)')
         parser.add_argument('--limit', default=100, type=int, help='Skip segment evaluation above this limit')
+        parser.add_argument('--nop', action='store_true', help='Do not propagate')
         parser.add_argument('--dryrun', action='store_true')
 
     def _get_unused(self):
@@ -180,7 +183,8 @@ class Command(BaseCommand):
             if self.do_commit:
                 qset.delete()
             self.reductions += 1
-            propagate_segment_reduction(self.processor, segment)
+            if not self.nop:
+                propagate_segment_reduction(self.processor, segment)
 
     def _reduce_s3(self):
         """
@@ -567,6 +571,8 @@ class Command(BaseCommand):
 
         self.segment_limit = options['limit']
         self.stdout.write('[INFO] Segment limit: %s' % self.segment_limit)
+
+        self.nop = options['nop']
 
         self.unused0 = self._get_unused()
 

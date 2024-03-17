@@ -40,6 +40,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         # parser.add_argument('--verbose', action='store_true')
+        parser.add_argument('--nop', action='store_true', help='Do not propagate')
         parser.add_argument('processor', nargs=1, type=int, help='Processor number to use')
         parser.add_argument('loc', nargs=1, type=int, help='Location on board (1..64)')
         parser.add_argument('claimed', nargs='*', type=int, help="Base piece number claimed for other location")
@@ -107,6 +108,8 @@ class Command(BaseCommand):
         self.processor = options['processor'][0]
 
         self.stdout.write('[INFO] Location: %s; processor=%s' % (self.loc, self.processor))
+
+        nop = options['nop']
 
         unused = self._get_unused(options['claimed'])
 
@@ -218,9 +221,10 @@ class Command(BaseCommand):
             qset2.delete()
         # for
 
-        for segment in self.bulk_reduce.keys():
-            propagate_segment_reduction(self.processor, segment)
-        # for
+        if not nop:
+            for segment in self.bulk_reduce.keys():
+                propagate_segment_reduction(self.processor, segment)
+            # for
 
         if count == 1:
             # only 1 solution left: set the base pieces as used
@@ -243,7 +247,8 @@ class Command(BaseCommand):
                                                                      self.reductions[2],
                                                                      self.reductions[3],
                                                                      self.reductions[4]))
-            request_eval_claims(self.processor)
+            if not nop:
+                request_eval_claims(self.processor)
 
 
 # end of file
