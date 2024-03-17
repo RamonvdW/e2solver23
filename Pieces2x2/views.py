@@ -665,7 +665,7 @@ class OptionsListView(TemplateView):
 
         context['work'] = (ProcessorUsedPieces
                            .objects
-                           .order_by('processor')          # consistent order
+                           .order_by('-processor')          # consistent order
                            .values('processor',
                                    'from_ring1',
                                    'reached_dead_end'))

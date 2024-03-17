@@ -22,7 +22,7 @@ class Command(BaseCommand):
         if options['find']:
             ring = Ring1.objects.filter(is_processed=False).first()
             if ring:
-                self.stdout.write(ring.nr)
+                self.stdout.write("%s" % ring.nr)
 
         elif options['set']:
             nr = options['nr']
