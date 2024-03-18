@@ -711,7 +711,7 @@ class OptionsListView(TemplateView):
         ongoing = list(ongoing)
 
         work2count = dict()     # [processor] = count
-        for work in Work.objects.filter(doing=True, done=False):
+        for work in Work.objects.filter(done=False):
             try:
                 work2count[work.processor] += 1
             except KeyError:
