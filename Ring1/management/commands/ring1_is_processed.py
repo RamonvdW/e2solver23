@@ -10,29 +10,12 @@ from Ring1.models import Ring1
 
 class Command(BaseCommand):
 
-    help = "Handle the Ring1 is_processed flag"
-
-    def add_arguments(self, parser):
-        parser.add_argument('nr', type=int, help='Ring1 to set')
-        parser.add_argument('--find', action='store_true', help='Find a Ring1 with is_processed == False')
-        parser.add_argument('--set', action='store_true', help='Set Ring1 status is_processed = True')
+    help = "Find a Ring1 with is_processed flag set to False"
 
     def handle(self, *args, **options):
-
-        if options['find']:
-            ring = Ring1.objects.filter(is_processed=False).first()
-            if ring:
-                self.stdout.write("%s" % ring.nr)
-
-        elif options['set']:
-            nr = options['nr']
-            try:
-                ring = Ring1.objects.get(nr=nr)
-            except Ring1.DoesNotExist:
-                self.stdout.write('[ERROR] Cannot find Ring1 with nr=%s' % nr)
-            else:
-                ring.is_processed = True
-                ring.save(update_fields=['is_processed'])
+        ring = Ring1.objects.filter(is_processed=False).first()
+        if ring:
+            self.stdout.write("%s" % ring.nr)
 
 
 # end of file

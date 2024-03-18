@@ -10,7 +10,9 @@ from Ring1.models import Ring1
 
 class CornerAdmin(admin.ModelAdmin):
 
-    list_filter = ('seed',)
+    list_filter = ('is_processed', 'seed', )
+
+    search_fields = ('nr',)
 
 
 admin.site.register(Ring1, CornerAdmin)
