@@ -13,7 +13,7 @@ class Command(BaseCommand):
     help = "Add job definition to the work queue"
 
     supported_job_types = ('eval_loc_1', 'eval_loc_4', 'eval_loc_9', 'eval_loc_16', 'eval_line1', 'eval_line2',
-                           'eval_claims', 'scan1',
+                           'eval_claims', 'scan1', 'scan9',
                            'make_c1', 'make_c2', 'make_c3', 'make_c4', 'make_c12', 'make_c34', 'make_ring1')
 
     def __init__(self, **kwargs):
@@ -52,6 +52,24 @@ class Command(BaseCommand):
                 loc_str = 'loc%s' % loc
                 if getattr(used, loc_str) == 0:
                     bulk.append(Work(processor=processor, job_type=job_type, priority=prio_seed, location=loc))
+            # for
+            Work.objects.bulk_create(bulk)
+            self.stdout.write('[INFO] Added %s jobs' % len(bulk))
+
+        elif job_type == 'scan9':
+            job_type = 'eval_loc_9'
+            self.stdout.write(
+                '[INFO] Adding work: %s %s %s {1 2 3 4 5 6 14 22 30 38 46 9 17 25 33 41 42 43 44 45}' % (
+                    processor, job_type, prio_seed))
+
+            try:
+                used = ProcessorUsedPieces.objects.get(processor=processor)
+            except ProcessorUsedPieces.DoesNotExist:
+                used = ProcessorUsedPieces()
+
+            bulk = []
+            for loc in (1, 2, 3, 4, 5, 6, 14, 22, 30, 38, 46, 9, 17, 25, 33, 41, 42, 43, 44, 45):
+                bulk.append(Work(processor=processor, job_type=job_type, priority=prio_seed, location=loc))
             # for
             Work.objects.bulk_create(bulk)
             self.stdout.write('[INFO] Added %s jobs' % len(bulk))

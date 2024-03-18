@@ -360,10 +360,25 @@ class OptionsView(TemplateView):
         seg3 = calc_segment(loc, 3)
         seg4 = calc_segment(loc, 4)
 
-        sides1 = seg2sides[seg1]
-        sides2 = seg2sides[seg2]
-        sides3 = seg2sides[seg3]
-        sides4 = seg2sides[seg4]
+        try:
+            sides1 = seg2sides[seg1]
+        except KeyError:
+            sides1 = []
+
+        try:
+            sides2 = seg2sides[seg2]
+        except KeyError:
+            sides2 = []
+
+        try:
+            sides3 = seg2sides[seg3]
+        except KeyError:
+            sides3 = []
+
+        try:
+            sides4 = seg2sides[seg4]
+        except KeyError:
+            sides4 = []
 
         sides3 = [twoside2reverse[side] for side in sides3]
         sides4 = [twoside2reverse[side] for side in sides4]
