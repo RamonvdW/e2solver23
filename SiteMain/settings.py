@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'BasePieces',
     'Pieces2x2',
     'Ring1',
+    'Ring2',
     'Solutions',
     'WorkQueue',
     'django.contrib.admin',
@@ -223,4 +224,3 @@ LOGGING = {
 from SiteMain.settings_local import *
 
 # end of file
-

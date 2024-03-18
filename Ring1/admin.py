@@ -8,14 +8,14 @@ from django.contrib import admin
 from Ring1.models import Ring1
 
 
-class CornerAdmin(admin.ModelAdmin):
+class Ring1Admin(admin.ModelAdmin):
 
     list_filter = ('is_processed', 'seed', )
 
     search_fields = ('nr',)
 
 
-admin.site.register(Ring1, CornerAdmin)
+admin.site.register(Ring1, Ring1Admin)
 
 
 # end of file

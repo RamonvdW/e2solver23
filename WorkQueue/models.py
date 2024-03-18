@@ -64,8 +64,9 @@ class ProcessorUsedPieces(models.Model):
     # from which processor was duplication done?
     created_from = models.PositiveIntegerField(default=0)
 
-    # did we load a ring1?
+    # did we load a ring1 or ring2
     from_ring1 = models.PositiveIntegerField(default=0)
+    from_ring2 = models.PositiveIntegerField(default=0)
 
     # out of all 256 base pieces, which ones are in use?
     nr1 = models.BooleanField(default=False)
