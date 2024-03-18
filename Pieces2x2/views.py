@@ -706,6 +706,10 @@ class OptionsListView(TemplateView):
                                        priority=1).distinct('processor').values_list('processor', flat=True)
         ongoing1 = list(ongoing1)
 
+        ongoing = Work.objects.filter(doing=True,
+                                      done=False).distinct('processor').values_list('processor', flat=True)
+        ongoing = list(ongoing)
+
         work2count = dict()     # [processor] = count
         for work in Work.objects.filter(doing=True, done=False):
             try:
@@ -713,8 +717,6 @@ class OptionsListView(TemplateView):
             except KeyError:
                 work2count[work.processor] = 1
         # for
-
-        ongoing = work2count.keys()
 
         for proc in context['work']:
             processor = proc['processor']
