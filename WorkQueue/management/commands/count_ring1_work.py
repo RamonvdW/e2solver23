@@ -18,7 +18,9 @@ class Command(BaseCommand):
         processors = ProcessorUsedPieces.objects.filter(reached_dead_end=True).values('processor')
         Work.objects.filter(processor__in=processors).delete()
 
-        count = ProcessorUsedPieces.objects.exclude(reached_dead_end=True).count()
+        processors = ProcessorUsedPieces.objects.filter(reached_dead_end=False).values('processor')
+        count = Work.objects.filter(processor__in=processors, done=False).distinct('processor').count()
+
         self.stdout.write('%s' % count)
 
 

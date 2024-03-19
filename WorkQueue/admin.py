@@ -17,7 +17,7 @@ class WorkAdmin(admin.ModelAdmin):
 
 class ProcessorUsedPiecesAdmin(admin.ModelAdmin):
 
-    list_filter = ('processor',)
+    list_filter = ('reached_dead_end', 'processor',)
 
 
 admin.site.register(Work, WorkAdmin)
