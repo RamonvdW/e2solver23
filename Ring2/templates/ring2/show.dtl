@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <style>
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+            padding: 5px;
+            text-align: center;
+            font-size: 15px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>{{ title }}</h1>
+
+    <p>
+        {% if url_first %}
+            <a href="{{ url_first }}">first</a>
+            {% if url_last %}
+                <a href="{{ url_last }}">last</a>
+            {% endif %}
+        {% elif is_empty %}
+            Nothing available
+        {% else %}
+            {% if url_prev1000 %}<a style="margin:10px" href="{{ url_prev1000 }}">-1000</a>{%  else %}<span style="margin:10px">-1000</span>{% endif %}
+            {% if url_prev100  %}<a style="margin:10px" href="{{ url_prev100  }}">-100</a>{%   else %}<span style="margin:10px">-100</span>{% endif %}
+            {% if url_prev10   %}<a style="margin:10px" href="{{ url_prev10   }}">-10</a>{%    else %}<span style="margin:10px">-10</span>{%  endif %}
+            {% if url_prev1    %}<a style="margin:10px" href="{{ url_prev1    }}">-1</a>{%     else %}<span style="margin:10px">-1</span>{%   endif %}
+            {% if url_next1    %}<a style="margin:10px" href="{{ url_next1    }}">+1</a>{%    endif %}
+            {% if url_next10   %}<a style="margin:10px" href="{{ url_next10   }}">+10</a>{%   endif %}
+            {% if url_next100  %}<a style="margin:10px" href="{{ url_next100  }}">+100</a>{%  endif %}
+            {% if url_next1000 %}<a style="margin:10px" href="{{ url_next1000 }}">+1000</a>{% endif %}
+        {% endif %}
+    </p>
+
+    {% if not is_empty %}
+        <table style="margin-left:auto; margin-right:auto; border:0">
+            <tr style="border:0; vertical-align:top">
+
+                <td style="border:0">
+                    <!-- solution -->
+                    <table>
+                        <thead>
+                            <tr>
+                                <td colspan="8">Nr {{ solution.nr }}</td>
+                            </tr>
+                            <tr>
+                                <td colspan="8">Seed: {{ solution.seed }}</td>
+                            </tr>
+                        </thead>
+
+                        <tr style="padding:0">
+                            {% for piece in solution.p2x2s %}
+                                <td style="padding:0">
+                                    {% if piece.is_empty %}
+                                        <div style="width:80px; height:80px"></div>
+                                    {% else %}
+                                        <div style="display:flex">
+                                            <img src="{{ piece.img1 }}" width=40 height=40 style="transform: {{ piece.transform1 }}">
+                                            <img src="{{ piece.img2 }}" width=40 height=40 style="transform: {{ piece.transform2 }}">
+                                        </div>
+                                        <div style="display:flex">
+                                            <img src="{{ piece.img3 }}" width=40 height=40 style="transform: {{ piece.transform3 }}">
+                                            <img src="{{ piece.img4 }}" width=40 height=40 style="transform: {{ piece.transform4 }}">
+                                        </div>
+                                    {% endif %}
+                                </td>
+                                {% if piece.break_after %}
+                                    </tr>
+                                    <tr>
+                                {% endif %}
+
+                            {% endfor %}
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    {% endif %}
+
+    {% if base_nrs %}
+        <p>Used nrs: {{ base_nrs }}</p>
+    {% endif %}
+
+    {% if auto_reload %}
+        <script>
+            setTimeout(function(){
+                window.location.reload();
+            }, 15*1000);        // 15 seconds
+        </script>
+    {% endif %}
+
+</body>
+</html>

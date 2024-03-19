@@ -94,7 +94,7 @@ class Ring2(models.Model):
     is_processed = models.BooleanField(default=False)
 
     def __str__(self):
-        return str(self.loc)
+        return str(self.nr)
 
     class Meta:
         verbose_name = 'Ring2'
