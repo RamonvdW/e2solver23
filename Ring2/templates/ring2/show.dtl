@@ -51,7 +51,7 @@
                                 <td colspan="8">Nr {{ solution.nr }}</td>
                             </tr>
                             <tr>
-                                <td colspan="8">Seed: {{ solution.seed }}</td>
+                                <td colspan="8">Based on Ring1: {{ solution.based_on_ring1 }}</td>
                             </tr>
                         </thead>
 
