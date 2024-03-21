@@ -10,6 +10,7 @@ from BasePieces.models import BasePiece
 from Pieces2x2.models import Piece2x2, TwoSide
 from Ring1.models import Ring1
 from Ring2.models import Ring2
+import time
 
 
 class Command(BaseCommand):
@@ -46,10 +47,7 @@ class Command(BaseCommand):
         # for
 
         self.used = []
-
         self.count = 0
-        self.count_print = 100
-        self.bulk = []
 
         # hint 1
         qset = Piece2x2.objects.filter(nr1=208)
@@ -79,9 +77,67 @@ class Command(BaseCommand):
         self.exp_loc58_s1_set = [self.twoside2reverse[side] for side in loc50_s3_set]
         self.exp_loc49_s2_set = [self.twoside2reverse[side] for side in loc50_s4_set]
 
+        self.prev_tick = time.monotonic()
+
     def add_arguments(self, parser):
         parser.add_argument('ring1_nr', type=int, help='Ring1 to load')
         parser.add_argument('--clean', action='store_true')
+
+    def _find_best(self):
+        if self.ring2.loc26 > 0:
+            return 20
+        if self.ring2.loc34 > 0:
+            return 19
+
+        if self.ring2.loc53 > 0:
+            return 18
+        if self.ring2.loc52 > 0:
+            return 17
+
+        if self.ring2.loc42 > 0:
+            return 16
+        if self.ring2.loc51 > 0:
+            return 15
+        if self.ring2.loc50 > 0:
+            return 14
+
+        if self.ring2.loc31 > 0:
+            return 13
+        if self.ring2.loc39 > 0:
+            return 12
+
+        if self.ring2.loc54 > 0:
+            return 11
+        if self.ring2.loc47 > 0:
+            return 10
+        if self.ring2.loc55 > 0:
+            return 9
+
+        if self.ring2.loc13 > 0:
+            return 8
+        if self.ring2.loc12 > 0:
+            return 7
+
+        if self.ring2.loc23 > 0:
+            return 6
+        if self.ring2.loc14 > 0:
+            return 5
+        if self.ring2.loc15 > 0:
+            return 4
+
+        if self.ring2.loc11 > 0:
+            return 3
+        if self.ring2.loc18 > 0:
+            return 2
+        if self.ring2.loc10 > 0:
+            return 1
+        return 0
+
+    def _report_progress(self):
+        tick = time.monotonic()
+        if tick - self.prev_tick > 60:
+            self.prev_tick = tick
+            self.stdout.write('Best: %s / 20' % self._find_best())
 
     def _make_used(self, p_nrs: tuple | list):
         for nr in p_nrs:
@@ -343,6 +399,7 @@ class Command(BaseCommand):
         # for
 
     def _find_loc31(self):
+        self._report_progress()
         qset = Piece2x2.objects.filter(has_hint=False,
                                        nr1__in=self.unused, nr2__in=self.unused,
                                        nr3__in=self.unused, nr4__in=self.unused,
@@ -526,7 +583,10 @@ class Command(BaseCommand):
                                        nr1=208,
                                        nr2__in=self.unused, nr3__in=self.unused, nr4__in=self.unused,
                                        side1=self.exp_loc10_s1, side4=self.exp_loc10_s4)
+        left = qset.count()
         for p in qset:
+            self.stdout.write('loc10: %s left' % left)
+            left -= 1
             self.ring2.loc10 = p.nr
             self.exp_loc11_s4 = self.twoside2reverse[p.side2]
             self.exp_loc18_s1 = self.twoside2reverse[p.side3]
@@ -535,56 +595,6 @@ class Command(BaseCommand):
             self._find_loc18()
             self._make_unused(p_nrs)
         # for
-
-    def _find_best(self):
-        if self.ring2.loc26 > 0:
-            return 20
-        if self.ring2.loc34 > 0:
-            return 19
-
-        if self.ring2.loc53 > 0:
-            return 18
-        if self.ring2.loc52 > 0:
-            return 17
-
-        if self.ring2.loc42 > 0:
-            return 16
-        if self.ring2.loc51 > 0:
-            return 15
-        if self.ring2.loc50 > 0:
-            return 14
-
-        if self.ring2.loc31 > 0:
-            return 13
-        if self.ring2.loc39 > 0:
-            return 12
-
-        if self.ring2.loc54 > 0:
-            return 11
-        if self.ring2.loc47 > 0:
-            return 10
-        if self.ring2.loc55 > 0:
-            return 9
-
-        if self.ring2.loc13 > 0:
-            return 8
-        if self.ring2.loc12 > 0:
-            return 7
-
-        if self.ring2.loc23 > 0:
-            return 6
-        if self.ring2.loc14 > 0:
-            return 5
-        if self.ring2.loc15 > 0:
-            return 4
-
-        if self.ring2.loc11 > 0:
-            return 3
-        if self.ring2.loc18 > 0:
-            return 2
-        if self.ring2.loc10 > 0:
-            return 1
-        return 0
 
     def handle(self, *args, **options):
 
@@ -595,8 +605,7 @@ class Command(BaseCommand):
 
         ring1_nr = options['ring1_nr']
         self._load_ring1(ring1_nr)
-
-        #print('[DEBUG] count unused=%s' % len(frozenset(self.unused)))
+        # print('[DEBUG] count unused=%s' % len(frozenset(self.unused)))
 
         try:
             self._find_loc10()
@@ -604,7 +613,6 @@ class Command(BaseCommand):
             pass
         else:
             # print('[DEBUG] unused=%s' % len(frozenset(self.unused)))
-            best = self._find_best()
-            print('[INFO] Counted: %s; Best: %s' % (self.count, best))
+            print('[INFO] Best: %s' % self._find_best())
 
 # end of file
