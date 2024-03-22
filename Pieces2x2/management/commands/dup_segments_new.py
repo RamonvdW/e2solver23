@@ -7,6 +7,7 @@
 from django.core.management.base import BaseCommand
 from Pieces2x2.models import TwoSideOptions
 from WorkQueue.models import ProcessorUsedPieces
+from WorkQueue.operations import used_note_add
 
 
 class Command(BaseCommand):
@@ -43,6 +44,8 @@ class Command(BaseCommand):
         work.processor = new_processor
         work.created_from = source
         work.save()
+
+        used_note_add(work.processor, 'DupNew from %s' % source)
 
         # output only 1 thing: the new processor number
         self.stdout.write(str(new_processor))

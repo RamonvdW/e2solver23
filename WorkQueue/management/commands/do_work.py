@@ -82,41 +82,8 @@ class Command(BaseCommand):
         elif work.job_type == 'eval_claims':
             bad = self._run_command('eval_claims', str(work.processor))
 
-        elif work.job_type == 'make_c1':
-            bad = self._run_command('make_corner1', str(work.seed))
-
-        elif work.job_type == 'make_c2':
-            bad = self._run_command('make_corner2', str(work.seed))
-
-        elif work.job_type == 'make_c3':
-            bad = self._run_command('make_corner3', str(work.seed))
-
-        elif work.job_type == 'make_c4':
-            bad = self._run_command('make_corner4', str(work.seed))
-
-        elif work.job_type == 'make_c12':
-            if Work.objects.filter(job_type='make_c1', seed=work.seed, done=True).count() == 0:
-                do_later = True
-            elif Work.objects.filter(job_type='make_c2', seed=work.seed, done=True).count() == 0:
-                do_later = True
-            else:
-                bad = self._run_command('make_corner12', str(work.seed))
-
-        elif work.job_type == 'make_c34':
-            if Work.objects.filter(job_type='make_c3', seed=work.seed, done=True).count() == 0:
-                do_later = True
-            elif Work.objects.filter(job_type='make_c4', seed=work.seed, done=True).count() == 0:
-                do_later = True
-            else:
-                bad = self._run_command('make_corner34', str(work.seed))
-
-        elif work.job_type == 'make_ring1':
-            if Work.objects.filter(job_type='make_c12', seed=work.seed, done=True).count() == 0:
-                do_later = True
-            elif Work.objects.filter(job_type='make_c34', seed=work.seed, done=True).count() == 0:
-                do_later = True
-            else:
-                bad = self._run_command('make_ring1', str(work.seed))
+        elif work.job_type == 'make_ring2':
+            bad = self._run_command('make_ring2', str(work.processor))
 
         else:
             self.stdout.write('[ERROR] Unsupported job_type %s in work pk=%s' % (repr(work.job_type), work.pk))

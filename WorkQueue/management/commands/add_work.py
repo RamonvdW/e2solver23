@@ -12,9 +12,11 @@ class Command(BaseCommand):
 
     help = "Add job definition to the work queue"
 
-    supported_job_types = ('eval_loc_1', 'eval_loc_4', 'eval_loc_9', 'eval_loc_16', 'eval_line1', 'eval_line2',
-                           'eval_claims', 'scan1', 'scan9',
-                           'make_c1', 'make_c2', 'make_c3', 'make_c4', 'make_c12', 'make_c34', 'make_ring1')
+    supported_job_types = ('eval_loc_1', 'eval_loc_4', 'eval_loc_9', 'eval_loc_16',
+                           'eval_line1', 'eval_line2',
+                           'eval_claims',
+                           'scan1', 'scan9',
+                           'make_ring2')
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -74,9 +76,9 @@ class Command(BaseCommand):
             Work.objects.bulk_create(bulk)
             self.stdout.write('[INFO] Added %s jobs' % len(bulk))
 
-        elif job_type.startswith('make_c') or job_type == 'make_ring1':
+        elif job_type == 'make_ring2':
             self.stdout.write('[INFO] Adding work: %s %s %s' % (processor, job_type, prio_seed))
-            Work(processor=processor, job_type=job_type, seed=prio_seed).save()
+            Work(processor=processor, job_type=job_type, priority=prio_seed).save()
 
         else:
             limit_str = ''

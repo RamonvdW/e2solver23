@@ -12,6 +12,7 @@ from Pieces2x2.models import Piece2x2, TwoSide, TwoSideOptions
 from Ring1.models import Ring1
 from Ring2.models import Ring2
 from WorkQueue.models import ProcessorUsedPieces
+from WorkQueue.operations import used_note_add
 import time
 
 
@@ -41,6 +42,7 @@ class Command(BaseCommand):
         # for
 
         self.ring2 = Ring2()
+        self.ring2_count = 0
 
         # 1..60 = borders + corners
         self.unused = list(range(1, 256+1))
@@ -373,6 +375,7 @@ class Command(BaseCommand):
     def _save_ring2(self):
         self.ring2.pk = None
         self.ring2.save()
+        self.ring2_count += 1
         self.stdout.write('[INFO] Saved Ring2 with pk=%s' % self.ring2.pk)
 
     def _check_loc46(self):
@@ -730,20 +733,28 @@ class Command(BaseCommand):
             return
 
         # ring1_nr = options['ring1_nr']
-        nr = options['processor']
+        processor_nr = options['processor']
         try:
-            processor = ProcessorUsedPieces.objects.get(processor=nr)
+            processor = ProcessorUsedPieces.objects.get(processor=processor_nr)
         except ProcessorUsedPieces.DoesNotExist:
-            self.stderr.write('[ERROR] Could not find processor %s' % nr)
+            self.stderr.write('[ERROR] Could not find processor %s' % processor_nr)
             return
 
-        self._load_ring1(processor.from_ring1, nr)
+        self._load_ring1(processor.from_ring1, processor_nr)
 
         try:
             self._find_loc10()
         except KeyboardInterrupt:
             pass
         else:
+            if self.ring2_count > 0:
+                self.stdout.write('[INFO] Generated %s Ring2' % self.ring2_count)
+                used_note_add(processor_nr, "Generated %s Ring2" % self.ring2_count)
+            else:
+                used_note_add(processor_nr, 'No Ring2 (best: %s / 20)' % self._find_best())
+                processor.reached_dead_end = True
+                processor.save(update_fields=['choices', 'reached_dead_end'])
+
             print('[INFO] Best: %s / 20' % self._find_best())
 
 # end of file

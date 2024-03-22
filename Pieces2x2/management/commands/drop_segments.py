@@ -14,34 +14,33 @@ class Command(BaseCommand):
     help = "Drop the a specific TwoSideOptions set"
 
     def add_arguments(self, parser):
-        parser.add_argument('processor', type=int, help='New processor number')
+        parser.add_argument('processor', type=int, nargs='+', help='Processor number(s) to drop')
 
     def handle(self, *args, **options):
 
-        processor = options['processor']
+        for processor in options['processor']:
+            qset = TwoSideOptions.objects.filter(processor=processor)
+            count = qset.count()
 
-        qset = TwoSideOptions.objects.filter(processor=processor)
-        count = qset.count()
+            if count == 0:
+                self.stderr.write('[ERROR] Processor %s not found' % processor)
+            else:
+                self.stdout.write('[INFO] Deleting %s TwoSide records' % count)
+                qset.delete()
 
-        if count == 0:
-            self.stderr.write('[ERROR] Processor %s not found' % processor)
-        else:
-            self.stdout.write('[INFO] Deleting %s records' % count)
-            qset.delete()
+                count = Work.objects.filter(processor=processor).count()
+                Work.objects.filter(processor=processor).delete()
+                self.stdout.write('[INFO] Deleted %s jobs for processor %s from work queue' % (count, processor))
 
-            count = Work.objects.filter(processor=processor).count()
-            Work.objects.filter(processor=processor).delete()
-            self.stdout.write('[INFO] Deleted %s jobs for processor %s from work queue' % (count, processor))
+            try:
+                ProcessorUsedPieces.objects.filter(processor=processor).delete()
+            except ProcessorUsedPieces.DoesNotExist:
+                pass
 
-        try:
-            ProcessorUsedPieces.objects.filter(processor=processor).delete()
-        except ProcessorUsedPieces.DoesNotExist:
-            pass
-
-        try:
-            EvalProgress.objects.filter(processor=processor).delete()
-        except EvalProgress.DoesNotExist:
-            pass
-
+            try:
+                EvalProgress.objects.filter(processor=processor).delete()
+            except EvalProgress.DoesNotExist:
+                pass
+        # for
 
 # end of file
