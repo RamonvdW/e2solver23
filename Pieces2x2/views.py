@@ -33,6 +33,8 @@ if True:
 
 piece2x2_cache = dict()
 
+twoside_count_cache = dict()    # [processor] = (count, stamp)
+
 
 class ShowView(TemplateView):
 
@@ -718,6 +720,9 @@ class OptionsListView(TemplateView):
                 work2count[work.processor] = 1
         # for
 
+        age_limit = time.monotonic() - (5 * 60)     # max 5 minutes old
+        query_credits = 15
+
         for proc in context['work']:
             processor = proc['processor']
 
@@ -727,6 +732,20 @@ class OptionsListView(TemplateView):
             except KeyError:
                 count = 0
             proc['count'] = count
+
+            if not proc['reached_dead_end']:
+                try:
+                    count, stamp = twoside_count_cache[processor]
+                except KeyError:
+                    count, stamp = '?', 0
+
+                if stamp < age_limit and query_credits > 0:
+                    query_credits -= 1
+                    count = TwoSideOptions.objects.filter(processor=processor).count()
+                    stamp = time.monotonic()
+                    twoside_count_cache[processor] = (count, stamp)
+
+                proc['twosides_count'] = count
 
             proc['color'] = None
             if proc['processor'] in ongoing1:

@@ -26,6 +26,7 @@
                 <th>Processor</th>
                 <th>Ring1</th>
                 <th>Work</th>
+                <th>TwoSides left</th>
             </tr>
         </thead>
         {% for proc in work %}
@@ -34,6 +35,7 @@
                     <td><a href="{{ proc.url }}" target="_blank">{{ proc.processor }}</a></td>
                     <td{% if proc.color %} style="background:{{ proc.color }}"{% endif %}>{{ proc.from_ring1 }}</td>
                     <td>{{ proc.count }}</td>
+                    <td>{{ proc.twosides_count }}</td>
                 </tr>
             {% endif %}
         {% endfor %}
