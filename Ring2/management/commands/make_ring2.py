@@ -753,7 +753,7 @@ class Command(BaseCommand):
             else:
                 used_note_add(processor_nr, 'No Ring2 (best: %s / 20)' % self._find_best())
                 processor.reached_dead_end = True
-                processor.save(update_fields=['choices', 'reached_dead_end'])
+                processor.save(update_fields=['reached_dead_end'])
 
             print('[INFO] Best: %s / 20' % self._find_best())
 
