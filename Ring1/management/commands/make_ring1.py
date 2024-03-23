@@ -10,6 +10,7 @@ from BasePieces.hints import ALL_HINT_NRS
 from BasePieces.models import BasePiece
 from Pieces2x2.models import Piece2x2, TwoSide
 from Ring1.models import Ring1
+from Ring1.can_solve_ring2 import CanSolveRing2
 
 
 class Command(BaseCommand):
@@ -123,42 +124,6 @@ class Command(BaseCommand):
         self.ring1.save()
         self.stdout.write('[INFO] Saved Ring1 with pk=%s' % self.ring1.pk)
 
-    def _add_hints_and_save(self):
-        p = Piece2x2.objects.filter(has_hint=True,
-                                    nr1=208,
-                                    nr2__in=self.unused, nr3__in=self.unused, nr4__in=self.unused,
-                                    side1=self.exp_loc10_s1, side4=self.exp_loc10_s4).first()
-        if p:
-            self.ring1.nr10 = p.nr
-
-        p = Piece2x2.objects.filter(has_hint=True,
-                                    nr2=255,
-                                    nr1__in=self.unused, nr3__in=self.unused, nr4__in=self.unused,
-                                    side1=self.exp_loc15_s1, side2=self.exp_loc15_s2).first()
-        if p:
-            self.ring1.nr15 = p.nr
-
-        p = Piece2x2.objects.filter(has_hint=True,
-                                    nr4=249,
-                                    nr1__in=self.unused, nr2__in=self.unused, nr3__in=self.unused,
-                                    side2=self.exp_loc55_s2, side3=self.exp_loc55_s3).first()
-        if p:
-            self.ring1.nr55 = p.nr
-
-        p = Piece2x2.objects.filter(has_hint=True,
-                                    nr3=181,
-                                    nr1__in=self.unused, nr2__in=self.unused, nr4__in=self.unused,
-                                    side3=self.exp_loc50_s3, side4=self.exp_loc50_s4).first()
-        if p:
-            self.ring1.nr50 = p.nr
-
-        self._save_ring1()
-
-        self.ring1.nr10 = 0
-        self.ring1.nr15 = 0
-        self.ring1.nr55 = 0
-        self.ring1.nr50 = 0
-
     def _check_loc10_c1(self):
         p = Piece2x2.objects.filter(has_hint=True,
                                     nr1=208,
@@ -257,8 +222,12 @@ class Command(BaseCommand):
                 if self._check_loc42_c4() and self._check_loc51_c4():   # re-check
                     if self._check_loc14_c2() and self._check_loc23_c2():   # re-check
                         if self._check_loc11_c1() and self._check_loc18_c1():   # re-check
-                            self._save_ring1()
-                            found = True
+                            solve = CanSolveRing2()
+                            if solve.verify(self.ring1):
+                                self._save_ring1()
+                                found = True
+                            else:
+                                self.stdout.write('No inner ring solution')
             self._make_unused(p_nrs)
             if found:
                 break
