@@ -108,6 +108,7 @@ class Command(BaseCommand):
     def _find_work(self, only_eval_loc_1):
         # find some work to pick up
         now = timezone.now()
+        do_work = None
 
         with transaction.atomic():
             qset = (Work
@@ -125,23 +126,34 @@ class Command(BaseCommand):
             else:
                 qset = qset.exclude(job_type='eval_loc_1')
 
-            work = qset.first()
-            if not work:
-                self.stdout.write('[INFO] Waiting for more work')
-                time.sleep(10)
-                return
+            for work in qset.all():
+                used = ProcessorUsedPieces.objects.filter(processor=work.processor).first()
+                if used:
+                    if used.reached_dead_end:
+                        work.delete()
+                        continue    # next job
 
-            used = ProcessorUsedPieces.objects.filter(processor=work.processor).first()
-            if used:
-                if used.reached_dead_end:
-                    work.delete()
-                    return
+                if work.job_type == 'make_ring2':
+                    if Work.objects.filter(processor=work.processor, done=False).count() > 1:
+                        self.stdout.write('[WARNING] Not starting make_ring2 due to other work')
+                        continue    # next job
 
-            work.doing = True
-            work.save(update_fields=['doing'])
+                if work:
+                    work.doing = True
+                    work.save(update_fields=['doing'])
+                    do_work = work
+                    break   # from the for
+            # for
         # atomic
 
-        self._do_work(work)
+        if do_work:
+            self._do_work(work)
+        else:
+            self.stdout.write('[INFO] Waiting for more work')
+            if only_eval_loc_1:
+                time.sleep(2)
+            else:
+                time.sleep(10)
 
     def handle(self, *args, **options):
         worker_nr = options['worker_nr']
