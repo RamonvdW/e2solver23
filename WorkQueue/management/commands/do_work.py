@@ -105,7 +105,7 @@ class Command(BaseCommand):
             work.when_done = timezone.now()
             work.save()
 
-    def _find_work(self, only_eval_loc_1):
+    def _find_work(self, only_eval_loc_1, no_eval_loc_4):
         # find some work to pick up
         now = timezone.now()
         do_work = None
@@ -125,6 +125,9 @@ class Command(BaseCommand):
                 qset = qset.filter(job_type='eval_loc_1')
             else:
                 qset = qset.exclude(job_type='eval_loc_1')
+
+            if no_eval_loc_4:
+                qset = qset.filter(job_type='eval_loc_4')
 
             for work in qset.all():
                 used = ProcessorUsedPieces.objects.filter(processor=work.processor).first()
@@ -167,9 +170,10 @@ class Command(BaseCommand):
 
         # keep one worker available for small tasks
         only_eval_loc_1 = worker_nr == 1
+        no_eval_loc_4 = worker_nr > 8
 
         while worker_nr:
-            self._find_work(only_eval_loc_1)
+            self._find_work(only_eval_loc_1, no_eval_loc_4)
             time.sleep(0.1)
         # while
 
