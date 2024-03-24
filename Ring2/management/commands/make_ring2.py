@@ -4,11 +4,12 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+from django.utils import timezone
 from django.core.management.base import BaseCommand
 from BasePieces.hints import ALL_HINT_NRS
 from BasePieces.models import BasePiece
 from Pieces2x2.helpers import calc_segment
-from Pieces2x2.models import Piece2x2, TwoSide, TwoSideOptions
+from Pieces2x2.models import Piece2x2, TwoSide, TwoSideOptions, EvalProgress
 from Ring1.models import Ring1
 from Ring2.models import Ring2
 from WorkQueue.models import ProcessorUsedPieces
@@ -43,6 +44,7 @@ class Command(BaseCommand):
 
         self.ring2 = Ring2()
         self.ring2_count = 0
+        self.progress = None
 
         # 1..60 = borders + corners
         self.unused = list(range(1, 256+1))
@@ -141,7 +143,10 @@ class Command(BaseCommand):
         tick = time.monotonic()
         if tick - self.prev_tick > 60:
             self.prev_tick = tick
-            self.stdout.write('Best: %s / 20' % self._find_best())
+            msg = 'Best: %s / 20' % self._find_best()
+            self.progress.solve_order = msg
+            self.progress.save(update_fields=['solve_order'])
+            self.stdout.write(msg)
 
     def _make_used(self, p_nrs: tuple | list):
         for nr in p_nrs:
@@ -713,9 +718,16 @@ class Command(BaseCommand):
                                        side1=self.exp_loc10_s1, side4=self.exp_loc10_s4,
                                        side2__in=self.exp_loc10_sides2, side3__in=self.exp_loc10_sides3)
         left = qset.count()
+        self.progress.todo_count = left
+        self.progress.save(update_fields=['todo_count'])
+
         for p in qset:
             self.stdout.write('loc10: %s left' % left)
             left -= 1
+            self.progress.left_count = left
+            self.progress.updated = timezone.now()
+            self.progress.save(update_fields=['left_count', 'updated'])
+
             self.ring2.loc10 = p.nr
             self.exp_loc11_s4 = self.twoside2reverse[p.side2]
             self.exp_loc18_s1 = self.twoside2reverse[p.side3]
@@ -742,6 +754,17 @@ class Command(BaseCommand):
 
         self._load_ring1(processor.from_ring1, processor_nr)
 
+        self.progress = EvalProgress(
+                            eval_size=20,
+                            eval_loc=10,
+                            processor=processor_nr,
+                            segment=0,
+                            todo_count=0,
+                            left_count=0,
+                            solve_order="",
+                            updated=timezone.now())
+        self.progress.save()
+
         try:
             self._find_loc10()
         except KeyboardInterrupt:
@@ -756,5 +779,8 @@ class Command(BaseCommand):
                 processor.save(update_fields=['reached_dead_end'])
 
             print('[INFO] Best: %s / 20' % self._find_best())
+
+        self.progress.delete()
+
 
 # end of file

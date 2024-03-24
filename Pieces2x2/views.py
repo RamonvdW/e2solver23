@@ -603,6 +603,8 @@ class OptionsView(TemplateView):
                 used_nrs.append(str(nr))
         # for
 
+        used_len = len(used_nrs)
+
         blocks = []
         while len(used_nrs) > 15:
             blocks.append(", ".join(used_nrs[:15]) + ',')
@@ -613,7 +615,7 @@ class OptionsView(TemplateView):
         used.claimed_nrs_single = used.claimed_nrs_single.replace(',', ', ')
         used.claimed_nrs_double = used.claimed_nrs_double.replace(',', ', ')
 
-        return blocks, used
+        return blocks, used, used_len
 
     def get_context_data(self, **kwargs):
         """ called by the template system to get the context data for the template """
@@ -663,7 +665,7 @@ class OptionsView(TemplateView):
         # for
         context['total_options'] = sum(segment2count.values())
 
-        context['used_blocks'], used = self._get_used(processor)
+        context['used_blocks'], used, context['used_count'] = self._get_used(processor)
         context['used'] = used
 
         context['compare'] = self._compare_pre(used)
@@ -720,7 +722,7 @@ class OptionsListView(TemplateView):
                 work2count[work.processor] = 1
         # for
 
-        age_limit = time.monotonic() - (5 * 60)     # max 5 minutes old
+        age_limit = time.monotonic() - (2 * 60)     # max 2 minutes old
         query_credits = 15
 
         for proc in context['work']:
