@@ -178,7 +178,8 @@ class Command(BaseCommand):
                           nr1__in=unused1,
                           nr2__in=unused1,
                           nr3__in=unused1,
-                          nr4__in=unused1)):
+                          nr4__in=unused1)
+                  .iterator(chunk_size=1000)):
             unused2 = unused1[:]
             unused2.remove(p.nr1)
             unused2.remove(p.nr2)

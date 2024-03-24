@@ -248,7 +248,8 @@ class Command(BaseCommand):
                           nr1__in=unused,
                           nr2__in=unused,
                           nr3__in=unused,
-                          nr4__in=unused)):
+                          nr4__in=unused)
+                  .iterator(chunk_size=1000)):
             yield p
         # for
 
