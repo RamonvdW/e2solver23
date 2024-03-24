@@ -127,7 +127,7 @@ class Command(BaseCommand):
                 qset = qset.exclude(job_type='eval_loc_1')
 
             if no_eval_loc_4:
-                qset = qset.filter(job_type='eval_loc_4')
+                qset = qset.exclude(job_type='eval_loc_4')
 
             for work in qset.all():
                 used = ProcessorUsedPieces.objects.filter(processor=work.processor).first()
