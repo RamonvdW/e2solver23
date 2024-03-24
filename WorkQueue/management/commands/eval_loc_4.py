@@ -9,6 +9,7 @@ from django.core.management.base import BaseCommand
 from Pieces2x2.models import TwoSide, TwoSideOptions, Piece2x2, EvalProgress
 from Pieces2x2.helpers import calc_segment
 from WorkQueue.operations import propagate_segment_reduction, get_unused_for_locs, check_dead_end
+import time
 
 
 class Command(BaseCommand):
@@ -26,6 +27,8 @@ class Command(BaseCommand):
             +----+      +----+
              s10         s11
     """
+
+    MAX_SECONDS_SEARCH = 15 * 60    # 15 minutes
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -233,6 +236,8 @@ class Command(BaseCommand):
             self.progress.updated = timezone.now()
             self.progress.save(update_fields=['left_count', 'updated'])
 
+            deadline = time.monotonic() + self.MAX_SECONDS_SEARCH
+
             p0_exp_s2 = side
             p1_exp_s4 = self.twoside2reverse[side]
             found = False
@@ -270,6 +275,10 @@ class Command(BaseCommand):
                             self._sides8_seen.append(p2.side2)
                             break
                         # for
+
+                        if time.monotonic() > deadline:
+                            found = True
+
                         if found:
                             break
                     # for
@@ -327,6 +336,8 @@ class Command(BaseCommand):
             self.progress.updated = timezone.now()
             self.progress.save(update_fields=['left_count', 'updated'])
 
+            deadline = time.monotonic() + self.MAX_SECONDS_SEARCH
+
             p0_exp_s3 = self.twoside2reverse[side]
             p2_exp_s1 = side
             found = False
@@ -363,6 +374,10 @@ class Command(BaseCommand):
                             self._sides8_seen.append(p2.side2)
                             break
                         # for
+
+                        if time.monotonic() > deadline:
+                            found = True
+
                         if found:
                             break
                     # for
@@ -419,6 +434,8 @@ class Command(BaseCommand):
             self.progress.updated = timezone.now()
             self.progress.save(update_fields=['left_count', 'updated'])
 
+            deadline = time.monotonic() + self.MAX_SECONDS_SEARCH
+
             p1_exp_s3 = self.twoside2reverse[side]
             p3_exp_s1 = side
             found = False
@@ -454,6 +471,10 @@ class Command(BaseCommand):
                             self._sides8_seen.append(p2.side2)
                             break
                         # for
+
+                        if time.monotonic() > deadline:
+                            found = True
+
                         if found:
                             break
                     # for
@@ -509,6 +530,8 @@ class Command(BaseCommand):
             self.progress.updated = timezone.now()
             self.progress.save(update_fields=['left_count', 'updated'])
 
+            deadline = time.monotonic() + self.MAX_SECONDS_SEARCH
+
             p2_exp_s2 = side
             p3_exp_s4 = self.twoside2reverse[side]
             found = False
@@ -542,6 +565,10 @@ class Command(BaseCommand):
                             found = True
                             break
                         # for
+
+                        if time.monotonic() > deadline:
+                            found = True
+
                         if found:
                             break
                     # for
