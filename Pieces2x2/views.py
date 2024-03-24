@@ -765,7 +765,10 @@ class OptionsListView(TemplateView):
 
                 proc['twosides_count'] = count
             else:
-                proc['last_log'] = proc['choices'].split('\n')[-1]
+                log = proc['choices'].strip()       # removes last \n
+                spl = log.split('\n')               # split lines
+                if len(spl) > 0:
+                    proc['last_log'] = spl[-1]      # last line
 
             proc['color'] = None
             if proc['processor'] in ongoing1:
