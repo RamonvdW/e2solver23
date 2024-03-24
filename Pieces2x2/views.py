@@ -11,6 +11,7 @@ from django.views.generic import TemplateView
 from django.templatetags.static import static
 from Pieces2x2.models import Piece2x2, TwoSide, TwoSideOptions, EvalProgress
 from Pieces2x2.helpers import calc_segment
+from Ring1.models import Ring1
 from WorkQueue.models import Work, ProcessorUsedPieces
 from types import SimpleNamespace
 import time
@@ -34,6 +35,8 @@ if True:
 piece2x2_cache = dict()
 
 twoside_count_cache = dict()    # [processor] = (count, stamp)
+
+ring1_seed_cache = dict()       # [ring1_nr] = seed
 
 
 class ShowView(TemplateView):
@@ -493,12 +496,12 @@ class OptionsView(TemplateView):
         # for
 
         # parse the claims
-        for claim in used.claimed_nrs_single.split(','):
-            if claim:
-                # nr:loc
-                nr, loc = claim.split(':')
-                loc = int(loc)
-        # for
+        # for claim in used.claimed_nrs_single.split(','):
+        #     if claim:
+        #         # nr:loc
+        #         nr, loc = claim.split(':')
+        #         loc = int(loc)
+        # # for
 
         unused = list(range(1, 256+1))
 
@@ -703,7 +706,8 @@ class OptionsListView(TemplateView):
                            .order_by('-processor')          # consistent order
                            .values('processor',
                                    'from_ring1',
-                                   'reached_dead_end'))
+                                   'reached_dead_end',
+                                   'choices'))
 
         ongoing1 = Work.objects.filter(doing=True,
                                        done=False,
@@ -726,28 +730,41 @@ class OptionsListView(TemplateView):
         query_credits = 15
 
         for proc in context['work']:
-            processor = proc['processor']
+            processor_nr = proc['processor']
 
-            proc['url'] = reverse('Pieces2x2:options-nr', kwargs={'nr': processor})
+            proc['url'] = reverse('Pieces2x2:options-nr', kwargs={'nr': processor_nr})
             try:
-                count = work2count[processor]
+                count = work2count[processor_nr]
             except KeyError:
                 count = 0
             proc['count'] = count
 
+            ring1_nr = proc['from_ring1']
+            try:
+                seed = ring1_seed_cache[ring1_nr]
+            except KeyError:
+                try:
+                    seed = Ring1.objects.get(nr=ring1_nr).seed
+                except Ring1.DoesNotExist:
+                    seed = '?'
+                ring1_seed_cache[ring1_nr] = seed
+            proc['seed'] = seed
+
             if not proc['reached_dead_end']:
                 try:
-                    count, stamp = twoside_count_cache[processor]
+                    count, stamp = twoside_count_cache[processor_nr]
                 except KeyError:
                     count, stamp = '?', 0
 
                 if stamp < age_limit and query_credits > 0:
                     query_credits -= 1
-                    count = TwoSideOptions.objects.filter(processor=processor).count()
+                    count = TwoSideOptions.objects.filter(processor=processor_nr).count()
                     stamp = time.monotonic()
-                    twoside_count_cache[processor] = (count, stamp)
+                    twoside_count_cache[processor_nr] = (count, stamp)
 
                 proc['twosides_count'] = count
+            else:
+                proc['last_log'] = proc['choices'].split('\n')[-1]
 
             proc['color'] = None
             if proc['processor'] in ongoing1:
