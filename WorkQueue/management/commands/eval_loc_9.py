@@ -189,6 +189,19 @@ class Command(BaseCommand):
 
         self.side_options_rev = [self._reverse_sides(s) for s in self.side_options]
 
+    def _limit_work(self, options):
+        if len(options) >= 2 * self.segment_limit:
+            # 200..289 --> reduce to 1/3
+            start_idx = len(self.board_unused) % 3       # cause variation
+            options = options[start_idx::3]
+
+        elif len(options) > self.segment_limit:
+            # 101..199 --> reduce to 1/2
+            start_idx = len(self.board_unused) % 2       # cause variation
+            options = options[start_idx::2]
+
+        return options
+
     def _find_filled_locs(self):
         for p_nr, loc in enumerate(self.locs):
             s1, s2, s3, s4 = self.side_nrs[p_nr]
@@ -428,9 +441,10 @@ class Command(BaseCommand):
 
         segment = calc_segment(self.locs[p_nr], side_n)
         sides = self.side_options[s_nr]
+        sides = self._limit_work(sides)
         todo = len(sides)
-        if todo > self.segment_limit:
-            return
+        # if todo > self.segment_limit:
+        #     return
 
         self.stdout.write('[INFO] Checking %s options in segment %s' % (len(sides), segment))
         self.p_nrs_order = []       # allow deciding optimal order anew

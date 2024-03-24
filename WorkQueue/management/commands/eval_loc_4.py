@@ -143,6 +143,19 @@ class Command(BaseCommand):
 
         self.side_options_rev = [s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11]
 
+    def _limit_work(self, options):
+        if len(options) >= 2 * self.segment_limit:
+            # 200..289 --> reduce to 1/3
+            start_idx = len(self.unused0) % 3       # cause variation
+            options = options[start_idx::3]
+
+        elif len(options) > self.segment_limit:
+            # 101..199 --> reduce to 1/2
+            start_idx = len(self.unused0) % 2       # cause variation
+            options = options[start_idx::2]
+
+        return options
+
     @staticmethod
     def _iter(unused1, options_side1, options_side2, options_side3, options_side4):
         if len(options_side1) == 1 and len(options_side2) == 1 and len(options_side3) == 1 and len(options_side4) == 1:
@@ -200,9 +213,10 @@ class Command(BaseCommand):
         """
         segment = calc_segment(self.locs[0], 2)
         sides = self.side_options[3]
+        sides = self._limit_work(sides)
         todo = len(sides)
-        if todo > self.segment_limit:
-            return
+        # if todo > self.segment_limit:
+        #     return
 
         self.progress.segment = segment
         self.progress.todo_count = todo
@@ -290,9 +304,10 @@ class Command(BaseCommand):
         """
         segment = calc_segment(self.locs[0], 3)
         sides = self.side_options[5]
+        sides = self._limit_work(sides)
         todo = len(sides)
-        if todo - len(self._sides5_seen) > self.segment_limit:
-            return
+        # if todo - len(self._sides5_seen) > self.segment_limit:
+        #     return
 
         self.progress.segment = segment
         self.progress.todo_count = todo
@@ -381,9 +396,10 @@ class Command(BaseCommand):
         """
         segment = calc_segment(self.locs[1], 3)
         sides = self.side_options[6]
+        sides = self._limit_work(sides)
         todo = len(sides)
-        if todo - len(self._sides6_seen) > self.segment_limit:
-            return
+        # if todo - len(self._sides6_seen) > self.segment_limit:
+        #     return
 
         self.progress.segment = segment
         self.progress.todo_count = todo
@@ -470,9 +486,10 @@ class Command(BaseCommand):
         """
         segment = calc_segment(self.locs[2], 2)
         sides = self.side_options[8]
+        sides = self._limit_work(sides)
         todo = len(sides)
-        if todo - len(self._sides8_seen) > self.segment_limit:
-            return
+        # if todo - len(self._sides8_seen) > self.segment_limit:
+        #     return
 
         self.progress.segment = segment
         self.progress.todo_count = todo
