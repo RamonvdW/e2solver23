@@ -54,7 +54,6 @@ class Command(BaseCommand):
         self.unused0 = []
         self.progress = None
         self.do_commit = True
-        self.segment_limit = 100
 
         self._sides5_seen = []
         self._sides6_seen = []
@@ -65,7 +64,6 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('processor', type=int, help='Processor number to use')
         parser.add_argument('loc', type=int, help='Top-left location on the board (1..55)')
-        parser.add_argument('--limit', default=100, type=int, help='Skip segment evaluation above this limit')
         parser.add_argument('--nop', action='store_true', help='Do not propagate')
         parser.add_argument('--dryrun', action='store_true')
 
@@ -147,15 +145,31 @@ class Command(BaseCommand):
         self.side_options_rev = [s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11]
 
     def _limit_work(self, options):
-        if len(options) >= 2 * self.segment_limit:
-            # 200..289 --> reduce to 1/3
-            start_idx = len(self.unused0) % 3       # cause variation
-            options = options[start_idx::3]
+        variant = len(self.unused0)
+        if len(options) >= 250:
+            # 250..289 --> reduce to 1/6 = 33..48
+            start_idx = variant % 6                 # cause variation
+            options = options[start_idx::6]         # keep every 6th
 
-        elif len(options) > self.segment_limit:
-            # 101..199 --> reduce to 1/2
-            start_idx = len(self.unused0) % 2       # cause variation
-            options = options[start_idx::2]
+        elif len(options) >= 200:
+            # 200..249 --> reduce to 1/5 = 40..49
+            start_idx = variant % 5                 # cause variation
+            options = options[start_idx::5]         # keep every 5th
+
+        elif len(options) >= 150:
+            # 150..199 --> reduce to 1/4 = 37..49
+            start_idx = variant % 4                 # cause variation
+            options = options[start_idx::4]         # keep every 3th
+
+        elif len(options) >= 100:
+            # 100..149 --> reduce to 1/3 = 33..49
+            start_idx = variant % 3                 # cause variation
+            options = options[start_idx::3]         # keep every 2nd
+
+        elif len(options) >= 50:
+            # 50..99 --> reduce to 1/2 = 25..49
+            start_idx = variant % 2                 # cause variation
+            options = options[start_idx::2]         # keep every 2nd
 
         return options
 
@@ -217,6 +231,7 @@ class Command(BaseCommand):
         """
         segment = calc_segment(self.locs[0], 2)
         sides = self.side_options[3]
+        original_todo = len(sides)
         sides = self._limit_work(sides)
         todo = len(sides)
         # if todo > self.segment_limit:
@@ -227,7 +242,7 @@ class Command(BaseCommand):
         self.progress.left_count = todo
         self.progress.save(update_fields=['segment', 'todo_count', 'left_count'])
 
-        self.stdout.write('[INFO] Checking %s options in segment %s' % (todo, segment))
+        self.stdout.write('[INFO] Checking %s of %s options in segment %s' % (todo, original_todo, segment))
         for side in sides:
             if check_dead_end(self.processor):
                 return
@@ -314,6 +329,7 @@ class Command(BaseCommand):
         """
         segment = calc_segment(self.locs[0], 3)
         sides = self.side_options[5]
+        original_todo = len(sides)
         sides = self._limit_work(sides)
         todo = len(sides)
         # if todo - len(self._sides5_seen) > self.segment_limit:
@@ -324,7 +340,7 @@ class Command(BaseCommand):
         self.progress.left_count = todo
         self.progress.save(update_fields=['segment', 'todo_count', 'left_count'])
 
-        self.stdout.write('[INFO] Checking %s options in segment %s' % (todo, segment))
+        self.stdout.write('[INFO] Checking %s of %s options in segment %s' % (todo, original_todo, segment))
         for side in sides:
             if side in self._sides5_seen:
                 continue
@@ -412,6 +428,7 @@ class Command(BaseCommand):
         """
         segment = calc_segment(self.locs[1], 3)
         sides = self.side_options[6]
+        original_todo = len(sides)
         sides = self._limit_work(sides)
         todo = len(sides)
         # if todo - len(self._sides6_seen) > self.segment_limit:
@@ -422,7 +439,7 @@ class Command(BaseCommand):
         self.progress.left_count = todo
         self.progress.save(update_fields=['segment', 'todo_count', 'left_count'])
 
-        self.stdout.write('[INFO] Checking %s options in segment %s' % (todo, segment))
+        self.stdout.write('[INFO] Checking %s of %s options in segment %s' % (todo, original_todo, segment))
         for side in sides:
             if side in self._sides6_seen:
                 continue
@@ -508,6 +525,7 @@ class Command(BaseCommand):
         """
         segment = calc_segment(self.locs[2], 2)
         sides = self.side_options[8]
+        original_todo = len(sides)
         sides = self._limit_work(sides)
         todo = len(sides)
         # if todo - len(self._sides8_seen) > self.segment_limit:
@@ -518,7 +536,7 @@ class Command(BaseCommand):
         self.progress.left_count = todo
         self.progress.save(update_fields=['segment', 'todo_count', 'left_count'])
 
-        self.stdout.write('[INFO] Checking %s options in segment %s' % (todo, segment))
+        self.stdout.write('[INFO] Checking %s of %s options in segment %s' % (todo, original_todo, segment))
         for side in sides:
             if side in self._sides8_seen:
                 continue
@@ -613,9 +631,6 @@ class Command(BaseCommand):
 
         self.processor = options['processor']
         self.stdout.write('[INFO] Processor=%s' % self.processor)
-
-        self.segment_limit = options['limit']
-        self.stdout.write('[INFO] Segment limit: %s' % self.segment_limit)
 
         self.nop = options['nop']
 

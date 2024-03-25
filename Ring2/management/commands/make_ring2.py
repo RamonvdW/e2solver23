@@ -451,7 +451,8 @@ class Command(BaseCommand):
             self.ring2.loc53 = p.nr
             p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
             self._make_used(p_nrs)
-            self._find_loc34()
+            if self._check_loc43() and self._check_loc46() and self._check_loc22() and self._check_loc19():
+                self._find_loc34()
             self._make_unused(p_nrs)
         # for
 
@@ -530,7 +531,8 @@ class Command(BaseCommand):
             self.ring2.loc31 = p.nr
             p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
             self._make_used(p_nrs)
-            self._find_loc50()
+            if self._check_loc46() and self._check_loc22() and self._check_loc19():
+                self._find_loc50()
             self._make_unused(p_nrs)
         # for
         pass
@@ -610,7 +612,8 @@ class Command(BaseCommand):
             self.ring2.loc13 = p.nr
             p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
             self._make_used(p_nrs)
-            self._find_loc55()
+            if self._check_loc22() and self._check_loc19():
+                self._find_loc55()
             self._make_unused(p_nrs)
         # for
 
