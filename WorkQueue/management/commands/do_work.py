@@ -170,7 +170,7 @@ class Command(BaseCommand):
 
         # keep one worker available for small tasks
         only_eval_loc_1 = worker_nr == 1
-        no_eval_loc_4 = worker_nr > 8
+        no_eval_loc_4 = worker_nr > 10
 
         while worker_nr:
             self._find_work(only_eval_loc_1, no_eval_loc_4)
