@@ -13,7 +13,7 @@ class Command(BaseCommand):
     help = "Add job definition to the work queue"
 
     supported_job_types = ('eval_loc_1', 'eval_loc_4', 'eval_loc_9', 'eval_loc_16',
-                           'eval_line1', 'eval_line2',
+                           'eval_line1', 'eval_line2', 'eval_line3',
                            'eval_claims',
                            'scan1', 'scan9',
                            'make_ring2')
