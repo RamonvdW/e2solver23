@@ -217,10 +217,10 @@ class Command(BaseCommand):
                             .objects
                             .filter(side3=p49_exp_s3,
                                     side2__in=p49_exp_s2_set)
-                        .exclude(nr1__in=used2)
-                        .exclude(nr2__in=used2)
-                        .exclude(nr3__in=used2)
-                        .exclude(nr4__in=used2)):
+                            .exclude(nr1__in=used2)
+                            .exclude(nr2__in=used2)
+                            .exclude(nr3__in=used2)
+                            .exclude(nr4__in=used2)):
 
                     bbbcbbb = (p58.nr4, p58.nr3, p57.nr4, p57.nr3, p57.nr1, p49.nr3, p49.nr1)
                     self._add_bbbcbbb(bbbcbbb)
