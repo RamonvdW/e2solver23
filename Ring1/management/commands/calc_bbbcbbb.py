@@ -10,7 +10,7 @@ from Pieces2x2.models import Piece2x2, TwoSide
 
 class Command(BaseCommand):
 
-    help = "Calculate the possible 5-border pieces in each corner, considering the hints"
+    help = "Calculate the possible 7-border pieces in each corner, considering the hints"
 
     """
         Method:

@@ -22,17 +22,6 @@ class Command(BaseCommand):
 
         self.twoside_border = TwoSide.objects.get(two_sides='XX').nr
 
-        two2nr = dict()
-        for two in TwoSide.objects.all():
-            two2nr[two.two_sides] = two.nr
-        # for
-        self.twoside2reverse = dict()
-        for two_sides, nr in two2nr.items():
-            two_rev = two_sides[1] + two_sides[0]
-            rev_nr = two2nr[two_rev]
-            self.twoside2reverse[nr] = rev_nr
-        # for
-
         self.processor = 0
         self.loc = 0
         self.reductions = {1: 0, 2: 0, 3: 0, 4: 0}     # [side_nr] = count
@@ -71,9 +60,6 @@ class Command(BaseCommand):
         self.stdout.write('[INFO] %s base pieces in use or claimed' % (256 - len(unused)))
         return unused
 
-    def _reverse_sides(self, options):
-        return [self.twoside2reverse[two_side] for two_side in options]
-
     def _get_side_options(self, side_nr):
         segment = calc_segment(self.loc, side_nr)
         options = (TwoSideOptions
@@ -82,10 +68,6 @@ class Command(BaseCommand):
                            segment=segment)
                    .values_list('two_side', flat=True))
         options = list(options)
-
-        if side_nr >= 3:
-            # sides 3 and 4 need to be reversed
-            options = self._reverse_sides(options)
 
         # print('segment %s options: %s' % (segment, repr(options)))
         return options
@@ -205,7 +187,7 @@ class Command(BaseCommand):
             segment = calc_segment(self.loc, 3)
             for side in side3_options:
                 if side not in side3_new:
-                    self._reduce(segment, self.twoside2reverse[side], 3)
+                    self._reduce(segment, side, 3)
             # for
 
         if len(side4_new) != count4:
@@ -213,7 +195,7 @@ class Command(BaseCommand):
             segment = calc_segment(self.loc, 4)
             for side in side4_options:
                 if side not in side4_new:
-                    self._reduce(segment, self.twoside2reverse[side], 4)
+                    self._reduce(segment, side, 4)
             # for
 
         for segment, two_sides in self.bulk_reduce.items():

@@ -20,17 +20,6 @@ class Command(BaseCommand):
 
         self.twoside_border = TwoSide.objects.get(two_sides='XX').nr
 
-        two2nr = dict()
-        for two in TwoSide.objects.all():
-            two2nr[two.two_sides] = two.nr
-        # for
-        self.twoside2reverse = dict()
-        for two_sides, nr in two2nr.items():
-            two_rev = two_sides[1] + two_sides[0]
-            rev_nr = two2nr[two_rev]
-            self.twoside2reverse[nr] = rev_nr
-        # for
-
         self.loc = 0
         self.processor = 0
         self.reductions = {1: 0, 2: 0, 3: 0, 4: 0}     # [side_nr] = count
@@ -71,9 +60,6 @@ class Command(BaseCommand):
         self.stdout.write('[INFO] %s base pieces in use or claimed' % (256 - len(unused)))
         self.unused = unused
 
-    def _reverse_sides(self, options):
-        return [self.twoside2reverse[two_side] for two_side in options]
-
     def _get_side_options(self, side_nr):
         segment = calc_segment(self.loc, side_nr)
         options = (TwoSideOptions
@@ -83,24 +69,16 @@ class Command(BaseCommand):
                    .values_list('two_side', flat=True))
         options = list(options)
 
-        if side_nr >= 3:
-            # sides 3 and 4 need to be reversed
-            options = self._reverse_sides(options)
-
         # print('segment %s options: %s' % (segment, repr(options)))
         return options
 
     def _reduce(self, segment, two_side, side_nr):
-        if side_nr in (3, 4):
-            two_side = self.twoside2reverse[two_side]
-
         try:
             self.bulk_reduce[segment].append(two_side)
         except KeyError:
             self.bulk_reduce[segment] = [two_side]
 
         self.reductions[side_nr] += 1
-        return
 
     def handle(self, *args, **options):
 
@@ -118,8 +96,8 @@ class Command(BaseCommand):
 
         options1 = self._get_side_options(1)
         options2 = self._get_side_options(2)
-        options3 = self._get_side_options(3)        # is reversed
-        options4 = self._get_side_options(4)        # is reversed
+        options3 = self._get_side_options(3)
+        options4 = self._get_side_options(4)
 
         qset = Piece2x2.objects.filter(side1__in=options1, side2__in=options2, side3__in=options3, side4__in=options4,
                                        nr1__in=self.unused, nr2__in=self.unused,
@@ -201,14 +179,14 @@ class Command(BaseCommand):
             segment = calc_segment(self.loc, side_nr)
             self.stdout.write('[INFO] Side %s is segment %s' % (side_nr, segment))
 
-            side_options = self._get_side_options(side_nr)     # gets reversed for side 3 and 4
+            side_options = self._get_side_options(side_nr)
 
             side_field = 'side%s' % side_nr
             side_new = getattr(p2x2, side_field, self.twoside_border)
 
             for side in side_options:
                 if side != side_new:
-                    self._reduce(segment, side, side_nr)            # reverses back for side 3 and 4
+                    self._reduce(segment, side, side_nr)
             # for
         # for
 

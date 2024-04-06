@@ -20,17 +20,6 @@ class Command(BaseCommand):
 
         self.twoside_border = TwoSide.objects.get(two_sides='XX').nr
 
-        two2nr = dict()
-        for two in TwoSide.objects.all():
-            two2nr[two.two_sides] = two.nr
-        # for
-        self.twoside2reverse = dict()
-        for two_sides, nr in two2nr.items():
-            two_rev = two_sides[1] + two_sides[0]
-            rev_nr = two2nr[two_rev]
-            self.twoside2reverse[nr] = rev_nr
-        # for
-
         self.processor = 0
         self.small_limit = 3
         self.unused = []
@@ -50,9 +39,6 @@ class Command(BaseCommand):
         parser.add_argument('processor', type=int, help='Processor number to use')
         parser.add_argument('--limit', type=int, default=3, help='Size of small claims to show')
 
-    def _reverse_sides(self, options):
-        return [self.twoside2reverse[two_side] for two_side in options]
-
     def _load_unused(self):
         self.unused = get_unused(self.processor)
         self.stdout.write('[INFO] %s base pieces in use' % (256 - len(self.unused)))
@@ -65,10 +51,6 @@ class Command(BaseCommand):
                            segment=segment)
                    .values_list('two_side', flat=True))
         options = list(options)
-
-        if side_nr >= 3:
-            # sides 3 and 4 need to be reversed
-            options = self._reverse_sides(options)
 
         # print('segment %s options: %s' % (segment, repr(options)))
         return options

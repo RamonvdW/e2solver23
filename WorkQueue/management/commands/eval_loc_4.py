@@ -35,21 +35,9 @@ class Command(BaseCommand):
 
         self.twoside_border = TwoSide.objects.get(two_sides='XX').nr
 
-        two2nr = dict()
-        for two in TwoSide.objects.all():
-            two2nr[two.two_sides] = two.nr
-        # for
-        self.twoside2reverse = dict()
-        for two_sides, nr in two2nr.items():
-            two_rev = two_sides[1] + two_sides[0]
-            rev_nr = two2nr[two_rev]
-            self.twoside2reverse[nr] = rev_nr
-        # for
-
         self.processor = 0
         self.locs = (0, 0, 0, 0)        # p0..p3
         self.side_options = ([], [], [], [], [], [], [], [], [], [], [], [])        # s0..s11
-        self.side_options_rev = ([], [], [], [], [], [], [], [], [], [], [], [])    # s0..s11
         self.reductions = 0
         self.unused0 = []
         self.progress = None
@@ -88,9 +76,6 @@ class Command(BaseCommand):
         self.stdout.write('[INFO] %s base pieces in use' % (256 - len(unused)))
         return unused
 
-    def _reverse_sides(self, options):
-        return [self.twoside2reverse[two_side] for two_side in options]
-
     def _get_loc_side_options(self, loc, side_nr):
         segment = calc_segment(loc, side_nr)
         options = (TwoSideOptions
@@ -128,21 +113,6 @@ class Command(BaseCommand):
         s11 = self._get_loc_side_options(self.locs[3], 3)
 
         self.side_options = [s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11]
-
-        s0 = self._reverse_sides(s0)
-        s1 = self._reverse_sides(s1)
-        s2 = self._reverse_sides(s2)
-        s3 = self._reverse_sides(s3)
-        s4 = self._reverse_sides(s4)
-        s5 = self._reverse_sides(s5)
-        s6 = self._reverse_sides(s6)
-        s7 = self._reverse_sides(s7)
-        s8 = self._reverse_sides(s8)
-        s9 = self._reverse_sides(s9)
-        s10 = self._reverse_sides(s10)
-        s11 = self._reverse_sides(s11)
-
-        self.side_options_rev = [s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11]
 
     def _limit_work(self, options):
         variant = len(self.unused0)
@@ -254,33 +224,33 @@ class Command(BaseCommand):
             deadline = time.monotonic() + self.MAX_SECONDS_SEARCH
 
             p0_exp_s2 = side
-            p1_exp_s4 = self.twoside2reverse[side]
+            p1_exp_s4 = side
             found = False
             for p0, unused1 in self._iter(self.unused0,
                                           self.side_options[0],
                                           [p0_exp_s2],
-                                          self.side_options_rev[5],
-                                          self.side_options_rev[2]):
-                p2_exp_s1 = self.twoside2reverse[p0.side3]
+                                          self.side_options[5],
+                                          self.side_options[2]):
+                p2_exp_s1 = p0.side3
 
                 for p1, unused2 in self._iter(unused1,
                                               self.side_options[1],
                                               self.side_options[4],
-                                              self.side_options_rev[6],
+                                              self.side_options[6],
                                               [p1_exp_s4]):
-                    p3_exp_s1 = self.twoside2reverse[p1.side3]
+                    p3_exp_s1 = p1.side3
 
                     for p2, unused3 in self._iter(unused2,
                                                   [p2_exp_s1],
                                                   self.side_options[8],
-                                                  self.side_options_rev[10],
-                                                  self.side_options_rev[7]):
-                        p3_exp_s4 = self.twoside2reverse[p2.side2]
+                                                  self.side_options[10],
+                                                  self.side_options[7]):
+                        p3_exp_s4 = p2.side2
 
                         for p3, _ in self._iter(unused3,
                                                 [p3_exp_s1],
                                                 self.side_options[9],
-                                                self.side_options_rev[11],
+                                                self.side_options[11],
                                                 [p3_exp_s4]):
                             # found a combi of p0..p3
                             found = True
@@ -354,34 +324,34 @@ class Command(BaseCommand):
 
             deadline = time.monotonic() + self.MAX_SECONDS_SEARCH
 
-            p0_exp_s3 = self.twoside2reverse[side]
+            p0_exp_s3 = side
             p2_exp_s1 = side
             found = False
             for p0, unused1 in self._iter(self.unused0,
                                           self.side_options[0],
                                           self.side_options[3],
                                           [p0_exp_s3],
-                                          self.side_options_rev[2]):
-                p1_exp_s4 = self.twoside2reverse[p0.side2]
+                                          self.side_options[2]):
+                p1_exp_s4 = p0.side2
 
                 for p2, unused2 in self._iter(unused1,
                                               [p2_exp_s1],
                                               self.side_options[8],
-                                              self.side_options_rev[10],
-                                              self.side_options_rev[7]):
-                    p3_exp_s4 = self.twoside2reverse[p2.side2]
+                                              self.side_options[10],
+                                              self.side_options[7]):
+                    p3_exp_s4 = p2.side2
 
                     for p1, unused3 in self._iter(unused2,
                                                   self.side_options[1],
                                                   self.side_options[4],
-                                                  self.side_options_rev[6],
+                                                  self.side_options[6],
                                                   [p1_exp_s4]):
-                        p3_exp_s1 = self.twoside2reverse[p1.side3]
+                        p3_exp_s1 = p1.side3
 
                         for p3, _ in self._iter(unused3,
                                                 [p3_exp_s1],
                                                 self.side_options[9],
-                                                self.side_options_rev[11],
+                                                self.side_options[11],
                                                 [p3_exp_s4]):
                             # found a combi of p0..p3
                             found = True
@@ -453,35 +423,35 @@ class Command(BaseCommand):
 
             deadline = time.monotonic() + self.MAX_SECONDS_SEARCH
 
-            p1_exp_s3 = self.twoside2reverse[side]
+            p1_exp_s3 = side
             p3_exp_s1 = side
             found = False
             for p1, unused1 in self._iter(self.unused0,
                                           self.side_options[1],
                                           self.side_options[4],
                                           [p1_exp_s3],
-                                          self.side_options_rev[3]):
-                p0_exp_s2 = self.twoside2reverse[p1.side4]
+                                          self.side_options[3]):
+                p0_exp_s2 = p1.side4
 
                 for p3, unused2 in self._iter(unused1,
                                               [p3_exp_s1],
                                               self.side_options[9],
-                                              self.side_options_rev[11],
-                                              self.side_options_rev[8]):
-                    p2_exp_s2 = self.twoside2reverse[p3.side4]
+                                              self.side_options[11],
+                                              self.side_options[8]):
+                    p2_exp_s2 = p3.side4
 
                     for p0, unused3 in self._iter(unused2,
                                                   self.side_options[0],
                                                   [p0_exp_s2],
-                                                  self.side_options_rev[5],
-                                                  self.side_options_rev[2]):
-                        p2_exp_s1 = self.twoside2reverse[p0.side3]
+                                                  self.side_options[5],
+                                                  self.side_options[2]):
+                        p2_exp_s1 = p0.side3
 
                         for p2, _ in self._iter(unused3,
                                                 [p2_exp_s1],
                                                 [p2_exp_s2],
-                                                self.side_options_rev[10],
-                                                self.side_options_rev[7]):
+                                                self.side_options[10],
+                                                self.side_options[7]):
                             # found a combi of p0..p3
                             found = True
                             # avoid repeating
@@ -551,28 +521,28 @@ class Command(BaseCommand):
             deadline = time.monotonic() + self.MAX_SECONDS_SEARCH
 
             p2_exp_s2 = side
-            p3_exp_s4 = self.twoside2reverse[side]
+            p3_exp_s4 = side
             found = False
             for p2, unused1 in self._iter(self.unused0,
                                           self.side_options[5],
                                           [p2_exp_s2],
-                                          self.side_options_rev[10],
-                                          self.side_options_rev[7]):
-                p0_exp_s3 = self.twoside2reverse[p2.side1]
+                                          self.side_options[10],
+                                          self.side_options[7]):
+                p0_exp_s3 = p2.side1
 
                 for p3, unused2 in self._iter(unused1,
                                               self.side_options[6],
                                               self.side_options[9],
-                                              self.side_options_rev[11],
+                                              self.side_options[11],
                                               [p3_exp_s4]):
-                    p1_exp_s3 = self.twoside2reverse[p3.side1]
+                    p1_exp_s3 = p3.side1
 
                     for p0, unused3 in self._iter(unused2,
                                                   self.side_options[0],
                                                   self.side_options[3],
                                                   [p0_exp_s3],
-                                                  self.side_options_rev[2]):
-                        p1_exp_s4 = self.twoside2reverse[p0.side2]
+                                                  self.side_options[2]):
+                        p1_exp_s4 = p0.side2
 
                         for _ in self._iter(unused3,
                                             self.side_options[1],

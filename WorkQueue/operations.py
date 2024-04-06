@@ -14,13 +14,13 @@ def _segment_to_loc_1(segment):
         returns the locations above/below or left/right of the segment
     """
 
-    if 130 <= segment <= 192:
-        loc_a = segment - 129       # left of the segment
-        loc_b = segment - 128       # right of the segment
+    if 102 <= segment <= 164:
+        loc_a = segment - 101       # loc left of the segment
+        loc_b = segment - 100       # loc right of the segment
 
     elif 9 <= segment <= 64:
-        loc_a = segment - 8         # above the segment
-        loc_b = segment             # below the segment
+        loc_a = segment - 8         # loc above the segment
+        loc_b = segment             # loc below the segment
 
     else:
         loc_a = 0

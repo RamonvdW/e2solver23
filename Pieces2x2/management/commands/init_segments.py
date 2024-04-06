@@ -20,17 +20,6 @@ class Command(BaseCommand):
 
         self.twoside_border = TwoSide.objects.get(two_sides='XX').nr
 
-        two2nr = dict()
-        for two in TwoSide.objects.all():
-            two2nr[two.two_sides] = two.nr
-        # for
-        self.twoside2reverse = dict()
-        for two_sides, nr in two2nr.items():
-            two_rev = two_sides[1] + two_sides[0]
-            rev_nr = two2nr[two_rev]
-            self.twoside2reverse[nr] = rev_nr
-        # for
-
         self._used_options = []
         self._segment_done = []
 
@@ -130,9 +119,6 @@ class Command(BaseCommand):
         twosides_side3 = list(qset.distinct('side3').values_list('side3', flat=True))
         twosides_side4 = list(qset.distinct('side4').values_list('side4', flat=True))
 
-        twosides_side3 = [self.twoside2reverse[two_side] for two_side in twosides_side3]
-        twosides_side4 = [self.twoside2reverse[two_side] for two_side in twosides_side4]
-
         return twosides_side1, twosides_side2, twosides_side3, twosides_side4
 
     def _save_options(self, loc, side, twosides):
@@ -170,9 +156,8 @@ class Command(BaseCommand):
                         nr4__gt=60)
                 .distinct('side1'))
 
-        standard_twosides12 = list(qset.values_list('side1', flat=True))
-        standard_twosides34 = [self.twoside2reverse[two_side] for two_side in standard_twosides12]
-        self.stdout.write('[INFO] Standard number of two sides: %s' % len(standard_twosides12))
+        standard_twosides = list(qset.values_list('side1', flat=True))
+        self.stdout.write('[INFO] Standard number of two sides: %s' % len(standard_twosides))
 
         self.stdout.write('[INFO] Generating all possible TwoSideOptions')
 
@@ -214,8 +199,7 @@ class Command(BaseCommand):
 
         # remainder gets the standard set
         self.stdout.write('[INFO] Remainder')
-        twosides_side1 = twosides_side2 = standard_twosides12
-        twosides_side3 = twosides_side4 = standard_twosides34
+        twosides_side1 = twosides_side2 = twosides_side3 = twosides_side4 = standard_twosides
 
         for loc in range(1, 64+1):
             if loc not in LOC_CORNERS + LOC_BORDERS + LOC_HINTS:

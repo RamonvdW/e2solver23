@@ -9,7 +9,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views.generic import TemplateView
 from django.templatetags.static import static
-from Pieces2x2.models import Piece2x2, TwoSide, TwoSideOptions, EvalProgress
+from Pieces2x2.models import Piece2x2, TwoSideOptions, EvalProgress
 from Pieces2x2.helpers import calc_segment
 from Ring1.models import Ring1
 from WorkQueue.models import Work, ProcessorUsedPieces
@@ -19,18 +19,6 @@ import time
 TEMPLATE_SHOW = 'pieces2x2/show.dtl'
 TEMPLATE_OPTIONS = 'pieces2x2/options.dtl'
 TEMPLATE_OPTIONS_LIST = 'pieces2x2/options-list.dtl'
-
-two2nr = dict()
-twoside2reverse = dict()
-if True:
-    for _two in TwoSide.objects.all():
-        two2nr[_two.two_sides] = _two.nr
-    # for
-    for two_sides, two_nr in two2nr.items():
-        two_rev = two_sides[1] + two_sides[0]
-        rev_nr = two2nr[two_rev]
-        twoside2reverse[two_nr] = rev_nr
-    # for
 
 piece2x2_cache = dict()
 
@@ -384,9 +372,6 @@ class OptionsView(TemplateView):
             sides4 = seg2sides[seg4]
         except KeyError:
             sides4 = []
-
-        sides3 = [twoside2reverse[side] for side in sides3]
-        sides4 = [twoside2reverse[side] for side in sides4]
 
         if is_last:
             limit = 289 + 289 + 17 + 17

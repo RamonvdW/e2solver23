@@ -116,7 +116,7 @@ class Command(BaseCommand):
         self.stdout.write('[INFO] Filling caches')
         self._make_cache_base_with_side()
 
-        self.stdout.write('[INFO] Deleting old pieces')
+        self.stdout.write('[INFO] Deleting all Piece2x2 and TwoSide')
         Piece2x2.objects.all().delete()
         TwoSide.objects.all().delete()
 
@@ -277,10 +277,14 @@ class Command(BaseCommand):
                                         nr=nr,
                                         is_border=is_border,
                                         has_hint=has_hint,
-                                        side1=self._get_two_sides_nr(piece1.get_side(1, rot1), piece2.get_side(1, rot2)),
-                                        side2=self._get_two_sides_nr(piece2.get_side(2, rot2), piece4.get_side(2, rot4)),
-                                        side3=self._get_two_sides_nr(piece4.get_side(3, rot4), piece3.get_side(3, rot3)),
-                                        side4=self._get_two_sides_nr(piece3.get_side(4, rot3), piece1.get_side(4, rot1)),
+                                        side1=self._get_two_sides_nr(piece1.get_side(1, rot1),      # A = nr1
+                                                                     piece2.get_side(1, rot2)),     # B = nr2
+                                        side2=self._get_two_sides_nr(piece2.get_side(2, rot2),      # A = nr2
+                                                                     piece4.get_side(2, rot4)),     # B = nr4
+                                        side3=self._get_two_sides_nr(piece3.get_side(3, rot3),      # A = nr3
+                                                                     piece4.get_side(3, rot4)),     # B = nr4
+                                        side4=self._get_two_sides_nr(piece1.get_side(4, rot1),      # A = nr1
+                                                                     piece3.get_side(4, rot3)),     # B = nr3
                                         nr1=piece1.nr,
                                         nr2=piece2.nr,
                                         nr3=piece3.nr,

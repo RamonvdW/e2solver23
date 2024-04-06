@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -71,9 +71,9 @@ def calc_segment(loc, side):
     if side == 3:
         return loc + 8
     if side == 4:
-        return 128 + loc
+        return 100 + loc
     # if side == 2:
-    return 128 + loc + 1
+    return 100 + loc + 1
 
 
 # end of file

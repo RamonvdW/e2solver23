@@ -20,17 +20,6 @@ class Command(BaseCommand):
 
         self.twoside_border = TwoSide.objects.get(two_sides='XX').nr
 
-        two2nr = dict()
-        for two in TwoSide.objects.all():
-            two2nr[two.two_sides] = two.nr
-        # for
-        self.twoside2reverse = dict()
-        for two_sides, nr in two2nr.items():
-            two_rev = two_sides[1] + two_sides[0]
-            rev_nr = two2nr[two_rev]
-            self.twoside2reverse[nr] = rev_nr
-        # for
-
         self.processor = 0
         self.do_commit = False
         self.bulk_reduce = dict()       # [segment] = [two_side, ..]
@@ -38,9 +27,6 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('nr', type=int, help='Ring1 to load')
         parser.add_argument('processor', type=int, help='Into which processor to load')
-
-    def _reverse_sides(self, options):
-        return [self.twoside2reverse[two_side] for two_side in options]
 
     def _get_loc_side_options(self, loc, side_nr):
         segment = calc_segment(loc, side_nr)
@@ -51,17 +37,10 @@ class Command(BaseCommand):
                    .values_list('two_side', flat=True))
         options = list(options)
 
-        if side_nr >= 3:
-            # sides 3 and 4 need to be reversed
-            options = self._reverse_sides(options)
-
         # print('segment %s options: %s' % (segment, repr(options)))
         return options
 
-    def _reduce(self, segment, two_side, side_nr):
-        if side_nr in (3, 4):
-            two_side = self.twoside2reverse[two_side]
-
+    def _reduce(self, segment, two_side):
         try:
             self.bulk_reduce[segment].append(two_side)
         except KeyError:
@@ -124,7 +103,7 @@ class Command(BaseCommand):
 
                     for side in side_options:
                         if side != side_new:
-                            self._reduce(segment, side, side_nr)  # reverses back for side 3 and 4
+                            self._reduce(segment, side)
                     # for
                 # for
 
