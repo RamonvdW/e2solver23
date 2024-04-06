@@ -439,10 +439,10 @@ class Command(BaseCommand):
     def _segment_to_loc(self, segment):
         """ reverse of calc_segment """
 
-        if segment > 128:
+        if segment > 100:
             # assume side = 2
-            loc2 = segment - 129
-            loc4 = segment - 128
+            loc2 = segment - 101        # 140-101 = 39
+            loc4 = segment - 100        # 140-100 = 40
 
             if loc2 in self.locs and loc4 in self.locs:
                 # we can choose
@@ -551,16 +551,16 @@ class Command(BaseCommand):
 
         if side == 1:
             self.locs = (1, 2, 3, 4, 10, 9, 11, 5, 6, 7, 8, 15, 16, 14, 13, 12, 11)
-            segments = (130, 131, 132, 133, 134, 135, 136, 9, 10, 11, 12, 13, 14, 15, 16)
+            segments = (102, 103, 104, 105, 106, 107, 108, 9, 10, 11, 12, 13, 14, 15, 16)
         elif side == 2:
             self.locs = (8, 16, 24, 32, 15, 7, 23, 40, 48, 56, 64, 55, 63, 47, 39, 31)
-            segments = (16, 24, 32, 40, 48, 56, 64, 136, 144, 152, 160, 168, 176, 184, 192)
+            segments = (16, 24, 32, 40, 48, 56, 64, 108, 116, 124, 132, 140, 148, 156, 164)
         elif side == 3:
             self.locs = (57, 58, 59, 60, 50, 49, 51, 61, 62, 63, 64, 55, 56, 54, 53, 52)
-            segments = (186, 187, 188, 189, 190, 191, 192, 57, 58, 59, 60, 61, 62, 63, 64)
+            segments = (158, 159, 160, 161, 162, 163, 164, 57, 58, 59, 60, 61, 62, 63, 64)
         else:
             self.locs = (1, 9, 17, 25, 10, 2, 18, 33, 41, 49, 57, 50, 58, 42, 34, 26)
-            segments = (9, 17, 25, 33, 41, 49, 57, 130, 138, 146, 154, 162, 170, 178, 186)
+            segments = (9, 17, 25, 33, 41, 49, 57, 102, 110, 118, 126, 134, 142, 150, 158)
 
         self.requested_order = self.locs[:]
 
@@ -582,6 +582,7 @@ class Command(BaseCommand):
         try:
             for segment in segments:
                 if check_dead_end(self.processor):
+                    self.stdout.write('[WARNING] Dead-end')
                     return
 
                 # due to runtime, refresh for every segment
