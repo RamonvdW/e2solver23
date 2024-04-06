@@ -299,7 +299,7 @@ class OptionsView(TemplateView):
                      27, 28, 29, 30,
                      32, 33, 34)
 
-        elif progress.eval_size in (25, 32, 36, 48, 64):
+        elif progress.eval_size in (20, 25, 32, 36, 48, 64):
             locs = side_nrs = s_nrs = None
 
         else:
