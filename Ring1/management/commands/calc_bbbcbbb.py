@@ -41,19 +41,6 @@ class Command(BaseCommand):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        two2nr = dict()
-        side2two = dict()     # [two side nr] = two_sides
-        for two in TwoSide.objects.all():
-            two2nr[two.two_sides] = two.nr
-            side2two[two.nr] = two.two_sides
-        # for
-        self.twoside2reverse = dict()
-        for two_sides, nr in two2nr.items():
-            two_rev = two_sides[1] + two_sides[0]
-            rev_nr = two2nr[two_rev]
-            self.twoside2reverse[nr] = rev_nr
-        # for
-
         self.bbbcbbb = []
         self._print = -1
 
