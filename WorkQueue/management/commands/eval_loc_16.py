@@ -286,15 +286,14 @@ class Command(BaseCommand):
 
     def _reduce(self, segment, two_side):
         qset = TwoSideOptions.objects.filter(processor=self.processor, segment=segment, two_side=two_side)
-        if qset.count() != 1:
-            self.stderr.write('[ERROR] Cannot find segment=%s, two_side=%s' % (segment, two_side))
-        else:
+        if qset.count() == 1:
             self.stdout.write('[INFO] Reduction segment %s: %s' % (segment, two_side))
             if self.do_commit:
                 qset.delete()
             self.reductions += 1
             if not self.nop:
                 propagate_segment_reduction(self.processor, segment)
+        # else: most likely deleted by parllel operation
 
     def _check_open_ends(self):
         #  verify each location can still be filled

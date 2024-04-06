@@ -40,6 +40,8 @@ class Command(BaseCommand):
         self.processor = 0
         self.locs = (0, 0)                  # p0..p8
         self.side_options = ([], [])        # s0..s23
+        self.variation = 99
+
         self.reductions = 0
         self.segment_limit = 100
         self.do_commit = True
@@ -172,15 +174,18 @@ class Command(BaseCommand):
                              s17, s18, s19, s20,
                              s21, s22, s23]
 
+        self.variation = sum([sum(options) for options in self.side_options])
+        self.stdout.write('[INFO] Variation is %s' % self.variation)
+
     def _limit_work(self, options):
         if len(options) >= 2 * self.segment_limit:
             # 200..289 --> reduce to 1/3
-            start_idx = len(self.board_unused) % 3       # cause variation
+            start_idx = self.variation % 3       # cause variation
             options = options[start_idx::3]
 
         elif len(options) > self.segment_limit:
             # 101..199 --> reduce to 1/2
-            start_idx = len(self.board_unused) % 2       # cause variation
+            start_idx = self.variation % 2       # cause variation
             options = options[start_idx::2]
 
         return options
@@ -238,15 +243,14 @@ class Command(BaseCommand):
 
     def _reduce(self, segment, two_side):
         qset = TwoSideOptions.objects.filter(processor=self.processor, segment=segment, two_side=two_side)
-        if qset.count() != 1:
-            self.stderr.write('[ERROR] Cannot find segment=%s, two_side=%s' % (segment, two_side))
-        else:
+        if qset.count() == 1:
             self.stdout.write('[INFO] Reduction segment %s: %s' % (segment, two_side))
             if self.do_commit:
                 qset.delete()
             self.reductions += 1
             if not self.nop:
                 propagate_segment_reduction(self.processor, segment)
+        # else: most likely deleted by parallel operation
 
     def _decide_p_nr_order(self):
         qset = Piece2x2.objects.filter(nr1__in=self.board_unused,
@@ -425,12 +429,11 @@ class Command(BaseCommand):
 
         segment = calc_segment(self.locs[p_nr], side_n)
         sides = self.side_options[s_nr]
+        original_todo = len(sides)
         sides = self._limit_work(sides)
         todo = len(sides)
-        # if todo > self.segment_limit:
-        #     return
 
-        self.stdout.write('[INFO] Checking %s options in segment %s' % (len(sides), segment))
+        self.stdout.write('[INFO] Checking %s of %s options in segment %s' % (todo, original_todo, segment))
         self.p_nrs_order = []       # allow deciding optimal order anew
 
         self.progress.segment = segment

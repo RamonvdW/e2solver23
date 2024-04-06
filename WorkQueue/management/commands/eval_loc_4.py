@@ -38,6 +38,8 @@ class Command(BaseCommand):
         self.processor = 0
         self.locs = (0, 0, 0, 0)        # p0..p3
         self.side_options = ([], [], [], [], [], [], [], [], [], [], [], [])        # s0..s11
+        self.variation = 99
+
         self.reductions = 0
         self.unused0 = []
         self.progress = None
@@ -114,31 +116,33 @@ class Command(BaseCommand):
 
         self.side_options = [s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11]
 
+        self.variation = sum([sum(options) for options in self.side_options])
+        self.stdout.write('[INFO] Variation is %s' % self.variation)
+
     def _limit_work(self, options):
-        variant = len(self.unused0)
         if len(options) >= 250:
             # 250..289 --> reduce to 1/6 = 33..48
-            start_idx = variant % 6                 # cause variation
+            start_idx = self.variation % 6          # cause variation
             options = options[start_idx::6]         # keep every 6th
 
         elif len(options) >= 200:
             # 200..249 --> reduce to 1/5 = 40..49
-            start_idx = variant % 5                 # cause variation
+            start_idx = self.variation % 5          # cause variation
             options = options[start_idx::5]         # keep every 5th
 
         elif len(options) >= 150:
             # 150..199 --> reduce to 1/4 = 37..49
-            start_idx = variant % 4                 # cause variation
+            start_idx = self.variation % 4          # cause variation
             options = options[start_idx::4]         # keep every 3th
 
         elif len(options) >= 100:
             # 100..149 --> reduce to 1/3 = 33..49
-            start_idx = variant % 3                 # cause variation
+            start_idx = self.variation % 3          # cause variation
             options = options[start_idx::3]         # keep every 2nd
 
         elif len(options) >= 50:
             # 50..99 --> reduce to 1/2 = 25..49
-            start_idx = variant % 2                 # cause variation
+            start_idx = self.variation % 2          # cause variation
             options = options[start_idx::2]         # keep every 2nd
 
         return options
@@ -177,15 +181,14 @@ class Command(BaseCommand):
 
     def _reduce(self, segment, two_side):
         qset = TwoSideOptions.objects.filter(processor=self.processor, segment=segment, two_side=two_side)
-        if qset.count() != 1:
-            self.stderr.write('[ERROR] Cannot find segment=%s, two_side=%s' % (segment, two_side))
-        else:
+        if qset.count() == 1:
             self.stdout.write('[INFO] Reduction segment %s: %s' % (segment, two_side))
             if self.do_commit:
                 qset.delete()
             self.reductions += 1
             if not self.nop:
                 propagate_segment_reduction(self.processor, segment)
+        # else: most likely deleted by parallel operation
 
     def _reduce_s3(self):
         """
@@ -593,7 +596,7 @@ class Command(BaseCommand):
 
         loc = options['loc']
         if loc < 1 or loc > 55 or loc in (8, 16, 24, 32, 40, 48):
-            self.stderr.write('[ERROR] Invalid location')
+            self.stdout.write('[ERROR] Invalid location')
             return
         self.locs = (loc, loc + 1,
                      loc + 8, loc + 9)
@@ -629,6 +632,7 @@ class Command(BaseCommand):
             self._reduce_s3()
 
             if check_dead_end(self.processor):
+                self.stdout.write('[WARNING] Dead end')
                 return
 
             self.progress.solve_order = msg
@@ -638,6 +642,7 @@ class Command(BaseCommand):
             self._reduce_s5()
 
             if check_dead_end(self.processor):
+                self.stdout.write('[WARNING] Dead end')
                 return
 
             self.progress.solve_order = msg
@@ -647,6 +652,7 @@ class Command(BaseCommand):
             self._reduce_s6()
 
             if check_dead_end(self.processor):
+                self.stdout.write('[WARNING] Dead end')
                 return
 
             self.progress.solve_order = msg
