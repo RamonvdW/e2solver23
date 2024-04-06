@@ -115,6 +115,17 @@ class OptionsView(TemplateView):
             prev_segment2count[option.segment] += 1
         # for
 
+        if used.from_ring1 > 0:
+            for segment in (102, 103, 104, 105, 106, 107, 108,
+                            10, 11, 12, 13, 14, 15,
+                            58, 59, 60, 61, 62, 63,
+                            158, 159, 160, 161, 162, 163, 164,
+                            9, 17, 25, 33, 41, 49, 57,
+                            110, 118, 126, 134, 142, 150,
+                            116, 124, 132, 140, 148, 156,
+                            16, 24, 32, 40, 48, 56, 64):
+                prev_segment2count[segment] = 1
+
         segments = list(segment2count.keys())
         segments.sort()
         compare = []
