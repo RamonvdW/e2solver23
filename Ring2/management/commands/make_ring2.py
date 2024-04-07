@@ -146,7 +146,7 @@ class Command(BaseCommand):
             ring1 = Ring1.objects.get(nr=nr)
         except Ring1.DoesNotExist:
             self.stdout.write('[ERROR] Could not locate Ring1')
-            return
+            return False
 
         self.ring2.based_on_ring1 = ring1.nr
 
