@@ -40,17 +40,17 @@ class Command(BaseCommand):
         if self.loc != 36 and 139 in unused:
             unused.remove(139)
 
-        # if self.loc != 10 and 208 in unused:
-        #     unused.remove(208)
-        #
-        # if self.loc != 15 and 255 in unused:
-        #     unused.remove(255)
-        #
-        # if self.loc != 50 and 181 in unused:
-        #     unused.remove(181)
-        #
-        # if self.loc != 55 and 249 in unused:
-        #     unused.remove(249)
+        if self.loc != 10 and 208 in unused:
+            unused.remove(208)
+
+        if self.loc != 15 and 255 in unused:
+            unused.remove(255)
+
+        if self.loc != 50 and 181 in unused:
+            unused.remove(181)
+
+        if self.loc != 55 and 249 in unused:
+            unused.remove(249)
 
         for claim in claimed:
             if claim in unused:
@@ -120,14 +120,14 @@ class Command(BaseCommand):
 
         if self.loc == 36:
             qset = qset.filter(nr2=139)
-        # elif self.loc == 10:
-        #     qset = qset.filter(nr1=208)
-        # elif self.loc == 15:
-        #     qset = qset.filter(nr2=255)
-        # elif self.loc == 50:
-        #     qset = qset.filter(nr3=181)
-        # elif self.loc == 55:
-        #     qset = qset.filter(nr4=249)
+        elif self.loc == 10:
+            qset = qset.filter(nr1=208)
+        elif self.loc == 15:
+            qset = qset.filter(nr2=255)
+        elif self.loc == 50:
+            qset = qset.filter(nr3=181)
+        elif self.loc == 55:
+            qset = qset.filter(nr4=249)
 
         count = qset.count()
 
@@ -215,7 +215,7 @@ class Command(BaseCommand):
             set_loc_used(self.processor, self.loc, p2x2)
             return
 
-        if count < 5:
+        if count < 10:
             for p2x2 in qset:
                 print('[DEBUG] p2x2 nr %s has base nrs [%s, %s, %s, %s]' % (p2x2.nr,
                                                                             p2x2.nr1, p2x2.nr2, p2x2.nr3, p2x2.nr4))

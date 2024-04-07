@@ -93,19 +93,19 @@ class Command(BaseCommand):
         if 36 not in self.locs and 139 in unused:
             unused.remove(139)
 
-        # if 10 not in self.locs and 208 in unused:
-        #     unused.remove(208)
-        #
-        # if 15 not in self.locs and 255 in unused:
-        #     unused.remove(255)
-        #
-        # if 50 not in self.locs and 181 in unused:
-        #     unused.remove(181)
-        #
-        # if 55 not in self.locs and 249 in unused:
-        #     unused.remove(249)
+        if 10 not in self.locs and 208 in unused:
+            unused.remove(208)
 
-        self.stdout.write('[INFO] %s base pieces in use' % (256 - len(unused)))
+        if 15 not in self.locs and 255 in unused:
+            unused.remove(255)
+
+        if 50 not in self.locs and 181 in unused:
+            unused.remove(181)
+
+        if 55 not in self.locs and 249 in unused:
+            unused.remove(249)
+
+        self.stdout.write('[INFO] %s base pieces in use or claimed' % (256 - len(unused)))
         return unused
 
     def _get_loc_side_options(self, loc, side_nr):
@@ -225,19 +225,31 @@ class Command(BaseCommand):
         self.board[p_nr] = None
         self.board_unused.extend([p2x2.nr1, p2x2.nr2, p2x2.nr3, p2x2.nr4])
 
-    def _iter(self, options_side1, options_side2, options_side3, options_side4):
+    def _iter(self, loc, options_side1, options_side2, options_side3, options_side4):
         unused = self.board_unused
-        for p in (Piece2x2
-                  .objects
-                  .filter(side1__in=options_side1,
-                          side2__in=options_side2,
-                          side3__in=options_side3,
-                          side4__in=options_side4,
-                          nr1__in=unused,
-                          nr2__in=unused,
-                          nr3__in=unused,
-                          nr4__in=unused)
-                  .iterator(chunk_size=1000)):
+        qset = (Piece2x2
+                .objects
+                .filter(side1__in=options_side1,
+                        side2__in=options_side2,
+                        side3__in=options_side3,
+                        side4__in=options_side4,
+                        nr1__in=unused,
+                        nr2__in=unused,
+                        nr3__in=unused,
+                        nr4__in=unused))
+
+        if loc == 36:
+            qset = qset.filter(nr2=139)
+        elif loc == 10:
+            qset = qset.filter(nr1=208)
+        elif loc == 15:
+            qset = qset.filter(nr2=255)
+        elif loc == 50:
+            qset = qset.filter(nr3=181)
+        elif loc == 55:
+            qset = qset.filter(nr4=249)
+
+        for p in qset.iterator(chunk_size=1000):
             yield p
         # for
 
@@ -412,7 +424,9 @@ class Command(BaseCommand):
             if p:
                 options_side4 = [p.side2]
 
-        for p in self._iter(options_side1, options_side2, options_side3, options_side4):
+        loc = self.locs[p_nr]
+
+        for p in self._iter(loc, options_side1, options_side2, options_side3, options_side4):
             self._board_place(p_nr, p)
             found = self._find_recurse()
             self._board_pop()
@@ -427,7 +441,8 @@ class Command(BaseCommand):
         if self.board[p_nr] is not None:
             return
 
-        segment = calc_segment(self.locs[p_nr], side_n)
+        loc = self.locs[p_nr]
+        segment = calc_segment(loc, side_n)
         sides = self.side_options[s_nr]
         original_todo = len(sides)
         sides = self._limit_work(sides)
@@ -473,7 +488,7 @@ class Command(BaseCommand):
                 options_side4 = [side]
 
             found = False
-            for p in self._iter(options_side1, options_side2, options_side3, options_side4):
+            for p in self._iter(loc, options_side1, options_side2, options_side3, options_side4):
                 self._board_place(p_nr, p)
                 found = self._find_recurse()
                 self._board_pop()

@@ -65,19 +65,19 @@ class Command(BaseCommand):
         if 36 not in self.locs and 139 in unused:
             unused.remove(139)
 
-        # if 10 not in self.locs and 208 in unused:
-        #     unused.remove(208)
-        #
-        # if 15 not in self.locs and 255 in unused:
-        #     unused.remove(255)
-        #
-        # if 50 not in self.locs and 181 in unused:
-        #     unused.remove(181)
-        #
-        # if 55 not in self.locs and 249 in unused:
-        #     unused.remove(249)
+        if 10 not in self.locs and 208 in unused:
+            unused.remove(208)
 
-        self.stdout.write('[INFO] %s base pieces in use' % (256 - len(unused)))
+        if 15 not in self.locs and 255 in unused:
+            unused.remove(255)
+
+        if 50 not in self.locs and 181 in unused:
+            unused.remove(181)
+
+        if 55 not in self.locs and 249 in unused:
+            unused.remove(249)
+
+        self.stdout.write('[INFO] %s base pieces in use or claimed' % (256 - len(unused)))
         return unused
 
     def _get_loc_side_options(self, loc, side_nr):
@@ -150,7 +150,7 @@ class Command(BaseCommand):
         return options
 
     @staticmethod
-    def _iter(unused1, options_side1, options_side2, options_side3, options_side4):
+    def _iter(loc, unused1, options_side1, options_side2, options_side3, options_side4):
         if len(options_side1) == 1 and len(options_side2) == 1 and len(options_side3) == 1 and len(options_side4) == 1:
             # special case: this location is already filled, so it can be skipped
             p2x2 = Piece2x2(nr=0,
@@ -162,17 +162,29 @@ class Command(BaseCommand):
             yield p2x2, unused1
             return
 
-        for p in (Piece2x2
-                  .objects
-                  .filter(side1__in=options_side1,
-                          side2__in=options_side2,
-                          side3__in=options_side3,
-                          side4__in=options_side4,
-                          nr1__in=unused1,
-                          nr2__in=unused1,
-                          nr3__in=unused1,
-                          nr4__in=unused1)
-                  .iterator(chunk_size=1000)):
+        qset = (Piece2x2
+                .objects
+                .filter(side1__in=options_side1,
+                        side2__in=options_side2,
+                        side3__in=options_side3,
+                        side4__in=options_side4,
+                        nr1__in=unused1,
+                        nr2__in=unused1,
+                        nr3__in=unused1,
+                        nr4__in=unused1))
+
+        if loc == 36:
+            qset = qset.filter(nr2=139)
+        elif loc == 10:
+            qset = qset.filter(nr1=208)
+        elif loc == 15:
+            qset = qset.filter(nr2=255)
+        elif loc == 50:
+            qset = qset.filter(nr3=181)
+        elif loc == 55:
+            qset = qset.filter(nr4=249)
+
+        for p in qset.iterator(chunk_size=1000):
             unused2 = unused1[:]
             unused2.remove(p.nr1)
             unused2.remove(p.nr2)
@@ -231,28 +243,32 @@ class Command(BaseCommand):
             p0_exp_s2 = side
             p1_exp_s4 = side
             found = False
-            for p0, unused1 in self._iter(self.unused0,
+            for p0, unused1 in self._iter(self.locs[0],
+                                          self.unused0,
                                           self.side_options[0],
                                           [p0_exp_s2],
                                           self.side_options[5],
                                           self.side_options[2]):
                 p2_exp_s1 = p0.side3
 
-                for p1, unused2 in self._iter(unused1,
+                for p1, unused2 in self._iter(self.locs[1],
+                                              unused1,
                                               self.side_options[1],
                                               self.side_options[4],
                                               self.side_options[6],
                                               [p1_exp_s4]):
                     p3_exp_s1 = p1.side3
 
-                    for p2, unused3 in self._iter(unused2,
+                    for p2, unused3 in self._iter(self.locs[2],
+                                                  unused2,
                                                   [p2_exp_s1],
                                                   self.side_options[8],
                                                   self.side_options[10],
                                                   self.side_options[7]):
                         p3_exp_s4 = p2.side2
 
-                        for p3, _ in self._iter(unused3,
+                        for p3, _ in self._iter(self.locs[3],
+                                                unused3,
                                                 [p3_exp_s1],
                                                 self.side_options[9],
                                                 self.side_options[11],
@@ -332,28 +348,32 @@ class Command(BaseCommand):
             p0_exp_s3 = side
             p2_exp_s1 = side
             found = False
-            for p0, unused1 in self._iter(self.unused0,
+            for p0, unused1 in self._iter(self.locs[0],
+                                          self.unused0,
                                           self.side_options[0],
                                           self.side_options[3],
                                           [p0_exp_s3],
                                           self.side_options[2]):
                 p1_exp_s4 = p0.side2
 
-                for p2, unused2 in self._iter(unused1,
+                for p2, unused2 in self._iter(self.locs[2],
+                                              unused1,
                                               [p2_exp_s1],
                                               self.side_options[8],
                                               self.side_options[10],
                                               self.side_options[7]):
                     p3_exp_s4 = p2.side2
 
-                    for p1, unused3 in self._iter(unused2,
+                    for p1, unused3 in self._iter(self.locs[1],
+                                                  unused2,
                                                   self.side_options[1],
                                                   self.side_options[4],
                                                   self.side_options[6],
                                                   [p1_exp_s4]):
                         p3_exp_s1 = p1.side3
 
-                        for p3, _ in self._iter(unused3,
+                        for p3, _ in self._iter(self.locs[3],
+                                                unused3,
                                                 [p3_exp_s1],
                                                 self.side_options[9],
                                                 self.side_options[11],
@@ -431,28 +451,32 @@ class Command(BaseCommand):
             p1_exp_s3 = side
             p3_exp_s1 = side
             found = False
-            for p1, unused1 in self._iter(self.unused0,
+            for p1, unused1 in self._iter(self.locs[1],
+                                          self.unused0,
                                           self.side_options[1],
                                           self.side_options[4],
                                           [p1_exp_s3],
                                           self.side_options[3]):
                 p0_exp_s2 = p1.side4
 
-                for p3, unused2 in self._iter(unused1,
+                for p3, unused2 in self._iter(self.locs[3],
+                                              unused1,
                                               [p3_exp_s1],
                                               self.side_options[9],
                                               self.side_options[11],
                                               self.side_options[8]):
                     p2_exp_s2 = p3.side4
 
-                    for p0, unused3 in self._iter(unused2,
+                    for p0, unused3 in self._iter(self.locs[0],
+                                                  unused2,
                                                   self.side_options[0],
                                                   [p0_exp_s2],
                                                   self.side_options[5],
                                                   self.side_options[2]):
                         p2_exp_s1 = p0.side3
 
-                        for p2, _ in self._iter(unused3,
+                        for p2, _ in self._iter(self.locs[2],
+                                                unused3,
                                                 [p2_exp_s1],
                                                 [p2_exp_s2],
                                                 self.side_options[10],
@@ -528,28 +552,32 @@ class Command(BaseCommand):
             p2_exp_s2 = side
             p3_exp_s4 = side
             found = False
-            for p2, unused1 in self._iter(self.unused0,
+            for p2, unused1 in self._iter(self.locs[2],
+                                          self.unused0,
                                           self.side_options[5],
                                           [p2_exp_s2],
                                           self.side_options[10],
                                           self.side_options[7]):
                 p0_exp_s3 = p2.side1
 
-                for p3, unused2 in self._iter(unused1,
+                for p3, unused2 in self._iter(self.locs[3],
+                                              unused1,
                                               self.side_options[6],
                                               self.side_options[9],
                                               self.side_options[11],
                                               [p3_exp_s4]):
                     p1_exp_s3 = p3.side1
 
-                    for p0, unused3 in self._iter(unused2,
+                    for p0, unused3 in self._iter(self.locs[0],
+                                                  unused2,
                                                   self.side_options[0],
                                                   self.side_options[3],
                                                   [p0_exp_s3],
                                                   self.side_options[2]):
                         p1_exp_s4 = p0.side2
 
-                        for _ in self._iter(unused3,
+                        for _ in self._iter(self.locs[1],
+                                            unused3,
                                             self.side_options[1],
                                             self.side_options[4],
                                             [p1_exp_s3],
