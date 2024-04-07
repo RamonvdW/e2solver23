@@ -29,10 +29,10 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         # parser.add_argument('--verbose', action='store_true')
-        parser.add_argument('--nop', action='store_true', help='Do not propagate')
         parser.add_argument('processor', nargs=1, type=int, help='Processor number to use')
         parser.add_argument('loc', nargs=1, type=int, help='Location on board (1..64)')
         parser.add_argument('claimed', nargs='*', type=int, help="Base piece number claimed for other location")
+        parser.add_argument('--nop', action='store_true', help='Do not propagate')
 
     def _get_unused(self, claimed):
         unused = get_unused_for_locs(self.processor, [self.loc])

@@ -32,6 +32,7 @@ class Command(BaseCommand):
         parser.add_argument('processor', type=int, help='Processor number to use')
         parser.add_argument('loc', type=int, help='Location on board')
         parser.add_argument('index', type=int, help='i-th Piece2x2 number to use')
+        parser.add_argument('--nop', action='store_true', help='Do not propagate')
         parser.add_argument('claimed', nargs='*', type=int, help="Base piece number claimed for other location")
 
     def _get_unused(self, claimed):
@@ -91,6 +92,8 @@ class Command(BaseCommand):
         index = options['index']
 
         self.stdout.write('[INFO] Processor=%s; Location: %s' % (self.processor, self.loc))
+
+        nop = options['nop']
 
         self._get_unused(options['claimed'])
 
@@ -197,8 +200,9 @@ class Command(BaseCommand):
             # for
             set_loc_used(self.processor, self.loc, p2x2)
 
-            for segment in self.bulk_reduce.keys():
-                propagate_segment_reduction(self.processor, segment)
+            if not nop:
+                for segment in self.bulk_reduce.keys():
+                    propagate_segment_reduction(self.processor, segment)
             # for
 
         total = sum(self.reductions.values())
