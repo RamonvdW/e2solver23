@@ -150,7 +150,7 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('processor', nargs=1, type=int, help='Processor number to use')
         parser.add_argument('loc', nargs=1, type=int, help='Top-left location on board (1..37)')
-        parser.add_argument('segment', nargs=1, type=int, help='Segment to work on (1..72, 129..193)')
+        parser.add_argument('segment', nargs=1, type=int, help='Segment to work on (1..72, 102..164)')
         parser.add_argument('order', nargs='*', type=int, help='Solving order (1..64), max %s' % len(self.locs))
         parser.add_argument('--dryrun', action='store_true')
         parser.add_argument('--nop', action='store_true', help='Do not propagate')
@@ -638,8 +638,8 @@ class Command(BaseCommand):
     @staticmethod
     def _segment_to_loc(segment):
         """ reverse of calc_segment """
-        if segment > 128:
-            return segment - 129, 2
+        if segment > 101:
+            return segment - 101, 2
         else:
             return segment, 1
 

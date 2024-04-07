@@ -41,6 +41,7 @@ class Command(BaseCommand):
         self.variation = 99
 
         self.reductions = 0
+        self.segment_limit = 50
         self.unused0 = []
         self.progress = None
         self.do_commit = True
@@ -54,6 +55,7 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('processor', type=int, help='Processor number to use')
         parser.add_argument('loc', type=int, help='Top-left location on the board (1..55)')
+        parser.add_argument('--limit', default=50, type=int, help='Skip segment evaluation above this limit')
         parser.add_argument('--nop', action='store_true', help='Do not propagate')
         parser.add_argument('--dryrun', action='store_true')
 
@@ -120,27 +122,27 @@ class Command(BaseCommand):
         self.stdout.write('[INFO] Variation is %s' % self.variation)
 
     def _limit_work(self, options):
-        if len(options) >= 250:
+        if len(options) >= 5 * self.segment_limit:      # default: 250
             # 250..289 --> reduce to 1/6 = 33..48
             start_idx = self.variation % 6          # cause variation
             options = options[start_idx::6]         # keep every 6th
 
-        elif len(options) >= 200:
+        elif len(options) >= 4 * self.segment_limit:    # default: 200
             # 200..249 --> reduce to 1/5 = 40..49
             start_idx = self.variation % 5          # cause variation
             options = options[start_idx::5]         # keep every 5th
 
-        elif len(options) >= 150:
+        elif len(options) >= 3 * self.segment_limit:    # default: 150
             # 150..199 --> reduce to 1/4 = 37..49
             start_idx = self.variation % 4          # cause variation
             options = options[start_idx::4]         # keep every 3th
 
-        elif len(options) >= 100:
+        elif len(options) >= 2 * self.segment_limit:    # default: 100
             # 100..149 --> reduce to 1/3 = 33..49
             start_idx = self.variation % 3          # cause variation
             options = options[start_idx::3]         # keep every 2nd
 
-        elif len(options) >= 50:
+        elif len(options) >= self.segment_limit:    # default: 50
             # 50..99 --> reduce to 1/2 = 25..49
             start_idx = self.variation % 2          # cause variation
             options = options[start_idx::2]         # keep every 2nd
@@ -604,6 +606,9 @@ class Command(BaseCommand):
 
         self.processor = options['processor']
         self.stdout.write('[INFO] Processor=%s' % self.processor)
+
+        self.segment_limit = options['limit']
+        self.stdout.write('[INFO] Segment limit: %s' % self.segment_limit)
 
         self.nop = options['nop']
 

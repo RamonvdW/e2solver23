@@ -5,7 +5,12 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from Pieces2x2.models import Piece2x2, TwoSide
+from Pieces2x2.models import Piece2x2
+
+
+"""
+    NOTE: not in use because too many options (stopped at 175k for corner 1)
+"""
 
 
 class Command(BaseCommand):
@@ -61,14 +66,12 @@ class Command(BaseCommand):
 
     def _needs_c1(self):
         # solve order: 1, 2, 9, 10
-        p10_s1_set = Piece2x2.objects.filter(nr1=208).values_list('side1', flat=True)
-        p10_s4_set = Piece2x2.objects.filter(nr1=208).values_list('side4', flat=True)
-        p2_exp_s3_set = [self.twoside2reverse[side] for side in p10_s1_set]
-        p9_exp_s2_set = [self.twoside2reverse[side] for side in p10_s4_set]
+        p2_exp_s3_set = Piece2x2.objects.filter(nr1=208).values_list('side1', flat=True)
+        p9_exp_s2_set = Piece2x2.objects.filter(nr1=208).values_list('side4', flat=True)
 
         for p1 in Piece2x2.objects.filter(nr1__in=(1, 2, 3, 4)):
-            p2_exp_s4 = self.twoside2reverse[p1.side2]
-            p9_exp_s1 = self.twoside2reverse[p1.side3]
+            p2_exp_s4 = p1.side2
+            p9_exp_s1 = p1.side3
             used1 = [p1.nr1, p1.nr2, p1.nr3, p1.nr4]
 
             for p2 in (Piece2x2
@@ -100,14 +103,12 @@ class Command(BaseCommand):
 
     def _needs_c2(self):
         # solve order: 8, 7, 16, 15
-        p15_s1_set = Piece2x2.objects.filter(nr2=255).values_list('side1', flat=True)
-        p15_s2_set = Piece2x2.objects.filter(nr2=255).values_list('side2', flat=True)
-        p7_exp_s3_set = [self.twoside2reverse[side] for side in p15_s1_set]
-        p16_exp_s4_set = [self.twoside2reverse[side] for side in p15_s2_set]
+        p7_exp_s3_set = Piece2x2.objects.filter(nr2=255).values_list('side1', flat=True)
+        p16_exp_s4_set = Piece2x2.objects.filter(nr2=255).values_list('side2', flat=True)
 
         for p8 in Piece2x2.objects.filter(nr2__in=(1, 2, 3, 4)):
-            p7_exp_s2 = self.twoside2reverse[p8.side4]
-            p16_exp_s1 = self.twoside2reverse[p8.side3]
+            p7_exp_s2 = p8.side4
+            p16_exp_s1 = p8.side3
             used1 = [p8.nr1, p8.nr2, p8.nr3, p8.nr4]
 
             for p7 in (Piece2x2
@@ -139,14 +140,12 @@ class Command(BaseCommand):
 
     def _needs_c3(self):
         # solve order: 64, 63, 56, 55
-        p55_s2_set = Piece2x2.objects.filter(nr4=249).values_list('side2', flat=True)
-        p55_s3_set = Piece2x2.objects.filter(nr4=249).values_list('side3', flat=True)
-        p56_exp_s4_set = [self.twoside2reverse[side] for side in p55_s2_set]
-        p63_exp_s1_set = [self.twoside2reverse[side] for side in p55_s3_set]
+        p56_exp_s4_set = Piece2x2.objects.filter(nr4=249).values_list('side2', flat=True)
+        p63_exp_s1_set = Piece2x2.objects.filter(nr4=249).values_list('side3', flat=True)
 
         for p64 in Piece2x2.objects.filter(nr4__in=(1, 2, 3, 4)):
-            p63_exp_s2 = self.twoside2reverse[p64.side4]
-            p56_exp_s3 = self.twoside2reverse[p64.side1]
+            p63_exp_s2 = p64.side4
+            p56_exp_s3 = p64.side1
             used1 = [p64.nr1, p64.nr2, p64.nr3, p64.nr4]
 
             for p63 in (Piece2x2
@@ -178,14 +177,12 @@ class Command(BaseCommand):
 
     def _needs_c4(self):
         # solve order: 57, 58, 49, 50
-        p50_s3_set = Piece2x2.objects.filter(nr3=181).values_list('side3', flat=True)
-        p50_s4_set = Piece2x2.objects.filter(nr3=181).values_list('side4', flat=True)
-        p58_exp_s1_set = [self.twoside2reverse[side] for side in p50_s3_set]
-        p49_exp_s2_set = [self.twoside2reverse[side] for side in p50_s4_set]
+        p58_exp_s1_set = Piece2x2.objects.filter(nr3=181).values_list('side3', flat=True)
+        p49_exp_s2_set = Piece2x2.objects.filter(nr3=181).values_list('side4', flat=True)
 
         for p57 in Piece2x2.objects.filter(nr3__in=(1, 2, 3, 4)):
-            p58_exp_s4 = self.twoside2reverse[p57.side2]
-            p49_exp_s3 = self.twoside2reverse[p57.side1]
+            p58_exp_s4 = p57.side2
+            p49_exp_s3 = p57.side1
             used1 = [p57.nr1, p57.nr2, p57.nr3, p57.nr4]
 
             for p58 in (Piece2x2
@@ -227,7 +224,7 @@ class Command(BaseCommand):
         elif corner == 4:
             self._needs_c4()
 
-        print('[INFO] %s bbcbb for corner %s' % (len(self.bbbcbbb), corner))
+        print('[INFO] %s bbbcbbb for corner %s' % (len(self.bbbcbbb), corner))
         print('bbbcbbb%s = [' % corner)
         for bbbcbbb in self.bbbcbbb:
             print('    %s,' % repr(bbbcbbb))

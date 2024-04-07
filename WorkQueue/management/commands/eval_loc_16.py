@@ -44,8 +44,8 @@ class Command(BaseCommand):
         self.processor = 0
         self.locs = (0, 0)                  # p0..p8
         self.side_options = ([], [])        # s0..s23
-        self.reductions = 0
 
+        self.reductions = 0
         self.do_commit = True
 
         # [p_nr] = [p_nr on side1..4 or -1 if no neighbour]

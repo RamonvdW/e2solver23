@@ -85,7 +85,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('processor', nargs=1, type=int, help='Processor number to use')
-        parser.add_argument('segment', nargs=1, type=int, help='Segment to work on (1..72, 129..193)')
+        parser.add_argument('segment', nargs=1, type=int, help='Segment to work on (1..72, 102..164)')
         parser.add_argument('--dryrun', action='store_true')
         parser.add_argument('order', nargs='*', type=int, help='Solving order (1..64), max %s' % len(self.locs))
 
@@ -425,10 +425,10 @@ class Command(BaseCommand):
     def _segment_to_loc(self, segment):
         """ reverse of calc_segment """
 
-        if segment > 128:
+        if segment > 100:
             # assume side = 2
-            loc2 = segment - 129
-            loc4 = segment - 128
+            loc2 = segment - 101
+            loc4 = segment - 100
 
             if loc2 in self.locs and loc4 in self.locs:
                 # we can choose
@@ -540,7 +540,7 @@ class Command(BaseCommand):
         # for
 
         if len(self.requested_order) == 0:
-            if self.segment in (130, 131):
+            if self.segment in (102, 103):
                 self.requested_order = [2, 10, 1, 9,
                                         15, 16, 8, 7,
                                         55, 63, 64, 56,
@@ -550,7 +550,7 @@ class Command(BaseCommand):
                                         15, 16, 8, 7,
                                         55, 63, 64, 56,
                                         50, 58, 57, 49]
-            elif self.segment in (135, 136):
+            elif self.segment in (107, 108):
                 self.requested_order = [7, 15, 8, 16,
                                         10, 9, 1, 2,
                                         55, 63, 64, 56,
@@ -565,7 +565,7 @@ class Command(BaseCommand):
                                         2, 10, 1, 9,
                                         15, 16, 8, 7,
                                         55, 63, 64, 56]
-            elif self.segment in (186, 187):
+            elif self.segment in (158, 159):
                 self.requested_order = [58, 50, 57, 49,
                                         2, 10, 1, 9,
                                         15, 16, 8, 7,
@@ -575,7 +575,7 @@ class Command(BaseCommand):
                                         58, 50, 57, 49,
                                         2, 10, 1, 9,
                                         15, 16, 8, 7]
-            elif self.segment in (191, 192):
+            elif self.segment in (163, 164):
                 self.requested_order = [63, 55, 64, 56,
                                         58, 50, 57, 49,
                                         2, 10, 1, 9,
