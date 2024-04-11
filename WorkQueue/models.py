@@ -40,6 +40,9 @@ class Work(models.Model):
     # which seed (for Ring1)
     seed = models.PositiveSmallIntegerField(default=0)
 
+    # propagation control (nop = no propagation)
+    nop = models.BooleanField(default=False)
+
     # when was this job requested?
     when_added = models.DateTimeField(auto_now_add=True)
 

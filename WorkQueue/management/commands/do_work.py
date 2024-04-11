@@ -31,6 +31,8 @@ class Command(BaseCommand):
 
     def _run_command(self, *args):
 
+        args = [arg for arg in args if arg is not None]
+
         self.stdout.write('[INFO] Running command %s' % " ".join(args))
 
         f1 = io.StringIO()
@@ -56,31 +58,33 @@ class Command(BaseCommand):
 
         bad = True
         do_later = False
+        nop = None
+        if work.nop:
+            nop = '--nop'
 
         if work.job_type == 'eval_loc_1':
-            bad = self._run_command('eval_loc_1', str(work.processor), str(work.location))
+            bad = self._run_command('eval_loc_1', str(work.processor), str(work.location), nop)
 
         elif work.job_type == 'eval_loc_4':
-            bad = self._run_command('eval_loc_4', str(work.processor), str(work.location))
+            bad = self._run_command('eval_loc_4', str(work.processor), str(work.location), nop)
 
         elif work.job_type == 'eval_loc_9':
+            limit_arg = None
             if work.limit:
                 limit_arg = '--limit=%s' % work.limit
-                bad = self._run_command('eval_loc_9', str(work.processor), str(work.location), limit_arg)
-            else:
-                bad = self._run_command('eval_loc_9', str(work.processor), str(work.location))
+            bad = self._run_command('eval_loc_9', str(work.processor), str(work.location), limit_arg, nop)
 
         elif work.job_type == 'eval_loc_16':
-            bad = self._run_command('eval_loc_16', str(work.processor), str(work.location))
+            bad = self._run_command('eval_loc_16', str(work.processor), str(work.location), nop)
 
         elif work.job_type == 'eval_line1':
-            bad = self._run_command('eval_line1', str(work.processor), str(work.location))
+            bad = self._run_command('eval_line1', str(work.processor), str(work.location), nop)
 
         elif work.job_type == 'eval_line2':
-            bad = self._run_command('eval_line2', str(work.processor), str(work.location))
+            bad = self._run_command('eval_line2', str(work.processor), str(work.location), nop)
 
         elif work.job_type == 'eval_line3':
-            bad = self._run_command('eval_line3', str(work.processor), str(work.location))
+            bad = self._run_command('eval_line3', str(work.processor), str(work.location), nop)
 
         elif work.job_type == 'eval_claims':
             bad = self._run_command('eval_claims', str(work.processor))

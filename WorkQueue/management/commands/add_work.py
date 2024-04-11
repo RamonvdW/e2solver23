@@ -27,6 +27,7 @@ class Command(BaseCommand):
         parser.add_argument('prio_seed', type=int, help='Priority (lower numbers are handled first) or seed')
         parser.add_argument('location', type=int, help='Location (1..64) / side (1..4)')
         parser.add_argument('--limit', default=0, type=int, help='Optional limit (1..289)')
+        parser.add_argument('--nop', action='store_true', help='Do not propagate')
 
     def handle(self, *args, **options):
         processor = options['processor']
@@ -34,6 +35,7 @@ class Command(BaseCommand):
         prio_seed = options['prio_seed']
         location = options['location']
         limit = options['limit']
+        nop = options['nop']
 
         if job_type not in self.supported_job_types:
             self.stderr.write('[ERROR] Unsupported job_type %s' % repr(job_type))
@@ -53,7 +55,9 @@ class Command(BaseCommand):
             for loc in range(1, 64+1):
                 loc_str = 'loc%s' % loc
                 if getattr(used, loc_str) == 0:
-                    bulk.append(Work(processor=processor, job_type=job_type, priority=prio_seed, location=loc))
+                    work = Work(processor=processor, job_type=job_type, priority=prio_seed,
+                                location=loc, nop=nop)
+                    bulk.append(work)
             # for
             Work.objects.bulk_create(bulk)
             self.stdout.write('[INFO] Added %s jobs' % len(bulk))
@@ -64,21 +68,19 @@ class Command(BaseCommand):
                 '[INFO] Adding work: %s %s %s {1 2 3 4 5 6 14 22 30 38 46 9 17 25 33 41 42 43 44 45}' % (
                     processor, job_type, prio_seed))
 
-            try:
-                used = ProcessorUsedPieces.objects.get(processor=processor)
-            except ProcessorUsedPieces.DoesNotExist:
-                used = ProcessorUsedPieces()
-
             bulk = []
             for loc in (1, 2, 3, 4, 5, 6, 14, 22, 30, 38, 46, 9, 17, 25, 33, 41, 42, 43, 44, 45):
-                bulk.append(Work(processor=processor, job_type=job_type, priority=prio_seed, location=loc))
+                work = Work(processor=processor, job_type=job_type, priority=prio_seed,
+                            location=loc, nop=nop)
+                bulk.append(work)
             # for
             Work.objects.bulk_create(bulk)
             self.stdout.write('[INFO] Added %s jobs' % len(bulk))
 
         elif job_type == 'make_ring2':
             self.stdout.write('[INFO] Adding work: %s %s %s' % (processor, job_type, prio_seed))
-            Work(processor=processor, job_type=job_type, priority=prio_seed).save()
+            work = Work(processor=processor, job_type=job_type, priority=prio_seed, nop=nop)
+            work.save()
 
         else:
             limit_str = ''
@@ -86,7 +88,9 @@ class Command(BaseCommand):
                 limit_str = ' --limit %s' % limit
             self.stdout.write(
                 '[INFO] Adding work: %s %s %s %s%s' % (processor, job_type, prio_seed, location, limit_str))
-            Work(processor=processor, job_type=job_type, priority=prio_seed, location=location, limit=limit).save()
+            work = Work(processor=processor, job_type=job_type, priority=prio_seed,
+                        location=location, limit=limit, nop=nop)
+            work.save()
 
 
 # end of file
