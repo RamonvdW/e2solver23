@@ -62,7 +62,24 @@ class Command(BaseCommand):
         if work.nop:
             nop = '--nop'
 
-        if work.job_type == 'eval_loc_1':
+        if work.job_type == 'delayed_scan1':
+            try:
+                used = ProcessorUsedPieces.objects.get(processor=work.processor)
+            except ProcessorUsedPieces.DoesNotExist:
+                used = ProcessorUsedPieces()
+
+            bulk = []
+            for loc in range(1, 64+1):
+                loc_str = 'loc%s' % loc
+                if getattr(used, loc_str) == 0:
+                    work = Work(processor=work.processor, job_type='eval_loc_1', priority=1, location=loc)
+                    bulk.append(work)
+            # for
+            Work.objects.bulk_create(bulk)
+            self.stdout.write('[INFO] Added %s jobs' % len(bulk))
+            bad = False
+
+        elif work.job_type == 'eval_loc_1':
             bad = self._run_command('eval_loc_1', str(work.processor), str(work.location), nop)
 
         elif work.job_type == 'eval_loc_4':

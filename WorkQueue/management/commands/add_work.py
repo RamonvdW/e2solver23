@@ -15,7 +15,7 @@ class Command(BaseCommand):
     supported_job_types = ('eval_loc_1', 'eval_loc_4', 'eval_loc_9', 'eval_loc_16',
                            'eval_line1', 'eval_line2', 'eval_line3',
                            'eval_claims',
-                           'scan1', 'scan9',
+                           'scan1', 'scan9', 'delayed_scan1',
                            'make_ring2')
 
     def __init__(self, **kwargs):
