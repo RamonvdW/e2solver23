@@ -124,8 +124,8 @@ class Command(BaseCommand):
                     .filter(done=False,
                             doing=False)
                     .exclude(start_after__gt=now)
-                    .order_by('priority',       # lowest first = highest priority
-                              'when_added'))    # oldest first
+                    .order_by('when_added',     # oldest first
+                              'priority'))      # lowest first = highest priority
 
             if only_eval_loc_1:
                 # avoid concurrent claiming by serializing eval_loc_1 on one worker
