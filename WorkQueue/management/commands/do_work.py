@@ -141,7 +141,7 @@ class Command(BaseCommand):
                     .filter(done=False,
                             doing=False)
                     .exclude(start_after__gt=now)
-                    .order_by('when_added',     # oldest first
+                    .order_by('start_after',    # oldest first
                               'priority'))      # lowest first = highest priority
 
             if only_eval_loc_1:
@@ -160,16 +160,17 @@ class Command(BaseCommand):
                         work.delete()
                         continue    # next job
 
-                if work.job_type == 'make_ring2':
-                    if Work.objects.filter(processor=work.processor, done=False).count() > 1:
-                        self.stdout.write('[WARNING] Not starting make_ring2 due to other work')
-                        continue    # next job
+                # ensure there is no work with higher prio pending
+                if Work.objects.filter(processor=work.processor, done=False, priority__lt=work.priority).count() > 0:
+                    self.stdout.write('[INFO] Delaying work pk=%s with 3 minutes' % work.pk)
+                    work.start_after = timezone.now() + datetime.timedelta(minutes=3)
+                    work.save(update_fields=['start_after'])
+                    continue        # next job
 
-                if work:
-                    work.doing = True
-                    work.save(update_fields=['doing'])
-                    do_work = work
-                    break   # from the for
+                work.doing = True
+                work.save(update_fields=['doing'])
+                do_work = work
+                break   # from the for
             # for
         # atomic
 
