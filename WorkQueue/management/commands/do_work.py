@@ -72,8 +72,8 @@ class Command(BaseCommand):
             for loc in range(1, 64+1):
                 loc_str = 'loc%s' % loc
                 if getattr(used, loc_str) == 0:
-                    work = Work(processor=work.processor, job_type='eval_loc_1', priority=1, location=loc, nop=work.nop)
-                    bulk.append(work)
+                    new_work = Work(processor=work.processor, job_type='eval_loc_1', priority=1, location=loc, nop=work.nop)
+                    bulk.append(new_work)
             # for
             Work.objects.bulk_create(bulk)
             self.stdout.write('[INFO] Added %s jobs' % len(bulk))
