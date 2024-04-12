@@ -134,15 +134,29 @@ class Command(BaseCommand):
         now = timezone.now()
         do_work = None
 
+        qset = (Work
+                .objects
+                .filter(done=False,
+                        doing=False)
+                .exclude(start_after__gt=now)
+                .order_by('start_after'))  # oldest first
+
+        prios = qset.distinct('priority').order_by('priority').values_list('priority', flat=True)
+        if len(prios) == 0:
+            return False        # did no work
+
+        lowest_prio = prios[0]
+        self.stdout.write('[INFO] Lowest priority = %s' % lowest_prio)
+
         with transaction.atomic():
             qset = (Work
                     .objects
                     .select_for_update()
                     .filter(done=False,
-                            doing=False)
+                            doing=False,
+                            priority=lowest_prio)
                     .exclude(start_after__gt=now)
-                    .order_by('start_after',    # oldest first
-                              'priority'))      # lowest first = highest priority
+                    .order_by('start_after'))  # oldest first
 
             if only_eval_loc_1:
                 # avoid concurrent claiming by serializing eval_loc_1 on one worker
@@ -160,13 +174,6 @@ class Command(BaseCommand):
                         work.delete()
                         continue    # next job
 
-                # ensure there is no work with higher prio pending
-                if Work.objects.filter(processor=work.processor, done=False, priority__lt=work.priority).count() > 0:
-                    self.stdout.write('[INFO] Delaying work pk=%s with 3 minutes' % work.pk)
-                    work.start_after = timezone.now() + datetime.timedelta(minutes=3)
-                    work.save(update_fields=['start_after'])
-                    continue        # next job
-
                 work.doing = True
                 work.save(update_fields=['doing'])
                 do_work = work
@@ -176,12 +183,9 @@ class Command(BaseCommand):
 
         if do_work:
             self._do_work(work)
-        else:
-            self.stdout.write('[INFO] Waiting for more work')
-            if only_eval_loc_1:
-                time.sleep(2)
-            else:
-                time.sleep(10)
+            return True
+
+        return False        # did no work
 
     def handle(self, *args, **options):
         worker_nr = options['worker_nr']
@@ -198,8 +202,16 @@ class Command(BaseCommand):
         no_eval_loc_4 = worker_nr > 10
 
         while worker_nr:
-            self._find_work(only_eval_loc_1, no_eval_loc_4)
-            time.sleep(0.1)
+            did_work = self._find_work(only_eval_loc_1, no_eval_loc_4)
+
+            if not did_work:
+                self.stdout.write('[INFO] Waiting for more work')
+                if only_eval_loc_1:
+                    time.sleep(2)
+                else:
+                    time.sleep(10)
+            else:
+                time.sleep(0.1)
         # while
 
 # end of file
