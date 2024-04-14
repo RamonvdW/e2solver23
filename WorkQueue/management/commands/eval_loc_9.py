@@ -78,6 +78,7 @@ class Command(BaseCommand):
         self.p_nrs_order = []
         self.prev_tick = 0
         self.progress = None
+        self.time_limit = 0.0
         self.nop = False
 
     def add_arguments(self, parser):
@@ -381,12 +382,16 @@ class Command(BaseCommand):
 
     def _find_recurse(self):
         tick = time.monotonic()
+        if tick > self.time_limit:
+            self.stdout.write('[INFO] Time limit!')
+            return True         # assume solution is possible
+
         if tick - self.prev_tick > 30:
             self.prev_tick = tick
             msg = '(%s) %s' % (len(self.board_order), repr([self.locs[idx] for idx in self.board_order]))
             # print(msg)
             if check_dead_end(self.processor):
-                return True     # True causes stop and avoid reduction
+                return True     # True causes stop and avoids reduction
 
             self.progress.solve_order = msg
             self.progress.updated = timezone.now()
@@ -486,6 +491,9 @@ class Command(BaseCommand):
                 options_side3 = [side]
             else:   # side_n == 4:
                 options_side4 = [side]
+
+            # set a time limit before assuming a solution is still possible
+            self.time_limit = time.monotonic() + 3 * 60     # 3 minutes timeout
 
             found = False
             for p in self._iter(loc, options_side1, options_side2, options_side3, options_side4):
