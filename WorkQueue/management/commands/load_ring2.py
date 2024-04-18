@@ -8,12 +8,12 @@ from django.core.management.base import BaseCommand
 from Pieces2x2.models import TwoSide, TwoSideOptions, Piece2x2
 from Pieces2x2.helpers import calc_segment
 from WorkQueue.models import ProcessorUsedPieces
-from Ring1.models import Ring1
+from Ring2.models import Ring2
 
 
 class Command(BaseCommand):
 
-    help = "Load Ring1 into a progress"
+    help = "Load Ring2 into a progress"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -25,7 +25,7 @@ class Command(BaseCommand):
         self.bulk_reduce = dict()       # [segment] = [two_side, ..]
 
     def add_arguments(self, parser):
-        parser.add_argument('nr', type=int, help='Ring1 to load')
+        parser.add_argument('nr', type=int, help='Ring2 to load')
         parser.add_argument('processor', type=int, help='Into which processor to load')
 
     def _get_loc_side_options(self, loc, side_nr):
@@ -52,12 +52,12 @@ class Command(BaseCommand):
 
         nr = options['nr']
         self.processor = options['processor']
-        self.stdout.write('[INFO] Loading ring1 %s into processor %s' % (nr, self.processor))
+        self.stdout.write('[INFO] Loading ring2 %s into processor %s' % (nr, self.processor))
 
         try:
-            ring1 = Ring1.objects.get(nr=nr)
-        except Ring1.DoesNotExist:
-            self.stderr.write('[ERROR] Ring1 not found')
+            ring2 = Ring2.objects.get(nr=nr)
+        except Ring2.DoesNotExist:
+            self.stderr.write('[ERROR] Ring2 not found')
             return
 
         try:
@@ -66,20 +66,18 @@ class Command(BaseCommand):
             self.stderr.write('[ERROR] Processor not found')
             return
 
-        locs = (1, 2, 3, 4, 5, 6, 7, 8,
-                9, 10, 11, 14, 15, 16,
-                17, 18, 23, 24,
-                25, 32,
-                33, 40,
-                41, 42, 47, 48,
-                49, 50, 51, 54, 55, 56,
-                57, 58, 59, 60, 61, 62, 63, 64)
+        locs = (10, 11, 12, 13, 14, 15,
+                18, 23,
+                26, 31,
+                34, 39,
+                42, 47,
+                50, 51, 52, 53, 54, 55)
 
         for loc in locs:
 
-            field_str = 'nr%s' % loc
-            p2x2_nr = getattr(ring1, field_str)
-            # print('loc %s ring1 %s = %s' % (loc, field_str, p2x2_nr))
+            field_str = 'loc%s' % loc
+            p2x2_nr = getattr(ring2, field_str)
+            # print('loc %s ring2 %s = %s' % (loc, field_str, p2x2_nr))
             if p2x2_nr > 0:
 
                 field_str = 'loc%s' % loc
@@ -109,7 +107,7 @@ class Command(BaseCommand):
 
         # for
 
-        processor.from_ring1 = ring1.nr
+        processor.from_ring2 = ring2.nr
         processor.save()
 
         for segment, two_sides in self.bulk_reduce.items():

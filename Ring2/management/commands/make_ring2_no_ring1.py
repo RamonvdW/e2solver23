@@ -9,8 +9,7 @@ from django.core.management.base import BaseCommand
 from BasePieces.hints import ALL_HINT_NRS
 from BasePieces.models import BasePiece
 from Pieces2x2.helpers import calc_segment
-from Pieces2x2.models import Piece2x2, TwoSideOptions, EvalProgress
-from Ring1.models import Ring1
+from Pieces2x2.models import Piece2x2, EvalProgress, TwoSide, TwoSideOptions
 from Ring2.models import Ring2
 from WorkQueue.models import ProcessorUsedPieces
 from WorkQueue.operations import used_note_add
@@ -19,10 +18,12 @@ import time
 
 class Command(BaseCommand):
 
-    help = "Generate a Ring2, starting with a Ring1"
+    help = "Generate a Ring2 without a Ring1"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+        self.twoside_border = TwoSide.objects.get(two_sides='XX').nr
 
         self.nr2base = dict()
         for p1x1 in BasePiece.objects.all():
@@ -34,7 +35,7 @@ class Command(BaseCommand):
         self.progress = None
 
         # 1..60 = borders + corners
-        self.unused = list(range(1, 256+1))
+        self.unused = list(range(61, 256+1))
         for nr in ALL_HINT_NRS:
             self.unused.remove(nr)
         # for
@@ -46,6 +47,43 @@ class Command(BaseCommand):
         # parser.add_argument('ring1_nr', type=int, help='Ring1 to load')
         parser.add_argument('processor', type=int, help='Processor to use')
         parser.add_argument('--clean', action='store_true')
+
+    def _load_options(self, processor_nr):
+
+        # get the segment limitations for some key locations
+        qset = TwoSideOptions.objects.filter(processor=processor_nr)
+
+        seg = calc_segment(10, 1)
+        options = list(qset.filter(segment=seg).values_list('two_side', flat=True))
+        self.exp_loc10_sides1 = options
+
+        seg = calc_segment(15, 1)
+        options = list(qset.filter(segment=seg).values_list('two_side', flat=True))
+        self.exp_loc15_sides1 = options
+
+        seg = calc_segment(15, 2)
+        options = list(qset.filter(segment=seg).values_list('two_side', flat=True))
+        self.exp_loc15_sides2 = options
+
+        seg = calc_segment(55, 2)
+        options = list(qset.filter(segment=seg).values_list('two_side', flat=True))
+        self.exp_loc55_sides2 = options
+
+        seg = calc_segment(55, 3)
+        options = list(qset.filter(segment=seg).values_list('two_side', flat=True))
+        self.exp_loc55_sides3 = options
+
+        seg = calc_segment(50, 3)
+        options = list(qset.filter(segment=seg).values_list('two_side', flat=True))
+        self.exp_loc50_sides3 = options
+
+        seg = calc_segment(50, 4)
+        options = list(qset.filter(segment=seg).values_list('two_side', flat=True))
+        self.exp_loc50_sides4 = options
+
+        seg = calc_segment(10, 4)
+        options = list(qset.filter(segment=seg).values_list('two_side', flat=True))
+        self.exp_loc10_sides4 = options
 
     def _find_best(self):
         if self.ring2.loc26 > 0:
@@ -118,247 +156,22 @@ class Command(BaseCommand):
         # for
         self.unused.extend(p_nrs)
 
-    def _load_ring1(self, nr, processor):
-        self.stdout.write('[INFO] Loading Ring1 %s' % nr)
-
-        try:
-            ring1 = Ring1.objects.get(nr=nr)
-        except Ring1.DoesNotExist:
-            self.stdout.write('[ERROR] Could not locate Ring1')
-            return False
-
-        self.ring2.based_on_ring1 = ring1.nr
-
-        p2x2_nrs = list()
-        for loc in (1, 2, 3, 4, 5, 6, 7, 8,
-                    9, 16,
-                    17, 24,
-                    25, 32,
-                    33, 40,
-                    41, 48,
-                    49, 56,
-                    57, 58, 59, 60, 61, 62, 63, 64):
-            nr_str = 'nr%s' % loc
-            p2x2_nr = getattr(ring1, nr_str)
-            p2x2_nrs.append(p2x2_nr)
-
-            loc_str = 'loc%s' % loc
-            setattr(self.ring2, loc_str, p2x2_nr)
-        # for
-
-        # load all p2x2's
-        nr2p2x2 = dict()
-        for p2x2 in Piece2x2.objects.filter(nr__in=p2x2_nrs):
-            # set the p2x2 pieces as used
-            nr2p2x2[p2x2.nr] = p2x2
-            nrs = [p2x2.nr1, p2x2.nr2, p2x2.nr3, p2x2.nr4]
-            self._make_used(nrs)
-        # for
-
-        # side 1
-        p2x2 = nr2p2x2[self.ring2.loc2]
-        self.exp_loc10_s1 = p2x2.side3
-
-        p2x2 = nr2p2x2[self.ring2.loc3]
-        self.exp_loc11_s1 = p2x2.side3
-
-        p2x2 = nr2p2x2[self.ring2.loc4]
-        self.exp_loc12_s1 = p2x2.side3
-
-        p2x2 = nr2p2x2[self.ring2.loc5]
-        self.exp_loc13_s1 = p2x2.side3
-
-        p2x2 = nr2p2x2[self.ring2.loc6]
-        self.exp_loc14_s1 = p2x2.side3
-
-        p2x2 = nr2p2x2[self.ring2.loc7]
-        self.exp_loc15_s1 = p2x2.side3
-
-        # side 4
-        p2x2 = nr2p2x2[self.ring2.loc9]
-        self.exp_loc10_s4 = p2x2.side2
-
-        p2x2 = nr2p2x2[self.ring2.loc17]
-        self.exp_loc18_s4 = p2x2.side2
-
-        p2x2 = nr2p2x2[self.ring2.loc25]
-        self.exp_loc26_s4 = p2x2.side2
-
-        p2x2 = nr2p2x2[self.ring2.loc33]
-        self.exp_loc34_s4 = p2x2.side2
-
-        p2x2 = nr2p2x2[self.ring2.loc41]
-        self.exp_loc42_s4 = p2x2.side2
-
-        p2x2 = nr2p2x2[self.ring2.loc49]
-        self.exp_loc50_s4 = p2x2.side2
-
-        # side 2
-        p2x2 = nr2p2x2[self.ring2.loc16]
-        self.exp_loc15_s2 = p2x2.side4
-
-        p2x2 = nr2p2x2[self.ring2.loc24]
-        self.exp_loc23_s2 = p2x2.side4
-
-        p2x2 = nr2p2x2[self.ring2.loc32]
-        self.exp_loc31_s2 = p2x2.side4
-
-        p2x2 = nr2p2x2[self.ring2.loc40]
-        self.exp_loc39_s2 = p2x2.side4
-
-        p2x2 = nr2p2x2[self.ring2.loc48]
-        self.exp_loc47_s2 = p2x2.side4
-
-        p2x2 = nr2p2x2[self.ring2.loc56]
-        self.exp_loc55_s2 = p2x2.side4
-
-        # side 3
-        p2x2 = nr2p2x2[self.ring2.loc58]
-        self.exp_loc50_s3 = p2x2.side1
-
-        p2x2 = nr2p2x2[self.ring2.loc59]
-        self.exp_loc51_s3 = p2x2.side1
-
-        p2x2 = nr2p2x2[self.ring2.loc60]
-        self.exp_loc52_s3 = p2x2.side1
-
-        p2x2 = nr2p2x2[self.ring2.loc61]
-        self.exp_loc53_s3 = p2x2.side1
-
-        p2x2 = nr2p2x2[self.ring2.loc62]
-        self.exp_loc54_s3 = p2x2.side1
-
-        p2x2 = nr2p2x2[self.ring2.loc63]
-        self.exp_loc55_s3 = p2x2.side1
-
-        # get the segment limitations for the inner sides and free-start location
-        qset = TwoSideOptions.objects.filter(processor=processor)
-
-        seg = calc_segment(50, 1)
-        options = list(qset.filter(segment=seg).values_list('two_side', flat=True))
-        self.exp_loc50_sides1 = options
-
-        seg = calc_segment(51, 1)
-        options = list(qset.filter(segment=seg).values_list('two_side', flat=True))
-        self.exp_loc51_sides1 = options
-
-        seg = calc_segment(52, 1)
-        options = list(qset.filter(segment=seg).values_list('two_side', flat=True))
-        self.exp_loc52_sides1 = options
-
-        seg = calc_segment(53, 1)
-        options = list(qset.filter(segment=seg).values_list('two_side', flat=True))
-        self.exp_loc53_sides1 = options
-
-        seg = calc_segment(54, 1)
-        options = list(qset.filter(segment=seg).values_list('two_side', flat=True))
-        self.exp_loc54_sides1 = options
-
-        seg = calc_segment(55, 1)
-        options = list(qset.filter(segment=seg).values_list('two_side', flat=True))
-        self.exp_loc55_sides1 = options
-
-        seg = calc_segment(10, 2)
-        options = list(qset.filter(segment=seg).values_list('two_side', flat=True))
-        self.exp_loc10_sides2 = options
-
-        seg = calc_segment(18, 2)
-        options = list(qset.filter(segment=seg).values_list('two_side', flat=True))
-        self.exp_loc18_sides2 = options
-
-        seg = calc_segment(26, 2)
-        options = list(qset.filter(segment=seg).values_list('two_side', flat=True))
-        self.exp_loc26_sides2 = options
-
-        seg = calc_segment(34, 2)
-        options = list(qset.filter(segment=seg).values_list('two_side', flat=True))
-        self.exp_loc34_sides2 = options
-
-        seg = calc_segment(42, 2)
-        options = list(qset.filter(segment=seg).values_list('two_side', flat=True))
-        self.exp_loc42_sides2 = options
-
-        seg = calc_segment(50, 2)
-        options = list(qset.filter(segment=seg).values_list('two_side', flat=True))
-        self.exp_loc50_sides2 = options
-
-        seg = calc_segment(10, 3)
-        options = list(qset.filter(segment=seg).values_list('two_side', flat=True))
-        self.exp_loc10_sides3 = options
-
-        seg = calc_segment(11, 3)
-        options = list(qset.filter(segment=seg).values_list('two_side', flat=True))
-        self.exp_loc11_sides3 = options
-
-        seg = calc_segment(12, 3)
-        options = list(qset.filter(segment=seg).values_list('two_side', flat=True))
-        self.exp_loc12_sides3 = options
-
-        seg = calc_segment(13, 3)
-        options = list(qset.filter(segment=seg).values_list('two_side', flat=True))
-        self.exp_loc13_sides3 = options
-
-        seg = calc_segment(14, 3)
-        options = list(qset.filter(segment=seg).values_list('two_side', flat=True))
-        self.exp_loc14_sides3 = options
-
-        seg = calc_segment(15, 3)
-        options = list(qset.filter(segment=seg).values_list('two_side', flat=True))
-        self.exp_loc15_sides3 = options
-
-        seg = calc_segment(15, 4)
-        options = list(qset.filter(segment=seg).values_list('two_side', flat=True))
-        self.exp_loc15_sides4 = options
-
-        seg = calc_segment(23, 4)
-        options = list(qset.filter(segment=seg).values_list('two_side', flat=True))
-        self.exp_loc23_sides4 = options
-
-        seg = calc_segment(31, 4)
-        options = list(qset.filter(segment=seg).values_list('two_side', flat=True))
-        self.exp_loc31_sides4 = options
-
-        seg = calc_segment(39, 4)
-        options = list(qset.filter(segment=seg).values_list('two_side', flat=True))
-        self.exp_loc39_sides4 = options
-
-        seg = calc_segment(47, 4)
-        options = list(qset.filter(segment=seg).values_list('two_side', flat=True))
-        self.exp_loc47_sides4 = options
-
-        seg = calc_segment(55, 4)
-        options = list(qset.filter(segment=seg).values_list('two_side', flat=True))
-        self.exp_loc55_sides4 = options
-
-        # TODO: add loc 19, 22, 42, 46
-
-        return True
-
     def _save_ring2(self):
         self.ring2.pk = None
         self.ring2.save()
         self.ring2_count += 1
         self.stdout.write('[INFO] Saved Ring2 with pk=%s' % self.ring2.pk)
 
-    def _check_loc46(self):
+    def _check_loc2(self):
         p = Piece2x2.objects.filter(has_hint=False,
-                                    nr1__in=self.unused, nr2__in=self.unused,
                                     nr3__in=self.unused, nr4__in=self.unused,
-                                    side2=self.exp_loc46_s2, side3=self.exp_loc46_s3).first()
+                                    side1=self.twoside_border, side3=self.exp_loc2_s3).first()
         return p is not None
 
-    def _check_loc43(self):
+    def _check_loc9(self):
         p = Piece2x2.objects.filter(has_hint=False,
-                                    nr1__in=self.unused, nr2__in=self.unused,
-                                    nr3__in=self.unused, nr4__in=self.unused,
-                                    side3=self.exp_loc43_s3, side4=self.exp_loc43_s4).first()
-        return p is not None
-
-    def _check_loc22(self):
-        p = Piece2x2.objects.filter(has_hint=False,
-                                    nr1__in=self.unused, nr2__in=self.unused,
-                                    nr3__in=self.unused, nr4__in=self.unused,
-                                    side1=self.exp_loc22_s1, side2=self.exp_loc22_s2).first()
+                                    nr2__in=self.unused, nr4__in=self.unused,
+                                    side2=self.exp_loc9_s2, side4=self.twoside_border).first()
         return p is not None
 
     def _check_loc19(self):
@@ -368,12 +181,32 @@ class Command(BaseCommand):
                                     side1=self.exp_loc19_s1, side4=self.exp_loc19_s4).first()
         return p is not None
 
+    def _check_loc22(self):
+        p = Piece2x2.objects.filter(has_hint=False,
+                                    nr1__in=self.unused, nr2__in=self.unused,
+                                    nr3__in=self.unused, nr4__in=self.unused,
+                                    side1=self.exp_loc22_s1, side2=self.exp_loc22_s2).first()
+        return p is not None
+
+    def _check_loc43(self):
+        p = Piece2x2.objects.filter(has_hint=False,
+                                    nr1__in=self.unused, nr2__in=self.unused,
+                                    nr3__in=self.unused, nr4__in=self.unused,
+                                    side3=self.exp_loc43_s3, side4=self.exp_loc43_s4).first()
+        return p is not None
+
+    def _check_loc46(self):
+        p = Piece2x2.objects.filter(has_hint=False,
+                                    nr1__in=self.unused, nr2__in=self.unused,
+                                    nr3__in=self.unused, nr4__in=self.unused,
+                                    side2=self.exp_loc46_s2, side3=self.exp_loc46_s3).first()
+        return p is not None
+
     def _find_loc26(self):
         qset = Piece2x2.objects.filter(has_hint=False,
                                        nr1__in=self.unused, nr2__in=self.unused,
                                        nr3__in=self.unused, nr4__in=self.unused,
-                                       side3=self.exp_loc26_s3, side4=self.exp_loc26_s4, side1=self.exp_loc26_s1,
-                                       side2__in=self.exp_loc26_sides2)
+                                       side3=self.exp_loc26_s3, side1=self.exp_loc26_s1)
         for p in qset:
             self.ring2.loc26 = p.nr
             p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
@@ -387,8 +220,7 @@ class Command(BaseCommand):
         qset = Piece2x2.objects.filter(has_hint=False,
                                        nr1__in=self.unused, nr2__in=self.unused,
                                        nr3__in=self.unused, nr4__in=self.unused,
-                                       side3=self.exp_loc34_s3, side4=self.exp_loc34_s4,
-                                       side2__in=self.exp_loc34_sides2)
+                                       side3=self.exp_loc34_s3)
         for p in qset:
             self.ring2.loc34 = p.nr
             self.exp_loc26_s3 = p.side1
@@ -402,8 +234,7 @@ class Command(BaseCommand):
         qset = Piece2x2.objects.filter(has_hint=False,
                                        nr1__in=self.unused, nr2__in=self.unused,
                                        nr3__in=self.unused, nr4__in=self.unused,
-                                       side2=self.exp_loc53_s2, side3=self.exp_loc53_s3, side4=self.exp_loc53_s4,
-                                       side1__in=self.exp_loc53_sides1)
+                                       side2=self.exp_loc53_s2, side4=self.exp_loc53_s4)
         for p in qset:
             self.ring2.loc53 = p.nr
             p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
@@ -417,8 +248,7 @@ class Command(BaseCommand):
         qset = Piece2x2.objects.filter(has_hint=False,
                                        nr1__in=self.unused, nr2__in=self.unused,
                                        nr3__in=self.unused, nr4__in=self.unused,
-                                       side3=self.exp_loc52_s3, side4=self.exp_loc52_s4,
-                                       side1__in=self.exp_loc52_sides1)
+                                       side4=self.exp_loc52_s4)
         for p in qset:
             self.ring2.loc52 = p.nr
             self.exp_loc53_s4 = p.side2
@@ -432,8 +262,7 @@ class Command(BaseCommand):
         qset = Piece2x2.objects.filter(has_hint=False,
                                        nr1__in=self.unused, nr2__in=self.unused,
                                        nr3__in=self.unused, nr4__in=self.unused,
-                                       side3=self.exp_loc42_s3, side4=self.exp_loc42_s4,
-                                       side2__in=self.exp_loc42_sides2)
+                                       side3=self.exp_loc42_s3)
         for p in qset:
             self.ring2.loc42 = p.nr
             self.exp_loc34_s3 = p.side1
@@ -449,8 +278,7 @@ class Command(BaseCommand):
         qset = Piece2x2.objects.filter(has_hint=False,
                                        nr1__in=self.unused, nr2__in=self.unused,
                                        nr3__in=self.unused, nr4__in=self.unused,
-                                       side3=self.exp_loc51_s3, side4=self.exp_loc51_s4,
-                                       side1__in=self.exp_loc51_sides1)
+                                       side4=self.exp_loc51_s4)
         for p in qset:
             self.ring2.loc51 = p.nr
             self.exp_loc43_s3 = p.side1
@@ -465,8 +293,7 @@ class Command(BaseCommand):
         qset = Piece2x2.objects.filter(has_hint=True,
                                        nr3=181,
                                        nr1__in=self.unused, nr2__in=self.unused, nr4__in=self.unused,
-                                       side3=self.exp_loc50_s3, side4=self.exp_loc50_s4,
-                                       side1__in=self.exp_loc50_sides1, side2__in=self.exp_loc50_sides2)
+                                       side3__in=self.exp_loc50_sides3, side4__in=self.exp_loc50_sides4)
         for p in qset:
             self.ring2.loc50 = p.nr
             self.exp_loc42_s3 = p.side1
@@ -482,8 +309,7 @@ class Command(BaseCommand):
         qset = Piece2x2.objects.filter(has_hint=False,
                                        nr1__in=self.unused, nr2__in=self.unused,
                                        nr3__in=self.unused, nr4__in=self.unused,
-                                       side1=self.exp_loc31_s1, side2=self.exp_loc31_s2, side3=self.exp_loc31_s3,
-                                       side4__in=self.exp_loc31_sides4)
+                                       side1=self.exp_loc31_s1, side3=self.exp_loc31_s3)
         for p in qset:
             self.ring2.loc31 = p.nr
             p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
@@ -498,8 +324,7 @@ class Command(BaseCommand):
         qset = Piece2x2.objects.filter(has_hint=False,
                                        nr1__in=self.unused, nr2__in=self.unused,
                                        nr3__in=self.unused, nr4__in=self.unused,
-                                       side2=self.exp_loc39_s2, side3=self.exp_loc39_s3,
-                                       side4__in=self.exp_loc39_sides4)
+                                       side3=self.exp_loc39_s3)
         for p in qset:
             self.ring2.loc39 = p.nr
             self.exp_loc31_s3 = p.side1
@@ -514,8 +339,7 @@ class Command(BaseCommand):
         qset = Piece2x2.objects.filter(has_hint=False,
                                        nr1__in=self.unused, nr2__in=self.unused,
                                        nr3__in=self.unused, nr4__in=self.unused,
-                                       side2=self.exp_loc54_s2, side3=self.exp_loc54_s3,
-                                       side1__in=self.exp_loc54_sides1)
+                                       side2=self.exp_loc54_s2)
         for p in qset:
             self.ring2.loc54 = p.nr
             self.exp_loc53_s2 = p.side4
@@ -531,8 +355,7 @@ class Command(BaseCommand):
         qset = Piece2x2.objects.filter(has_hint=False,
                                        nr1__in=self.unused, nr2__in=self.unused,
                                        nr3__in=self.unused, nr4__in=self.unused,
-                                       side2=self.exp_loc47_s2, side3=self.exp_loc47_s3,
-                                       side4__in=self.exp_loc47_sides4)
+                                       side3=self.exp_loc47_s3)
         for p in qset:
             self.ring2.loc47 = p.nr
             self.exp_loc46_s2 = p.side4
@@ -548,8 +371,7 @@ class Command(BaseCommand):
         qset = Piece2x2.objects.filter(has_hint=True,
                                        nr4=249,
                                        nr1__in=self.unused, nr2__in=self.unused, nr3__in=self.unused,
-                                       side2=self.exp_loc55_s2, side3=self.exp_loc55_s3,
-                                       side1__in=self.exp_loc55_sides1, side4__in=self.exp_loc55_sides4)
+                                       side2__in=self.exp_loc55_sides2, side3__in=self.exp_loc55_sides3)
         for p in qset:
             self.ring2.loc55 = p.nr
             self.exp_loc47_s3 = p.side1
@@ -564,8 +386,7 @@ class Command(BaseCommand):
         qset = Piece2x2.objects.filter(has_hint=False,
                                        nr1__in=self.unused, nr2__in=self.unused,
                                        nr3__in=self.unused, nr4__in=self.unused,
-                                       side1=self.exp_loc13_s1, side2=self.exp_loc13_s2, side4=self.exp_loc13_s4,
-                                       side3__in=self.exp_loc13_sides3)
+                                       side2=self.exp_loc13_s2, side4=self.exp_loc13_s4)
         for p in qset:
             self.ring2.loc13 = p.nr
             p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
@@ -579,8 +400,7 @@ class Command(BaseCommand):
         qset = Piece2x2.objects.filter(has_hint=False,
                                        nr1__in=self.unused, nr2__in=self.unused,
                                        nr3__in=self.unused, nr4__in=self.unused,
-                                       side1=self.exp_loc12_s1, side4=self.exp_loc12_s4,
-                                       side3__in=self.exp_loc12_sides3)
+                                       side4=self.exp_loc12_s4)
         for p in qset:
             self.ring2.loc12 = p.nr
             self.exp_loc13_s4 = p.side2
@@ -594,8 +414,7 @@ class Command(BaseCommand):
         qset = Piece2x2.objects.filter(has_hint=False,
                                        nr1__in=self.unused, nr2__in=self.unused,
                                        nr3__in=self.unused, nr4__in=self.unused,
-                                       side1=self.exp_loc23_s1, side2=self.exp_loc23_s2,
-                                       side4__in=self.exp_loc23_sides4)
+                                       side1=self.exp_loc23_s1)
         for p in qset:
             self.ring2.loc23 = p.nr
             self.exp_loc22_s2 = p.side4
@@ -611,8 +430,7 @@ class Command(BaseCommand):
         qset = Piece2x2.objects.filter(has_hint=False,
                                        nr1__in=self.unused, nr2__in=self.unused,
                                        nr3__in=self.unused, nr4__in=self.unused,
-                                       side1=self.exp_loc14_s1, side2=self.exp_loc14_s2,
-                                       side3__in=self.exp_loc14_sides3)
+                                       side2=self.exp_loc14_s2)
         for p in qset:
             self.ring2.loc14 = p.nr
             self.exp_loc22_s1 = p.side3
@@ -628,8 +446,7 @@ class Command(BaseCommand):
         qset = Piece2x2.objects.filter(has_hint=True,
                                        nr2=255,
                                        nr1__in=self.unused, nr3__in=self.unused, nr4__in=self.unused,
-                                       side1=self.exp_loc15_s1, side2=self.exp_loc15_s2,
-                                       side3__in=self.exp_loc15_sides3, side4__in=self.exp_loc15_sides4)
+                                       side1__in=self.exp_loc15_sides1, side2__in=self.exp_loc15_sides2)
         for p in qset:
             self.ring2.loc15 = p.nr
             self.exp_loc14_s2 = p.side4
@@ -644,8 +461,7 @@ class Command(BaseCommand):
         qset = Piece2x2.objects.filter(has_hint=False,
                                        nr1__in=self.unused, nr2__in=self.unused,
                                        nr3__in=self.unused, nr4__in=self.unused,
-                                       side1=self.exp_loc11_s1, side4=self.exp_loc11_s4,
-                                       side3__in=self.exp_loc11_sides3)
+                                       side4=self.exp_loc11_s4)
         for p in qset:
             self.ring2.loc11 = p.nr
             self.exp_loc19_s1 = p.side3
@@ -661,8 +477,7 @@ class Command(BaseCommand):
         qset = Piece2x2.objects.filter(has_hint=False,
                                        nr1__in=self.unused, nr2__in=self.unused,
                                        nr3__in=self.unused, nr4__in=self.unused,
-                                       side1=self.exp_loc18_s1, side4=self.exp_loc18_s4,
-                                       side2__in=self.exp_loc18_sides2)
+                                       side1=self.exp_loc18_s1)
         for p in qset:
             self.ring2.loc18 = p.nr
             self.exp_loc26_s1 = p.side3
@@ -677,8 +492,7 @@ class Command(BaseCommand):
         qset = Piece2x2.objects.filter(has_hint=True,
                                        nr1=208,
                                        nr2__in=self.unused, nr3__in=self.unused, nr4__in=self.unused,
-                                       side1=self.exp_loc10_s1, side4=self.exp_loc10_s4,
-                                       side2__in=self.exp_loc10_sides2, side3__in=self.exp_loc10_sides3)
+                                       side1__in=self.exp_loc10_sides1, side4__in=self.exp_loc10_sides4)
         left = qset.count()
         self.progress.todo_count = left
         self.progress.save(update_fields=['todo_count'])
@@ -691,11 +505,14 @@ class Command(BaseCommand):
             self.progress.save(update_fields=['left_count', 'updated'])
 
             self.ring2.loc10 = p.nr
+            self.exp_loc2_s3 = p.side1
             self.exp_loc11_s4 = p.side2
             self.exp_loc18_s1 = p.side3
+            self.exp_loc9_s2 = p.side4
             p_nrs = (p.nr2, p.nr3, p.nr4)
             self._make_used(p_nrs)
-            self._find_loc18()
+            if self._check_loc2() and self._check_loc9():
+                self._find_loc18()
             self._make_unused(p_nrs)
         # for
 
@@ -714,8 +531,7 @@ class Command(BaseCommand):
             self.stderr.write('[ERROR] Could not find processor %s' % processor_nr)
             return
 
-        if not self._load_ring1(processor.from_ring1, processor_nr):
-            return
+        self._load_options(processor_nr)
 
         self.progress = EvalProgress(
                             eval_size=20,

@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'Pieces2x2',
     'Ring1',
     'Ring2',
+    'Ring3',
     'Solutions',
     'WorkQueue',
     'django.contrib.admin',

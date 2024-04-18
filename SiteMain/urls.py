@@ -19,6 +19,7 @@ urlpatterns = [
     path('2x2/',        include('Pieces2x2.urls')),
     path('ring1/',      include('Ring1.urls')),
     path('ring2/',      include('Ring2.urls')),
+    path('ring3/',      include('Ring3.urls')),
     path('solutions/',  include('Solutions.urls')),
     path('admin/',      admin.site.urls),
 ]
