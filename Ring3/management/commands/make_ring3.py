@@ -49,24 +49,6 @@ class Command(BaseCommand):
         # get the segment limitations for some key locations
         qset = TwoSideOptions.objects.filter(processor=processor_nr)
 
-        seg = calc_segment(36, 1)
-        options = list(qset.filter(segment=seg).values_list('two_side', flat=True))
-        self.exp_loc36_sides1 = options
-        self.exp_loc28_sides3 = options
-
-        seg = calc_segment(36, 2)
-        options = list(qset.filter(segment=seg).values_list('two_side', flat=True))
-        self.exp_loc36_sides2 = options
-        self.exp_loc37_sides4 = options
-
-        seg = calc_segment(36, 3)
-        options = list(qset.filter(segment=seg).values_list('two_side', flat=True))
-        self.exp_loc44_sides1 = options
-
-        seg = calc_segment(36, 4)
-        options = list(qset.filter(segment=seg).values_list('two_side', flat=True))
-        self.exp_loc35_sides2 = options
-
         seg = calc_segment(10, 2)
         options = list(qset.filter(segment=seg).values_list('two_side', flat=True))
         self.exp_loc11_sides4 = options
@@ -133,7 +115,9 @@ class Command(BaseCommand):
             msg = 'Best: %s / 12' % self._find_best()
             self.progress.solve_order = msg
             self.progress.save(update_fields=['solve_order'])
-            self.stdout.write(msg)
+
+            stamp = timezone.localtime(timezone.now()).strftime('%Y-%m-%d %H:%M:%S')
+            self.stdout.write('[%s] %s' % (stamp, msg))
 
     def _make_used(self, p_nrs: tuple | list):
         for nr in p_nrs:
@@ -152,12 +136,329 @@ class Command(BaseCommand):
         self.ring3.save()
         self.ring3_count += 1
         self.stdout.write('[INFO] Saved Ring3 with pk=%s' % self.ring3.pk)
-
-    def _find_loc20(self):
-        print('loc20: hoi!')
-        self._save_ring3()
         import sys
         sys.exit(1)
+
+    def _check_ring4(self):
+        # verify the inner 4 blocks can be filled
+        self._save_ring3()
+
+    def _check_loc14b(self):
+        qset = Piece2x2.objects.filter(has_hint=False,
+                                       nr1__in=self.unused, nr2__in=self.unused,
+                                       nr3__in=self.unused, nr4__in=self.unused,
+                                       side2__in=self.exp_loc14b_sides2,
+                                       side3=self.exp_loc14_s3,
+                                       side4__in=self.exp_loc14_sides4)
+        return qset.first() is not None
+
+    def _check_loc23b(self):
+        qset = Piece2x2.objects.filter(has_hint=False,
+                                       nr1__in=self.unused, nr2__in=self.unused,
+                                       nr3__in=self.unused, nr4__in=self.unused,
+                                       side1__in=self.exp_loc23b_sides1,
+                                       side3__in=self.exp_loc23_sides3,
+                                       side4=self.exp_loc23_s4)
+        return qset.first() is not None
+
+    def _check_loc15(self):
+        qset = Piece2x2.objects.filter(has_hint=True,
+                                       nr1__in=self.unused,
+                                       nr2=255,
+                                       nr3__in=self.unused,
+                                       nr4__in=self.unused,
+                                       side3__in=self.exp_loc15_sides3,
+                                       side4__in=self.exp_loc15_sides4)
+        if qset.first() is None:
+            return False
+
+        self.exp_loc23b_sides1 = list(qset.values_list('side3', flat=True))
+        self.exp_loc14b_sides2 = list(qset.values_list('side4', flat=True))
+        return True
+
+    def _check_loc14a(self):
+        qset = Piece2x2.objects.filter(has_hint=False,
+                                       nr1__in=self.unused, nr2__in=self.unused,
+                                       nr3__in=self.unused, nr4__in=self.unused,
+                                       side2__in=self.exp_loc14_sides2,
+                                       side3=self.exp_loc14_s3,
+                                       side4__in=self.exp_loc14_sides4)
+        if qset.first() is None:
+            return False
+
+        self.exp_loc15_sides4 = list(qset.values_list('side2', flat=True))
+        return True
+
+    def _check_loc23a(self):
+        qset = Piece2x2.objects.filter(has_hint=False,
+                                       nr1__in=self.unused, nr2__in=self.unused,
+                                       nr3__in=self.unused, nr4__in=self.unused,
+                                       side1__in=self.exp_loc23_sides1,
+                                       side3__in=self.exp_loc23_sides3,
+                                       side4=self.exp_loc23_s4)
+        if qset.first() is None:
+            return False
+
+        self.exp_loc15_sides3 = list(qset.values_list('side1', flat=True))
+        return True
+
+    def _find_loc22(self):
+        qset = Piece2x2.objects.filter(has_hint=False,
+                                       nr1__in=self.unused, nr2__in=self.unused,
+                                       nr3__in=self.unused, nr4__in=self.unused,
+                                       side3=self.exp_loc22_s3,
+                                       side4=self.exp_loc22_s4)
+        for p in qset.iterator(chunk_size=1000):
+            self.ring3.loc22 = p.nr
+            self.exp_loc14_s3 = p.side1
+            self.exp_loc23_s4 = p.side2
+            p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
+            self._make_used(p_nrs)
+            if self._check_loc23a() and self._check_loc14a() and self._check_loc15():
+                if self._check_loc23b() and self._check_loc14b():
+                    self._check_ring4()
+            self._make_unused(p_nrs)
+        # for
+
+    def _check_loc31(self):
+        qset = Piece2x2.objects.filter(has_hint=False,
+                                       nr1__in=self.unused, nr2__in=self.unused,
+                                       nr3__in=self.unused, nr4__in=self.unused,
+                                       side3__in=self.exp_loc31_sides3,
+                                       side4=self.exp_loc31_s4)
+        if qset.first() is None:
+            return False
+
+        self.exp_loc23_sides3 = list(qset.values_list('side1', flat=True))
+        return True
+
+    def _check_loc28d(self):
+        qset = Piece2x2.objects.filter(has_hint=False,
+                                       nr1__in=self.unused, nr2__in=self.unused,
+                                       nr3__in=self.unused, nr4__in=self.unused,
+                                       side1=self.exp_loc28b_s1,
+                                       side2__in=self.exp_loc28d_sides2,
+                                       side3=self.exp_loc28_s3,
+                                       side4=self.exp_loc28_s4)
+        if qset.first() is None:
+            return False
+
+        self.exp_loc36f_sides1 = list(qset.values_list('side3', flat=True))
+        return True
+
+    def _check_loc37c(self):
+        qset = Piece2x2.objects.filter(has_hint=False,
+                                       nr1__in=self.unused, nr2__in=self.unused,
+                                       nr3__in=self.unused, nr4__in=self.unused,
+                                       side1__in=self.exp_loc37c_sides1,
+                                       side2=self.exp_loc37_s2,
+                                       side3=self.exp_loc37_s3,
+                                       side4=self.exp_loc37_s4)
+        if qset.first() is None:
+            return False
+
+        return True
+
+    def _check_loc29b(self):
+        qset = Piece2x2.objects.filter(has_hint=False,
+                                       nr1__in=self.unused, nr2__in=self.unused,
+                                       nr3__in=self.unused, nr4__in=self.unused,
+                                       side1=self.exp_loc29_s1,
+                                       side2=self.exp_loc29_s2,
+                                       side3__in=self.exp_loc29_sides3,
+                                       side4__in=self.exp_loc29_sides4)
+        if qset.first() is None:
+            return False
+
+        self.exp_loc37c_sides1 = list(qset.values_list('side3', flat=True))
+        self.exp_loc28d_sides2 = list(qset.values_list('side4', flat=True))
+        return True
+
+    def _find_loc30(self):
+        qset = Piece2x2.objects.filter(has_hint=False,
+                                       nr1__in=self.unused, nr2__in=self.unused,
+                                       nr3__in=self.unused, nr4__in=self.unused,
+                                       side3=self.exp_loc30_s3)
+        for p in qset.iterator(chunk_size=100):
+            self.ring3.loc30 = p.nr
+            self.exp_loc22_s3 = p.side1
+            self.exp_loc31_s4 = p.side2
+            self.exp_loc29_s2 = p.side4
+            p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
+            self._make_used(p_nrs)
+            if self._check_loc29b() and self._check_loc37c() and self._check_loc28d() and self._check_loc31():
+                self._find_loc22()
+            self._make_unused(p_nrs)
+        # for
+
+    def _check_loc13(self):
+        qset = Piece2x2.objects.filter(has_hint=False,
+                                       nr1__in=self.unused, nr2__in=self.unused,
+                                       nr3__in=self.unused, nr4__in=self.unused,
+                                       side3=self.exp_loc13_s3,
+                                       side4__in=self.exp_loc13_sides4)
+        if qset.first() is None:
+            return False
+
+        self.exp_loc14_sides4 = list(qset.values_list('side2', flat=True))
+        return True
+
+    def _check_loc28c(self):
+        qset = Piece2x2.objects.filter(has_hint=False,
+                                       nr1__in=self.unused, nr2__in=self.unused,
+                                       nr3__in=self.unused, nr4__in=self.unused,
+                                       side1=self.exp_loc28b_s1,
+                                       side2__in=self.exp_loc28c_sides2,
+                                       side3=self.exp_loc28_s3,
+                                       side4=self.exp_loc28_s4)
+        if qset.first() is None:
+            return False
+
+        self.exp_loc36f_sides1 = list(qset.values_list('side3', flat=True))
+        return True
+
+    def _check_loc29a(self):
+        qset = Piece2x2.objects.filter(has_hint=False,
+                                       nr1__in=self.unused, nr2__in=self.unused,
+                                       nr3__in=self.unused, nr4__in=self.unused,
+                                       side1=self.exp_loc29_s1,
+                                       side3__in=self.exp_loc29_sides3,
+                                       side4__in=self.exp_loc29_sides4)
+        if qset.first() is None:
+            return False
+
+        self.exp_loc28c_sides2 = list(qset.values_list('side4', flat=True))
+        return True
+
+    def _find_loc21(self):
+        self._report_progress()
+        qset = Piece2x2.objects.filter(has_hint=False,
+                                       nr1__in=self.unused, nr2__in=self.unused,
+                                       nr3__in=self.unused, nr4__in=self.unused,
+                                       side4=self.exp_loc21_s4)
+        for p in qset.iterator(chunk_size=100):
+            self.ring3.loc21 = p.nr
+            self.exp_loc13_s3 = p.side1
+            self.exp_loc22_s4 = p.side2
+            self.exp_loc29_s1 = p.side3
+            p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
+            self._make_used(p_nrs)
+            if self._check_loc29a() and self._check_loc28c() and self._check_loc13():
+                self._find_loc30()
+            self._make_unused(p_nrs)
+        # for
+
+    def _check_loc39(self):
+        qset = Piece2x2.objects.filter(has_hint=False,
+                                       nr1__in=self.unused, nr2__in=self.unused,
+                                       nr3__in=self.unused, nr4__in=self.unused,
+                                       side3__in=self.exp_loc39_sides3,
+                                       side4=self.exp_loc39_s4)
+        if qset.first() is None:
+            return False
+
+        self.exp_loc31_sides3 = list(qset.values_list('side1', flat=True))
+        return True
+
+    def _check_loc37b(self):
+        qset = Piece2x2.objects.filter(has_hint=False,
+                                       nr1__in=self.unused, nr2__in=self.unused,
+                                       nr3__in=self.unused, nr4__in=self.unused,
+                                       side2=self.exp_loc37_s2,
+                                       side3=self.exp_loc37_s3,
+                                       side4=self.exp_loc37_s4)
+        if qset.first() is None:
+            return False
+
+        self.exp_loc29_sides3 = list(qset.values_list('side1', flat=True))
+        self.exp_loc36e_sides2 = list(qset.values_list('side4', flat=True))
+        return True
+
+    def _find_loc38(self):
+        qset = Piece2x2.objects.filter(has_hint=False,
+                                       nr1__in=self.unused, nr2__in=self.unused,
+                                       nr3__in=self.unused, nr4__in=self.unused,
+                                       side3=self.exp_loc38_s3)
+        for p in qset.iterator(chunk_size=100):
+            self.ring3.loc38 = p.nr
+            self.exp_loc30_s3 = p.side1
+            self.exp_loc39_s4 = p.side2
+            self.exp_loc37_s2 = p.side4
+            p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
+            self._make_used(p_nrs)
+            if self._check_loc37b() and self._check_loc39():
+                self._find_loc21()
+            self._make_unused(p_nrs)
+        # for
+
+    def _check_loc10b(self):
+        qset = Piece2x2.objects.filter(has_hint=True,
+                                       nr1=208,
+                                       nr2__in=self.unused,
+                                       nr3__in=self.unused,
+                                       nr4__in=self.unused,
+                                       side2__in=self.exp_loc10b_sides2,
+                                       side3__in=self.exp_loc10_sides3)
+        return qset.first() is not None
+
+    def _check_loc11c(self):
+        qset = Piece2x2.objects.filter(has_hint=False,
+                                       nr1__in=self.unused, nr2__in=self.unused,
+                                       nr3__in=self.unused, nr4__in=self.unused,
+                                       side2__in=self.exp_loc11c_sides2,
+                                       side3=self.exp_loc11_s3,
+                                       side4__in=self.exp_loc11b_sides4)
+        if qset.first() is None:
+            return False
+
+        self.exp_loc10b_sides2 = list(qset.values_list('side4', flat=True))
+        return True
+
+    def _check_loc12(self):
+        qset = Piece2x2.objects.filter(has_hint=False,
+                                       nr1__in=self.unused, nr2__in=self.unused,
+                                       nr3__in=self.unused, nr4__in=self.unused,
+                                       side3=self.exp_loc12_s3,
+                                       side4__in=self.exp_loc12_sides4)
+        if qset.first() is None:
+            return False
+
+        self.exp_loc13_sides4 = list(qset.values_list('side2', flat=True))
+        self.exp_loc11c_sides2 = list(qset.values_list('side4', flat=True))
+        return True
+
+    def _check_loc28b(self):
+        qset = Piece2x2.objects.filter(has_hint=False,
+                                       nr1__in=self.unused, nr2__in=self.unused,
+                                       nr3__in=self.unused, nr4__in=self.unused,
+                                       side1=self.exp_loc28b_s1,
+                                       side3=self.exp_loc28_s3,
+                                       side4=self.exp_loc28_s4)
+        if qset.first() is None:
+            return False
+
+        self.exp_loc29_sides4 = list(qset.values_list('side2', flat=True))
+        self.exp_loc36d_sides1 = list(qset.values_list('side3', flat=True))
+        return True
+
+    def _find_loc20(self):
+        qset = Piece2x2.objects.filter(has_hint=False,
+                                       nr1__in=self.unused, nr2__in=self.unused,
+                                       nr3__in=self.unused, nr4__in=self.unused,
+                                       side3__in=self.exp_loc20_sides3,
+                                       side4=self.exp_loc20_s4)
+        for p in qset.iterator(chunk_size=100):
+            self.ring3.loc20 = p.nr
+            self.exp_loc12_s3 = p.side1
+            self.exp_loc21_s4 = p.side2
+            self.exp_loc28b_s1 = p.side3
+            p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
+            self._make_used(p_nrs)
+            if self._check_loc28b() and self._check_loc12():
+                if self._check_loc11c() and self._check_loc10b():
+                    self._find_loc38()
+            self._make_unused(p_nrs)
+        # for
 
     def _check_loc47b(self):
         qset = Piece2x2.objects.filter(has_hint=False,
@@ -272,8 +573,8 @@ class Command(BaseCommand):
                                        nr2__in=self.unused,
                                        nr3__in=self.unused,
                                        nr4__in=self.unused,
-                                       side1__in=self.exp_loc10_sides3,
-                                       side2__in=self.exp_loc10_sides4)
+                                       side3__in=self.exp_loc10_sides3,
+                                       side4__in=self.exp_loc10_sides4)
         if qset.first() is None:
             return False
 
@@ -333,27 +634,12 @@ class Command(BaseCommand):
             self._make_unused(p_nrs)
         # for
 
-    def _check_loc36c(self):
-        qset = Piece2x2.objects.filter(has_hint=False,
-                                       nr1__in=self.unused, nr2__in=self.unused,
-                                       nr3__in=self.unused, nr4__in=self.unused,
-                                       side1__in=self.exp_loc36_sides1,
-                                       side2__in=self.exp_loc36c_sides2,
-                                       side3=self.exp_loc36b_s3,
-                                       side4=self.exp_loc36_s4)
-        if qset.first() is None:
-            return False
-
-        self.exp_loc28_sides3 = list(qset.values_list('side1', flat=True))
-        self.exp_loc37_sides4 = list(qset.values_list('side2', flat=True))
-        return True
-
     def _check_loc37a(self):
         qset = Piece2x2.objects.filter(has_hint=False,
                                        nr1__in=self.unused, nr2__in=self.unused,
                                        nr3__in=self.unused, nr4__in=self.unused,
                                        side3=self.exp_loc37_s3,
-                                       side4__in=self.exp_loc37_sides4)
+                                       side4=self.exp_loc37_s4)
         if qset.first() is None:
             return False
 
@@ -385,7 +671,7 @@ class Command(BaseCommand):
             self.exp_loc53_s1 = p.side3
             p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
             self._make_used(p_nrs)
-            if self._check_loc53a() and self._check_loc37a() and self._check_loc36c():
+            if self._check_loc53a() and self._check_loc37a():
                 self._find_loc19()
             self._make_unused(p_nrs)
         # for
@@ -394,13 +680,13 @@ class Command(BaseCommand):
         qset = Piece2x2.objects.filter(has_hint=False,
                                        nr1__in=self.unused, nr2__in=self.unused,
                                        nr3__in=self.unused, nr4__in=self.unused,
-                                       side3__in=self.exp_loc28_sides3,
+                                       side3=self.exp_loc28_s3,
                                        side4=self.exp_loc28_s4)
         if qset.first() is None:
             return False
 
         self.exp_loc20_sides3 = list(qset.values_list('side1', flat=True))
-        self.exp_loc29_sides4 = list(qset.values_list('side2', flat=True))
+        # self.exp_loc29_sides4 = list(qset.values_list('side2', flat=True))
         self.exp_loc36c_sides1 = list(qset.values_list('side3', flat=True))
         return True
 
@@ -433,21 +719,6 @@ class Command(BaseCommand):
             self._make_unused(p_nrs)
         # for
 
-    def _check_loc36b(self):
-        qset = Piece2x2.objects.filter(has_hint=False,
-                                       nr1__in=self.unused, nr2__in=self.unused,
-                                       nr3__in=self.unused, nr4__in=self.unused,
-                                       side1__in=self.exp_loc36_sides1,
-                                       side2__in=self.exp_loc36_sides2,
-                                       side3=self.exp_loc36b_s3,
-                                       side4=self.exp_loc36_s4)
-        if qset.first() is None:
-            return False
-
-        self.exp_loc28_sides3 = list(qset.values_list('side1', flat=True))
-        self.exp_loc37_sides4 = list(qset.values_list('side2', flat=True))
-        return True
-
     def _check_loc52(self):
         qset = Piece2x2.objects.filter(has_hint=False,
                                        nr1__in=self.unused, nr2__in=self.unused,
@@ -459,24 +730,6 @@ class Command(BaseCommand):
 
         self.exp_loc53_sides4 = list(qset.values_list('side2', flat=True))
         return True
-
-    def _find_loc44(self):
-        qset = Piece2x2.objects.filter(has_hint=False,
-                                       nr1__in=self.unused, nr2__in=self.unused,
-                                       nr3__in=self.unused, nr4__in=self.unused,
-                                       side1__in=self.exp_loc44_sides1,
-                                       side4=self.exp_loc44_s4)
-        for p in qset.iterator(chunk_size=100):
-            self.ring3.loc44 = p.nr
-            self.exp_loc36b_s3 = p.side1
-            self.exp_loc45_s4 = p.side2
-            self.exp_loc52_s1 = p.side3
-            p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
-            self._make_used(p_nrs)
-            if self._check_loc36b() and self._check_loc52():
-                self._find_loc27()
-            self._make_unused(p_nrs)
-        # for
 
     def _check_loc34(self):
         qset = Piece2x2.objects.filter(has_hint=False,
@@ -490,49 +743,15 @@ class Command(BaseCommand):
         self.exp_loc26_sides3 = list(qset.values_list('side1', flat=True))
         return True
 
-    def _check_loc36a(self):
-        qset = Piece2x2.objects.filter(has_hint=False,
-                                       nr1__in=self.unused, nr2__in=self.unused,
-                                       nr3__in=self.unused, nr4__in=self.unused,
-                                       side1__in=self.exp_loc36_sides1,
-                                       side2__in=self.exp_loc36_sides2,
-                                       side4=self.exp_loc36_s4)
-        if qset.first() is None:
-            return False
-
-        self.exp_loc44_sides1 = list(qset.values_list('side3', flat=True))
-        return True
-
-    def _find_loc35(self):
-        qset = Piece2x2.objects.filter(has_hint=False,
-                                       nr1__in=self.unused, nr2__in=self.unused,
-                                       nr3__in=self.unused, nr4__in=self.unused,
-                                       side2__in=self.exp_loc35_sides2,
-                                       side3=self.exp_loc35_s3)
-        for p in qset.iterator(chunk_size=100):
-            self.ring3.loc35 = p.nr
-            self.exp_loc27_s3 = p.side1
-            self.exp_loc36_s4 = p.side2
-            self.exp_loc34_s2 = p.side4
-            p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
-            self._make_used(p_nrs)
-            if self._check_loc36a() and self._check_loc34():
-                self._find_loc44()
-            self._make_unused(p_nrs)
-        # for
-
-    def _check_loc42(self):
-        qset = Piece2x2.objects.filter(has_hint=False,
-                                       nr1__in=self.unused, nr2__in=self.unused,
-                                       nr3__in=self.unused, nr4__in=self.unused,
-                                       side2=self.exp_loc42_s2,
-                                       side3__in=self.exp_loc42_sides3)
-        if qset.first() is None:
-            return False
-
-        self.exp_loc34_sides3 = list(qset.values_list('side1', flat=True))
-        self.exp_loc50_sides1 = list(qset.values_list('side3', flat=True))
-        return True
+    def _check_loc50(self):
+        qset = Piece2x2.objects.filter(has_hint=True,
+                                       nr1__in=self.unused,
+                                       nr2__in=self.unused,
+                                       nr3=181,
+                                       nr4__in=self.unused,
+                                       side1__in=self.exp_loc50_sides1,
+                                       side2__in=self.exp_loc50_sides2)
+        return qset.first() is not None
 
     def _check_loc51(self):
         qset = Piece2x2.objects.filter(has_hint=False,
@@ -547,37 +766,90 @@ class Command(BaseCommand):
         self.exp_loc50_sides2 = list(qset.values_list('side4', flat=True))
         return True
 
-    def _check_loc50(self):
-        p = Piece2x2.objects.filter(has_hint=True,
-                                    nr1__in=self.unused,
-                                    nr2__in=self.unused,
-                                    nr3=181,
-                                    nr4__in=self.unused,
-                                    side1__in=self.exp_loc50_sides1,
-                                    side2__in=self.exp_loc50_sides2).first()
-        return p is not None
+    def _check_loc42(self):
+        qset = Piece2x2.objects.filter(has_hint=False,
+                                       nr1__in=self.unused, nr2__in=self.unused,
+                                       nr3__in=self.unused, nr4__in=self.unused,
+                                       side2=self.exp_loc42_s2,
+                                       side3__in=self.exp_loc42_sides3)
+        if qset.first() is None:
+            return False
+
+        self.exp_loc34_sides3 = list(qset.values_list('side1', flat=True))
+        self.exp_loc50_sides1 = list(qset.values_list('side3', flat=True))
+        return True
 
     def _find_loc43(self):
         qset = Piece2x2.objects.filter(has_hint=False,
                                        nr1__in=self.unused, nr2__in=self.unused,
-                                       nr3__in=self.unused, nr4__in=self.unused)
-        left = qset.count()
+                                       nr3__in=self.unused, nr4__in=self.unused,
+                                       side1=self.exp_loc43_s1,
+                                       side2=self.exp_loc43_s2)
         for p in qset.iterator(chunk_size=100):
-            self.stdout.write('loc43: %s left' % left)
-            left -= 1
-            self.progress.left_count = min(left, 32767)
-            self.progress.updated = timezone.now()
-            self.progress.save(update_fields=['left_count', 'updated'])
-
             self.ring3.loc43 = p.nr
-            self.exp_loc35_s3 = p.side1
-            self.exp_loc44_s4 = p.side2
             self.exp_loc51_s1 = p.side3
             self.exp_loc42_s2 = p.side4
             p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
             self._make_used(p_nrs)
             if self._check_loc42() and self._check_loc51() and self._check_loc50():
-                self._find_loc35()
+                if self._check_loc34() and self._check_loc52():
+                    self._find_loc27()
+            self._make_unused(p_nrs)
+        # for
+
+    def _find_loc44(self):
+        qset = Piece2x2.objects.filter(has_hint=False,
+                                       nr1__in=self.unused, nr2__in=self.unused,
+                                       nr3__in=self.unused, nr4__in=self.unused,
+                                       side1=self.exp_loc44_s1)
+        for p in qset.iterator(chunk_size=100):
+            self.ring3.loc44 = p.nr
+            self.exp_loc45_s4 = p.side2
+            self.exp_loc52_s1 = p.side3
+            self.exp_loc43_s2 = p.side4
+            p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
+            self._make_used(p_nrs)
+            self._find_loc43()
+            self._make_unused(p_nrs)
+        # for
+
+    def _find_loc35(self):
+        qset = Piece2x2.objects.filter(has_hint=False,
+                                       nr1__in=self.unused, nr2__in=self.unused,
+                                       nr3__in=self.unused, nr4__in=self.unused,
+                                       side2=self.exp_loc35_s2)
+        for p in qset.iterator(chunk_size=100):
+            self.ring3.loc35 = p.nr
+            self.exp_loc27_s3 = p.side1
+            self.exp_loc43_s1 = p.side3
+            self.exp_loc34_s2 = p.side4
+            p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
+            self._make_used(p_nrs)
+            self._find_loc44()
+            self._make_unused(p_nrs)
+        # for
+
+    def _find_loc36(self):
+        qset = Piece2x2.objects.filter(has_hint=True,
+                                       nr1__in=self.unused,
+                                       nr2=139,
+                                       nr3__in=self.unused,
+                                       nr4__in=self.unused)
+        left = qset.count()
+        for p in qset.iterator(chunk_size=100):
+            self.stdout.write('loc36: %s left' % left)
+            left -= 1
+            self.progress.left_count = min(left, 32767)
+            self.progress.updated = timezone.now()
+            self.progress.save(update_fields=['left_count', 'updated'])
+
+            self.exp_loc28_s3 = p.side1
+            self.exp_loc37_s4 = p.side2
+            self.exp_loc44_s1 = p.side3
+            self.exp_loc35_s2 = p.side4
+            p_nrs = (p.nr1, p.nr3, p.nr4)
+            self._make_used(p_nrs)
+            self._find_loc35()
             self._make_unused(p_nrs)
         # for
 
@@ -609,7 +881,7 @@ class Command(BaseCommand):
         self.progress.save()
 
         try:
-            self._find_loc43()
+            self._find_loc36()
         except KeyboardInterrupt:
             pass
         else:

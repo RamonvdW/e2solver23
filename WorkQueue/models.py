@@ -70,6 +70,7 @@ class ProcessorUsedPieces(models.Model):
     # did we load a ring1 or ring2
     from_ring1 = models.PositiveIntegerField(default=0)
     from_ring2 = models.PositiveIntegerField(default=0)
+    from_ring3 = models.PositiveIntegerField(default=0)
 
     # out of all 256 base pieces, which ones are in use?
     nr1 = models.BooleanField(default=False)
