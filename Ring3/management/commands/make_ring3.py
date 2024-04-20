@@ -132,12 +132,15 @@ class Command(BaseCommand):
         self.unused.extend(p_nrs)
 
     def _save_ring3(self):
-        self.ring3.pk = None
-        self.ring3.save()
         self.ring3_count += 1
-        self.stdout.write('[INFO] Saved Ring3 with pk=%s' % self.ring3.pk)
-        import sys
-        sys.exit(1)
+
+        if self.ring3_count < 100 or self.ring3_count % 100 == 1:
+            print('[INFO] Ring3 count: %s' % self.ring3_count)
+        # self.ring3.pk = None
+        # self.ring3.save()
+        # self.stdout.write('[INFO] Saved Ring3 with pk=%s' % self.ring3.pk)
+        # import sys
+        # sys.exit(1)
 
     def _check_ring4(self):
         # verify the inner 4 blocks can be filled
@@ -851,6 +854,9 @@ class Command(BaseCommand):
             self._make_used(p_nrs)
             self._find_loc35()
             self._make_unused(p_nrs)
+
+
+            break
         # for
 
     def handle(self, *args, **options):
@@ -897,5 +903,6 @@ class Command(BaseCommand):
 
         self.progress.delete()
 
+        print('[INFO] Total ring3 count: %s' % self.ring3_count)
 
 # end of file
