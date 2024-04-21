@@ -123,7 +123,7 @@
                             <td colspan="5">Work queue</td>
                         </tr>
                         <tr>
-                            <th>Added</th>
+                            <th>Start after</th>
                             <th>Priority</th>
                             <th>Location</th>
                             <th>Job type</th>
@@ -133,7 +133,7 @@
 
                     {% for job in work %}
                         <tr>
-                            <td>{{ job.when_added|date:"H:i:s" }}</td>
+                            <td>{{ job.start_after|date:"H:i:s" }}</td>
                             <td>{{ job.priority }}</td>
                             <td>{{ job.location }}</td>
                             <td>{{ job.job_type }}</td>

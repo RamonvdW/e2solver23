@@ -369,7 +369,7 @@ class OptionsView(TemplateView):
 
     @staticmethod
     def _find_work(processor):
-        work = Work.objects.filter(done=False, processor=processor).order_by('-doing', 'priority')
+        work = Work.objects.filter(done=False, processor=processor).order_by('-doing', 'priority', 'start_after', 'location')
 
         for job in work:
             if job.doing:
