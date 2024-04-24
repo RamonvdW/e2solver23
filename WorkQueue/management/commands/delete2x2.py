@@ -4,12 +4,9 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
-from django.utils import timezone
 from django.core.management.base import BaseCommand
-from Pieces2x2.models import TwoSide, TwoSideOptions, Piece2x2, EvalProgress
+from Pieces2x2.models import TwoSideOptions, Piece2x2
 from Pieces2x2.helpers import calc_segment
-from WorkQueue.operations import propagate_segment_reduction, get_unused_for_locs, check_dead_end
-import time
 
 
 class Command(BaseCommand):
@@ -26,27 +23,6 @@ class Command(BaseCommand):
         parser.add_argument('processor', type=int, help='Processor number to use')
         parser.add_argument('loc', type=int, help='Location to work on (1..64)')
         parser.add_argument('--commit', action='store_true')
-
-    def _get_unused(self):
-        unused = get_unused_for_locs(self.processor, self.locs)
-
-        if 36 not in self.locs and 139 in unused:
-            unused.remove(139)
-
-        # if 10 not in self.locs and 208 in unused:
-        #     unused.remove(208)
-        #
-        # if 15 not in self.locs and 255 in unused:
-        #     unused.remove(255)
-        #
-        # if 50 not in self.locs and 181 in unused:
-        #     unused.remove(181)
-        #
-        # if 55 not in self.locs and 249 in unused:
-        #     unused.remove(249)
-
-        self.stdout.write('[INFO] %s base pieces in use' % (256 - len(unused)))
-        return unused
 
     def _get_loc_side_options(self, loc, side_nr):
         segment = calc_segment(loc, side_nr)

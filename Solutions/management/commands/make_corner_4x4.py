@@ -30,18 +30,20 @@ class Command(BaseCommand):
         self.bad_nrs.extend(ALL_CORNER_NRS)
 
         self.count = 0
+        self.corner_count = {1: 0, 2: 0, 3: 0, 4: 0}
         self.prev_tick = time.monotonic()
 
     def add_arguments(self, parser):
         parser.add_argument('corner', type=int, help='Which corner to work on (1..4)')
 
-    def _found(self, p1, p2, p3, p4):
+    def _found(self, p1, p2, p3, p4, corner):
         self.count += 1
+        self.corner_count[corner] += 1
 
         tick = time.monotonic()
         if tick > self.prev_tick + 5:
             self.prev_tick = tick
-            print('count: %s' % self.count)
+            print('count: %s %s' % (self.count, repr(self.corner_count)))
 
         # TODO: extract useful information: sides, base pieces, etc.
 
@@ -65,6 +67,7 @@ class Command(BaseCommand):
             print('Corner left: %s' % left)
             left -= 1
 
+            corner = p3.nr3
             exp_p1_side3 = p3.side1
             exp_p4_side4 = p3.side2
             used3 = [p3.nr1, p3.nr2, p3.nr4]
@@ -96,7 +99,7 @@ class Command(BaseCommand):
                                .exclude(nr3__in=used123)
                                .exclude(nr4__in=used123)):
 
-                        self._found(p1, p2, p3, p4)
+                        self._found(p1, p2, p3, p4, corner)
                     # for
                 # for
             # for
@@ -107,9 +110,9 @@ class Command(BaseCommand):
     def _find_corner3(self):
         """
             +---+---+
-            | 1 | 2 |       4 = corner: nr4=1..4
+            | 1 | 2 |       1 = hint: nr4=249
             +---+---+
-            | 3 | 4 |       1 = hint: nr4=249
+            | 3 | 4 |       4 = corner: nr4=1..4
             +---+---+
         """
         print('corner: 3')
@@ -124,6 +127,7 @@ class Command(BaseCommand):
             print('Corner left: %s' % left)
             left -= 1
 
+            corner = p4.nr4
             exp_p2_side3 = p4.side1
             exp_p3_side2 = p4.side4
             used4 = [p4.nr1, p4.nr2, p4.nr3]
@@ -156,7 +160,7 @@ class Command(BaseCommand):
                                .exclude(nr3__in=used124)
                                .exclude(nr4__in=used124)):
 
-                        self._found(p1, p2, p3, p4)
+                        self._found(p1, p2, p3, p4, corner)
                     # for
                 # for
             # for
@@ -184,6 +188,7 @@ class Command(BaseCommand):
             print('Corner left: %s' % left)
             left -= 1
 
+            corner = p2.nr2
             exp_p1_side2 = p2.side4
             exp_p4_side1 = p2.side3
             used1 = [p2.nr1, p2.nr3, p2.nr4]
@@ -216,7 +221,7 @@ class Command(BaseCommand):
                                .exclude(nr3__in=used123)
                                .exclude(nr4__in=used123)):
 
-                        self._found(p1, p2, p3, p4)
+                        self._found(p1, p2, p3, p4, corner)
                     # for
                 # for
             # for
@@ -244,6 +249,7 @@ class Command(BaseCommand):
             print('Corner left: %s' % left)
             left -= 1
 
+            corner = p1.nr1
             exp_p2_side4 = p1.side2
             exp_p3_side1 = p1.side3
             used1 = [p1.nr2, p1.nr3, p1.nr4]
@@ -276,7 +282,7 @@ class Command(BaseCommand):
                                .exclude(nr3__in=used124)
                                .exclude(nr4__in=used124)):
 
-                        self._found(p1, p2, p3, p4)
+                        self._found(p1, p2, p3, p4, corner)
                     # for
                 # for
             # for
