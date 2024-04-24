@@ -12,6 +12,8 @@
 
 ALL_HINT_NRS = (139, 181, 208, 249, 255)
 
+ALL_CORNER_NRS = (1, 2, 3, 4)
+
 # required number of counter-clockwise rotations of each hint piece
 ALL_HINT_ROTS = {
     139: 2,
