@@ -48,9 +48,9 @@ class Command(BaseCommand):
     def _find_corner4(self):
         """
             +---+---+
-            | 1 | 2 |       3 = corner: nr3=1..4
+            | 1 | 2 |       2 = hint: nr3=181
             +---+---+
-            | 3 | 4 |       2 = hint: nr3=181
+            | 3 | 4 |       3 = corner: nr3=1..4
             +---+---+
         """
         print('corner: 4')
@@ -67,18 +67,18 @@ class Command(BaseCommand):
 
             exp_p1_side3 = p3.side1
             exp_p4_side4 = p3.side2
-            used3 = [p3.nr1, p3.nr2, p3.nr3, p3.nr4]
+            used3 = [p3.nr1, p3.nr2, p3.nr4]
 
             for p2 in qset_hint.exclude(nr1__in=used3).exclude(nr2__in=used3).exclude(nr4__in=used3):
                 exp_p4_side1 = p2.side3
-                exp_p1_side4 = p2.side4
+                exp_p1_side2 = p2.side4
                 used23 = used3[:]
-                used23.extend([p2.nr1, p2.nr2, p2.nr3, p2.nr4])
+                used23.extend([p2.nr1, p2.nr2, p2.nr4])
                 used23.extend(self.bad_nrs)
 
                 for p1 in (Piece2x2.objects
                            .filter(side3=exp_p1_side3,
-                                   side4=exp_p1_side4)
+                                   side2=exp_p1_side2)
                            .exclude(nr1__in=used23)
                            .exclude(nr2__in=used23)
                            .exclude(nr3__in=used23)
@@ -126,13 +126,13 @@ class Command(BaseCommand):
 
             exp_p2_side3 = p4.side1
             exp_p3_side2 = p4.side4
-            used4 = [p4.nr1, p4.nr2, p4.nr3, p4.nr4]
+            used4 = [p4.nr1, p4.nr2, p4.nr3]
 
             for p1 in qset_hint.exclude(nr1__in=used4).exclude(nr2__in=used4).exclude(nr3__in=used4):
                 exp_p2_side4 = p1.side2
                 exp_p3_side1 = p1.side3
                 used14 = used4[:]
-                used14.extend([p1.nr1, p1.nr2, p1.nr3, p1.nr4])
+                used14.extend([p1.nr1, p1.nr2, p1.nr3])
                 used14.extend(self.bad_nrs)
 
                 for p2 in (Piece2x2
@@ -186,13 +186,13 @@ class Command(BaseCommand):
 
             exp_p1_side2 = p2.side4
             exp_p4_side1 = p2.side3
-            used1 = [p2.nr1, p2.nr2, p2.nr3, p2.nr4]
+            used1 = [p2.nr1, p2.nr3, p2.nr4]
 
             for p3 in qset_hint.exclude(nr1__in=used1).exclude(nr3__in=used1).exclude(nr4__in=used1):
                 exp_p1_side3 = p3.side1
                 exp_p4_side4 = p3.side2
                 used23 = used1[:]
-                used23.extend([p3.nr1, p3.nr2, p3.nr3, p3.nr4])
+                used23.extend([p3.nr1, p3.nr3, p3.nr4])
                 used23.extend(self.bad_nrs)
 
                 for p1 in (Piece2x2
@@ -246,13 +246,13 @@ class Command(BaseCommand):
 
             exp_p2_side4 = p1.side2
             exp_p3_side1 = p1.side3
-            used1 = [p1.nr1, p1.nr2, p1.nr3, p1.nr4]
+            used1 = [p1.nr2, p1.nr3, p1.nr4]
 
             for p4 in qset_hint.exclude(nr2__in=used1).exclude(nr3__in=used1).exclude(nr4__in=used1):
                 exp_p2_side3 = p4.side1
                 exp_p3_side2 = p4.side4
                 used14 = used1[:]
-                used14.extend([p4.nr1, p4.nr2, p4.nr3, p4.nr4])
+                used14.extend([p4.nr2, p4.nr3, p4.nr4])
                 used14.extend(self.bad_nrs)
 
                 for p2 in (Piece2x2
