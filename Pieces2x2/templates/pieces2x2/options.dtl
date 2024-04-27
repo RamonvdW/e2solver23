@@ -31,7 +31,7 @@
                         <tr>
                             <td colspan="4">
                                 {% if url_prev %}
-                                    <a href="{{ url_prev }}">PREV</a>
+                                    <button onclick="window.stop(); location.href='{{ url_prev }}'" type="button">Prev</button>
                                 {% endif %}
                             </td>
 
@@ -39,9 +39,9 @@
 
                             <td colspan="4">
                                 {% if url_next %}
-                                    <a href="{{ url_next }}">NEXT</a>
+                                    <button onclick="window.stop(); location.href='{{ url_next }}'" type="button">Next</button>
                                 {% elif url_last %}
-                                    <a href="{{ url_last }}">LAST</a>
+                                    <button onclick="window.stop(); location.href='{{ url_last }}'" type="button">Last</button>
                                 {% endif %}
                             </td>
                         </tr>
