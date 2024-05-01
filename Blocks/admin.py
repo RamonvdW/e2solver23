@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023-2024 Ramon van der Winkel.
+#  Copyright (c) 2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.contrib import admin
-from BasePieces.models import BasePiece, Block
+from Blocks.models import Block2x1
 
-admin.site.register(BasePiece)
-admin.site.register(Block)
+
+admin.site.register(Block2x1)
 
 # end of file

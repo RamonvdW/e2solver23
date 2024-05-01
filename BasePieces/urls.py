@@ -13,10 +13,13 @@ app_name = 'BasePieces'
 
 urlpatterns = [
     path('view/',
-         views.ShowView.as_view(),
+         views.PiecesView.as_view(),
          name='view'),
+
+    path('blocks/',
+         views.BlocksView.as_view(),
+         name='blocks'),
 ]
 
 
 # end of file
-

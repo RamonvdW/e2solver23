@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#  Copyright (c) 2023 Ramon van der Winkel.
+#  Copyright (c) 2023-2024 Ramon van der Winkel.
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
@@ -101,8 +101,8 @@ class Piece2x2(models.Model):
     # base pieces used to build up this piece
     nr1 = models.PositiveSmallIntegerField()    # top left
     nr2 = models.PositiveSmallIntegerField()    # top right
-    nr3 = models.PositiveSmallIntegerField()    # bottom right
-    nr4 = models.PositiveSmallIntegerField()    # bottom left
+    nr3 = models.PositiveSmallIntegerField()    # bottom left
+    nr4 = models.PositiveSmallIntegerField()    # bottom right
 
     # number of counter-clockwise rotations of each base piece
     rot1 = models.PositiveSmallIntegerField()

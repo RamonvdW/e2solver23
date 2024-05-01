@@ -16,6 +16,7 @@ from django.conf.urls import include
 urlpatterns = [
     path('__debug__/',  include('debug_toolbar.urls')),
     path('1x1/',        include('BasePieces.urls')),
+    path('blocks/',     include('Blocks.urls')),
     path('2x2/',        include('Pieces2x2.urls')),
     path('ring1/',      include('Ring1.urls')),
     path('ring2/',      include('Ring2.urls')),

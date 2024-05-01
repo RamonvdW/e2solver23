@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blocks 2x1</title>
+    <style>
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+            padding: 5px 10px 5px 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Blocks 2x1</h1>
+
+    <p>
+        {% if url_prev1000 %}<a style="margin:10px" href="{{ url_prev1000 }}">-1000</a>{% else %}<span style="margin:10px">-1000</span>{% endif %}
+        {% if url_prev100  %}<a style="margin:10px" href="{{ url_prev100  }}">-100</a>{%  else %}<span style="margin:10px">-100</span>{% endif %}
+        {% if url_prev20   %}<a style="margin:10px" href="{{ url_prev20   }}">-20</a>{%   else %}<span style="margin:10px">-20</span>{% endif %}
+        <a style="margin:10px" href="{{ url_next20 }}">+20</a>
+        <a style="margin:10px" href="{{ url_next100 }}">+100</a>
+        <a style="margin:10px" href="{{ url_next1000 }}">+1000</a>
+    </p>
+
+    <table style="margin-left:auto; margin-right:auto">
+        <thead>
+            <tr>
+                <th>Nr</th>
+                <th>Image</th>
+                <th>Block nrs</th>
+                <th>Sides</th>
+            </tr>
+        </thead>
+
+        {% for group in groups %}
+            {% if not forloop.first %}
+                <tr>
+                    <td colspan="4"></td>
+                </tr>
+            {% endif %}
+            {% for block in group %}
+                <tr>
+                    <td>{{ block.nr }}</td>
+
+                    <!-- one image is 40x40 -->
+                    <td>
+                        <div style="display:flex">
+                            <img src="{{ block.img_b1 }}" width="32">
+                            <img src="{{ block.img_b2 }}" width="32" style="margin-right:2px">
+                            <img src="{{ block.img_b3 }}" width="32">
+                            <img src="{{ block.img_b4 }}" width="32">
+                        </div>
+                        <div style="display:flex">
+                            <img src="{{ block.img_b8 }}" width="32">
+                            <img src="{{ block.img_b7 }}" width="32" style="margin-right:2px">
+                            <img src="{{ block.img_b6 }}" width="32">
+                            <img src="{{ block.img_b5 }}" width="32">
+                        </div>
+                    </td>
+
+                    <td>{{ block.block1_nr }}<sub>{{ block.rot1 }}</sub>, {{ block.block2_nr }}<sub>{{ block.rot2 }}</sub></td>
+                    <td>{{ block.side1 }}, {{ block.side2 }}, {{ block.side3 }}, {{ block.side4 }}</td>
+                </tr>
+            {% endfor %}
+        {% endfor %}
+    </table>
+
+</body>
+</html>

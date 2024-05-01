@@ -36,11 +36,13 @@ INTERNAL_IPS = []
 INSTALLED_APPS = [
     'BasePieces',
     'Pieces2x2',
+    'Pieces3x3',
     'Ring1',
     'Ring2',
     'Ring3',
     'Solutions',
     'WorkQueue',
+    'Blocks',
     'django.contrib.admin',
     'django.contrib.staticfiles',   # gather static files from modules helper
     'django.contrib.sessions',      # support for database-backed sessions; needed for logged-in user

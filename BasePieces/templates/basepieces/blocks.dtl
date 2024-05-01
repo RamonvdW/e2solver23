@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Piece 2x2</title>
+    <title>Blocks</title>
     <style>
         table, th, td {
             border: 1px solid black;
@@ -16,7 +16,7 @@
 
 <body>
 
-    <h1>BasePieces</h1>
+    <h1>Blocks</h1>
 
     <table style="margin-left:auto; margin-right:auto">
         <thead>
@@ -44,7 +44,16 @@
             <tr>
                 {% for piece in group %}
                         <td>{{ piece.nr }}</td>
-                        <td><img src="{{ piece.img }}"></td>
+                        <td>
+                            <div style="display:flex">
+                                <img src="{{ piece.img_b1 }}" width="32">
+                                <img src="{{ piece.img_b2 }}" width="32">
+                            </div>
+                            <div style="display:flex">
+                                <img src="{{ piece.img_b4 }}" width="32">
+                                <img src="{{ piece.img_b3 }}" width="32">
+                            </div>
+                        </td>
                 {% endfor %}
             </tr>
         {% endfor %}

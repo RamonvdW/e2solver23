@@ -82,6 +82,9 @@ class ShowView(TemplateView):
                 group = []
         # for
 
+        if len(group):
+            groups.append(group)
+
         return context
 
 
