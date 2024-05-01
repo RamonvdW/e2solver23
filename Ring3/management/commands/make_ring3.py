@@ -41,6 +41,17 @@ class Command(BaseCommand):
         self.progress = None
         self.prev_tick = time.monotonic()
 
+        self.inner_ring_loc28_s1 = -1
+        self.inner_ring_loc29_s1 = -1
+        self.inner_ring_loc29_s2 = -1
+        self.inner_ring_loc37_s2 = -1
+        self.inner_ring_loc36_s3 = -1
+        self.inner_ring_loc37_s3 = -1
+        self.inner_ring_loc28_s4 = -1
+        self.inner_ring_loc36_s4 = -1
+
+        self.inner_rings = set()
+
     def add_arguments(self, parser):
         parser.add_argument('processor', type=int, help='Processor to use')
         parser.add_argument('--clean', action='store_true')
@@ -143,8 +154,21 @@ class Command(BaseCommand):
         # sys.exit(1)
 
     def _check_ring4(self):
-        # verify the inner 4 blocks can be filled
-        self._save_ring3()
+        # identify the unique inner ring of this Ring3
+        inner_ring = (
+            self.inner_ring_loc28_s1,
+            self.inner_ring_loc29_s1,
+            self.inner_ring_loc29_s2,
+            self.inner_ring_loc37_s2,
+            self.inner_ring_loc36_s3,
+            self.inner_ring_loc37_s3,
+            self.inner_ring_loc28_s4,
+            self.inner_ring_loc36_s4)
+
+        if inner_ring not in self.inner_rings:
+            self.inner_rings.add(inner_ring)
+            print('[INFO] Unique inner ring count: %s' % len(self.inner_rings))
+            self._save_ring3()
 
     def _check_loc14b(self):
         qset = Piece2x2.objects.filter(has_hint=False,
@@ -211,6 +235,8 @@ class Command(BaseCommand):
                                        nr3__in=self.unused, nr4__in=self.unused,
                                        side3=self.exp_loc22_s3,
                                        side4=self.exp_loc22_s4)
+
+        found = False
         for p in qset.iterator(chunk_size=1000):
             self.ring3.loc22 = p.nr
             self.exp_loc14_s3 = p.side1
@@ -220,8 +246,14 @@ class Command(BaseCommand):
             if self._check_loc23a() and self._check_loc14a() and self._check_loc15():
                 if self._check_loc23b() and self._check_loc14b():
                     self._check_ring4()
+                    # stop after finding 1 solution
+                    found = True
             self._make_unused(p_nrs)
+            if found:
+                break
         # for
+
+        return found
 
     def _check_loc31(self):
         qset = Piece2x2.objects.filter(has_hint=False,
@@ -282,16 +314,21 @@ class Command(BaseCommand):
                                        nr1__in=self.unused, nr2__in=self.unused,
                                        nr3__in=self.unused, nr4__in=self.unused,
                                        side3=self.exp_loc30_s3)
+
         for p in qset.iterator(chunk_size=100):
             self.ring3.loc30 = p.nr
             self.exp_loc22_s3 = p.side1
             self.exp_loc31_s4 = p.side2
             self.exp_loc29_s2 = p.side4
+            self.inner_ring_loc29_s2 = p.side4
             p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
+            found = False
             self._make_used(p_nrs)
             if self._check_loc29b() and self._check_loc37c() and self._check_loc28d() and self._check_loc31():
-                self._find_loc22()
+                found = self._find_loc22()
             self._make_unused(p_nrs)
+            if found:
+                break
         # for
 
     def _check_loc13(self):
@@ -344,6 +381,7 @@ class Command(BaseCommand):
             self.exp_loc13_s3 = p.side1
             self.exp_loc22_s4 = p.side2
             self.exp_loc29_s1 = p.side3
+            self.inner_ring_loc29_s1 = p.side3
             p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
             self._make_used(p_nrs)
             if self._check_loc29a() and self._check_loc28c() and self._check_loc13():
@@ -387,6 +425,7 @@ class Command(BaseCommand):
             self.exp_loc30_s3 = p.side1
             self.exp_loc39_s4 = p.side2
             self.exp_loc37_s2 = p.side4
+            self.inner_ring_loc37_s2 = p.side4
             p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
             self._make_used(p_nrs)
             if self._check_loc37b() and self._check_loc39():
@@ -455,6 +494,7 @@ class Command(BaseCommand):
             self.exp_loc12_s3 = p.side1
             self.exp_loc21_s4 = p.side2
             self.exp_loc28b_s1 = p.side3
+            self.inner_ring_loc28_s1 = p.side3
             p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
             self._make_used(p_nrs)
             if self._check_loc28b() and self._check_loc12():
@@ -550,6 +590,7 @@ class Command(BaseCommand):
             self.exp_loc38_s3 = p.side1
             self.exp_loc47_s4 = p.side2
             self.exp_loc54_s1 = p.side3
+
             p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
             self._make_used(p_nrs)
             if self._check_loc54a() and self._check_loc47a() and self._check_loc55():
@@ -672,6 +713,7 @@ class Command(BaseCommand):
             self.exp_loc37_s3 = p.side1
             self.exp_loc46_s4 = p.side2
             self.exp_loc53_s1 = p.side3
+            self.inner_ring_loc37_s3 = p.side1
             p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
             self._make_used(p_nrs)
             if self._check_loc53a() and self._check_loc37a():
@@ -715,6 +757,7 @@ class Command(BaseCommand):
             self.exp_loc19_s3 = p.side1
             self.exp_loc28_s4 = p.side2
             self.exp_loc26_s2 = p.side4
+            self.inner_ring_loc28_s4 = p.side2
             p_nrs = (p.nr1, p.nr2, p.nr3, p.nr4)
             self._make_used(p_nrs)
             if self._check_loc28a() and self._check_loc26a():
@@ -850,13 +893,12 @@ class Command(BaseCommand):
             self.exp_loc37_s4 = p.side2
             self.exp_loc44_s1 = p.side3
             self.exp_loc35_s2 = p.side4
+            self.inner_ring_loc36_s3 = p.side3
+            self.inner_ring_loc36_s4 = p.side4
             p_nrs = (p.nr1, p.nr3, p.nr4)
             self._make_used(p_nrs)
             self._find_loc35()
             self._make_unused(p_nrs)
-
-
-            break
         # for
 
     def handle(self, *args, **options):
