@@ -1,0 +1,20 @@
+---
+layout: article
+order: 6
+title:  "Segments"
+categories: background
+---
+The board is organized in 137 "segments" for which the remaining [two sides](/background/2024/01/01/03-sides) are tracked.
+
+The segments are numbered according to the location number:
+- Above = location
+- Below = location + 8
+- Left = 100 + location
+- Right = 100 + location + 1
+
+![Initial board](/assets/initial-board.png){:width="75%"}
+
+The columns on the far left and right have the same segment number.
+Since these hold the same 1 remaining option, it was an acceptable side-effect.
+
+8x8 (columns) + 8x8 (rows) + 8 (bottom row) + 1 (right of 64) = 64+64+8+1 = 137 segments.
