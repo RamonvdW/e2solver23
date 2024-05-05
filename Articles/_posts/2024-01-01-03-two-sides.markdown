@@ -1,14 +1,14 @@
 ---
 layout: article
 order: 3
-title:  "Two sides"
+title:  "Two-sides"
 categories: background
 ---
 The 2x2 pieces have four "big sides" that I simply numbered 1, 2, 3, 4 starting at the top, going clockwise.
 
-Each "two side" consists of the two sides of the base piece that ended pointing in that direction.
+Each two-side consists of the two sides of the base piece that ended pointing in that direction.
 
-The base piece colors must be put in a specific order in the "two side".
+The base piece colors must be put in a specific order in the two-side.
 On my first try I using "clock-wise" on all four sides.
 That had one problem: side1 and side3 using a different order. Side3 cannot match side1 of another piece: you have to reverse the order of the color first.
 

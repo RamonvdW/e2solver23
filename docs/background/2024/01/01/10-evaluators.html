@@ -15,37 +15,41 @@
         <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
 
   <header class="post-header">
-    <h1 class="post-title p-name" itemprop="name headline">Two-sides</h1>
+    <h1 class="post-title p-name" itemprop="name headline">Evaluators</h1>
     <p class="post-meta">
   </header>
 
   <div class="post-content e-content" itemprop="articleBody">
-    <p>The 2x2 pieces have four “big sides” that I simply numbered 1, 2, 3, 4 starting at the top, going clockwise.</p>
+    <p>The “evaluators” are the tools in my solver to find two-side options that can be deleted.</p>
 
-<p>Each two-side consists of the two sides of the base piece that ended pointing in that direction.</p>
+<p>They run through the options remaining for a segment and try to create a shape, for example a 3x3.
+If that succeeds, the option can stay.</p>
 
-<p>The base piece colors must be put in a specific order in the two-side.
-On my first try I using “clock-wise” on all four sides.
-That had one problem: side1 and side3 using a different order. Side3 cannot match side1 of another piece: you have to reverse the order of the color first.</p>
+<p>If, of the other hand, it does not succeed to find a solution, it concludes the option is not valid and it will be discarded.</p>
 
-<p>Once I discovered the overhead I decided to always follow left-right and top-down.</p>
-
-<p><img src="/e2solver23/assets/2x2_good.png" alt="2x2 good" width="150px" /></p>
-
-<p>The way the puzzle pieces fit together into the 2x2 pieces resulted in 460 “two sides”:</p>
+<p>Evaluators have been implemented for the following shapes:</p>
 <ul>
-  <li>combination of two of the 17 inner colors: 17x17=289</li>
-  <li>combination of the 5 colors found along the border + the 17 inner colors: 5x17=85 and 17x5=85</li>
-  <li>combination of two outside borders: 1</li>
+  <li>Single location (1x1)</li>
+  <li>Square of 2x2 locations (4 locations filled), 64 start locations</li>
+  <li>Square of 3x3 locations (9 locations filled), 36 start locations (top-left)</li>
+  <li>Square of 4x4 locations (16 locations filled), 25 start locations (top-left)</li>
+  <li>Square of 5x5 locations (25 locations filled), 16 start locations (top-left)</li>
+  <li>A line of 8x1 along any of the 4 sides (8 locations filled)</li>
+  <li>A line of 8x2 along any of the 4 sides (16 locations filled)</li>
+  <li>A line of 8x3 along any of the 4 sides (24 locations filled)</li>
+  <li>Square of 2x2 in all 4 corners at the same time (16 locations filled)</li>
 </ul>
 
-<p>The database contains a table with these 460 rows: a small number plus the two actual colors.
-The 2x2 pieces refer to these numbers.</p>
+<p>The evaluators use backtracking algorithms to run through all the possibilities (starting with a specific segment option) and abort the search as soon as a solution is found.</p>
 
-<p>Searching for 2x2 pieces that fit together means asking the database for pieces with a matching side:</p>
-
-<figure class="highlight"><pre><code class="language-django-python" data-lang="django-python">qset = Piece2x2.objects.filter(side1=piece_above.side3)</code></pre></figure>
-
+<p>Depending on the shape size, the solvers check all options for specific segments:</p>
+<ul>
+  <li>1x1: check all 4 outer segments (around the location)</li>
+  <li>2x2: check the 4 inner segments that connect the locations</li>
+  <li>3x3: check the 12 inner segments, starting with the 4 core inner segments</li>
+  <li>4x4: check the 17 inner segments</li>
+  <li>etc.</li>
+</ul>
 
   </div>
 
@@ -54,20 +58,20 @@ The 2x2 pieces refer to these numbers.</p>
     <div style="width:50%; display:block; text-align:left">
         
             <b>Previous: </b>
-            <a class="prev" href="/e2solver23/background/2024/01/01/02-bigger-pieces.html">Bigger pieces</a>
+            <a class="prev" href="/e2solver23/background/2024/01/01/06-segments.html">Segments</a>
         
     </div>
 
     <div style="width:50%; display:block; text-align:right">
         
             <b>Next: </b>
-            <a class="next" href="/e2solver23/background/2024/01/01/04-smaller-board.html">Smaller board</a>
+            <a class="next" href="/e2solver23/background/2024/01/01/11-evaluator-progress.html">Evaluator progress</a>
         
     </div>
     <div>
   </div>
 
-  <a class="u-url" href="/e2solver23/background/2024/01/01/03-two-sides.html" hidden></a>
+  <a class="u-url" href="/e2solver23/background/2024/01/01/10-evaluators.html" hidden></a>
 </article>
 
       </div>

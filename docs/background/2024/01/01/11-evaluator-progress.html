@@ -15,37 +15,21 @@
         <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
 
   <header class="post-header">
-    <h1 class="post-title p-name" itemprop="name headline">Two-sides</h1>
+    <h1 class="post-title p-name" itemprop="name headline">Evaluator progress</h1>
     <p class="post-meta">
   </header>
 
   <div class="post-content e-content" itemprop="articleBody">
-    <p>The 2x2 pieces have four “big sides” that I simply numbered 1, 2, 3, 4 starting at the top, going clockwise.</p>
+    <p>For monitoring purposes, the evaluators use a database record to report what they are doing.
+The website picks this information up and shows it to the user.</p>
 
-<p>Each two-side consists of the two sides of the base piece that ended pointing in that direction.</p>
+<p>In the example below, 13 evaluators are searching for solutions to confirm/deny each option of 12 segments of their 3x3.
+The first evaluator is considering locations 5, 6, 7, 13, 14, 15, 21, 22, 23.
+It is currently evaluating the 5th segment of 12 (marked in bold), checking option 78 out of 80.</p>
 
-<p>The base piece colors must be put in a specific order in the two-side.
-On my first try I using “clock-wise” on all four sides.
-That had one problem: side1 and side3 using a different order. Side3 cannot match side1 of another piece: you have to reverse the order of the color first.</p>
+<p><img src="/e2solver23/assets/progress-2.png" alt="Progress" /></p>
 
-<p>Once I discovered the overhead I decided to always follow left-right and top-down.</p>
-
-<p><img src="/e2solver23/assets/2x2_good.png" alt="2x2 good" width="150px" /></p>
-
-<p>The way the puzzle pieces fit together into the 2x2 pieces resulted in 460 “two sides”:</p>
-<ul>
-  <li>combination of two of the 17 inner colors: 17x17=289</li>
-  <li>combination of the 5 colors found along the border + the 17 inner colors: 5x17=85 and 17x5=85</li>
-  <li>combination of two outside borders: 1</li>
-</ul>
-
-<p>The database contains a table with these 460 rows: a small number plus the two actual colors.
-The 2x2 pieces refer to these numbers.</p>
-
-<p>Searching for 2x2 pieces that fit together means asking the database for pieces with a matching side:</p>
-
-<figure class="highlight"><pre><code class="language-django-python" data-lang="django-python">qset = Piece2x2.objects.filter(side1=piece_above.side3)</code></pre></figure>
-
+<p>Finally, we can see that none of the evaluators are stuck because all are continuously reporting out.</p>
 
   </div>
 
@@ -54,20 +38,20 @@ The 2x2 pieces refer to these numbers.</p>
     <div style="width:50%; display:block; text-align:left">
         
             <b>Previous: </b>
-            <a class="prev" href="/e2solver23/background/2024/01/01/02-bigger-pieces.html">Bigger pieces</a>
+            <a class="prev" href="/e2solver23/background/2024/01/01/10-evaluators.html">Evaluators</a>
         
     </div>
 
     <div style="width:50%; display:block; text-align:right">
         
             <b>Next: </b>
-            <a class="next" href="/e2solver23/background/2024/01/01/04-smaller-board.html">Smaller board</a>
+            <a class="next" href="/e2solver23/background/2024/01/01/50-solving-manually.html">Solving manually</a>
         
     </div>
     <div>
   </div>
 
-  <a class="u-url" href="/e2solver23/background/2024/01/01/03-two-sides.html" hidden></a>
+  <a class="u-url" href="/e2solver23/background/2024/01/01/11-evaluator-progress.html" hidden></a>
 </article>
 
       </div>
