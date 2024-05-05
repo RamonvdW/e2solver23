@@ -12,4 +12,4 @@ The hints have ended up in locations 10, 15, 36, 50 and 55.
 
 The thick grey bars between the cells will be utilized to show information about the progress.
 
-![Empty board](/assets/empty-board.png){:width="75%"}
+![Empty board]({{"/assets/empty-board.png" | relative_url }}){:width="75%"}

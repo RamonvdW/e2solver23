@@ -17,14 +17,14 @@ layout: default
     <div style="width:50%; display:block; text-align:left">
         {% if page.previous.url %}
             <b>Previous: </b>
-            <a class="prev" href="{{page.previous.url}}">{{page.previous.title}}</a>
+            <a class="prev" href="{{ page.previous.url | relative_url }}">{{page.previous.title}}</a>
         {% endif %}
     </div>
 
     <div style="width:50%; display:block; text-align:right">
         {% if page.next.url %}
             <b>Next: </b>
-            <a class="next" href="{{page.next.url}}">{{page.next.title}}</a>
+            <a class="next" href="{{ page.next.url | relative_url }}">{{page.next.title}}</a>
         {% endif %}
     </div>
     <div>

@@ -12,7 +12,7 @@ The segments are numbered according to the location number:
 - Left = 100 + location
 - Right = 100 + location + 1
 
-![Initial board](/assets/initial-board.png){:width="75%"}
+![Initial board]({{"/assets/initial-board.png" | relative_url }}){:width="75%"}
 
 The columns on the far left and right have the same segment number.
 Since these hold the same 1 remaining option, it was an acceptable side-effect.

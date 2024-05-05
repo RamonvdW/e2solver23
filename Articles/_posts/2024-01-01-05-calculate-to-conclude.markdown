@@ -15,6 +15,6 @@ Around the hint pieces we see a greatly reduced number of "two side" options rem
 In my solver, an “evaluation” (calculation) can conclude to drop one of the options, reducing the remaining possibilities.
 The end goal is 1 remaining option around each location.
 
-![Initial board](/assets/initial-board.png){:width="75%"}
+![Initial board]({{"/assets/initial-board.png" | relative_url }}){:width="75%"}
 
 The article about [two sides](/background/2024/01/01/03-sides) explains the numbers (289, 85).

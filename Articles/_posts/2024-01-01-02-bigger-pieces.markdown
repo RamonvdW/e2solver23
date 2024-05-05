@@ -22,8 +22,8 @@ The 2x2 pieces generator considers the following special cases:
 
 This resulted in a total of 3.95 million 2x2 pieces.
 
-![2x2 bad](/assets/2x2_bad.png){:width="150px"}
-![2x2 good](/assets/2x2_good.png){:width="150px"}
+![2x2 bad]({{"/assets/2x2_bad.png" | relative_url }}){:width="150px"}
+![2x2 good]({{"/assets/2x2_good.png" | relative_url }}){:width="150px"}
 
 I piece stores the 4 base pieces it is based on, including rotation.
 The fields are named nr1, nr2, nr3, nr4 and rot1, rot2, rot3, rot4.

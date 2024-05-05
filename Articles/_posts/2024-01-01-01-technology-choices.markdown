@@ -24,4 +24,4 @@ The visualizations help me identify problems in the code early.
 
 If you are interested in the code, check out the [GitHub repository](https://github.com/RamonvdW/e2solver23).
 
-![Technology choices](/assets/wordcloud.png){:width="250px"}
+![Technology choices]({{"/assets/wordcloud.png" | relative_url }}){:width="250px"}

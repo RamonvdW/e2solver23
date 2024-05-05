@@ -6,6 +6,6 @@ categories: background
 ---
 Given the form of the base pieces it is not unlikely a custom [Wang Tile](https://en.wikipedia.org/wiki/Wang_tile) generator was used.
 
-![Wang tiles](/assets/wang-tiles.png){:width="250px"}
+![Wang tiles]({{"/assets/wang-tiles.png" | relative_url }}){:width="250px"}
 
 Note to future: try to solve the puzzle by recreating the custom wang-tile generator.
