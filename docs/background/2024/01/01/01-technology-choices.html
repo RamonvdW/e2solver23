@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/assets/main.css">
+</head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">E2 Solver 2023</a>
+
+  </div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Technology choices</h1>
+    <p class="post-meta">
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>This is a follow-up on the work done about 16 years ago (2007-2008), utilizing skills and tools available in 2023.</p>
+
+<p>I selected the following technology:</p>
+<ul>
+  <li>Powerful Linux host in the cloud (dedicated 12-cores, 64GB RAM, 1TB NVMe)</li>
+  <li>Python3</li>
+  <li>PostgreSQL database</li>
+  <li>Systemd background workers</li>
+  <li>Django website: for visualizations and to monitor progress from any mobile / table / laptop</li>
+  <li>Django management commands to perform work (or queue work)</li>
+  <li>Source code in GitHub</li>
+  <li>Focus on efficient algorithms instead of efficient code</li>
+</ul>
+
+<p>The database serves two purposes: it hold the work queue, progress, board, remaining possibilities.
+And it is also good in one important task: to efficiently search and serve programs running in parallel.
+For example: answer “which puzzle pieces fit here?”</p>
+
+<p>The visualizations help me identify problems in the code early.</p>
+
+<p>If you are interested in the code, check out the <a href="https://github.com/RamonvdW/e2solver23">GitHub repository</a>.</p>
+
+<p><img src="/assets/wordcloud.png" alt="Technology choices" width="250px" /></p>
+
+  </div>
+
+  <div class="PageNavigation" style="display:flex; margin-bottom:0">
+
+    <div style="width:50%; display:block; text-align:left">
+        
+    </div>
+
+    <div style="width:50%; display:block; text-align:right">
+        
+            <b>Next: </b>
+            <a class="next" href="/background/2024/01/01/02-bigger-pieces.html">Bigger pieces</a>
+        
+    </div>
+    <div>
+  </div>
+
+  <a class="u-url" href="/background/2024/01/01/01-technology-choices.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">E2 Solver 2023</li>
+          <li class="p-name">by Ramon van der Winkel</li>
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+          <ul class="social-media-list">
+              <li>
+                  <a href="https://github.com/RamonvdW">
+                      <svg class="svg-icon">
+                          <use xlink:href="/assets/minima-social-icons.svg#github"></use>
+                      </svg>
+                      <span class="username">RamonvdW</span>
+                  </a>
+              </li>
+          </ul>
+      </div>
+
+      <div class="footer-col footer-col-3">
+        <p>Solver for the Eternity II puzzle using novel algorithms and web development technology</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

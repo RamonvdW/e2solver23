@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/assets/main.css">
+</head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">E2 Solver 2023</a>
+
+  </div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Server setup</h1>
+    <p class="post-meta">
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>The code available in the <a href="https://github.com/RamonvdW/e2solver23">GitHub repository</a> has some prerequisites.
+This article provides some background on what is needed.</p>
+
+<p>These are the big lines of my recipe:</p>
+<ul>
+  <li>Install headless Linux (my choice is Debian)</li>
+  <li>Setup the firewall: allow http, allow ssh from limited places</li>
+  <li>Secure your installation and verify it is secure</li>
+  <li>Install PostgreSQL</li>
+  <li>Tweak PostgreSQL of on-host efficiency: ssl off, huge cache size, large shared buffers, large work mem</li>
+  <li>Create database user + create empty database</li>
+  <li>Install Apache2</li>
+  <li>Configure Apache2: enable ssl, http2 and disable unnecessary things</li>
+  <li>Install CertBot for free HTTPS certificate</li>
+  <li>Install Django</li>
+  <li>Install git</li>
+  <li>Create Python virtual env for website, update pip, install pip-tools</li>
+  <li>Fetch the repo + deploy code</li>
+  <li>Install the 3rd-party packages with pip-sync</li>
+  <li>Install, enable and start the systemd workers</li>
+</ul>
+
+  </div>
+
+  <div class="PageNavigation" style="display:flex; margin-bottom:0">
+
+    <div style="width:50%; display:block; text-align:left">
+        
+            <b>Previous: </b>
+            <a class="prev" href="/background/2024/01/01/98-wang-tiles.html">Wang Tiles</a>
+        
+    </div>
+
+    <div style="width:50%; display:block; text-align:right">
+        
+    </div>
+    <div>
+  </div>
+
+  <a class="u-url" href="/background/2024/01/01/99-server-setup.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">E2 Solver 2023</li>
+          <li class="p-name">by Ramon van der Winkel</li>
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+          <ul class="social-media-list">
+              <li>
+                  <a href="https://github.com/RamonvdW">
+                      <svg class="svg-icon">
+                          <use xlink:href="/assets/minima-social-icons.svg#github"></use>
+                      </svg>
+                      <span class="username">RamonvdW</span>
+                  </a>
+              </li>
+          </ul>
+      </div>
+
+      <div class="footer-col footer-col-3">
+        <p>Solver for the Eternity II puzzle using novel algorithms and web development technology</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/assets/main.css">
+</head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">E2 Solver 2023</a>
+
+  </div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Segments</h1>
+    <p class="post-meta">
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>The board is organized in 137 “segments” for which the remaining <a href="/background/2024/01/01/03-sides">two sides</a> are tracked.</p>
+
+<p>The segments are numbered according to the location number:</p>
+<ul>
+  <li>Above = location</li>
+  <li>Below = location + 8</li>
+  <li>Left = 100 + location</li>
+  <li>Right = 100 + location + 1</li>
+</ul>
+
+<p><img src="/assets/initial-board.png" alt="Initial board" width="75%" /></p>
+
+<p>The columns on the far left and right have the same segment number.
+Since these hold the same 1 remaining option, it was an acceptable side-effect.</p>
+
+<p>8x8 (columns) + 8x8 (rows) + 8 (bottom row) + 1 (right of 64) = 64+64+8+1 = 137 segments.</p>
+
+  </div>
+
+  <div class="PageNavigation" style="display:flex; margin-bottom:0">
+
+    <div style="width:50%; display:block; text-align:left">
+        
+            <b>Previous: </b>
+            <a class="prev" href="/background/2024/01/01/05-calculate-to-conclude.html">Calculate to conclude</a>
+        
+    </div>
+
+    <div style="width:50%; display:block; text-align:right">
+        
+            <b>Next: </b>
+            <a class="next" href="/background/2024/01/01/50-solving-manually.html">Solving manually</a>
+        
+    </div>
+    <div>
+  </div>
+
+  <a class="u-url" href="/background/2024/01/01/06-segments.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">E2 Solver 2023</li>
+          <li class="p-name">by Ramon van der Winkel</li>
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+          <ul class="social-media-list">
+              <li>
+                  <a href="https://github.com/RamonvdW">
+                      <svg class="svg-icon">
+                          <use xlink:href="/assets/minima-social-icons.svg#github"></use>
+                      </svg>
+                      <span class="username">RamonvdW</span>
+                  </a>
+              </li>
+          </ul>
+      </div>
+
+      <div class="footer-col footer-col-3">
+        <p>Solver for the Eternity II puzzle using novel algorithms and web development technology</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

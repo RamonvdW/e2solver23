@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/assets/main.css">
+</head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">E2 Solver 2023</a>
+
+  </div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Bigger pieces</h1>
+    <p class="post-meta">
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>Considering just the base pieces without a border, we see 17 different sides in use.
+This allows for approximately 75000 unique pieces.
+The puzzle only has 192 inner pieces.
+192 out of 75000 means there is potentially a lot to gain to pre-calculate bigger pieces with <em>valid</em> inner side combinations.
+A first estimate was 1 million 2x2 pieces.</p>
+
+<p>Since the pieces do not have a predefined “up” direction, each piece can be placed under 4 possible rotations.
+I considered the option to pre-generate all rotation variants of the 2x2 pieces, mainly to avoid rotating the corners, borders and hints into <em>invalid</em> positions on the board.
+This approximately quadruples the number of 2x2 pieces generated, but trades work in the solvers versus handling some more rows in a database table.
+I decided for it.</p>
+
+<p>The 2x2 pieces generator considers the following special cases:</p>
+<ul>
+  <li>Hint pieces (5x) must be in a specific location in the 2x2 and never together in one piece.</li>
+  <li>Corner always combined with 2 border pieces and one inner piece that is never a hint.</li>
+  <li>Borders pieces always in pairs on at most one of the sides (never in the middle) combined with 2 inner pieces</li>
+</ul>
+
+<p>This resulted in a total of 3.95 million 2x2 pieces.</p>
+
+<p><img src="/assets/2x2_bad.png" alt="2x2 bad" width="150px" />
+<img src="/assets/2x2_good.png" alt="2x2 good" width="150px" /></p>
+
+<p>I piece stores the 4 base pieces it is based on, including rotation.
+The fields are named nr1, nr2, nr3, nr4 and rot1, rot2, rot3, rot4.</p>
+
+<p>To search for a piece that does not need one of the base pieces already in use on the board:</p>
+
+<figure class="highlight"><pre><code class="language-django-python" data-lang="django-python">qset = Piece2x2.objects.exclude(nr1__in=used_pieces,
+                                nr2__in=used_pieces,
+                                nr3__in=used_pieces,
+                                nr4__in=used_pieces)</code></pre></figure>
+
+
+  </div>
+
+  <div class="PageNavigation" style="display:flex; margin-bottom:0">
+
+    <div style="width:50%; display:block; text-align:left">
+        
+            <b>Previous: </b>
+            <a class="prev" href="/background/2024/01/01/01-technology-choices.html">Technology choices</a>
+        
+    </div>
+
+    <div style="width:50%; display:block; text-align:right">
+        
+            <b>Next: </b>
+            <a class="next" href="/background/2024/01/01/03-two-sides.html">Two sides</a>
+        
+    </div>
+    <div>
+  </div>
+
+  <a class="u-url" href="/background/2024/01/01/02-bigger-pieces.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">E2 Solver 2023</li>
+          <li class="p-name">by Ramon van der Winkel</li>
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+          <ul class="social-media-list">
+              <li>
+                  <a href="https://github.com/RamonvdW">
+                      <svg class="svg-icon">
+                          <use xlink:href="/assets/minima-social-icons.svg#github"></use>
+                      </svg>
+                      <span class="username">RamonvdW</span>
+                  </a>
+              </li>
+          </ul>
+      </div>
+
+      <div class="footer-col footer-col-3">
+        <p>Solver for the Eternity II puzzle using novel algorithms and web development technology</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

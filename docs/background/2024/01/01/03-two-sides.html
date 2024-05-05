@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/assets/main.css">
+</head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/">E2 Solver 2023</a>
+
+  </div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Two sides</h1>
+    <p class="post-meta">
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>The 2x2 pieces have four “big sides” that I simply numbered 1, 2, 3, 4 starting at the top, going clockwise.</p>
+
+<p>Each “two side” consists of the two sides of the base piece that ended pointing in that direction.</p>
+
+<p>The base piece colors must be put in a specific order in the “two side”.
+On my first try I using “clock-wise” on all four sides.
+That had one problem: side1 and side3 using a different order. Side3 cannot match side1 of another piece: you have to reverse the order of the color first.</p>
+
+<p>Once I discovered the overhead I decided to always follow left-right and top-down.</p>
+
+<p><img src="/assets/2x2_good.png" alt="2x2 good" width="150px" /></p>
+
+<p>The way the puzzle pieces fit together into the 2x2 pieces resulted in 460 “two sides”:</p>
+<ul>
+  <li>combination of two of the 17 inner colors: 17x17=289</li>
+  <li>combination of the 5 colors found along the border + the 17 inner colors: 5x17=85 and 17x5=85</li>
+  <li>combination of two outside borders: 1</li>
+</ul>
+
+<p>The database contains a table with these 460 rows: a small number plus the two actual colors.
+The 2x2 pieces refer to these numbers.</p>
+
+<p>Searching for 2x2 pieces that fit together means asking the database for pieces with a matching side:</p>
+
+<figure class="highlight"><pre><code class="language-django-python" data-lang="django-python">qset = Piece2x2.objects.filter(side1=piece_above.side3)</code></pre></figure>
+
+
+  </div>
+
+  <div class="PageNavigation" style="display:flex; margin-bottom:0">
+
+    <div style="width:50%; display:block; text-align:left">
+        
+            <b>Previous: </b>
+            <a class="prev" href="/background/2024/01/01/02-bigger-pieces.html">Bigger pieces</a>
+        
+    </div>
+
+    <div style="width:50%; display:block; text-align:right">
+        
+            <b>Next: </b>
+            <a class="next" href="/background/2024/01/01/04-smaller-board.html">Smaller board</a>
+        
+    </div>
+    <div>
+  </div>
+
+  <a class="u-url" href="/background/2024/01/01/03-two-sides.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">E2 Solver 2023</li>
+          <li class="p-name">by Ramon van der Winkel</li>
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+          <ul class="social-media-list">
+              <li>
+                  <a href="https://github.com/RamonvdW">
+                      <svg class="svg-icon">
+                          <use xlink:href="/assets/minima-social-icons.svg#github"></use>
+                      </svg>
+                      <span class="username">RamonvdW</span>
+                  </a>
+              </li>
+          </ul>
+      </div>
+
+      <div class="footer-col footer-col-3">
+        <p>Solver for the Eternity II puzzle using novel algorithms and web development technology</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
