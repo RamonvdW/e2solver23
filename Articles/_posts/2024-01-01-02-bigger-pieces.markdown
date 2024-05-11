@@ -29,7 +29,7 @@ I piece stores the 4 base pieces it is based on, including rotation.
 The fields are named nr1, nr2, nr3, nr4 and rot1, rot2, rot3, rot4.
 
 To search for a piece that does not need one of the base pieces already in use on the board:
-{% highlight django-python %}
+{% highlight text %}
 qset = Piece2x2.objects.exclude(nr1__in=used_pieces,
                                 nr2__in=used_pieces,
                                 nr3__in=used_pieces,

@@ -22,11 +22,13 @@ Evaluators have been implemented for the following shapes:
 - A line of 8x3 along any of the 4 sides (24 locations filled)
 - Square of 2x2 in all 4 corners at the same time (16 locations filled)
 
-The evaluators use backtracking algorithms to run through all the possibilities (starting with a specific segment option) and abort the search as soon as a solution is found.
+![2x2 evaluator]({{"/assets/eval_loc_4.png" | relative_url}}){:width="75%"}
+
+The evaluators use backtracking algorithms to run through all the possibilities (starting with a specific segment option) and stop the search as soon as a solution is found.
 
 Depending on the shape size, the solvers check all options for specific segments:
 - 1x1: check all 4 outer segments (around the location)
-- 2x2: check the 4 inner segments that connect the locations
+- 2x2: check the 4 inner segments that connect the locations (see image above)
 - 3x3: check the 12 inner segments, starting with the 4 core inner segments 
 - 4x4: check the 17 inner segments
 - etc.

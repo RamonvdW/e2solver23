@@ -26,6 +26,6 @@ The 2x2 pieces refer to these numbers.
 
 Searching for 2x2 pieces that fit together means asking the database for pieces with a matching side:
 
-{% highlight django-python %}
+{% highlight text %}
 qset = Piece2x2.objects.filter(side1=piece_above.side3)
 {% endhighlight %}
