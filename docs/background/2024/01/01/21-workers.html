@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/e2solver23/assets/main.css">
+</head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/e2solver23/">E2 Solver 2023</a>
+
+  </div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Workers</h1>
+    <p class="post-meta">
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>The solver can run many evaluators in parallel.
+On the cloud-host I rented, the solver could be configured with 19 workers while maintaining a reasonably responsive webpage (I monitored CPU usage with htop).</p>
+
+<p>Each worker repeats this process:</p>
+<ul>
+  <li>Find the most important work in a database table</li>
+  <li>Set the work as “ongoing” (to avoid processing more than once)</li>
+  <li>Processes the work (typically: run an evaluator)</li>
+  <li>Set the work as “done”</li>
+</ul>
+
+<p>The workers are systemd services. Systemd provides automatic start after server reboot and worker restarts in case of a software crash.
+The operator can reduce the number of systemd workers as needed.</p>
+
+<p>In addition, the operator can run workers in the foreground, typically in a “screen” instance.</p>
+
+<h2>Work queue</h2>
+<p>The operator can queue up work with a management command:</p>
+
+<figure class="highlight"><pre><code class="language-text" data-lang="text">$ ./manage.sh add_work 11 eval_loc_16 16 37
+[INFO] Adding work: 11 eval_loc_16 16 37
+$</code></pre></figure>
+
+<p>This adds a request for board 11 to run the 4x4 evaluator on location 37, with priority 16.</p>
+
+<p>The commands “scan1” and “scan9” request to create and queue up a lot of work in one go:</p>
+
+<figure class="highlight"><pre><code class="language-text" data-lang="text">$ ./manage.sh add_work 10 scan1 2 1
+[INFO] Adding work: 10 eval_loc_1 2 {1..64}
+[INFO] Added 36 jobs
+$ ./manage.sh add_work 10 scan9 9 1 --limit=289
+[INFO] Adding work: 10 eval_loc_9 9 {1 2 3 4 5 6 14 22 30 38 46 9 17 25 33 41 42 43 44 45}
+[INFO] Added 20 jobs</code></pre></figure>
+
+<p>The “scan1” command expands to run a single location evaluator for all locations that are no already filled.</p>
+
+<p>The “scan9” command expands to run a 3x3 evaluator for a fixed number of locations of the board.
+The limit option controls how many options are actually evaluated: this is normally limited to 50 options (to reduce processing time).</p>
+
+<h2>Work propagation</h2>
+<p>When an evaluator removes a segment option, it immediately requests evaluation work to be queued up to check the locations around it for knock-on effects:</p>
+<ul>
+  <li>Evaluate the locations left + right or above + below the segment with priority 1</li>
+  <li>Evaluate three 2x2 around/touching the affected segment with priority 4</li>
+</ul>
+
+<p>These evaluations can again result in knock-on effects.</p>
+
+<h2>Special workers</h2>
+<p>To avoid double use of base pieces, the solver must avoid concurrent selection of pieces on the board.
+Worker 1 is therefore dedicated to running all single location evaluations.</p>
+
+  </div>
+
+  <div class="PageNavigation" style="display:flex; margin-bottom:0">
+
+    <div style="width:50%; display:block; text-align:left">
+        
+            <b>Previous: </b>
+            <a class="prev" href="/e2solver23/background/2024/01/01/20-solving-manually.html">Solving manually</a>
+        
+    </div>
+
+    <div style="width:50%; display:block; text-align:right">
+        
+            <b>Next: </b>
+            <a class="next" href="/e2solver23/background/2024/01/01/22-claims.html">Claims</a>
+        
+    </div>
+    <div>
+  </div>
+
+  <a class="u-url" href="/e2solver23/background/2024/01/01/21-workers.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/e2solver23/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">E2 Solver 2023</li>
+          <li class="p-name">by Ramon van der Winkel</li>
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+          <ul class="social-media-list">
+              <li>
+                  <a href="https://github.com/RamonvdW">
+                      <svg class="svg-icon">
+                          <use xlink:href="/e2solver23/assets/minima-social-icons.svg#github"></use>
+                      </svg>
+                      <span class="username">RamonvdW</span>
+                  </a>
+              </li>
+          </ul>
+      </div>
+
+      <div class="footer-col footer-col-3">
+        <p>Solver for the Eternity II puzzle using novel algorithms and web development technology</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

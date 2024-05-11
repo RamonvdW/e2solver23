@@ -20,12 +20,11 @@
   </header>
 
   <div class="post-content e-content" itemprop="articleBody">
-    <p>The “evaluators” are the tools in my solver to find two-side options that can be deleted.</p>
+    <p>The “evaluators” are the tools in the solver to find two-side options that can be deleted.</p>
 
-<p>They run through the options remaining for a segment and try to create a shape, for example a 3x3.
-If that succeeds, the option can stay.</p>
-
-<p>If, of the other hand, it does not succeed to find a solution, it concludes the option is not valid and it will be discarded.</p>
+<p>They run through all remaining options for a segment and try to create a shape with multiple 2x2 pieces, for example a 3x3.
+If that succeeds, the option can stay.
+If it does not succeed to find a solution, it concludes the option is not valid and it will be discarded from the database.</p>
 
 <p>Evaluators have been implemented for the following shapes:</p>
 <ul>
@@ -40,16 +39,26 @@ If that succeeds, the option can stay.</p>
   <li>Square of 2x2 in all 4 corners at the same time (16 locations filled)</li>
 </ul>
 
-<p>The evaluators use backtracking algorithms to run through all the possibilities (starting with a specific segment option) and abort the search as soon as a solution is found.</p>
+<p><img src="/e2solver23/assets/eval_loc_4.png" alt="2x2 evaluator" width="75%" /></p>
+
+<p>The evaluators use backtracking algorithms to run through all the possibilities (starting with a specific segment option) and stop the search as soon as a solution is found.</p>
 
 <p>Depending on the shape size, the solvers check all options for specific segments:</p>
 <ul>
   <li>1x1: check all 4 outer segments (around the location)</li>
-  <li>2x2: check the 4 inner segments that connect the locations</li>
+  <li>2x2: check the 4 inner segments that connect the locations (see image above)</li>
   <li>3x3: check the 12 inner segments, starting with the 4 core inner segments</li>
   <li>4x4: check the 17 inner segments</li>
   <li>etc.</li>
 </ul>
+
+<p>In pseudo-code:</p>
+
+<figure class="highlight"><pre><code class="language-text" data-lang="text">for side in get_segment_options(segment_nr):
+    found_solution = find_solution(side)
+    if not found_solution:
+        delete_from_database(side, segment_nr)</code></pre></figure>
+
 
   </div>
 

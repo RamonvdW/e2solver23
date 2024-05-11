@@ -42,19 +42,19 @@ def _segment_to_loc_4(segment):
 
     loc1_a, loc1_b = _segment_to_loc_1(segment)
 
-    if segment > 128:
+    if segment > 100:
         # left/right
 
         # loc1_a = -1, 0
         # loc1_b = +1, 0
 
         loc_a = loc1_a - 1 - 8  # -2, -1
-        loc_b = loc_a + 1       # -1, -1
-        # loc_c = loc_b + 1       # +1, -1
+        loc_b = loc_a + 1       # +1, -1
+        # loc_c = loc_b + 1       # +2, 0
 
         # loc_d = loc_a + 8       # -2, 0
-        loc_e = loc_b + 8       # -1, 0
-        # loc_f = loc_c + 8       # +1, 0
+        loc_e = loc_b + 8       # +1, +1
+        # loc_f = loc_c + 8       # +2, +1
 
     else:
         # above/below

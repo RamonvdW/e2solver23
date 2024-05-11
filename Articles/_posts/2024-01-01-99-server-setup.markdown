@@ -1,7 +1,7 @@
 ---
 layout: article
 order: 99
-title:  "Server setup"
+title: "Server setup"
 categories: background
 ---
 The code available in the [GitHub repository](https://github.com/RamonvdW/e2solver23) has some prerequisites.

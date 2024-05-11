@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/e2solver23/assets/main.css">
+</head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/e2solver23/">E2 Solver 2023</a>
+
+  </div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Solving strategies</h1>
+    <p class="post-meta">
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>These are my learnings from trying to solve Eternity II.
+Needless the say, none of these strategies resulted in a solution so far.</p>
+
+<h2>Lots of options</h2>
+<p>Due to the design of the base pieces, placing one 2x2 piece has almost no effect on the neighboring locations.
+The immediate neighbour locations could loose a few two-side options, but beyond that there is typically no effect at all.</p>
+
+<p>The bigger evaluators (3x3 and 4x4) are needed to find an effect.</p>
+
+<h2>Location tension</h2>
+<p>Once the neighbors of a location get filled, the location comes “under tension”.
+With this I mean the chance of finding a solution is decreasing.</p>
+
+<p>One neighbor is not too bad, two sides is tension, three or four sides means a very small chance of a solution.</p>
+
+<h2>Constraints</h2>
+<p>I noticed the puzzle contains “constraints” in the form of rings.</p>
+
+<p>If we attempt to create a complete outer ring, then it is easy until the very end: the last piece cannot be placed.
+Also, once the ring is complete there is tension on the inner corners and we typically find there is no solution left.</p>
+
+<p>Specialized <a href="/e2solver23/background/2024/01/01/31-ring-generators">ring generators</a> were added to create a ring, as a good foundation for solving the remainder.</p>
+
+<h2>Solving outside-in</h2>
+<p>Starting with a solid ring1, it is an option to solve from the outside towards the center.
+This means the tension of the border is solved, but a lot of borders with varying use of inner base pieces can be made.</p>
+
+<p><img src="/e2solver23/assets/ring1.png" alt="Ring1" width="70%" /></p>
+
+<h2>Solving from in between</h2>
+<p>Starting with a solid ring2, four of the hints are already placed properly.
+The challenge is to find an outer border.</p>
+
+<p><img src="/e2solver23/assets/ring2.png" alt="Ring2" width="70%" /></p>
+
+<h2>Solving inside-out</h2>
+<p>Starting with a solid ring3, it is an option to solve from the inside towards the border.
+The advantage is that the center hint is secured.</p>
+
+<p><img src="/e2solver23/assets/ring3.png" alt="Ring3" width="70%" /></p>
+
+<p>The rings all come with the problem of location tension described above: the inside corners have two sides that need to match
+and at least once the three-side tension happens when closing the next ring.</p>
+
+<h2>Lines</h2>
+<p>Using horizontal or vertical lines it is possible to limit the location tension to two sides.
+But the constraints of the rings are solved very late.</p>
+
+<p>Very likely this is how the puzzle was created - see the page on <a href="/e2solver23/background/2024/01/01/98-wang-tiles">Wang Tiles</a>.</p>
+
+  </div>
+
+  <div class="PageNavigation" style="display:flex; margin-bottom:0">
+
+    <div style="width:50%; display:block; text-align:left">
+        
+            <b>Previous: </b>
+            <a class="prev" href="/e2solver23/background/2024/01/01/22-claims.html">Claims</a>
+        
+    </div>
+
+    <div style="width:50%; display:block; text-align:right">
+        
+            <b>Next: </b>
+            <a class="next" href="/e2solver23/background/2024/01/01/31-ring-generators.html">Ring generators</a>
+        
+    </div>
+    <div>
+  </div>
+
+  <a class="u-url" href="/e2solver23/background/2024/01/01/30-solving-strategies.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/e2solver23/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">E2 Solver 2023</li>
+          <li class="p-name">by Ramon van der Winkel</li>
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+          <ul class="social-media-list">
+              <li>
+                  <a href="https://github.com/RamonvdW">
+                      <svg class="svg-icon">
+                          <use xlink:href="/e2solver23/assets/minima-social-icons.svg#github"></use>
+                      </svg>
+                      <span class="username">RamonvdW</span>
+                  </a>
+              </li>
+          </ul>
+      </div>
+
+      <div class="footer-col footer-col-3">
+        <p>Solver for the Eternity II puzzle using novel algorithms and web development technology</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

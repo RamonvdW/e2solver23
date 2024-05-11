@@ -1,7 +1,7 @@
 ---
 layout: article
 order: 13
-title:  "Board visualization"
+title: "Board visualization"
 categories: background
 ---
 The website can visualize the progress of a board:

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/e2solver23/assets/main.css">
+</head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/e2solver23/">E2 Solver 2023</a>
+
+  </div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Claims</h1>
+    <p class="post-meta">
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>Once the number of options goes down, several locations start to “claim” base pieces: there is simply no solution possible unless the location can use that base piece.
+The solver tracks these claims in the database and uses the information when considering the remaining 2x2 pieces possible for a location.</p>
+
+<p>The following management command evaluates the claims and updates the database.</p>
+
+<figure class="highlight"><pre><code class="language-text" data-lang="text">$ ./manage.py eval_claims 102
+[INFO] Processor=102
+[INFO] 48 base pieces in use
+[INFO] Scanning locs 1-9
+[INFO] Scanning locs 9-17
+[INFO] Scanning locs 17-25
+[INFO] Scanning locs 25-33
+[INFO] Scanning locs 33-41
+[INFO] Scanning locs 41-49
+[INFO] Scanning locs 49-57
+[INFO] Scanning locs 57-65
+[INFO] Loc 10 requires base 208 on nr1
+[INFO] Loc 13 requires base 104 on nr2
+[INFO] Loc 13 requires base 167 on nr4
+[INFO] Loc 34 requires base 132 on nr3
+[INFO] Loc 34 requires base 186 on nr4
+[INFO] Loc 52 requires base 83 on nr1
+[INFO] Loc 52 requires base 116 on nr2
+[INFO] Loc 52 requires base 213 on nr3
+[INFO] Remaining small claims:
+1.nr1: [1, 2, 3, 4]  *** MULTI (4) 1.nr1 + 57.nr3 + 64.nr4 + 8.nr2 ***
+8.nr2: [1, 2, 3, 4]  *** MULTI (4) 1.nr1 + 57.nr3 + 64.nr4 + 8.nr2 ***
+13.nr1: [102, 120]
+13.nr3: [212, 218]
+34.nr2: [73, 75]
+57.nr3: [1, 2, 3, 4]  *** MULTI (4) 1.nr1 + 57.nr3 + 64.nr4 + 8.nr2 ***
+59.nr1: [75, 84, 86]
+64.nr4: [1, 2, 3, 4]  *** MULTI (4) 1.nr1 + 57.nr3 + 64.nr4 + 8.nr2 ***
+[INFO] Single claims changed from 7 to 8 nrs</code></pre></figure>
+
+<p>In the above output we can read:</p>
+<ul>
+  <li>8 base pieces are claimed for specific locations</li>
+  <li>Several locations on the board show “tension”: only 2 or 3 base pieces left to chose from</li>
+  <li>4 location needs the same set of 4 base pieces (the four corners)</li>
+</ul>
+
+<p>The information of single-location-use and dual-location-use claims is applied automatically in the evaluators.
+The remainder of the information can be used when solving manually.</p>
+
+<h2>Automatic update of claims</h2>
+<p>The eval_claims command tracks of many two-side options where remaining at the time of evaluation.
+When the number has dropped 5% below that level, the evaluators automatically schedule a new claims evaluation.</p>
+
+<p>This ensures that the claims are updated regularly.</p>
+
+  </div>
+
+  <div class="PageNavigation" style="display:flex; margin-bottom:0">
+
+    <div style="width:50%; display:block; text-align:left">
+        
+            <b>Previous: </b>
+            <a class="prev" href="/e2solver23/background/2024/01/01/21-workers.html">Workers</a>
+        
+    </div>
+
+    <div style="width:50%; display:block; text-align:right">
+        
+            <b>Next: </b>
+            <a class="next" href="/e2solver23/background/2024/01/01/30-solving-strategies.html">Solving strategies</a>
+        
+    </div>
+    <div>
+  </div>
+
+  <a class="u-url" href="/e2solver23/background/2024/01/01/22-claims.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/e2solver23/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">E2 Solver 2023</li>
+          <li class="p-name">by Ramon van der Winkel</li>
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+          <ul class="social-media-list">
+              <li>
+                  <a href="https://github.com/RamonvdW">
+                      <svg class="svg-icon">
+                          <use xlink:href="/e2solver23/assets/minima-social-icons.svg#github"></use>
+                      </svg>
+                      <span class="username">RamonvdW</span>
+                  </a>
+              </li>
+          </ul>
+      </div>
+
+      <div class="footer-col footer-col-3">
+        <p>Solver for the Eternity II puzzle using novel algorithms and web development technology</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

@@ -4,12 +4,11 @@ order: 10
 title: "Evaluators"
 categories: background
 ---
-The "evaluators" are the tools in my solver to find two-side options that can be deleted.
+The "evaluators" are the tools in the solver to find two-side options that can be deleted.
 
-They run through the options remaining for a segment and try to create a shape, for example a 3x3.
+They run through all remaining options for a segment and try to create a shape with multiple 2x2 pieces, for example a 3x3.
 If that succeeds, the option can stay.
-
-If, of the other hand, it does not succeed to find a solution, it concludes the option is not valid and it will be discarded.
+If it does not succeed to find a solution, it concludes the option is not valid and it will be discarded from the database.
 
 Evaluators have been implemented for the following shapes:
 - Single location (1x1)
@@ -32,3 +31,12 @@ Depending on the shape size, the solvers check all options for specific segments
 - 3x3: check the 12 inner segments, starting with the 4 core inner segments 
 - 4x4: check the 17 inner segments
 - etc.
+
+In pseudo-code:
+{% highlight text %}
+
+for side in get_segment_options(segment_nr):
+    found_solution = find_solution(side)
+    if not found_solution:
+        delete_from_database(side, segment_nr)
+{% endhighlight %}

@@ -1,28 +1,25 @@
 ---
 layout: article
 order: 3
-title:  "Two-sides"
+title: "Two-sides"
 categories: background
 ---
 The 2x2 pieces have four "big sides" that I simply numbered 1, 2, 3, 4 starting at the top, going clockwise.
 
-Each two-side consists of the two sides of the base piece that ended pointing in that direction.
+Each two-side consists of the two sides of the base piece that ended up pointing in that direction.
 
-The base piece colors must be put in a specific order in the two-side.
-On my first try I using "clock-wise" on all four sides.
-That had one problem: side1 and side3 using a different order. Side3 cannot match side1 of another piece: you have to reverse the order of the color first.
-
-Once I discovered the overhead I decided to always follow left-right and top-down.
+The base piece colors must be put in a specific order into the two-side.
+The order is left-to-right for sides 1 and 3 and top-down for sides 2 and 4.
 
 ![2x2 good]({{"/assets/2x2_good.png" | relative_url }}){:width="150px"}
 
 The way the puzzle pieces fit together into the 2x2 pieces resulted in 460 "two sides":
 - combination of two of the 17 inner colors: 17x17=289
-- combination of the 5 colors found along the border + the 17 inner colors: 5x17=85 and 17x5=85
+- combination of the 5 border colors + the 17 inner colors: 5x17=85 and 17x5=85
 - combination of two outside borders: 1
 
-The database contains a table with these 460 rows: a small number plus the two actual colors.
-The 2x2 pieces refer to these numbers.
+The database contains a table with these 460 rows: a number and the two actual colors.
+The 2x2 pieces refer to these numbers only.
 
 Searching for 2x2 pieces that fit together means asking the database for pieces with a matching side:
 

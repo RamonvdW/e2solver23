@@ -1,0 +1,56 @@
+---
+layout: article
+order: 22
+title: "Claims"
+categories: background
+---
+Once the number of options goes down, several locations start to "claim" base pieces: there is simply no solution possible unless the location can use that base piece.
+The solver tracks these claims in the database and uses the information when considering the remaining 2x2 pieces possible for a location.
+
+The following management command evaluates the claims and updates the database.
+
+{% highlight text %}
+$ ./manage.py eval_claims 102
+[INFO] Processor=102
+[INFO] 48 base pieces in use
+[INFO] Scanning locs 1-9
+[INFO] Scanning locs 9-17
+[INFO] Scanning locs 17-25
+[INFO] Scanning locs 25-33
+[INFO] Scanning locs 33-41
+[INFO] Scanning locs 41-49
+[INFO] Scanning locs 49-57
+[INFO] Scanning locs 57-65
+[INFO] Loc 10 requires base 208 on nr1
+[INFO] Loc 13 requires base 104 on nr2
+[INFO] Loc 13 requires base 167 on nr4
+[INFO] Loc 34 requires base 132 on nr3
+[INFO] Loc 34 requires base 186 on nr4
+[INFO] Loc 52 requires base 83 on nr1
+[INFO] Loc 52 requires base 116 on nr2
+[INFO] Loc 52 requires base 213 on nr3
+[INFO] Remaining small claims:
+1.nr1: [1, 2, 3, 4]  *** MULTI (4) 1.nr1 + 57.nr3 + 64.nr4 + 8.nr2 ***
+8.nr2: [1, 2, 3, 4]  *** MULTI (4) 1.nr1 + 57.nr3 + 64.nr4 + 8.nr2 ***
+13.nr1: [102, 120]
+13.nr3: [212, 218]
+34.nr2: [73, 75]
+57.nr3: [1, 2, 3, 4]  *** MULTI (4) 1.nr1 + 57.nr3 + 64.nr4 + 8.nr2 ***
+59.nr1: [75, 84, 86]
+64.nr4: [1, 2, 3, 4]  *** MULTI (4) 1.nr1 + 57.nr3 + 64.nr4 + 8.nr2 ***
+[INFO] Single claims changed from 7 to 8 nrs
+{% endhighlight %}
+
+In the above output we can read:
+- 8 base pieces are claimed for specific locations
+- Several locations on the board show "tension": only 2 or 3 base pieces left to chose from
+- 4 location needs the same set of 4 base pieces (the four corners)
+
+The information of single-location-use and dual-location-use claims is applied automatically in the evaluators.
+The remainder of the information can be used when solving manually.
+
+<h2>Automatic update of claims</h2>
+The eval_claims command tracks of many two-side options where remaining at the time of evaluation.
+When the number has dropped 5% below that level, the evaluators automatically schedule a new claims evaluation.
+
+This ensures that the claims are updated regularly.

@@ -1,0 +1,55 @@
+---
+layout: article
+order: 21
+title: "Workers"
+categories: background
+---
+The solver can run many evaluators in parallel.
+On the cloud-host I rented, the solver could be configured with 19 workers while maintaining a reasonably responsive webpage (I monitored CPU usage with htop).
+
+Each worker repeats this process:
+- Find the most important work in a database table
+- Set the work as "ongoing" (to avoid processing more than once)
+- Processes the work (typically: run an evaluator)
+- Set the work as "done"
+
+The workers are systemd services. Systemd provides automatic start after server reboot and worker restarts in case of a software crash.
+The operator can reduce the number of systemd workers as needed.
+
+In addition, the operator can run workers in the foreground, typically in a "screen" instance.
+
+<h2>Work queue</h2>
+The operator can queue up work with a management command:
+
+{% highlight text %}
+$ ./manage.sh add_work 11 eval_loc_16 16 37
+[INFO] Adding work: 11 eval_loc_16 16 37
+$
+{% endhighlight %}
+This adds a request for board 11 to run the 4x4 evaluator on location 37, with priority 16.
+
+The commands "scan1" and "scan9" request to create and queue up a lot of work in one go:
+{% highlight text %}
+$ ./manage.sh add_work 10 scan1 2 1
+[INFO] Adding work: 10 eval_loc_1 2 {1..64}
+[INFO] Added 36 jobs
+$ ./manage.sh add_work 10 scan9 9 1 --limit=289
+[INFO] Adding work: 10 eval_loc_9 9 {1 2 3 4 5 6 14 22 30 38 46 9 17 25 33 41 42 43 44 45}
+[INFO] Added 20 jobs
+{% endhighlight %}
+
+The "scan1" command expands to run a single location evaluator for all locations that are no already filled.
+
+The "scan9" command expands to run a 3x3 evaluator for a fixed number of locations of the board.
+The limit option controls how many options are actually evaluated: this is normally limited to 50 options (to reduce processing time). 
+
+<h2>Work propagation</h2>
+When an evaluator removes a segment option, it immediately requests evaluation work to be queued up to check the locations around it for knock-on effects:
+- Evaluate the locations left + right or above + below the segment with priority 1
+- Evaluate three 2x2 around/touching the affected segment with priority 4 
+
+These evaluations can again result in knock-on effects.
+
+<h2>Special workers</h2>
+To avoid double use of base pieces, the solver must avoid concurrent selection of pieces on the board.
+Worker 1 is therefore dedicated to running all single location evaluations.

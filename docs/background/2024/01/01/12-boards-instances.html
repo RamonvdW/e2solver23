@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/e2solver23/assets/main.css">
+</head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/e2solver23/">E2 Solver 2023</a>
+
+  </div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Board instances</h1>
+    <p class="post-meta">
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>The solver supports “board instances” that can be duplicated and deleted on command.
+Each board instance has its own set of remaining two side options.
+A board can also have a specified 2x2 piece on each of the 64 locations.</p>
+
+<p>A board instance is referenced by its number.
+Evaluators always work on a specified board.</p>
+
+<p>An operator or script can request a board instance to be duplicated, as shown below.</p>
+
+<p>Duplicate board 0 to board 1:</p>
+
+<figure class="highlight"><pre><code class="language-text" data-lang="text">$ ./manage.sh dup_segments 0 1
+[INFO] Duplicating processor 0 to 1
+[INFO] Creating 23637 records
+$</code></pre></figure>
+
+<p>Duplicate board 0 to the next free number (this is intended for scripts):</p>
+
+<figure class="highlight"><pre><code class="language-text" data-lang="text">$ ./manage.sh dup_segments_new 0
+2
+$</code></pre></figure>
+
+<p>Drop board 1:</p>
+
+<figure class="highlight"><pre><code class="language-text" data-lang="text">$ ./manage.sh drop_segments 1
+[INFO] Deleting 23637 TwoSide records
+[INFO] Deleted 0 jobs for processor 1 from work queue</code></pre></figure>
+
+<h2>Dead end</h2>
+<p>An evaluator can mark a board as a “dead end”, for example when zero options remain for one of the segments.
+Boards that are a dead end can be cleaned up with the drop segments command.</p>
+
+<p>Example of a dead-end:</p>
+
+<p><img src="/e2solver23/assets/dead-end_1.png" alt="Progress" width="60%" /></p>
+
+<p>The progress shows that the single-location evaluator concluded no 2x2 pieces is available for location 13,
+given the remaining two-side options around location 13 and the base pieces already taken by the filled locations.</p>
+
+<p><img src="/e2solver23/assets/dead-end_3.png" alt="Progress" width="60%" /></p>
+
+  </div>
+
+  <div class="PageNavigation" style="display:flex; margin-bottom:0">
+
+    <div style="width:50%; display:block; text-align:left">
+        
+            <b>Previous: </b>
+            <a class="prev" href="/e2solver23/background/2024/01/01/11-evaluator-progress.html">Evaluator progress</a>
+        
+    </div>
+
+    <div style="width:50%; display:block; text-align:right">
+        
+            <b>Next: </b>
+            <a class="next" href="/e2solver23/background/2024/01/01/13-boards-visualization.html">Board visualization</a>
+        
+    </div>
+    <div>
+  </div>
+
+  <a class="u-url" href="/e2solver23/background/2024/01/01/12-boards-instances.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/e2solver23/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">E2 Solver 2023</li>
+          <li class="p-name">by Ramon van der Winkel</li>
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+          <ul class="social-media-list">
+              <li>
+                  <a href="https://github.com/RamonvdW">
+                      <svg class="svg-icon">
+                          <use xlink:href="/e2solver23/assets/minima-social-icons.svg#github"></use>
+                      </svg>
+                      <span class="username">RamonvdW</span>
+                  </a>
+              </li>
+          </ul>
+      </div>
+
+      <div class="footer-col footer-col-3">
+        <p>Solver for the Eternity II puzzle using novel algorithms and web development technology</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

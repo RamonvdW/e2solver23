@@ -1,10 +1,10 @@
 ---
 layout: article
 order: 6
-title:  "Segments"
+title: "Segments"
 categories: background
 ---
-The board is organized in 137 "segments" for which the remaining [two sides](/background/2024/01/01/03-sides) are tracked.
+The board is organized in 137 "segments" for which the remaining [two sides]({{"/background/2024/01/01/03-two-sides.html" | relative_url}}) are tracked in the database.
 
 The segments are numbered according to the location number:
 - Above = location

@@ -5,12 +5,13 @@ title: "Evaluator progress"
 categories: background
 ---
 For monitoring purposes, the evaluators use a database record to report what they are doing.
-The website picks this information up and shows it to the user.
+The website picks up this information and displays it to the user.
 
-In the example below, 13 evaluators are searching for solutions to confirm/deny each option of 12 segments of their 3x3.
+In the example below, several 3x3 evaluators are checking the remaining options for 12 segments of the 3x3.
+
 The first evaluator is considering locations 5, 6, 7, 13, 14, 15, 21, 22, 23.
-It is currently evaluating the 5th segment of 12 (marked in bold), checking option 78 out of 80.
+It is currently evaluating the 5th segment (marked in bold), checking option 78 out of 80.
 
-![Progress]({{"/assets/progress-2.png" | relative_url }}){:width="75%"}
+![Progress]({{"/assets/progress-2.png" | relative_url }}){:width="90%"}
 
-Finally, we can see that none of the evaluators are stuck because all are continuously reporting out.
+We can also see that none of the evaluators are stuck because all are continuously reporting out.

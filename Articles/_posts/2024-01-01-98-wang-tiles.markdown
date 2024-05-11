@@ -1,7 +1,7 @@
 ---
 layout: article
 order: 98
-title:  "Wang Tiles"
+title: "Wang Tiles"
 categories: background
 ---
 Given the form of the base pieces it is not unlikely a custom [Wang Tile](https://en.wikipedia.org/wiki/Wang_tile) generator was used.

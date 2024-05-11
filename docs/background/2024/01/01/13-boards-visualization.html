@@ -15,30 +15,16 @@
         <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
 
   <header class="post-header">
-    <h1 class="post-title p-name" itemprop="name headline">Calculate to conclude</h1>
+    <h1 class="post-title p-name" itemprop="name headline">Board visualization</h1>
     <p class="post-meta">
   </header>
 
   <div class="post-content e-content" itemprop="articleBody">
-    <p>Many solvers are based on a backtracking algorithm.
-When restarted, these typically repeat all the same steps.</p>
+    <p>The website can visualize the progress of a board:</p>
 
-<p>I wanted to come up with an algorithm that performs a calculation on part of the puzzle, draws a conclusion and stores the result so it does not have to be performed again.</p>
+<p><img src="/e2solver23/assets/progress_1.png" alt="Progress" width="60%" /></p>
 
-<p>The image below shows the initial board with the counts of remaining two-side options around each location.
-Around the hint piece locations we see a greatly reduced number of options remaining.</p>
-
-<p>In this solver, a search (“calculation”) can result in a conclusion to drop one of the options, reducing the remaining possibilities.
-Once concluded, the search never considers that option again. It thus reduces the amount of calculation work remaining.</p>
-
-<p>Instead of calculating and accumulating results it actually works the other way around: it starts with the maximum options and performs calculations to reduce the remaining possibilities.
-The initial number of options worked out to be a very reasonable number: 23814.</p>
-
-<p>The end-goal is 1 remaining option around each location.</p>
-
-<p><img src="/e2solver23/assets/initial-board.png" alt="Initial board" width="75%" /></p>
-
-<p>The article about <a href="/e2solver23/background/2024/01/01/03-two-sides">two sides</a> explains the numbers shown (289, 85).</p>
+<p><img src="/e2solver23/assets/progress_2.png" alt="Progress" width="60%" /></p>
 
   </div>
 
@@ -47,20 +33,20 @@ The initial number of options worked out to be a very reasonable number: 23814.<
     <div style="width:50%; display:block; text-align:left">
         
             <b>Previous: </b>
-            <a class="prev" href="/e2solver23/background/2024/01/01/04-smaller-board.html">Smaller board</a>
+            <a class="prev" href="/e2solver23/background/2024/01/01/12-boards-instances.html">Board instances</a>
         
     </div>
 
     <div style="width:50%; display:block; text-align:right">
         
             <b>Next: </b>
-            <a class="next" href="/e2solver23/background/2024/01/01/06-segments.html">Segments</a>
+            <a class="next" href="/e2solver23/background/2024/01/01/20-solving-manually.html">Solving manually</a>
         
     </div>
     <div>
   </div>
 
-  <a class="u-url" href="/e2solver23/background/2024/01/01/05-calculate-to-conclude.html" hidden></a>
+  <a class="u-url" href="/e2solver23/background/2024/01/01/13-boards-visualization.html" hidden></a>
 </article>
 
       </div>

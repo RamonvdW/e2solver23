@@ -27,18 +27,18 @@
   <li>Powerful Linux host in the cloud (dedicated 12-cores, 64GB RAM, 1TB NVMe)</li>
   <li>Python3</li>
   <li>PostgreSQL database</li>
-  <li>Systemd background workers</li>
   <li>Django website: for visualizations and to monitor progress from any mobile / table / laptop</li>
-  <li>Django management commands to perform work (or queue work)</li>
+  <li>Django management commands to perform work (or queue up for the workers)</li>
+  <li>Systemd-managed workers</li>
   <li>Source code in GitHub</li>
   <li>Focus on efficient algorithms instead of efficient code</li>
 </ul>
 
-<p>The database serves two purposes: it hold the work queue, progress, board, remaining possibilities.
-And it is also good in one important task: to efficiently search and serve programs running in parallel.
-For example: answer “which puzzle pieces fit here?”</p>
+<p>The database serves two purposes: it holds the work queue, progress, boards, remaining options per board.
+And it is also good in one important task: to efficiently search and handle parallel queries.
+For example: answer “which puzzle pieces fit on this location given these used pieces?”</p>
 
-<p>The visualizations help me identify problems in the code early.</p>
+<p>The visualizations helped me identify problems in the code early.</p>
 
 <p>If you are interested in the code, check out the <a href="https://github.com/RamonvdW/e2solver23">GitHub repository</a>.</p>
 
