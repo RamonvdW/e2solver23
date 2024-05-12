@@ -23,11 +23,12 @@
     <p>These are my learnings from trying to solve Eternity II.
 Needless the say, none of these strategies resulted in a solution so far.</p>
 
-<h2>Lots of options</h2>
+<h2>Short-distance effects</h2>
 <p>Due to the design of the base pieces, placing one 2x2 piece has almost no effect on the neighboring locations.
-The immediate neighbour locations could loose a few two-side options, but beyond that there is typically no effect at all.</p>
+The immediate neighbour locations could loose a few two-side options, but beyond that there is typically no effect at all.
+The bigger evaluators (3x3 and 4x4) are needed to find an effect.</p>
 
-<p>The bigger evaluators (3x3 and 4x4) are needed to find an effect.</p>
+<p>Once the puzzle has more locations filled, the problems typically occur at a random location further away from the last placed piece, due to the used base pieces.</p>
 
 <h2>Location tension</h2>
 <p>Once the neighbors of a location get filled, the location comes “under tension”.
@@ -39,13 +40,16 @@ With this I mean the chance of finding a solution is decreasing.</p>
 <p>I noticed the puzzle contains “constraints” in the form of rings.</p>
 
 <p>If we attempt to create a complete outer ring, then it is easy until the very end: the last piece cannot be placed.
-Also, once the ring is complete there is tension on the inner corners and we typically find there is no solution left.</p>
+This is the constraint that cannot be fulfilled.</p>
+
+<p>In addition, when the ring is complete there could be tension on the inner corners and we typically find there is no solution left.</p>
 
 <p>Specialized <a href="/e2solver23/background/2024/01/01/31-ring-generators">ring generators</a> were added to create a ring, as a good foundation for solving the remainder.</p>
 
 <h2>Solving outside-in</h2>
 <p>Starting with a solid ring1, it is an option to solve from the outside towards the center.
-This means the tension of the border is solved, but a lot of borders with varying use of inner base pieces can be made.</p>
+This means the tension of the border is solved.
+Unfortunately, a lot of borders can be made with varying utilization of inner base pieces.</p>
 
 <p><img src="/e2solver23/assets/ring1.png" alt="Ring1" width="70%" /></p>
 
