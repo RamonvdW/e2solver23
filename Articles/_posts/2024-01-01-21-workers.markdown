@@ -43,13 +43,9 @@ The "scan1" command expands to run a single location evaluator for all locations
 The "scan9" command expands to run a 3x3 evaluator for a fixed number of locations of the board.
 The limit option controls how many options are actually evaluated: this is normally limited to 50 options (to reduce processing time). 
 
-<h2>Work propagation</h2>
-When an evaluator removes a segment option, it immediately requests evaluation work to be queued up to check the locations around it for knock-on effects:
-- Evaluate the locations left + right or above + below the segment with priority 1
-- Evaluate three 2x2 around/touching the affected segment with priority 4 
-
-These evaluations can again result in knock-on effects.
-
 <h2>Special workers</h2>
 To avoid double use of base pieces, the solver must avoid concurrent selection of pieces on the board.
 Worker 1 is therefore dedicated to running all single location evaluations.
+
+Workers 10 and up are dedicated to "big work". This avoids clogging all the workers with 2x2 evaluations,
+which occur a lot due to [propagation]({{"/background/2024/01/01/22-propagation.html" | relative_url}}).

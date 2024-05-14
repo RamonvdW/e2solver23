@@ -59,18 +59,12 @@ $ ./manage.sh add_work 10 scan9 9 1 --limit=289
 <p>The “scan9” command expands to run a 3x3 evaluator for a fixed number of locations of the board.
 The limit option controls how many options are actually evaluated: this is normally limited to 50 options (to reduce processing time).</p>
 
-<h2>Work propagation</h2>
-<p>When an evaluator removes a segment option, it immediately requests evaluation work to be queued up to check the locations around it for knock-on effects:</p>
-<ul>
-  <li>Evaluate the locations left + right or above + below the segment with priority 1</li>
-  <li>Evaluate three 2x2 around/touching the affected segment with priority 4</li>
-</ul>
-
-<p>These evaluations can again result in knock-on effects.</p>
-
 <h2>Special workers</h2>
 <p>To avoid double use of base pieces, the solver must avoid concurrent selection of pieces on the board.
 Worker 1 is therefore dedicated to running all single location evaluations.</p>
+
+<p>Workers 10 and up are dedicated to “big work”. This avoids clogging all the workers with 2x2 evaluations,
+which occur a lot due to <a href="/e2solver23/background/2024/01/01/22-propagation.html">propagation</a>.</p>
 
   </div>
 
@@ -86,7 +80,7 @@ Worker 1 is therefore dedicated to running all single location evaluations.</p>
     <div style="width:50%; display:block; text-align:right">
         
             <b>Next: </b>
-            <a class="next" href="/e2solver23/background/2024/01/01/22-claims.html">Claims</a>
+            <a class="next" href="/e2solver23/background/2024/01/01/22-propagation.html">Propagation</a>
         
     </div>
     <div>

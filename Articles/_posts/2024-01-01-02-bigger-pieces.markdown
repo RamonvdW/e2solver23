@@ -35,3 +35,5 @@ qset = Piece2x2.objects.exclude(nr1__in=used_pieces)
                        .exclude(nr3__in=used_pieces)
                        .exclude(nr4__in=used_pieces)
 {% endhighlight %}
+
+I also tried creating 3x3 pieces, but the number of possible pieces is simply too much (trillions).

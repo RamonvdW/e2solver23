@@ -41,7 +41,7 @@ If it does not succeed to find a solution, it concludes the option is not valid 
 
 <p><img src="/e2solver23/assets/eval_loc_4.png" alt="2x2 evaluator" width="75%" /></p>
 
-<p>The evaluators use backtracking algorithms to run through all the possibilities (starting with a specific segment option) and stop the search as soon as a solution is found.</p>
+<p>The evaluators use backtracking to run through all the possibilities (starting with a specific segment option) and stop the search as soon as a solution is found.</p>
 
 <p>Depending on the shape size, the solvers check all options for specific segments:</p>
 <ul>
@@ -59,6 +59,8 @@ If it does not succeed to find a solution, it concludes the option is not valid 
     if not found_solution:
         delete_from_database(side, segment_nr)</code></pre></figure>
 
+<p>Small note: a 3x3 evaluator tries to place 9 2x2 pieces, which is 4x9 = 36 base pieces or 15% of the original puzzle.
+The 4x4 evaluator places 25% of the original puzzle.</p>
 
   </div>
 

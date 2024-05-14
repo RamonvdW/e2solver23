@@ -23,3 +23,5 @@ The end-goal is 1 remaining option around each location.
 ![Initial board]({{"/assets/initial-board.png" | relative_url }}){:width="75%"}
 
 The article about [two sides]({{"/background/2024/01/01/03-two-sides" | relative_url}}) explains the numbers shown (289, 85).
+
+The colors indicate how many options are left, on a scale for red to green with blue used for "untouched".

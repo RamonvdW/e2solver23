@@ -15,12 +15,32 @@
         <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
 
   <header class="post-header">
-    <h1 class="post-title p-name" itemprop="name headline">Ring generators</h1>
+    <h1 class="post-title p-name" itemprop="name headline">Propagation</h1>
     <p class="post-meta">
   </header>
 
   <div class="post-content e-content" itemprop="articleBody">
-    
+    <p>When an evaluator removes a segment option, it can affect the possible options for the locations around it.</p>
+
+<p>Therefore, the work is queued up to evaluate the locations around an affected segment:</p>
+<ul>
+  <li>Evaluate the single locations left + right or above + below the segment</li>
+  <li>Evaluate three 2x2 blocks around/touching the affected segment</li>
+</ul>
+
+<p>These new evaluations can again result in knock-on effects.</p>
+
+<p>When a location is filled, either manually or simply because it is the last 2x2 possible in that location,
+then the same thing happens: segments around the location are set to 1 option and evaluations of all neighbors is requested.</p>
+
+<p>Because the number of 2x2 pieces that fit in the neighboring location is now limited by the fixed segment,
+fewer options remain for the other segments of that location. And this can again trigger options removal on other segments.</p>
+
+<p>An example of this is shown in <a href="/e2solver23/background/2024/01/01/20-solving-manually">solving manually</a></p>
+
+<p>A typical situation in the work queue: the 3x3 evaluator (eval_loc_9) removes options and propagates to eval_loc_1 and eval_loc_4.</p>
+
+<p><img src="/e2solver23/assets/queued_work.png" alt="Work queue" width="45%" /></p>
 
   </div>
 
@@ -29,20 +49,20 @@
     <div style="width:50%; display:block; text-align:left">
         
             <b>Previous: </b>
-            <a class="prev" href="/e2solver23/background/2024/01/01/30-solving-strategies.html">Solving strategies</a>
+            <a class="prev" href="/e2solver23/background/2024/01/01/21-workers.html">Workers</a>
         
     </div>
 
     <div style="width:50%; display:block; text-align:right">
         
             <b>Next: </b>
-            <a class="next" href="/e2solver23/background/2024/01/01/98-wang-tiles.html">Wang Tiles</a>
+            <a class="next" href="/e2solver23/background/2024/01/01/23-claims.html">Claims</a>
         
     </div>
     <div>
   </div>
 
-  <a class="u-url" href="/e2solver23/background/2024/01/01/31-ring-generators.html" hidden></a>
+  <a class="u-url" href="/e2solver23/background/2024/01/01/22-propagation.html" hidden></a>
 </article>
 
       </div>

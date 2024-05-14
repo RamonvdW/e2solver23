@@ -48,6 +48,9 @@ The result:
 
 ![Progress]({{"/assets/fix_loc_36.png" | relative_url }}){: width="60%"}
 
+The colors indicate how many options are left, on a scale for red to green with blue used for "untouched".
+White is used to indicate a delta compared the board it was duplicated from.
+
 Evaluate location 28, which resulted in removal of 37 and 90 of the remaining options on sides 2 and 4 respectively.
 {% highlight text %}
 $ ./manage.sh eval_loc_1 1 28 --nop

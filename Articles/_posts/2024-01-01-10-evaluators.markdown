@@ -23,7 +23,7 @@ Evaluators have been implemented for the following shapes:
 
 ![2x2 evaluator]({{"/assets/eval_loc_4.png" | relative_url}}){:width="75%"}
 
-The evaluators use backtracking algorithms to run through all the possibilities (starting with a specific segment option) and stop the search as soon as a solution is found.
+The evaluators use backtracking to run through all the possibilities (starting with a specific segment option) and stop the search as soon as a solution is found.
 
 Depending on the shape size, the solvers check all options for specific segments:
 - 1x1: check all 4 outer segments (around the location)
@@ -40,3 +40,6 @@ for side in get_segment_options(segment_nr):
     if not found_solution:
         delete_from_database(side, segment_nr)
 {% endhighlight %}
+
+Small note: a 3x3 evaluator tries to place 9 2x2 pieces, which is 4x9 = 36 base pieces or 15% of the original puzzle.
+The 4x4 evaluator places 25% of the original puzzle.

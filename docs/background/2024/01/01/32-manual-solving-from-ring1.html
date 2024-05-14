@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/e2solver23/assets/main.css">
+</head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/e2solver23/">E2 Solver 2023</a>
+
+  </div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Manually solving from ring1</h1>
+    <p class="post-meta">
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>The image below shows a ring1 loaded into a board.
+Several 3x3 evaluators (eval_loc_9) are at work to reduce the remaining options.</p>
+
+<p><img src="/e2solver23/assets/reduce_ring1_1.png" alt="Reduce ring1" width="70%" /></p>
+
+<p>Approximately 20 minutes later it looks like this:</p>
+
+<p><img src="/e2solver23/assets/reduce_ring1_2.png" alt="Reduce ring1" width="70%" /></p>
+
+<p>How would you continue?</p>
+<ul>
+  <li>Fix the center hint? Location 36 has 1857 pieces to chose from</li>
+  <li>Fix the other four hints? Locations 10, 15, 50, 55 respectively have 7, 5, 11 and 8 pieces to chose from</li>
+  <li>Fix some of the segments? Will you chose a high or low number?</li>
+  <li>The right side seems to have fewer options.</li>
+  <li>Looking at the claims: location 10 has 2 claims</li>
+</ul>
+
+<p>Let’s try location 15</p>
+
+<figure class="highlight"><pre><code class="language-text" data-lang="text">$ dup 200 201
+[INFO] Duplicating processor 200 to 201
+[INFO] Creating 8620 records
+$ fix 201 15 2 --commit
+[INFO] Processor=201; Location: 15
+[INFO] 117 base pieces in use or claimed
+[INFO] Selecting 2 / 5
+[INFO] Performing eval_loc_1 equivalent check for loc 15
+[INFO] Selected p2x2 with base nrs: [109, 255, 83, 215]
+[INFO] Side 1 is segment 15
+[INFO] Side 2 is segment 116
+[INFO] Side 3 is segment 23
+[INFO] Side 4 is segment 115
+[INFO] Reductions: 0, 0, 4, 4
+$ </code></pre></figure>
+
+<p>(the commands used are shell aliases for the commands shown earlier)</p>
+
+<ul>
+  <li>Selection 1: dead-end in location 47.</li>
+  <li>Selection 2: dead-end in location 47.</li>
+  <li>Selection 3: stable with 6373 options remaining. Tension in locations 50 (2 pieces remaining) and 47 (3 pieces remaining).</li>
+  <li>Selection 4: “solves” locations 55, 47, 39 but dead-ends in the bottom row (locations 50, 51, 52, 53)</li>
+  <li>Selection 5: stable with 6757 options remaining. Location 23 has 3 pieces remaining.</li>
+</ul>
+
+<p>Let’s duplicate the last board and work with location 23.</p>
+
+<ul>
+  <li>(board 210)Selection 1: stable with xxx options remaining. Tension in the right column (locations 31, 39, 47, 55).</li>
+  <li>(board 211)Selection 2: stable with xxx options remaining.</li>
+  <li>(board 212)Selection 3: stable with xxx options remaining. Location 31 has 3 pieces remaining.</li>
+</ul>
+
+  </div>
+
+  <div class="PageNavigation" style="display:flex; margin-bottom:0">
+
+    <div style="width:50%; display:block; text-align:left">
+        
+            <b>Previous: </b>
+            <a class="prev" href="/e2solver23/background/2024/01/01/31-ring1-generator.html">Ring1 generator</a>
+        
+    </div>
+
+    <div style="width:50%; display:block; text-align:right">
+        
+            <b>Next: </b>
+            <a class="next" href="/e2solver23/background/2024/01/01/98-wang-tiles.html">Wang Tiles</a>
+        
+    </div>
+    <div>
+  </div>
+
+  <a class="u-url" href="/e2solver23/background/2024/01/01/32-manual-solving-from-ring1.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/e2solver23/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">E2 Solver 2023</li>
+          <li class="p-name">by Ramon van der Winkel</li>
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+          <ul class="social-media-list">
+              <li>
+                  <a href="https://github.com/RamonvdW">
+                      <svg class="svg-icon">
+                          <use xlink:href="/e2solver23/assets/minima-social-icons.svg#github"></use>
+                      </svg>
+                      <span class="username">RamonvdW</span>
+                  </a>
+              </li>
+          </ul>
+      </div>
+
+      <div class="footer-col footer-col-3">
+        <p>Solver for the Eternity II puzzle using novel algorithms and web development technology</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

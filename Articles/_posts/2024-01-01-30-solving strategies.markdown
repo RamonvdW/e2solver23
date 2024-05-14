@@ -29,12 +29,14 @@ This is the constraint that cannot be fulfilled.
 
 In addition, when the ring is complete there could be tension on the inner corners and we typically find there is no solution left.
 
-Specialized [ring generators]({{"/background/2024/01/01/31-ring-generators" | relative_url }}) were added to create a ring, as a good foundation for solving the remainder.
+Specialized ring generators were written to create a valid ring, as a good foundation for solving the remainder.
 
 <h2>Solving outside-in</h2>
 Starting with a solid ring1, it is an option to solve from the outside towards the center.
 This means the tension of the border is solved.
 Unfortunately, a lot of borders can be made with varying utilization of inner base pieces.
+
+More details: [ring1 generator]({{"/background/2024/01/01/31-ring1-generator" | relative_url }}) 
 
 ![Ring1]({{"/assets/ring1.png" | relative_url }}){: width="70%"}
 

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/e2solver23/assets/main.css">
+</head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/e2solver23/">E2 Solver 2023</a>
+
+  </div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Ring1 generator</h1>
+    <p class="post-meta">
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>The ring1 generator creates a closed ring of 2x2 pieces along the outer border.
+It starts with a border consisting of base pieces, then finds compatible 2x2 pieces.
+It also verifies that all inner corners can be solved: it requires a valid 2x2 pieces (with unused base pieces) plus two direct neighbours.</p>
+
+<p><img src="/e2solver23/assets/ring1.png" alt="Ring1" width="70%" /></p>
+
+<h2>Generating an outer border</h2>
+<p>Efficiently generating a border is a challenge by itself.
+One optimization is using lists of pre-calculated corners with two border pieces on each side: border, border, corner, border, border.
+The pre-calculated lists are checked for being able to make a valid solution with the hint piece. 
+In the top-left corner, the 4 corner pieces can be coupled to four border pieces in 2600 ways.
+The top-right corner can be made in 3400 ways.</p>
+
+<p>A seed number provided by the operator allows to vary the starting position for the generator.
+This allows generating controlled variations while being able to re-generation the same solution when needed.</p>
+
+<p>The method used is to shuffle the pre-calculated lists by repeatedly removing one element and appending it to the end.
+The number of shuffles depends on the length of the array: 10, 1000 or 10000.</p>
+
+<p>The seed initializes a pseudo-random generator.
+The numbers it generates are indexes into the array, for the shuffle.</p>
+
+<p>Once the shuffle is done, the border generator searches for complete borders and outputs these.
+It is possible to try the border generator with a management command:</p>
+
+<figure class="highlight"><pre><code class="language-text" data-lang="text">$ ./manage.py generate_border 221
+solution: [49, 39, 54, 30, 16, 31, 32, 3, 6, 25, 19, 11, 7, 5, 57, 23, 51, 18, 43, 10, 22, 40, 2, 45, 14, 15, 59, 17, 33, 41, 48, 36, 29, 60, 13, 42, 21, 4, 44, 47, 12, 52, 58, 8, 24, 20, 26, 27, 28, 56, 38, 34, 1, 50, 35, 9, 37, 46, 53, 55]
+solution: [39, 54, 49, 30, 16, 31, 32, 3, 6, 25, 19, 11, 7, 5, 57, 23, 51, 18, 43, 10, 22, 40, 2, 45, 14, 15, 59, 17, 33, 41, 48, 36, 29, 60, 13, 42, 21, 4, 44, 47, 12, 52, 58, 8, 24, 20, 26, 27, 28, 56, 38, 34, 1, 50, 35, 9, 37, 46, 53, 55]
+solution: [55, 39, 54, 30, 16, 31, 32, 3, 6, 25, 19, 11, 7, 5, 57, 23, 51, 18, 43, 10, 22, 40, 2, 45, 14, 15, 59, 17, 33, 41, 48, 36, 29, 60, 13, 42, 21, 4, 44, 47, 12, 52, 58, 8, 24, 20, 26, 27, 28, 56, 38, 34, 1, 50, 35, 9, 37, 46, 53, 49]
+solution: [39, 54, 55, 30, 16, 31, 32, 3, 6, 25, 19, 11, 7, 5, 57, 23, 51, 18, 43, 10, 22, 40, 2, 45, 14, 15, 59, 17, 33, 41, 48, 36, 29, 60, 13, 42, 21, 4, 44, 47, 12, 52, 58, 8, 24, 20, 26, 27, 28, 56, 38, 34, 1, 50, 35, 9, 37, 46, 53, 49]
+$</code></pre></figure>
+
+<figure class="highlight"><pre><code class="language-text" data-lang="text">$ ./manage.py generate_border 222
+solution: [43, 48, 34, 32, 29, 27, 44, 2, 5, 45, 10, 37, 36, 56, 39, 53, 23, 51, 30, 41, 14, 25, 4, 9, 22, 33, 28, 60, 35, 16, 40, 46, 12, 50, 49, 18, 31, 1, 15, 19, 59, 58, 13, 57, 8, 42, 54, 55, 38, 47, 21, 26, 3, 6, 52, 17, 20, 11, 7, 24]
+solution: [43, 48, 34, 29, 32, 27, 44, 2, 5, 45, 10, 37, 36, 56, 39, 53, 23, 51, 30, 41, 14, 25, 4, 9, 22, 33, 28, 60, 35, 16, 40, 46, 12, 50, 49, 18, 31, 1, 15, 19, 59, 58, 13, 57, 8, 42, 54, 55, 38, 47, 21, 26, 3, 6, 52, 17, 20, 11, 7, 24]
+solution: [43, 48, 34, 32, 29, 27, 44, 2, 5, 45, 10, 37, 36, 56, 39, 53, 23, 51, 30, 41, 14, 25, 4, 9, 22, 33, 28, 60, 35, 16, 40, 46, 12, 50, 49, 18, 31, 1, 15, 19, 59, 58, 13, 57, 8, 42, 54, 55, 38, 47, 21, 26, 3, 6, 52, 17, 11, 7, 24, 20]
+solution: [43, 48, 34, 29, 32, 27, 44, 2, 5, 45, 10, 37, 36, 56, 39, 53, 23, 51, 30, 41, 14, 25, 4, 9, 22, 33, 28, 60, 35, 16, 40, 46, 12, 50, 49, 18, 31, 1, 15, 19, 59, 58, 13, 57, 8, 42, 54, 55, 38, 47, 21, 26, 3, 6, 52, 17, 11, 7, 24, 20]
+$</code></pre></figure>
+
+<p>The output shows the pieces outer border piece numbers. The last piece connects to the first.</p>
+
+  </div>
+
+  <div class="PageNavigation" style="display:flex; margin-bottom:0">
+
+    <div style="width:50%; display:block; text-align:left">
+        
+            <b>Previous: </b>
+            <a class="prev" href="/e2solver23/background/2024/01/01/30-solving-strategies.html">Solving strategies</a>
+        
+    </div>
+
+    <div style="width:50%; display:block; text-align:right">
+        
+            <b>Next: </b>
+            <a class="next" href="/e2solver23/background/2024/01/01/32-manual-solving-from-ring1.html">Manually solving from ring1</a>
+        
+    </div>
+    <div>
+  </div>
+
+  <a class="u-url" href="/e2solver23/background/2024/01/01/31-ring1-generator.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/e2solver23/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">E2 Solver 2023</li>
+          <li class="p-name">by Ramon van der Winkel</li>
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+          <ul class="social-media-list">
+              <li>
+                  <a href="https://github.com/RamonvdW">
+                      <svg class="svg-icon">
+                          <use xlink:href="/e2solver23/assets/minima-social-icons.svg#github"></use>
+                      </svg>
+                      <span class="username">RamonvdW</span>
+                  </a>
+              </li>
+          </ul>
+      </div>
+
+      <div class="footer-col footer-col-3">
+        <p>Solver for the Eternity II puzzle using novel algorithms and web development technology</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
