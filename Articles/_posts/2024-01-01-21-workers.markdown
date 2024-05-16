@@ -38,7 +38,7 @@ $ ./manage.sh add_work 10 scan9 9 1 --limit=289
 [INFO] Added 20 jobs
 {% endhighlight %}
 
-The "scan1" command expands to run a single location evaluator for all locations that are no already filled.
+The "scan1" command expands to run a single location evaluator for all locations that are not already filled.
 
 The "scan9" command expands to run a 3x3 evaluator for a fixed number of locations of the board.
 The limit option controls how many options are actually evaluated: this is normally limited to 50 options (to reduce processing time). 
