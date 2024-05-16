@@ -22,6 +22,8 @@ How would you continue?
 
 Let's try location 15
 
+<h2>15 option 2</h2>
+
 {% highlight text %}
 $ dup 200 201
 [INFO] Duplicating processor 200 to 201
@@ -44,11 +46,58 @@ $
 - Selection 1: dead-end in location 47.
 - Selection 2: dead-end in location 47.
 - Selection 3: stable with 6373 options remaining. Tension in locations 50 (2 pieces remaining) and 47 (3 pieces remaining).
-- Selection 4: "solves" locations 55, 47, 39 but dead-ends in the bottom row (locations 50, 51, 52, 53)
-- Selection 5: stable with 6757 options remaining. Location 23 has 3 pieces remaining.
+- Selection 4: solves locations 55, 47, 39 but dead-ends in the bottom row (locations 50, 51, 52, 53)
+- Selection 5: stable with 6754 options remaining. Location 23 has 3 pieces remaining.
 
 Let's duplicate the last board and work with location 23.
 
-- (board 210)Selection 1: stable with xxx options remaining. Tension in the right column (locations 31, 39, 47, 55).
-- (board 211)Selection 2: stable with xxx options remaining.
-- (board 212)Selection 3: stable with xxx options remaining. Location 31 has 3 pieces remaining.
+- Selection 1: stable with 5742 options remaining.
+- Selection 2: stable with 5903 options remaining.
+- Selection 3: stable with 5671 options remaining.
+
+All three boards have tension in the right column (locations 31, 39, 47, 55).
+Location 31 only has 3 to 4 pieces remaining.
+Locations 10, 50 and 55 only have 5 pieces remaining.
+
+Let's duplicate the board with the most options and work with location 31.
+
+- Selection 1: dead-end in location 11 after solving locations 31, 39, 47, 55, 14, 13, 12. 
+- Selection 2: dead-end in location 12 after solving locations 31, 39, 47, 55, 54, 53, 52, 51. 
+- Selection 3: dead-end in location 11 after solving locations 31, 39, 47, 55, 14, 13, 12.
+- Selection 4: dead-end in location 50 after solving locations 31, 39, 47, 55, 54, 53, 52, 51. 
+
+Let's duplicate the board with the fewest options and work with location 31.
+
+- Selection 1: dead-end in location 46 after solving locations 31, 39, 47, 55, 54. 
+- Selection 2: dead-end in location 44 after solving locations 31, 39, 47, 55, 54, 53, 52, 51, 50, 42. 
+- Selection 3: dead-end in location 12 after solving locations 31, 54, 10, 18. 
+
+And the last option:
+
+- Selection 1: dead-end in location 14 after solving 31, 39, 47, 55, 54, 53, 52. 
+- Selection 2: dead-end in location 47 after solving 31, 39, 55. 
+- Selection 3: dead-end in location 14 after solving 31, 39, 47, 55.
+
+Location 14 does not have claims, but is running out of 2x2 options probably because of the used base pieces.
+
+{% highlight text %}
+$ ./manage.sh eval_loc_1 252 14
+[INFO] Location: 14; processor=252
+[INFO] 148 base pieces in use or claimed
+[INFO] Side options: 1, 1, 6, 10
+[INFO] Number of Piece2x2: 0
+{% endhighlight %}
+
+Everything is dead end, so we need to take the next option for location 15.
+
+<h2>15 option 4</h2>
+
+Option 3 was a quick dead-end after immediately solving the right column and reducing the total option to below 4000, which is typically a bad sign.
+
+Trying option 4 for location 15 instead.
+After the initial propagation "scan1" was done to touch all locations and a "scan9" to evaluate 3x3 on 20 positions.
+Since the board did not run into a dead-end, a "line2" evaluator was used on each side followed by a 4x4 evaluation in 4 position.
+
+![Reduction animation]({{"/assets/anim1.gif" | relative_url }})
+
+(board 210)
