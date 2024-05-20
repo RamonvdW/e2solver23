@@ -33,6 +33,9 @@ url: ""         # the base hostname & protocol for your site, e.g. http://exampl
 theme: minima
 #plugins:
 #  - jekyll-feed
+
+# we don't want the feed, ever.
+# by setting this flag it is left out.
 feed:
  disable_in_development: true
 
@@ -50,7 +53,9 @@ destination: ../docs/
 # Excluded items can be processed by explicitly listing the directories or
 # their entries' file path in the `include:` list.
 #
-# exclude:
+exclude:
+- HOWTO.txt
+
 #   - .sass-cache/
 #   - .jekyll-cache/
 #   - gemfiles/

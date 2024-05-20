@@ -6,9 +6,9 @@
 #
 asgiref==3.8.1
     # via django
-coverage==7.4.4
+coverage==7.5.1
     # via -r requirements_dev.in
-django==4.2.11
+django==4.2.13
     # via
     #   -r requirements_dev.in
     #   django-debug-toolbar
@@ -18,7 +18,7 @@ packaging==24.0
     # via pip-review
 pip-review==1.3.0
     # via -r requirements_dev.in
-psycopg==3.1.18
+psycopg==3.1.19
     # via -r requirements_dev.in
 sqlparse==0.5.0
     # via

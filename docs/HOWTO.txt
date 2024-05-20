@@ -1,5 +1,0 @@
-Edit Articles/_posts/files
-Run ./serve.sh
-It will update the docs directory
-Commit and push
-Git action will publish to GH pages
