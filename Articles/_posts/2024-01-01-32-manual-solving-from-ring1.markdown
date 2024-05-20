@@ -22,7 +22,7 @@ How would you continue?
 
 Let's try location 15
 
-<h2>15 option 2</h2>
+<h2>Try location 15 option 2</h2>
 
 {% highlight text %}
 $ dup 200 201
@@ -90,14 +90,42 @@ $ ./manage.sh eval_loc_1 252 14
 
 Everything is dead end, so we need to take the next option for location 15.
 
-<h2>15 option 4</h2>
+<h2>Try location 15 option 3</h2>
 
 Option 3 was a quick dead-end after immediately solving the right column and reducing the total option to below 4000, which is typically a bad sign.
 
 Trying option 4 for location 15 instead.
+
+<h2>Try location 15 option 4</h2>
+
 After the initial propagation "scan1" was done to touch all locations and a "scan9" to evaluate 3x3 on 20 positions.
 Since the board did not run into a dead-end, a "line2" evaluator was used on each side followed by a 4x4 evaluation in 4 position.
 
 ![Reduction animation]({{"/assets/anim1.gif" | relative_url }})
 
-(board 210)
+The intermediate result has 6220 options left, with 6, 3, 8 and 5 pieces possible in location 10, 23, 50 and 55.
+Let's duplicate the board three times and fix location 23 to a different option on each board.
+
+{% highlight text %}
+$ dup 210 211
+$ dup 210 212
+$ dup 210 213
+$ fix 211 23 0 --commit
+$ fix 212 23 1 --commit
+$ fix 213 23 2 --commit
+{% endhighlight %}
+
+![Reduced ring1]({{"/assets/reduce_ring1_3.png" | relative_url }}){: width="70%"}
+
+Add scanning with 1x1 at prio 2 and 3x3 at prio 9 all over the board:
+
+{% highlight text %}
+$ ./manage.sh add_work 211 scan1 2 2
+$ ./manage.sh add_work 212 scan1 2 2
+$ ./manage.sh add_work 213 scan1 2 2
+$ ./manage.sh add_work 211 scan9 9 9 --limit=289
+$ ./manage.sh add_work 212 scan9 9 9 --limit=289
+$ ./manage.sh add_work 213 scan9 9 9 --limit=289
+{% endhighlight %}
+
+(board 211, 212, 213 = 23/0, 23/1, 23/2)
