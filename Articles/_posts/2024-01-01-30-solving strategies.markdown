@@ -36,6 +36,9 @@ Starting with a solid ring1, it is an option to solve from the outside towards t
 This means the tension of the border is solved.
 Unfortunately, a lot of borders can be made with varying utilization of inner base pieces.
 
+Solving in this direction always results in 2-side fits (the corners) and even several 3-side fits along each side.
+These are the most challenging and will often result in no-solution.
+
 More details: [ring1 generator]({{"/background/2024/01/01/31-ring1-generator" | relative_url }}) 
 
 ![Ring1]({{"/assets/ring1.png" | relative_url }}){: width="70%"}

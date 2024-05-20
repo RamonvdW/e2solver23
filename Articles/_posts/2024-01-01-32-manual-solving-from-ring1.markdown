@@ -128,4 +128,15 @@ $ ./manage.sh add_work 212 scan9 9 9 --limit=289
 $ ./manage.sh add_work 213 scan9 9 9 --limit=289
 {% endhighlight %}
 
-(board 211, 212, 213 = 23/0, 23/1, 23/2)
+All try survive with 4497, 5484 and 5315 options left.
+Locations 31 as well as location 55 have 3, 4, 4 options left.
+
+All 11 boards run into dead-ends. Two examples are shown below.
+
+![Reduced ring1]({{"/assets/reduce_ring1_4.png" | relative_url }}){: width="70%"}
+
+![Reduced ring1]({{"/assets/reduce_ring1_5.png" | relative_url }}){: width="70%"}
+
+These boards show that a 3-side fit is the most challenging.
+
+The inside-out strategy should therefore be more successful.

@@ -31,9 +31,9 @@ url: ""         # the base hostname & protocol for your site, e.g. http://exampl
 
 # Build settings
 theme: minima
+
 #plugins:
 #  - jekyll-feed
-
 # we don't want the feed, ever.
 # by setting this flag it is left out.
 feed:
