@@ -306,22 +306,22 @@ class OptionsView(TemplateView):
             # eval_line3
             if progress.eval_loc == 1:
                 # side 1
-                # locs = (1, 2, 3, 4, 10, 9, 11, 5, 6, 7, 8, 15, 16, 14, 13, 12, 11, 17, 18, 19, 20, 21, 22, 23, 24)
+                # locs = 1, 2, 3, 4, 10, 9, 11, 5, 6, 7, 8, 15, 16, 14, 13, 12, 11, 17, 18, 19, 20, 21, 22, 23, 24
                 return (102, 103, 104, 105, 106, 107, 108, 9, 10, 11, 12, 13, 14, 15, 16,
                         110, 111, 112, 113, 114, 115, 116, 17, 18, 19, 20, 21, 22, 23, 24)
             elif progress.eval_loc == 2:
                 # side 2
-                # locs = (8, 16, 24, 32, 15, 7, 23, 40, 48, 56, 64, 55, 63, 47, 39, 31, 6, 14, 22, 30, 38, 46, 54, 62)
+                # locs = 8, 16, 24, 32, 15, 7, 23, 40, 48, 56, 64, 55, 63, 47, 39, 31, 6, 14, 22, 30, 38, 46, 54, 62
                 return (16, 24, 32, 40, 48, 56, 64, 108, 116, 124, 132, 140, 148, 156, 164,
                         15, 23, 31, 39, 47, 55, 63, 107, 115, 123, 131, 139, 147, 155, 163)
             elif progress.eval_loc == 3:
                 # side 3
-                # locs = (57, 58, 59, 60, 50, 49, 51, 61, 62, 63, 64, 55, 56, 54, 53, 52, 41, 42, 43, 44, 45, 46, 47, 48)
+                # locs = 57, 58, 59, 60, 50, 49, 51, 61, 62, 63, 64, 55, 56, 54, 53, 52, 41, 42, 43, 44, 45, 46, 47, 48
                 return (158, 159, 160, 161, 162, 163, 164, 57, 58, 59, 60, 61, 62, 63, 64,
                         150, 151, 152, 153, 154, 155, 156, 49, 50, 51, 52, 53, 54, 55, 56)
             else:
                 # side 4
-                # locs = (1, 9, 17, 25, 10, 2, 18, 33, 41, 49, 57, 50, 58, 42, 34, 26, 3, 11, 19, 27, 35, 43, 51, 59)
+                # locs = 1, 9, 17, 25, 10, 2, 18, 33, 41, 49, 57, 50, 58, 42, 34, 26, 3, 11, 19, 27, 35, 43, 51, 59
                 return (9, 17, 25, 33, 41, 49, 57, 102, 110, 118, 126, 134, 142, 150, 158,
                         10, 18, 26, 34, 42, 50, 58, 103, 111, 119, 127, 135, 143, 151, 159)
 
@@ -372,7 +372,14 @@ class OptionsView(TemplateView):
 
     @staticmethod
     def _find_work(processor):
-        work = Work.objects.filter(done=False, processor=processor).order_by('-doing', 'priority', 'start_after', 'location')
+        work = (Work
+                .objects
+                .filter(done=False,
+                        processor=processor)
+                .order_by('-doing',
+                          'priority',
+                          'start_after',
+                          'location'))
 
         for job in work:
             if job.doing:
@@ -506,8 +513,8 @@ class OptionsView(TemplateView):
             sol[136].nr = 139
             sol[136].is_empty = False
 
-    def _add_claims_to_sol(self, sol, unused, seg2sides, loc, base_nr):
-
+    @staticmethod
+    def _add_claims_to_sol(sol, unused, seg2sides, loc, base_nr):
         seg1 = calc_segment(loc, 1)
         seg2 = calc_segment(loc, 2)
         seg3 = calc_segment(loc, 3)
