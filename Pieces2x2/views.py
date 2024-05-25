@@ -634,20 +634,6 @@ class OptionsView(TemplateView):
                     unused.remove(p2x2.nr4)
         # for
 
-        # parse the claims
-        for claim in used.claimed_nrs_single.split(', '):
-            if claim:
-                # nr:loc
-                nr, loc = claim.split(':')
-                loc = int(loc)
-
-                row_nr = int((loc - 1) / 8)
-                base_nr = 2 * (loc - 1) + row_nr * 16
-                base_nr += 1
-
-                self._add_claims_to_sol(sol, unused, seg2sides, loc, base_nr)
-        # for
-
         # for seg in seg2sides.keys():
         #     print('seg2sides[%s] = %s' % (seg, repr(seg2sides[seg])))
 
@@ -662,6 +648,20 @@ class OptionsView(TemplateView):
                 self._make_sol(sol, seg2sides, unused, True)
         # while
 
+        # parse the claims
+        for claim in used.claimed_nrs_single.split(', '):
+            if claim:
+                # nr:loc
+                nr, loc = claim.split(':')
+                loc = int(loc)
+
+                row_nr = int((loc - 1) / 8)
+                base_nr = 2 * (loc - 1) + row_nr * 16
+                base_nr += 1
+
+                self._add_claims_to_sol(sol, unused, seg2sides, loc, base_nr)
+        # for
+        
         # convert into an array
         out = []
         for base in range(1, 256+1):
