@@ -528,29 +528,33 @@ class OptionsView(TemplateView):
         qset = Piece2x2.objects.filter(side1__in=sides1, side2__in=sides2, side3__in=sides3, side4__in=sides4)
         qset = qset.filter(nr1__in=unused, nr2__in=unused, nr3__in=unused, nr4__in=unused)
 
-        nrs = list(qset.distinct('nr1').values_list('nr1', flat=True))
-        if len(nrs) == 1:
-            sol[base_nr].nr = nrs[0]
-            sol[base_nr].has_claim = True
-            sol[base_nr].is_empty = False
+        if sol[base_nr].is_empty:
+            nrs = list(qset.distinct('nr1').values_list('nr1', flat=True))
+            if len(nrs) == 1:
+                sol[base_nr].nr = nrs[0]
+                sol[base_nr].has_claim = True
+                sol[base_nr].is_empty = False
 
-        nrs = list(qset.distinct('nr2').values_list('nr2', flat=True))
-        if len(nrs) == 1:
-            sol[base_nr + 1].nr = nrs[0]
-            sol[base_nr + 1].has_claim = True
-            sol[base_nr + 1].is_empty = False
+        if sol[base_nr + 1].is_empty:
+            nrs = list(qset.distinct('nr2').values_list('nr2', flat=True))
+            if len(nrs) == 1:
+                sol[base_nr + 1].nr = nrs[0]
+                sol[base_nr + 1].has_claim = True
+                sol[base_nr + 1].is_empty = False
 
-        nrs = list(qset.distinct('nr3').values_list('nr3', flat=True))
-        if len(nrs) == 1:
-            sol[base_nr + 16].nr = nrs[0]
-            sol[base_nr + 16].has_claim = True
-            sol[base_nr + 16].is_empty = False
+        if sol[base_nr + 16].is_empty:
+            nrs = list(qset.distinct('nr3').values_list('nr3', flat=True))
+            if len(nrs) == 1:
+                sol[base_nr + 16].nr = nrs[0]
+                sol[base_nr + 16].has_claim = True
+                sol[base_nr + 16].is_empty = False
 
-        nrs = list(qset.distinct('nr4').values_list('nr4', flat=True))
-        if len(nrs) == 1:
-            sol[base_nr + 17].nr = nrs[0]
-            sol[base_nr + 17].has_claim = True
-            sol[base_nr + 17].is_empty = False
+        if sol[base_nr + 17].is_empty:
+            nrs = list(qset.distinct('nr4').values_list('nr4', flat=True))
+            if len(nrs) == 1:
+                sol[base_nr + 17].nr = nrs[0]
+                sol[base_nr + 17].has_claim = True
+                sol[base_nr + 17].is_empty = False
 
     def _make_solution(self, processor, used):
         sol = dict()        # [base] = SimpleNamespace
