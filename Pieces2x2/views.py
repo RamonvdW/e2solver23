@@ -661,7 +661,7 @@ class OptionsView(TemplateView):
 
                 self._add_claims_to_sol(sol, unused, seg2sides, loc, base_nr)
         # for
-        
+
         # convert into an array
         out = []
         for base in range(1, 256+1):

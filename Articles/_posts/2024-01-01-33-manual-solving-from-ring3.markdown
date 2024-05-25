@@ -45,5 +45,16 @@ Other sides:
 
 We observe that the tension is in the bottom left corner (location 50) and the fewest options are in location 34.
 
-With a little shell magic we create 123 duplicates of this board and fix location 34 on that board.
-The workers immediately jump at it and 
+With a little shell magic we create 123 duplicates of this board and fix location 34 on each board to a different option.
+We then add a 1x1 scan, 3x3 scan and 4x4 evaluation in strategic locations: the corners and centered against each border.
+
+The workers immediately jump at it and start removing options.
+While this is ongoing, claims start to develop as shown in blue below (location 26 was also filled in this example).
+
+![Reduce ring3 claims]({{"/assets/reduce_ring3_3_claims.png" | relative_url }}){: width="55%"}
+
+The claims further reduce the options in other locations.
+On boards with fewer total options left we see more claims showing up.
+The example below has 2215 total options remaining.
+
+![Reduce ring3 claims]({{"/assets/reduce_ring3_4_claims.png" | relative_url }}){: width="55%"}
