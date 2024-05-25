@@ -77,7 +77,7 @@
                 <table style="margin-left:auto; margin-right:auto{% if used.reached_dead_end %};background:orangered{% endif %}">
                     <tr>
                         {% for sol in solution %}
-                            <td>{% if not sol.is_empty %}{{ sol.nr }}{% endif %}</td>
+                            <td{% if sol.has_claim %} style="color:blue"{% endif %}>{% if not sol.is_empty %}{{ sol.nr }}{% endif %}</td>
                             {% if sol.do_break %}
                                 </tr>
                                 <tr>

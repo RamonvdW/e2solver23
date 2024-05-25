@@ -506,6 +506,45 @@ class OptionsView(TemplateView):
             sol[136].nr = 139
             sol[136].is_empty = False
 
+    def _add_claims_to_sol(self, sol, unused, seg2sides, loc, base_nr):
+
+        seg1 = calc_segment(loc, 1)
+        seg2 = calc_segment(loc, 2)
+        seg3 = calc_segment(loc, 3)
+        seg4 = calc_segment(loc, 4)
+
+        sides1 = seg2sides[seg1]
+        sides2 = seg2sides[seg2]
+        sides3 = seg2sides[seg3]
+        sides4 = seg2sides[seg4]
+
+        qset = Piece2x2.objects.filter(side1__in=sides1, side2__in=sides2, side3__in=sides3, side4__in=sides4)
+        qset = qset.filter(nr1__in=unused, nr2__in=unused, nr3__in=unused, nr4__in=unused)
+
+        nrs = list(qset.distinct('nr1').values_list('nr1', flat=True))
+        if len(nrs) == 1:
+            sol[base_nr].nr = nrs[0]
+            sol[base_nr].has_claim = True
+            sol[base_nr].is_empty = False
+
+        nrs = list(qset.distinct('nr2').values_list('nr2', flat=True))
+        if len(nrs) == 1:
+            sol[base_nr + 1].nr = nrs[0]
+            sol[base_nr + 1].has_claim = True
+            sol[base_nr + 1].is_empty = False
+
+        nrs = list(qset.distinct('nr3').values_list('nr3', flat=True))
+        if len(nrs) == 1:
+            sol[base_nr + 16].nr = nrs[0]
+            sol[base_nr + 16].has_claim = True
+            sol[base_nr + 16].is_empty = False
+
+        nrs = list(qset.distinct('nr4').values_list('nr4', flat=True))
+        if len(nrs) == 1:
+            sol[base_nr + 17].nr = nrs[0]
+            sol[base_nr + 17].has_claim = True
+            sol[base_nr + 17].is_empty = False
+
     def _make_solution(self, processor, used):
         sol = dict()        # [base] = SimpleNamespace
         wrap = 0
@@ -516,14 +555,6 @@ class OptionsView(TemplateView):
                 wrap = 0
                 sol[base].do_break = True
         # for
-
-        # parse the claims
-        # for claim in used.claimed_nrs_single.split(','):
-        #     if claim:
-        #         # nr:loc
-        #         nr, loc = claim.split(':')
-        #         loc = int(loc)
-        # # for
 
         unused = list(range(1, 256+1))
 
@@ -590,6 +621,20 @@ class OptionsView(TemplateView):
                 sol[base_nr + 17].is_empty = False
                 if p2x2.nr4 in unused:
                     unused.remove(p2x2.nr4)
+        # for
+
+        # parse the claims
+        for claim in used.claimed_nrs_single.split(', '):
+            if claim:
+                # nr:loc
+                nr, loc = claim.split(':')
+                loc = int(loc)
+
+                row_nr = int((loc - 1) / 8)
+                base_nr = 2 * (loc - 1) + row_nr * 16
+                base_nr += 1
+
+                self._add_claims_to_sol(sol, unused, seg2sides, loc, base_nr)
         # for
 
         # for seg in seg2sides.keys():
