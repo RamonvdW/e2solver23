@@ -208,6 +208,7 @@ class Command(BaseCommand):
             qset.delete()
 
             # restart all ongoing work
+            self.stdout.write('[INFO] Resetting all doing work')
             Work.objects.filter(done=False, doing=True).update(doing=False)
             EvalProgress.objects.all().delete()
             return
