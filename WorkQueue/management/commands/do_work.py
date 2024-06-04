@@ -192,6 +192,21 @@ class Command(BaseCommand):
         self.stdout.write('[INFO] Worker number: %s' % worker_nr)
 
         if worker_nr == 0:
+            # delete all done work
+            self.stdout.write('[INFO] Deleting done work')
+            Work.objects.filter(done=True).delete()
+
+            # delete all work for removed boards
+            procs = list(ProcessorUsedPieces
+                         .objects
+                         .filter(reached_dead_end=False)
+                         .distinct('processor')
+                         .values_list('processor', flat=True))
+
+            qset = Work.objects.exclude(processor__in=procs)
+            self.stdout.write('[INFO] Deleting %s obsolete work (deleted boards)' % qset.count())
+            qset.delete()
+
             # restart all ongoing work
             Work.objects.filter(done=False, doing=True).update(doing=False)
             EvalProgress.objects.all().delete()
