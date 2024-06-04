@@ -526,7 +526,25 @@ class OptionsView(TemplateView):
         sides4 = seg2sides[seg4]
 
         qset = Piece2x2.objects.filter(side1__in=sides1, side2__in=sides2, side3__in=sides3, side4__in=sides4)
-        qset = qset.filter(nr1__in=unused, nr2__in=unused, nr3__in=unused, nr4__in=unused)
+
+        unused1 = unused
+        unused2 = unused
+        unused3 = unused
+        unused4 = unused
+
+        if not sol[base_nr].is_empty:
+            unused1 = [sol[base_nr].nr]
+
+        if not sol[base_nr + 1].is_empty:
+            unused2 = [sol[base_nr + 1].nr]
+
+        if not sol[base_nr + 16].is_empty:
+            unused3 = [sol[base_nr + 16].nr]
+
+        if not sol[base_nr + 17].is_empty:
+            unused4 = [sol[base_nr + 17].nr]
+
+        qset = qset.filter(nr1__in=unused1, nr2__in=unused2, nr3__in=unused3, nr4__in=unused4)
 
         if sol[base_nr].is_empty:
             nrs = list(qset.distinct('nr1').values_list('nr1', flat=True))
