@@ -5,11 +5,10 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from Pieces2x2.models import TwoSide, TwoSideOptions, Piece2x2
+from Pieces2x2.models import TwoSideOptions, Piece2x2
 from Pieces2x2.helpers import calc_segment
 from WorkQueue.models import ProcessorUsedPieces
-from WorkQueue.operations import (propagate_segment_reduction, set_loc_used, get_unused_for_locs, request_eval_claims,
-                                  used_note_add)
+from WorkQueue.operations import set_loc_used, used_note_add
 
 
 class Command(BaseCommand):
