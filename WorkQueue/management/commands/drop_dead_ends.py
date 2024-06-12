@@ -36,8 +36,7 @@ class Command(BaseCommand):
         parser.add_argument('--verbose', action='store_true')
         parser.add_argument('--commit', action='store_true')
 
-    @staticmethod
-    def _find_boards_without_siblings():
+    def _find_boards_without_siblings(self):
         qset = ProcessorUsedPieces.objects.exclude(reached_dead_end=True).order_by('processor')
 
         logs = list()
@@ -62,6 +61,11 @@ class Command(BaseCommand):
                 created_from[proc.created_from] += 1
             except KeyError:
                 created_from[proc.created_from] = 1
+
+            if self.verbose:
+                self.stdout.write('Board %s has level %s and was created from %s' % (proc.processor,
+                                                                                     level,
+                                                                                     proc.created_from))
         # for
 
         highest_level = max(levels.values())
