@@ -47,6 +47,7 @@ class Command(BaseCommand):
         nrs = list()
         created_from = dict()
         levels = dict()              # [processor] = level
+        level_counts = dict()        # [level] = count
         for proc in qset:
             nrs.append(proc.processor)
 
@@ -56,6 +57,11 @@ class Command(BaseCommand):
                     level += 1
             # for
             levels[proc.processor] = level
+
+            try:
+                level_counts[level] += 1
+            except KeyError:
+                level_counts[level] = 1
 
             try:
                 created_from[proc.created_from] += 1
@@ -69,6 +75,10 @@ class Command(BaseCommand):
         # for
 
         highest_level = max(levels.values())
+
+        for level in range(1, highest_level+1):
+            self.stdout.write('Level %s has %s boards' % (level, level_counts[level]))
+        # for
 
         remove_nrs = list()
         for nr in nrs:
