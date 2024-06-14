@@ -48,8 +48,10 @@ class Command(BaseCommand):
             nr_str = 'nr%s' % nr
             if getattr(self.proc, nr_str, False):
                 # this piece is used
-                unused_center.remove(nr)
-                unused_border.remove(nr)
+                if nr in unused_center:
+                    unused_center.remove(nr)
+                if nr in unused_border:
+                    unused_border.remove(nr)
         # for
         if self.verbose:
             self.stdout.write('[INFO] %s unused pieces in the border' % len(unused_border))
