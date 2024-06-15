@@ -129,15 +129,19 @@ class Command(BaseCommand):
             work.when_done = timezone.now()
             work.save()
 
-    def _find_work(self, only_eval_loc_1, no_eval_loc_4):
-        # find some work to pick up
+    def _find_and_do_work_one(self):
+        """ Find work for the worker that only handle eval_loc_1
+            We prevent parallel processing to avoid claiming the same base piece multiple times
+        """
+
         now = timezone.now()
         do_work = None
 
         qset = (Work
                 .objects
                 .filter(done=False,
-                        doing=False)
+                        doing=False,
+                        job_type='eval_loc_1')
                 .exclude(start_after__gt=now)
                 .order_by('start_after'))  # oldest first
 
@@ -158,11 +162,66 @@ class Command(BaseCommand):
                     .exclude(start_after__gt=now)
                     .order_by('start_after'))  # oldest first
 
-            if only_eval_loc_1:
-                # avoid concurrent claiming by serializing eval_loc_1 on one worker
-                qset = qset.filter(job_type='eval_loc_1')
-            else:
-                qset = qset.exclude(job_type='eval_loc_1')
+            for work in qset.all():
+                used = ProcessorUsedPieces.objects.filter(processor=work.processor).first()
+                if used:
+                    if used.reached_dead_end:
+                        work.delete()
+                        continue    # next job
+
+                work.doing = True
+                work.save(update_fields=['doing'])
+                do_work = work
+                break   # from the for
+            # for
+        # atomic
+
+        if do_work:
+            self._do_work(work)
+            return True
+
+        return False        # did no work
+
+    def _find_and_do_work_4plus(self, no_eval_loc_4):
+        # find some work to pick up
+        now = timezone.now()
+        do_work = None
+
+        # exclude all boards that have an eval_loc_1 pending
+        skip_procs = list(Work
+                          .objects
+                          .filter(job_type='eval_loc_1',
+                                  done=False)
+                          .distinct('processor')
+                          .values_list('processor', flat=True))
+
+        self.stdout.write('[INFO] Skipping boards %s' % repr(skip_procs))
+
+        qset = (Work
+                .objects
+                .filter(done=False,
+                        doing=False)
+                .exclude(start_after__gt=now)
+                .exclude(processor__in=skip_procs)
+                .order_by('start_after'))  # oldest first
+
+        prios = qset.distinct('priority').order_by('priority').values_list('priority', flat=True)
+        if len(prios) == 0:
+            return False        # did no work
+
+        lowest_prio = prios[0]
+        self.stdout.write('[INFO] Lowest priority = %s' % lowest_prio)
+
+        with transaction.atomic():
+            qset = (Work
+                    .objects
+                    .select_for_update()
+                    .filter(done=False,
+                            doing=False,
+                            priority=lowest_prio)
+                    .exclude(start_after__gt=now)
+                    .exclude(processor__in=skip_procs)
+                    .order_by('start_after'))  # oldest first
 
             if no_eval_loc_4:
                 qset = qset.exclude(job_type='eval_loc_4')
@@ -217,15 +276,17 @@ class Command(BaseCommand):
         only_eval_loc_1 = worker_nr == 1
         no_eval_loc_4 = worker_nr > 10
 
+        duration = 2 if only_eval_loc_1 else 10
+
         while worker_nr:
-            did_work = self._find_work(only_eval_loc_1, no_eval_loc_4)
+            if only_eval_loc_1:
+                did_work = self._find_and_do_work_one()
+            else:
+                did_work = self._find_and_do_work_4plus(no_eval_loc_4)
 
             if not did_work:
                 self.stdout.write('[INFO] Waiting for more work')
-                if only_eval_loc_1:
-                    time.sleep(2)
-                else:
-                    time.sleep(10)
+                time.sleep(duration)
             else:
                 time.sleep(0.1)
         # while
