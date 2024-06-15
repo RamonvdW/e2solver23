@@ -163,6 +163,8 @@ class Command(BaseCommand):
                             doing=False,
                             priority=lowest_prio)
                     .exclude(start_after__gt=now)
+                    .annotate(is_odd=F('processor') % 2)
+                    .filter(is_odd=only_odd)
                     .order_by('start_after'))  # oldest first
 
             for work in qset.all():
