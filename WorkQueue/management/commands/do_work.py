@@ -7,6 +7,7 @@
 from django.db import transaction
 from django.core import management
 from django.utils import timezone
+from django.db.models import F
 from django.core.management.base import BaseCommand
 from Pieces2x2.models import EvalProgress
 from WorkQueue.models import Work, ProcessorUsedPieces
@@ -129,7 +130,7 @@ class Command(BaseCommand):
             work.when_done = timezone.now()
             work.save()
 
-    def _find_and_do_work_one(self):
+    def _find_and_do_work_one(self, only_odd):
         """ Find work for the worker that only handle eval_loc_1
             We prevent parallel processing to avoid claiming the same base piece multiple times
         """
@@ -143,6 +144,8 @@ class Command(BaseCommand):
                         doing=False,
                         job_type='eval_loc_1')
                 .exclude(start_after__gt=now)
+                .annotate(is_odd=F('processor') % 2)
+                .filter(is_odd=only_odd)
                 .order_by('start_after'))  # oldest first
 
         prios = qset.distinct('priority').order_by('priority').values_list('priority', flat=True)
@@ -273,14 +276,14 @@ class Command(BaseCommand):
             return
 
         # keep one worker available for small tasks
-        only_eval_loc_1 = worker_nr == 1
+        only_eval_loc_1 = worker_nr < 3         # 1, 2
         no_eval_loc_4 = worker_nr > 10
 
         duration = 2 if only_eval_loc_1 else 10
 
         while worker_nr:
             if only_eval_loc_1:
-                did_work = self._find_and_do_work_one()
+                did_work = self._find_and_do_work_one(worker_nr == 1)
             else:
                 did_work = self._find_and_do_work_4plus(no_eval_loc_4)
 
