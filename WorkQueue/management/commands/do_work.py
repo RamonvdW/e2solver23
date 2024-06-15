@@ -283,7 +283,7 @@ class Command(BaseCommand):
 
         while worker_nr:
             if only_eval_loc_1:
-                did_work = self._find_and_do_work_one(worker_nr == 1)
+                did_work = self._find_and_do_work_one(worker_nr % 2)
             else:
                 did_work = self._find_and_do_work_4plus(no_eval_loc_4)
 
