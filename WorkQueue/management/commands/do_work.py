@@ -73,7 +73,7 @@ class Command(BaseCommand):
             for loc in range(1, 64+1):
                 loc_str = 'loc%s' % loc
                 if getattr(used, loc_str) == 0:
-                    new_work = Work(processor=work.processor, job_type='eval_loc_1', priority=1, location=loc, nop=work.nop)
+                    new_work = Work(processor=work.processor, job_type='eval_loc_1', priority=2, location=loc, nop=work.nop)
                     bulk.append(new_work)
             # for
             Work.objects.bulk_create(bulk)

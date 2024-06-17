@@ -161,8 +161,8 @@ def propagate_segment_reduction(processor, segment):
     # eval_loc_1
     loc_a, loc_b = _segment_to_loc_1(segment)
 
-    _add_work(processor, 1, 'eval_loc_1', loc_a)
-    _add_work(processor, 1, 'eval_loc_1', loc_b)
+    _add_work(processor, 2, 'eval_loc_1', loc_a)
+    _add_work(processor, 2, 'eval_loc_1', loc_b)
 
     # eval_loc_4
     # loc_a, loc_b, loc_c, loc_d, loc_e, loc_f = _segment_to_loc_4(segment)
@@ -319,7 +319,7 @@ def request_eval_claims(processor):
             if perc > 0.05:
                 # 5% reduction
                 if Work.objects.filter(processor=processor, job_type='eval_claims', done=False).count() == 0:
-                    Work(processor=processor, job_type='eval_claims', priority='2').save()
+                    Work(processor=processor, job_type='eval_claims', priority='1').save()
 
 
 def set_dead_end(processor):
