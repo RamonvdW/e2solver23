@@ -193,21 +193,21 @@ class Command(BaseCommand):
         do_work = None
 
         # exclude all boards that have an eval_loc_1 pending
-        skip_procs = list(Work
-                          .objects
-                          .filter(job_type='eval_loc_1',
-                                  done=False)
-                          .distinct('processor')
-                          .values_list('processor', flat=True))
-
-        self.stdout.write('[INFO] Skipping boards %s' % repr(skip_procs))
+        # skip_procs = list(Work
+        #                   .objects
+        #                   .filter(job_type='eval_loc_1',
+        #                           done=False)
+        #                   .distinct('processor')
+        #                   .values_list('processor', flat=True))
+        #
+        # self.stdout.write('[INFO] Skipping boards %s' % repr(skip_procs))
 
         qset = (Work
                 .objects
                 .filter(done=False,
                         doing=False)
                 .exclude(start_after__gt=now)
-                .exclude(processor__in=skip_procs)
+                # .exclude(processor__in=skip_procs)
                 .order_by('start_after'))  # oldest first
 
         prios = qset.distinct('priority').order_by('priority').values_list('priority', flat=True)
@@ -225,7 +225,7 @@ class Command(BaseCommand):
                             doing=False,
                             priority=lowest_prio)
                     .exclude(start_after__gt=now)
-                    .exclude(processor__in=skip_procs)
+                    # .exclude(processor__in=skip_procs)
                     .order_by('start_after'))  # oldest first
 
             if no_eval_loc_4:
