@@ -808,7 +808,7 @@ class OptionsListView(TemplateView):
 
         ongoing1 = Work.objects.filter(doing=True,
                                        done=False,
-                                       priority=1).distinct('processor').values_list('processor', flat=True)
+                                       priority__lt=3).distinct('processor').values_list('processor', flat=True)
         ongoing1 = list(ongoing1)
 
         ongoing = Work.objects.filter(doing=True,
