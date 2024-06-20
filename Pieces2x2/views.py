@@ -824,8 +824,8 @@ class OptionsListView(TemplateView):
                 work2count[work.processor] = 1
         # for
 
-        age_limit = time.monotonic() - (2 * 60)     # max 2 minutes old
-        query_credits = 15
+        age_limit = time.monotonic() - (5 * 60)     # max 5 minutes old
+        query_credits = 25
 
         for proc in context['work']:
             processor_nr = proc['processor']
