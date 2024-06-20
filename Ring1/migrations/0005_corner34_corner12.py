@@ -126,9 +126,9 @@ class Migration(migrations.Migration):
                             models.Index(fields=['nr25'], name='Ring1_corne_nr25_f6fed5_idx'),
                             models.Index(fields=['nr26'], name='Ring1_corne_nr26_a34315_idx'),
                             models.Index(fields=['nr27'], name='Ring1_corne_nr27_f96e58_idx'),
-                            models.Index(fields=['nr28'], name='Ring1_corne_nr28_f7ecac_idx'),
+                            models.Index(fields=['nr28'], name='Ring1_corne_nr28_f7ecac_idx'),  # noqa
                             models.Index(fields=['nr29'], name='Ring1_corne_nr29_9c0daf_idx'),
-                            models.Index(fields=['nr30'], name='Ring1_corne_nr30_41ffaf_idx'),
+                            models.Index(fields=['nr30'], name='Ring1_corne_nr30_41ffaf_idx'),  # noqa
                             models.Index(fields=['nr31'], name='Ring1_corne_nr31_28ee57_idx'),
                             models.Index(fields=['nr32'], name='Ring1_corne_nr32_941319_idx'),
                             models.Index(fields=['nr33'], name='Ring1_corne_nr33_9d6032_idx'),
@@ -151,7 +151,7 @@ class Migration(migrations.Migration):
                             models.Index(fields=['nr50'], name='Ring1_corne_nr50_847ee5_idx'),
                             models.Index(fields=['nr51'], name='Ring1_corne_nr51_4aa2a1_idx'),
                             models.Index(fields=['nr52'], name='Ring1_corne_nr52_0fba12_idx'),
-                            models.Index(fields=['nr53'], name='Ring1_corne_nr53_ffedaa_idx'),
+                            models.Index(fields=['nr53'], name='Ring1_corne_nr53_ffedaa_idx'),  # noqa
                             models.Index(fields=['nr54'], name='Ring1_corne_nr54_8b986f_idx'),
                             models.Index(fields=['nr55'], name='Ring1_corne_nr55_3046ce_idx'),
                             models.Index(fields=['nr56'], name='Ring1_corne_nr56_387827_idx'),
@@ -279,14 +279,14 @@ class Migration(migrations.Migration):
                             models.Index(fields=['nr5'], name='Ring1_corne_nr5_47e318_idx'),
                             models.Index(fields=['nr6'], name='Ring1_corne_nr6_db1343_idx'),
                             models.Index(fields=['nr7'], name='Ring1_corne_nr7_e9cb8f_idx'),
-                            models.Index(fields=['nr8'], name='Ring1_corne_nr8_8ccee2_idx'),
+                            models.Index(fields=['nr8'], name='Ring1_corne_nr8_8ccee2_idx'),    # noqa
                             models.Index(fields=['nr9'], name='Ring1_corne_nr9_df59b2_idx'),
                             models.Index(fields=['nr10'], name='Ring1_corne_nr10_be8a40_idx'),
                             models.Index(fields=['nr12'], name='Ring1_corne_nr12_9d1f5a_idx'),
                             models.Index(fields=['nr13'], name='Ring1_corne_nr13_15bb30_idx'),
                             models.Index(fields=['nr14'], name='Ring1_corne_nr14_45c22e_idx'),
-                            models.Index(fields=['nr15'], name='Ring1_corne_nr15_8ccdb9_idx'),
-                            models.Index(fields=['nr16'], name='Ring1_corne_nr16_accd56_idx'),
+                            models.Index(fields=['nr15'], name='Ring1_corne_nr15_8ccdb9_idx'),  # noqa
+                            models.Index(fields=['nr16'], name='Ring1_corne_nr16_accd56_idx'),  # noqa
                             models.Index(fields=['nr17'], name='Ring1_corne_nr17_a362f4_idx'),
                             models.Index(fields=['nr18'], name='Ring1_corne_nr18_908853_idx'),
                             models.Index(fields=['nr19'], name='Ring1_corne_nr19_8fe2c0_idx'),
@@ -298,7 +298,7 @@ class Migration(migrations.Migration):
                             models.Index(fields=['nr25'], name='Ring1_corne_nr25_285c8f_idx'),
                             models.Index(fields=['nr26'], name='Ring1_corne_nr26_d4b562_idx'),
                             models.Index(fields=['nr27'], name='Ring1_corne_nr27_17e7b5_idx'),
-                            models.Index(fields=['nr28'], name='Ring1_corne_nr28_d1ecdd_idx'),
+                            models.Index(fields=['nr28'], name='Ring1_corne_nr28_d1ecdd_idx'),  # noqa
                             models.Index(fields=['nr29'], name='Ring1_corne_nr29_261903_idx'),
                             models.Index(fields=['nr30'], name='Ring1_corne_nr30_b2a31d_idx'),
                             models.Index(fields=['nr31'], name='Ring1_corne_nr31_51a72d_idx'),
@@ -315,7 +315,7 @@ class Migration(migrations.Migration):
                             models.Index(fields=['nr42'], name='Ring1_corne_nr42_a7008a_idx'),
                             models.Index(fields=['nr43'], name='Ring1_corne_nr43_c63825_idx'),
                             models.Index(fields=['nr44'], name='Ring1_corne_nr44_4eef42_idx'),
-                            models.Index(fields=['nr45'], name='Ring1_corne_nr45_50fbbd_idx'),
+                            models.Index(fields=['nr45'], name='Ring1_corne_nr45_50fbbd_idx'),  # noqa
                             models.Index(fields=['nr46'], name='Ring1_corne_nr46_1c043a_idx'),
                             models.Index(fields=['nr47'], name='Ring1_corne_nr47_97049e_idx'),
                             models.Index(fields=['nr48'], name='Ring1_corne_nr48_a15abf_idx'),
@@ -344,8 +344,8 @@ class Migration(migrations.Migration):
                             models.Index(fields=['nr71'], name='Ring1_corne_nr71_8891e2_idx'),
                             models.Index(fields=['nr72'], name='Ring1_corne_nr72_1f04f0_idx'),
                             models.Index(fields=['nr73'], name='Ring1_corne_nr73_cae0f6_idx'),
-                            models.Index(fields=['nr74'], name='Ring1_corne_nr74_f6ecbd_idx'),
-                            models.Index(fields=['nr75'], name='Ring1_corne_nr75_ebaab7_idx'),
+                            models.Index(fields=['nr74'], name='Ring1_corne_nr74_f6ecbd_idx'),  # noqa
+                            models.Index(fields=['nr75'], name='Ring1_corne_nr75_ebaab7_idx'),  # noqa
                             models.Index(fields=['nr76'], name='Ring1_corne_nr76_028e6f_idx'),
                             models.Index(fields=['nr77'], name='Ring1_corne_nr77_87a033_idx'),
                             models.Index(fields=['nr78'], name='Ring1_corne_nr78_8105f9_idx'),

@@ -112,7 +112,7 @@ class GenerateBorder(object):
             50..59 = add 10 borders
             60 = check head/tail match
         """
-        #print("(%s) %s" % (len(self.solve_order), self.solve_order))
+        # print("(%s) %s" % (len(self.solve_order), self.solve_order))
 
         prev_side = self.side_order[-1]
 
@@ -199,11 +199,11 @@ class GenerateBorder(object):
                 self.solve_order = self.solve_order[:-5]
         # for
 
-        #side_in, side_out = self.c_in_out[c]
-        #self.side_order.append(side_in)
+        # side_in, side_out = self.c_in_out[c]
+        # self.side_order.append(side_in)
 
-        #yield from self._iter_recurse()
-        yield bbcbb
+        # yield from self._iter_recurse()
+        yield bbcbb     # TODO: remove?
 
     def get_first_solution(self):
         for sol in self.iter_solutions():

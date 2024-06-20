@@ -61,7 +61,7 @@ class Show2x1View(TemplateView):
                 block2 = Block.objects.get(nr=block.block2_nr)
                 block_cache[block.block2_nr] = block2
 
-            side1 = side1 = block1.get_side(1, block.rot1) + block2.get_side(1, block.rot2)
+            side1 = block1.get_side(1, block.rot1) + block2.get_side(1, block.rot2)
             block.img_b1 = static('blocks/block_%s.png' % side1[0])
             block.img_b2 = static('blocks/block_%s.png' % side1[1])
             block.img_b3 = static('blocks/block_%s.png' % side1[2])

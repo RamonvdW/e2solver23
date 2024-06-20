@@ -58,7 +58,7 @@ class Command(BaseCommand):
             self.twoside2reverse[nr] = rev_nr
         # for
 
-        self.processor = 0
+        self.processor_nr = 0
         self.segment = 0
         self.requested_order = (-1,)
         self.locs = (1, 2, 7, 8,
@@ -159,7 +159,7 @@ class Command(BaseCommand):
         print('[INFO] Saved progress solution: pk=%s' % sol.pk)
 
     def _get_unused(self):
-        unused = get_unused(self.processor)
+        unused = get_unused(nr=self.processor_nr)
 
         if 36 not in self.locs and 139 in unused:
             unused.remove(139)
@@ -186,7 +186,7 @@ class Command(BaseCommand):
         segment = calc_segment(loc, side_nr)
         options = (TwoSideOptions
                    .objects
-                   .filter(processor=self.processor,
+                   .filter(processor=self.processor_nr,
                            segment=segment)
                    .values_list('two_side', flat=True))
         options = list(options)
@@ -407,12 +407,12 @@ class Command(BaseCommand):
         # for
 
     def _reduce(self, segment, two_side):
-        qset = TwoSideOptions.objects.filter(processor=self.processor, segment=segment, two_side=two_side)
+        qset = TwoSideOptions.objects.filter(processor=self.processor_nr, segment=segment, two_side=two_side)
         if qset.count() == 1:
             self.stdout.write('[INFO] Reduction segment %s: %s' % (segment, two_side))
             if self.do_commit:
                 qset.delete()
-                propagate_segment_reduction(self.processor, segment)
+                propagate_segment_reduction(self.processor_nr, segment)
             self.reductions += 1
         # else: most likely deleted by a parallel operation
 
@@ -758,8 +758,8 @@ class Command(BaseCommand):
 
         self.stdout.write('[INFO] Locations: %s' % repr(self.locs))
 
-        self.processor = options['processor'][0]
-        self.stdout.write('[INFO] Processor: %s' % self.processor)
+        self.processor_nr = options['processor'][0]
+        self.stdout.write('[INFO] Processor: %s' % self.processor_nr)
 
         self.segment = options['segment'][0]
         self.stdout.write('[INFO] Segment: %s' % self.segment)
@@ -776,7 +776,7 @@ class Command(BaseCommand):
         self.progress = EvalProgress(
                         eval_size=16,
                         eval_loc=1,
-                        processor=self.processor,
+                        processor=self.processor_nr,
                         segment=self.segment,
                         todo_count=0,
                         left_count=0,

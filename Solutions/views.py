@@ -30,7 +30,13 @@ def _get_2x2(nr, note):
     if nr == 0:
         piece = SimpleNamespace(nr=0, is_empty=True)
         if note:
-            piece.note = '2x2: ' + note.replace(' ', '\n').replace(')\n', ')\n1x1: ').replace('max\n', 'max ').replace(',', ', ')
+            piece.note = ('2x2: ' +
+                          note
+                          .replace(' ', '\n')
+                          .replace(')\n', ')\n1x1: ')
+                          .replace('max\n', 'max ')
+                          .replace(',', ', '))
+
     else:
         piece = Piece2x2.objects.get(nr=nr)
 
@@ -213,7 +219,7 @@ def _sol_add_stats_2x2(sol: Solution8x8, neighbours):
         side_nr2reverse[nr] = rev_nr
     # for
 
-    #side_border = two2nr['XX']
+    # side_border = two2nr['XX']
 
     qset = Piece2x2.objects.filter(nr1__in=unused_nrs, nr2__in=unused_nrs, nr3__in=unused_nrs, nr4__in=unused_nrs)
 
@@ -223,7 +229,7 @@ def _sol_add_stats_2x2(sol: Solution8x8, neighbours):
         rev_nr = side_nr2reverse[side_nr]
 
         # all rotation variants exist, so just count 1 side
-        c_left = qset.filter(side1=rev_nr).count()  #, side3=side_border).count()
+        c_left = qset.filter(side1=rev_nr).count()  # , side3=side_border).count()
 
         tup = (side_nr, c_open, c_left, is_border)
         sol.s2_counts.append(tup)
@@ -363,7 +369,7 @@ class ShowAutoView(TemplateView):
             _fill_sol(sol)
             # context['chains'] = _analyze_chains(sol)
 
-            #context['based_on'] = '6x6 nr %s' % sol.based_on_6x6
+            # context['based_on'] = '6x6 nr %s' % sol.based_on_6x6
 
             nr = sol.pk
             if nr > 100:

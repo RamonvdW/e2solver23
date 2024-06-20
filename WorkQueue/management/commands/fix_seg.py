@@ -5,10 +5,9 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from Pieces2x2.models import TwoSide, TwoSideOptions, Piece2x2
+from Pieces2x2.models import TwoSideOptions
 from Pieces2x2.helpers import calc_segment
-from WorkQueue.operations import (propagate_segment_reduction, set_loc_used, get_unused_for_locs, request_eval_claims,
-                                  used_note_add)
+from WorkQueue.operations import propagate_segment_reduction, request_eval_claims, used_note_add
 
 
 class Command(BaseCommand):
@@ -26,7 +25,8 @@ class Command(BaseCommand):
         parser.add_argument('--nop', action='store_true', help='Do not propagate')
         parser.add_argument('--commit', action='store_true')
 
-    def _get_side_options(self, processor, segment):
+    @staticmethod
+    def _get_side_options(processor, segment):
         options = (TwoSideOptions
                    .objects
                    .filter(processor=processor,

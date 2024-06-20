@@ -4,6 +4,7 @@
 #  All rights reserved.
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
+# from django.db import connection
 from django.core.management.base import BaseCommand
 from Pieces2x2.models import TwoSide, TwoSideOptions, Piece2x2
 from Pieces2x2.helpers import calc_segment
@@ -20,9 +21,11 @@ class Command(BaseCommand):
 
         self.twoside_border = TwoSide.objects.get(two_sides='XX').nr
 
-        self.processor = 0
+        self.processor_nr = 0
         self.small_limit = 3
         self.unused = []
+
+        self.seg2options = dict()      # [segment] = [two_side, two_side, ..]
 
         self.nr_claims = dict()     # [loc, 1/2/3/4] = [nr, ..]
         for loc in range(1, 64+1):
@@ -40,23 +43,34 @@ class Command(BaseCommand):
         parser.add_argument('--limit', type=int, default=3, help='Size of small claims to show')
 
     def _load_unused(self):
-        self.unused = get_unused(self.processor)
+        self.unused = get_unused(nr=self.processor_nr)
         self.stdout.write('[INFO] %s base pieces in use' % (256 - len(self.unused)))
+
+    def _load_twoside_options(self):
+        self.seg2options = dict()
+        for seg in range(1, 165+1):
+            self.seg2options[seg] = list()
+        # for
+
+        for option in TwoSideOptions.objects.filter(processor=self.processor_nr):
+            self.seg2options[option.segment].append(option.two_side)
+        # for
 
     def _get_side_options(self, loc, side_nr):
         segment = calc_segment(loc, side_nr)
-        options = (TwoSideOptions
-                   .objects
-                   .filter(processor=self.processor,
-                           segment=segment)
-                   .values_list('two_side', flat=True))
-        options = list(options)
-
-        # print('segment %s options: %s' % (segment, repr(options)))
-        return options
+        return self.seg2options[segment]
+        # options = (TwoSideOptions
+        #            .objects
+        #            .filter(processor=self.processor_nr,
+        #                    segment=segment)
+        #            .values_list('two_side', flat=True))
+        # options = list(options)
+        #
+        # # print('segment %s options: %s' % (segment, repr(options)))
+        # return options
 
     def _count_twoside(self):
-        return TwoSideOptions.objects.filter(processor=self.processor).count()
+        return TwoSideOptions.objects.filter(processor=self.processor_nr).count()
 
     def _scan_locs(self, used):
         """ Determinate the claims for each location, not considering existing claims """
@@ -207,18 +221,21 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
-        self.processor = options['processor']
+        self.processor_nr = options['processor']
         self.small_limit = options['limit']
 
-        self.stdout.write('[INFO] Processor=%s' % self.processor)
+        self.stdout.write('[INFO] Processor=%s' % self.processor_nr)
+
+        # q_begin = len(connection.queries)
 
         try:
-            used = ProcessorUsedPieces.objects.get(processor=self.processor)
+            used = ProcessorUsedPieces.objects.get(processor=self.processor_nr)
         except ProcessorUsedPieces.DoesNotExist:
             self.stderr.write('[ERROR] Used pieces admin not found')
             return
 
         self._load_unused()
+        self._load_twoside_options()
 
         self._scan_locs(used)
 
@@ -228,5 +245,28 @@ class Command(BaseCommand):
             used.reached_dead_end = True
             used.save(update_fields=['reached_dead_end'])
 
+        # print('queries: %s' % (len(connection.queries) - q_begin))
+        # for obj in connection.queries[q_begin:]:
+        #     print('%10s %s' % (obj['time'], obj['sql'][:200]))
+        # # for
+
+
+"""
+    performance debug helper:
+
+    from django.db import connection
+
+        q_begin = len(connection.queries)
+
+        # queries here
+
+        print('queries: %s' % (len(connection.queries) - q_begin))
+        for obj in connection.queries[q_begin:]:
+            print('%10s %s' % (obj['time'], obj['sql'][:200]))
+        # for
+        sys.exit(1)
+
+    test uitvoeren met DEBUG=True via --settings=SiteMain.settings_dev anders wordt er niets bijgehouden
+"""
 
 # end of file

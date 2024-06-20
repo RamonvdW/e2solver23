@@ -141,16 +141,16 @@ def _segment_to_loc_9(segment):
     return tuple(locs)
 
 
-def _add_work(processor, priority, job_type, location):
+def _add_work(processor_nr: int, priority: int, job_type: str, location: int):
     if location > 0:
         count = Work.objects.filter(done=False,
-                                    processor=processor, job_type=job_type, location=location).count()
+                                    processor=processor_nr, job_type=job_type, location=location).count()
 
         if count == 0:
             # not a duplicate
             # (new duplicate due to race condition is still possible though)
             Work(done=False, doing=False,
-                 processor=processor, job_type=job_type, location=location,
+                 processor=processor_nr, job_type=job_type, location=location,
                  priority=priority).save()
 
 
@@ -194,22 +194,19 @@ def propagate_segment_reduction(processor, segment):
     # location = segment_to_loc_16(segment)
 
 
-def get_unused(processor):
+def get_unused(used=None, nr=0):
     """ return the list with unused based piece numbers """
 
+    if not used:
+        used = ProcessorUsedPieces.objects.get(processor=nr)
+
     unused = list(range(1, 256+1))
-    try:
-        used = ProcessorUsedPieces.objects.get(processor=processor)
-    except ProcessorUsedPieces.DoesNotExist:
-        # not available; so simple return all
-        pass
-    else:
-        for nr in range(1, 256+1):
-            nr_str = 'nr%s' % nr
-            if getattr(used, nr_str, False):
-                # this piece is used
-                unused.remove(nr)
-        # for
+    for nr in range(1, 256+1):
+        nr_str = 'nr%s' % nr
+        if getattr(used, nr_str, False):
+            # this piece is used
+            unused.remove(nr)
+    # for
 
     return unused
 

@@ -8,7 +8,7 @@
 # this line + shebang ensures python is taken from the user's PATH
 # python sees this as a string and ignores it
 # note: -u = unbuffered stdout/stderr
-"exec" "python3" "-u" "$0" "$@"
+"exec" "python3" "-u" "$0" "$@"     # noqa
 
 from django.core.management import execute_from_command_line
 import sys

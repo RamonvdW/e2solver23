@@ -43,7 +43,22 @@ class Migration(migrations.Migration):
             options={
                 'verbose_name': 'Piece 3x3',
                 'verbose_name_plural': 'Pieces 3x3',
-                'indexes': [models.Index(fields=['is_border'], name='Pieces3x3_p_is_bord_802d89_idx'), models.Index(fields=['has_hint'], name='Pieces3x3_p_has_hin_314f36_idx'), models.Index(fields=['nr1'], name='Pieces3x3_p_nr1_5f1e95_idx'), models.Index(fields=['nr2'], name='Pieces3x3_p_nr2_e8134b_idx'), models.Index(fields=['nr3'], name='Pieces3x3_p_nr3_ed249e_idx'), models.Index(fields=['nr4'], name='Pieces3x3_p_nr4_e410e5_idx'), models.Index(fields=['nr5'], name='Pieces3x3_p_nr5_acc619_idx'), models.Index(fields=['nr6'], name='Pieces3x3_p_nr6_a6eb74_idx'), models.Index(fields=['nr7'], name='Pieces3x3_p_nr7_b0f32c_idx'), models.Index(fields=['nr8'], name='Pieces3x3_p_nr8_07fbbc_idx'), models.Index(fields=['nr9'], name='Pieces3x3_p_nr9_e23548_idx'), models.Index(fields=['side1'], name='Pieces3x3_p_side1_394a70_idx'), models.Index(fields=['side2'], name='Pieces3x3_p_side2_c74a8e_idx'), models.Index(fields=['side3'], name='Pieces3x3_p_side3_590984_idx'), models.Index(fields=['side4'], name='Pieces3x3_p_side4_e97a67_idx')],
+                'indexes': [models.Index(fields=['is_border'],
+                                         name='Pieces3x3_p_is_bord_802d89_idx'),
+                            models.Index(fields=['has_hint'], name='Pieces3x3_p_has_hin_314f36_idx'),
+                            models.Index(fields=['nr1'], name='Pieces3x3_p_nr1_5f1e95_idx'),
+                            models.Index(fields=['nr2'], name='Pieces3x3_p_nr2_e8134b_idx'),
+                            models.Index(fields=['nr3'], name='Pieces3x3_p_nr3_ed249e_idx'),
+                            models.Index(fields=['nr4'], name='Pieces3x3_p_nr4_e410e5_idx'),
+                            models.Index(fields=['nr5'], name='Pieces3x3_p_nr5_acc619_idx'),
+                            models.Index(fields=['nr6'], name='Pieces3x3_p_nr6_a6eb74_idx'),
+                            models.Index(fields=['nr7'], name='Pieces3x3_p_nr7_b0f32c_idx'),
+                            models.Index(fields=['nr8'], name='Pieces3x3_p_nr8_07fbbc_idx'),        # noqa
+                            models.Index(fields=['nr9'], name='Pieces3x3_p_nr9_e23548_idx'),
+                            models.Index(fields=['side1'], name='Pieces3x3_p_side1_394a70_idx'),
+                            models.Index(fields=['side2'], name='Pieces3x3_p_side2_c74a8e_idx'),
+                            models.Index(fields=['side3'], name='Pieces3x3_p_side3_590984_idx'),
+                            models.Index(fields=['side4'], name='Pieces3x3_p_side4_e97a67_idx')],
             },
         ),
     ]

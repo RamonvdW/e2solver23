@@ -5,7 +5,6 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from BasePieces.border import GenerateBorder
 from BasePieces.hints import ALL_HINT_NRS
 from BasePieces.models import BasePiece
 from Pieces2x2.models import Piece2x2

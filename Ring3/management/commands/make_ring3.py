@@ -145,8 +145,8 @@ class Command(BaseCommand):
     def _save_ring3(self):
         self.ring3_count += 1
 
-        #if self.ring3_count < 100 or self.ring3_count % 100 == 1:
-        #    print('[INFO] Ring3 count: %s' % self.ring3_count)
+        # if self.ring3_count < 100 or self.ring3_count % 100 == 1:
+        #     print('[INFO] Ring3 count: %s' % self.ring3_count)
         self.ring3.pk = None
         self.ring3.save()
         self.stdout.write('[INFO] Saved Ring3 with pk=%s' % self.ring3.pk)

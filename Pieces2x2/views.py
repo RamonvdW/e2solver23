@@ -656,16 +656,16 @@ class OptionsView(TemplateView):
         # for seg in seg2sides.keys():
         #     print('seg2sides[%s] = %s' % (seg, repr(seg2sides[seg])))
 
-        keep_going = True
-        while keep_going:
-            prev_len = len(unused)
-            self._make_sol(sol, seg2sides, unused)
-
-            if len(unused) == prev_len:
-                keep_going = False
-                # final run
-                self._make_sol(sol, seg2sides, unused, True)
-        # while
+        # keep_going = True
+        # while keep_going:
+        #     prev_len = len(unused)
+        #     self._make_sol(sol, seg2sides, unused)
+        #
+        #     if len(unused) == prev_len:
+        #         keep_going = False
+        #         # final run
+        #         self._make_sol(sol, seg2sides, unused, True)
+        # # while
 
         # parse the claims
         for claim in used.claimed_nrs_single.split(', '):

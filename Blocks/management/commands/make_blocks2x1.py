@@ -5,9 +5,8 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
-from BasePieces.models import BasePiece, Block
 from Blocks.models import Block2x1
-from Pieces2x2.models import TwoSide, Piece2x2
+from Pieces2x2.models import Piece2x2
 
 
 class Command(BaseCommand):

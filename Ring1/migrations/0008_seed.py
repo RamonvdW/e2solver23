@@ -63,7 +63,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddIndex(
             model_name='corner2',
-            index=models.Index(fields=['seed'], name='Ring1_corne_seed_15bbaa_idx'),
+            index=models.Index(fields=['seed'], name='Ring1_corne_seed_15bbaa_idx'),    # noqa
         ),
         migrations.AddIndex(
             model_name='corner3',

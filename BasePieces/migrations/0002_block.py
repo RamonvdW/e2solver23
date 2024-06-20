@@ -62,7 +62,7 @@ class Migration(migrations.Migration):
                             models.Index(fields=['b4'], name='BasePieces__b4_a83144_idx'),
                             models.Index(fields=['side1'], name='BasePieces__side1_41e40f_idx'),
                             models.Index(fields=['side2'], name='BasePieces__side2_2752a7_idx'),
-                            models.Index(fields=['side3'], name='BasePieces__side3_f9ccda_idx'),
+                            models.Index(fields=['side3'], name='BasePieces__side3_f9ccda_idx'),        # noqa
                             models.Index(fields=['side4'], name='BasePieces__side4_ccf482_idx'),
                             models.Index(fields=['base_nr'], name='BasePieces__base_nr_5c8898_idx')],
             },

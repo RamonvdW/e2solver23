@@ -18,7 +18,6 @@ class Command(BaseCommand):
             - it is a sibling that refers to another board
     """
 
-
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.proc: ProcessorUsedPieces | None = None
