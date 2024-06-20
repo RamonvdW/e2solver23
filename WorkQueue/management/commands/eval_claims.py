@@ -66,7 +66,7 @@ class Command(BaseCommand):
         print_at = 1
         for loc in range(1, 64+1):
             if loc == print_at:
-                self.stdout.write('[INFO] Scanning locs %s-%s' % (loc, loc + 8))
+                self.stdout.write('[INFO] Scanning locs %s-%s' % (loc, loc + 7))
                 print_at = loc + 8
 
             # see if this loc requires certain base pieces
