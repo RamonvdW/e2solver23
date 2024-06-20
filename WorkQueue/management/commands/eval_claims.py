@@ -188,6 +188,7 @@ class Command(BaseCommand):
                     # for
         # while
 
+        double_nrs = dict()     # [(nr1, nr2)] = [loc1, loc2]
         self.stdout.write('[INFO] Remaining small claims:')
         for loc, nr in self.nr_claims.keys():
             nrs = self.nr_claims[(loc, nr)]
@@ -200,6 +201,15 @@ class Command(BaseCommand):
                 if count > 1:
                     multi_str = '  *** MULTI (%s) %s ***' % (count, " + ".join(multi))
                 self.stdout.write('%s.nr%s: %s%s' % (loc, nr, repr(nrs), multi_str))
+
+                if count == 2:
+                    # double claims
+                    nrs.sort()
+                    nrs = tuple(nrs)
+                    try:
+                        double_nrs[nrs].append(str(loc))
+                    except KeyError:
+                        double_nrs[nrs] = [str(loc)]
         # for
 
         claimed_nrs = []
@@ -218,6 +228,22 @@ class Command(BaseCommand):
             used.save(update_fields=['claimed_nrs_single'])
         else:
             self.stdout.write('[INFO] Single claims unchanged')
+
+        claimed_nrs = []
+        for nrs, locs in double_nrs.items():
+            locs_str = "+".join(locs)
+            for nr in nrs:
+                claimed_nrs.append('%s:%s' % (nr, locs_str))
+        # for
+        claimed_nrs_double = ",".join(claimed_nrs)
+
+        if used.claimed_nrs_double != claimed_nrs_double:
+            self.stdout.write('[INFO] Double claims changed')
+            used.claimed_nrs_double = claimed_nrs_double
+            used.save(update_fields=['claimed_nrs_double'])
+        else:
+            self.stdout.write('[INFO] Double claims unchanged')
+
 
     def handle(self, *args, **options):
 
