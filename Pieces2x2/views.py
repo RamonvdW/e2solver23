@@ -587,13 +587,14 @@ class OptionsView(TemplateView):
 
         unused = list(range(1, 256+1))
 
-        qset = TwoSideOptions.objects.filter(processor=processor)
         seg2sides = dict()      # [seg] = list(two_side)
+        for seg in range(1, 165+1):
+            seg2sides[seg] = list()
+        # for
+
+        qset = TwoSideOptions.objects.filter(processor=processor)
         for two in qset:
-            try:
-                seg2sides[two.segment].append(two.two_side)
-            except KeyError:
-                seg2sides[two.segment] = [two.two_side]
+            seg2sides[two.segment].append(two.two_side)
         # for
 
         for loc in range(1, 64+1):
