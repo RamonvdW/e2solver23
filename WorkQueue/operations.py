@@ -243,7 +243,7 @@ def get_unused_for_locs(processor, locs):
         for claim in used.claimed_nrs_double.split(','):
             if claim:
                 nr_str, locs_str = claim.split(':')
-                spl = locs_str.split(';')
+                spl = locs_str.split('+')
                 loc1 = int(spl[0])
                 loc2 = int(spl[1])
                 if loc1 not in locs and loc2 not in locs:
