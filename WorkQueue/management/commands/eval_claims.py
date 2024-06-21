@@ -235,15 +235,15 @@ class Command(BaseCommand):
             for nr in nrs:
                 claimed_nrs.append('%s:%s' % (nr, locs_str))
         # for
+        claimed_nrs.sort()
         claimed_nrs_double = ",".join(claimed_nrs)
 
         if used.claimed_nrs_double != claimed_nrs_double:
-            self.stdout.write('[INFO] Double claims changed')
+            self.stdout.write('[INFO] Double claims changed %s --> %s' % (repr(used.claimed_nrs_double), repr(claimed_nrs_double)))
             used.claimed_nrs_double = claimed_nrs_double
             used.save(update_fields=['claimed_nrs_double'])
         else:
             self.stdout.write('[INFO] Double claims unchanged')
-
 
     def handle(self, *args, **options):
 
