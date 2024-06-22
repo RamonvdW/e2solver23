@@ -43,7 +43,7 @@ class Command(BaseCommand):
         try:
             management.call_command(*args, stderr=f1, stdout=f2)
         except SystemExit as exc:
-            self.stdout.write('[WARNING] %s for command %s' % (str(exc), repr(args)))
+            self.stdout.write('[WARNING] Exception "%s" from command %s' % (str(exc), repr(args)))
             bad = True
 
         msg = f2.getvalue() + '\n' + f1.getvalue()

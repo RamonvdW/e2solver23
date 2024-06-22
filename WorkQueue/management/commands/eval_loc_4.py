@@ -221,8 +221,6 @@ class Command(BaseCommand):
         original_todo = len(sides)
         sides = self._limit_work(sides)
         todo = len(sides)
-        # if todo > self.segment_limit:
-        #     return
 
         self.progress.segment = segment
         self.progress.todo_count = todo
@@ -323,8 +321,6 @@ class Command(BaseCommand):
         original_todo = len(sides)
         sides = self._limit_work(sides)
         todo = len(sides)
-        # if todo - len(self._sides5_seen) > self.segment_limit:
-        #     return
 
         self.progress.segment = segment
         self.progress.todo_count = todo
@@ -426,8 +422,6 @@ class Command(BaseCommand):
         original_todo = len(sides)
         sides = self._limit_work(sides)
         todo = len(sides)
-        # if todo - len(self._sides6_seen) > self.segment_limit:
-        #     return
 
         self.progress.segment = segment
         self.progress.todo_count = todo
@@ -527,8 +521,6 @@ class Command(BaseCommand):
         original_todo = len(sides)
         sides = self._limit_work(sides)
         todo = len(sides)
-        # if todo - len(self._sides8_seen) > self.segment_limit:
-        #     return
 
         self.progress.segment = segment
         self.progress.todo_count = todo

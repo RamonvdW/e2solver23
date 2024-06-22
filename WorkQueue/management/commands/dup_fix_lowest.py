@@ -22,9 +22,9 @@ class Command(BaseCommand):
         # which locations are not yet filled?
         self.locs_free = list()
 
-        self.loc2unused = dict()        # [loc] = [nr, nr, ..]
-        self.loc2claims = dict()        # [loc] = [nr, nr, ..]
-        self.segment2two_sides = dict()   # [segment] = [two_side, two_side, ..]
+        self.loc2unused = dict()            # [loc] = [nr, nr, ..]
+        self.loc2claims = dict()            # [loc] = [nr, nr, ..]
+        self.segment2two_sides = dict()     # [segment] = [two_side, two_side, ..]
 
         self.verbose = False
 

@@ -152,17 +152,17 @@ class Command(BaseCommand):
         claimed = []
         single_nrs = []
 
-        claim_count = dict()  # [base_nr] = count
-        for base_nr in range(1, 256+1):
-            claim_count[base_nr] = 0
-        # for
-        for loc in self.all_locs:
-            for nr in range(1, 4 + 1):
-                for base_nr in self.nr_claims[(loc, nr)]:
-                    claim_count[base_nr] += 1
-                # for
-            # for
-        # for
+        # claim_count = dict()  # [base_nr] = count
+        # for base_nr in range(1, 256+1):
+        #     claim_count[base_nr] = 0
+        # # for
+        # for loc in self.all_locs:
+        #     for nr in range(1, 4 + 1):
+        #         for base_nr in self.nr_claims[(loc, nr)]:
+        #             claim_count[base_nr] += 1
+        #         # for
+        #     # for
+        # # for
 
         while changed:
             changed = False
@@ -201,7 +201,7 @@ class Command(BaseCommand):
                     # for
         # while
 
-        double_nrs = dict()     # [(nr1, nr2)] = [loc1, loc2]
+        # double_nrs = dict()     # [(nr1, nr2)] = [loc1, loc2]
         self.stdout.write('[INFO] Remaining small claims:')
         for loc, nr in self.nr_claims.keys():
             nrs = self.nr_claims[(loc, nr)]
@@ -215,16 +215,16 @@ class Command(BaseCommand):
                     multi_str = '  *** MULTI (%s) %s ***' % (count, " + ".join(multi))
                 self.stdout.write('%s.nr%s: %s%s' % (loc, nr, repr(nrs), multi_str))
 
-                if count == 2:
-                    # possible double claims
-                    # verify no overlap with other claims
-                    if claim_count[nrs[0]] == 2 and claim_count[nrs[1]] == 2:
-                        nrs.sort()
-                        nrs = tuple(nrs)
-                        try:
-                            double_nrs[nrs].append(str(loc))
-                        except KeyError:
-                            double_nrs[nrs] = [str(loc)]
+                # if count == 2:
+                #     # possible double claims
+                #     # verify no overlap with other claims
+                #     if claim_count[nrs[0]] == 2 and claim_count[nrs[1]] == 2:
+                #         nrs.sort()
+                #         nrs = tuple(nrs)
+                #         try:
+                #             double_nrs[nrs].append(str(loc))
+                #         except KeyError:
+                #             double_nrs[nrs] = [str(loc)]
         # for
 
         claimed_nrs = []
@@ -244,21 +244,22 @@ class Command(BaseCommand):
         else:
             self.stdout.write('[INFO] Single claims unchanged')
 
-        claimed_nrs = []
-        for nrs, locs in double_nrs.items():
-            locs_str = "+".join(locs)
-            for nr in nrs:
-                claimed_nrs.append('%s:%s' % (nr, locs_str))
-        # for
-        claimed_nrs.sort()
-        claimed_nrs_double = ",".join(claimed_nrs)
+        # claimed_nrs = []
+        # for nrs, locs in double_nrs.items():
+        #     locs_str = "+".join(locs)
+        #     for nr in nrs:
+        #         claimed_nrs.append('%s:%s' % (nr, locs_str))
+        # # for
+        # claimed_nrs.sort()
+        # claimed_nrs_double = ",".join(claimed_nrs)
 
-        if used.claimed_nrs_double != claimed_nrs_double:
-            self.stdout.write('[INFO] Double claims changed %s --> %s' % (repr(used.claimed_nrs_double), repr(claimed_nrs_double)))
-            used.claimed_nrs_double = claimed_nrs_double
-            used.save(update_fields=['claimed_nrs_double'])
-        else:
-            self.stdout.write('[INFO] Double claims unchanged')
+        # if used.claimed_nrs_double != claimed_nrs_double:
+        #     self.stdout.write('[INFO] Double claims changed %s --> %s' % (repr(used.claimed_nrs_double),
+        #     repr(claimed_nrs_double)))
+        #     used.claimed_nrs_double = claimed_nrs_double
+        #     used.save(update_fields=['claimed_nrs_double'])
+        # else:
+        #     self.stdout.write('[INFO] Double claims unchanged')
 
     def handle(self, *args, **options):
 
