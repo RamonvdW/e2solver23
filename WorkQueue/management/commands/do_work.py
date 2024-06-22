@@ -207,6 +207,7 @@ class Command(BaseCommand):
                 .filter(done=False,
                         doing=False)
                 .exclude(start_after__gt=now)
+                .exclude(job_type='eval_loc_1')
                 # .exclude(processor__in=skip_procs)
                 .order_by('start_after'))  # oldest first
 
@@ -225,6 +226,7 @@ class Command(BaseCommand):
                             doing=False,
                             priority=lowest_prio)
                     .exclude(start_after__gt=now)
+                    .exclude(job_type='eval_loc_1')
                     # .exclude(processor__in=skip_procs)
                     .order_by('start_after'))  # oldest first
 
