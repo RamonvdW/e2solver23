@@ -1,14 +1,15 @@
 #!/bin/bash
 
+MANAGE="./manage.py"
+
 if [ $# -ne 2 ]
 then
     echo "Missing arguments: first and last board numbers"
     exit 1
 fi
 
-first_board=$1
-last_board=$2
-MANAGE="./manage.py"
+first_board=$((0 + $1))
+last_board=$((0 + $2))
 
 echo "[INFO] Running dup_fix_lowest on all boards in the range $first_board to $last_board"
 

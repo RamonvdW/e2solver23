@@ -151,6 +151,19 @@ class Command(BaseCommand):
         changed = True
         claimed = []
         single_nrs = []
+
+        claim_count = dict()  # [base_nr] = count
+        for base_nr in range(1, 256+1):
+            claim_count[base_nr] = 0
+        # for
+        for loc in self.all_locs:
+            for nr in range(1, 4 + 1):
+                for base_nr in self.nr_claims[(loc, nr)]:
+                    claim_count[base_nr] += 1
+                # for
+            # for
+        # for
+
         while changed:
             changed = False
 
@@ -203,13 +216,15 @@ class Command(BaseCommand):
                 self.stdout.write('%s.nr%s: %s%s' % (loc, nr, repr(nrs), multi_str))
 
                 if count == 2:
-                    # double claims
-                    nrs.sort()
-                    nrs = tuple(nrs)
-                    try:
-                        double_nrs[nrs].append(str(loc))
-                    except KeyError:
-                        double_nrs[nrs] = [str(loc)]
+                    # possible double claims
+                    # verify no overlap with other claims
+                    if claim_count[nrs[0]] == 2 and claim_count[nrs[1]] == 2:
+                        nrs.sort()
+                        nrs = tuple(nrs)
+                        try:
+                            double_nrs[nrs].append(str(loc))
+                        except KeyError:
+                            double_nrs[nrs] = [str(loc)]
         # for
 
         claimed_nrs = []
