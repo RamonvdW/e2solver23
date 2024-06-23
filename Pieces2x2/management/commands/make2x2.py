@@ -33,6 +33,8 @@ class Command(BaseCommand):
         self.allow_hint_piece_nrs = (208, 255, 181, 249, 139)
 
     def _make_cache_base_with_side(self):
+        self.stdout.write('[INFO] Filling caches')
+
         all_sides = []
         for piece in BasePiece.objects.exclude(nr__in=self.exclude_piece_nrs):
             side = piece.side4          # the only side where all possibilities are found
@@ -47,22 +49,22 @@ class Command(BaseCommand):
 
         for piece in BasePiece.objects.exclude(nr__in=self.exclude_piece_nrs):
             # rotations are counter-clockwise
-            self.base_with_side1[piece.side1].append((piece, 0))
-            self.base_with_side2[piece.side1].append((piece, 3))
+            self.base_with_side1[piece.side1].append((piece, 0))        # rotate 0x to get side1 up
+            self.base_with_side2[piece.side1].append((piece, 3))        # rotate 3x to get side1 at right
             self.base_with_side3[piece.side1].append((piece, 2))
-            self.base_with_side4[piece.side1].append((piece, 1))
+            self.base_with_side4[piece.side1].append((piece, 1))        # rotate 1x to get side1 at left
 
-            self.base_with_side1[piece.side2].append((piece, 1))
-            self.base_with_side2[piece.side2].append((piece, 0))
-            self.base_with_side3[piece.side2].append((piece, 3))
+            self.base_with_side1[piece.side2].append((piece, 1))        # rotate 1x to get side2 up
+            self.base_with_side2[piece.side2].append((piece, 0))        # rotate 0x to get side2 at right
+            self.base_with_side3[piece.side2].append((piece, 3))        # rotate 3x to get side2 down
             self.base_with_side4[piece.side2].append((piece, 2))
 
             self.base_with_side1[piece.side3].append((piece, 2))
-            self.base_with_side2[piece.side3].append((piece, 1))
+            self.base_with_side2[piece.side3].append((piece, 1))        # rotate 1x to get side3 at right
             self.base_with_side3[piece.side3].append((piece, 0))
-            self.base_with_side4[piece.side3].append((piece, 3))
+            self.base_with_side4[piece.side3].append((piece, 3))        # rotate 3x to get side3 at left
 
-            self.base_with_side1[piece.side4].append((piece, 3))
+            self.base_with_side1[piece.side4].append((piece, 3))        # rotate 3x to get side4 up
             self.base_with_side2[piece.side4].append((piece, 2))
             self.base_with_side3[piece.side4].append((piece, 1))
             self.base_with_side4[piece.side4].append((piece, 0))
@@ -113,7 +115,6 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
-        self.stdout.write('[INFO] Filling caches')
         self._make_cache_base_with_side()
 
         self.stdout.write('[INFO] Deleting all Piece2x2 and TwoSide')
@@ -301,7 +302,7 @@ class Command(BaseCommand):
 
                         if nr > print_nr:
                             print_nr += print_interval
-                            print(self.two_sides_nr, nr, piece1)
+                            self.stdout.write(self.two_sides_nr, nr, piece1)
                 # for
             # for
         # for

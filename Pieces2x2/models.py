@@ -45,6 +45,8 @@ class TwoSideOptions(models.Model):
     # reference to a TwoSide, of which 460 exist
     two_side = models.PositiveSmallIntegerField()       # max 32767
 
+    objects = models.Manager()  # for the editor only
+
 
 class EvalProgress(models.Model):
 
@@ -68,6 +70,8 @@ class EvalProgress(models.Model):
 
     # last updated
     updated = models.DateTimeField()
+
+    objects = models.Manager()  # for the editor only
 
 
 # TODO: Beware that Piece2x2 might be a subset with the hint pieces, used to generate the corners 4x4

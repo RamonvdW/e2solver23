@@ -146,6 +146,7 @@ class Command(BaseCommand):
             EvalProgress.objects.all().delete()
             TwoSideOptions.objects.all().delete()
             ProcessorUsedPieces.objects.all().delete()
+            Work.objects.all().delete()
 
         # get all possibilities for a typical type
         qset = (Piece2x2
@@ -161,7 +162,7 @@ class Command(BaseCommand):
 
         self.stdout.write('[INFO] Generating all possible TwoSideOptions')
 
-        self.stdout.write('[INFO] Hints')
+        self.stdout.write('[INFO] Hint locations')
         for loc in LOC_HINTS:
             # very limited set
             twosides_side1, twosides_side2, twosides_side3, twosides_side4 = self._get_twosides_for_loc(loc)
@@ -173,7 +174,7 @@ class Command(BaseCommand):
                 self._save_options(loc, 4, twosides_side4)
         # for
 
-        self.stdout.write('[INFO] Corners')
+        self.stdout.write('[INFO] Corner locations')
         for loc in LOC_CORNERS:
             # limited set
             twosides_side1, twosides_side2, twosides_side3, twosides_side4 = self._get_twosides_for_loc(loc)
@@ -185,7 +186,7 @@ class Command(BaseCommand):
                 self._save_options(loc, 4, twosides_side4)
         # for
 
-        self.stdout.write('[INFO] Borders')
+        self.stdout.write('[INFO] Border locations')
         for loc in LOC_BORDERS:
             # limited set
             twosides_side1, twosides_side2, twosides_side3, twosides_side4 = self._get_twosides_for_loc(loc)
@@ -198,7 +199,7 @@ class Command(BaseCommand):
         # for
 
         # remainder gets the standard set
-        self.stdout.write('[INFO] Remainder')
+        self.stdout.write('[INFO] Remainding locations')
         twosides_side1 = twosides_side2 = twosides_side3 = twosides_side4 = standard_twosides
 
         for loc in range(1, 64+1):
