@@ -46,9 +46,10 @@ class Command(BaseCommand):
         self.progress = None
         self.do_commit = True
 
-        self._sides5_seen = []
-        self._sides6_seen = []
-        self._sides8_seen = []
+        # disabled, because of some reason this fails to remove options
+        # self._sides5_seen = []
+        # self._sides6_seen = []
+        # self._sides8_seen = []
 
         self.nop = False
 
@@ -274,9 +275,9 @@ class Command(BaseCommand):
                             # found a combi of p0..p3
                             found = True
                             # avoid repeating
-                            self._sides5_seen.append(p2.side1)
-                            self._sides6_seen.append(p3.side1)
-                            self._sides8_seen.append(p2.side2)
+                            # self._sides5_seen.append(p2.side1)
+                            # self._sides6_seen.append(p3.side1)
+                            # self._sides8_seen.append(p2.side2)
                             break
                         # for
 
@@ -296,9 +297,9 @@ class Command(BaseCommand):
             if not found:
                 self._reduce(segment, side)
                 # built up history is no longer valid
-                self._sides5_seen = []
-                self._sides6_seen = []
-                self._sides8_seen = []
+                # self._sides5_seen = []
+                # self._sides6_seen = []
+                # self._sides8_seen = []
 
             todo -= 1
             self.stdout.write('[INFO] Left: %s/%s' % (todo, len(sides)))
@@ -329,8 +330,8 @@ class Command(BaseCommand):
 
         self.stdout.write('[INFO] Checking %s of %s options in segment %s' % (todo, original_todo, segment))
         for side in sides:
-            if side in self._sides5_seen:
-                continue
+            # if side in self._sides5_seen:
+            #     continue
 
             if check_dead_end(self.processor):
                 return
@@ -377,8 +378,8 @@ class Command(BaseCommand):
                             # found a combi of p0..p3
                             found = True
                             # avoid repeating
-                            self._sides6_seen.append(p3.side1)
-                            self._sides8_seen.append(p2.side2)
+                            # self._sides6_seen.append(p3.side1)
+                            # self._sides8_seen.append(p2.side2)
                             break
                         # for
 
@@ -398,8 +399,8 @@ class Command(BaseCommand):
             if not found:
                 self._reduce(segment, side)
                 # built up history is no longer valid
-                self._sides6_seen = []
-                self._sides8_seen = []
+                # self._sides6_seen = []
+                # self._sides8_seen = []
 
             todo -= 1
             self.stdout.write('[INFO] Left: %s/%s' % (todo, len(sides)))
@@ -430,8 +431,8 @@ class Command(BaseCommand):
 
         self.stdout.write('[INFO] Checking %s of %s options in segment %s' % (todo, original_todo, segment))
         for side in sides:
-            if side in self._sides6_seen:
-                continue
+            # if side in self._sides6_seen:
+            #     continue
 
             if check_dead_end(self.processor):
                 return
@@ -478,7 +479,7 @@ class Command(BaseCommand):
                             # found a combi of p0..p3
                             found = True
                             # avoid repeating
-                            self._sides8_seen.append(p2.side2)
+                            # self._sides8_seen.append(p2.side2)
                             break
                         # for
 
@@ -498,7 +499,7 @@ class Command(BaseCommand):
             if not found:
                 self._reduce(segment, side)
                 # built up history is no longer valid
-                self._sides8_seen = []
+                # self._sides8_seen = []
 
             todo -= 1
             self.stdout.write('[INFO] Left: %s/%s' % (todo, len(sides)))
@@ -529,8 +530,8 @@ class Command(BaseCommand):
 
         self.stdout.write('[INFO] Checking %s of %s options in segment %s' % (todo, original_todo, segment))
         for side in sides:
-            if side in self._sides8_seen:
-                continue
+            # if side in self._sides8_seen:
+            #     continue
 
             if check_dead_end(self.processor):
                 return
@@ -626,6 +627,13 @@ class Command(BaseCommand):
 
         self.processor = options['processor']
         self.stdout.write('[INFO] Processor=%s' % self.processor)
+        try:
+            work = Work.objects.get(processor=self.processor, job_type='eval_loc_4', location=loc)
+        except Work.DoesNotExist:
+            work = None
+        else:
+            work.doing = True
+            work.save(update_fields=['doing'])
 
         self.segment_limit = options['limit']
         self.stdout.write('[INFO] Segment limit: %s' % self.segment_limit)
@@ -663,7 +671,7 @@ class Command(BaseCommand):
             self.progress.solve_order = msg
             self.progress.updated = timezone.now()
             self.progress.save(update_fields=['solve_order', 'updated'])
-            self._sides5_seen = frozenset(self._sides5_seen)
+            # self._sides5_seen = frozenset(self._sides5_seen)
             self._reduce_s5()
 
             if check_dead_end(self.processor):
@@ -673,7 +681,7 @@ class Command(BaseCommand):
             self.progress.solve_order = msg
             self.progress.updated = timezone.now()
             self.progress.save(update_fields=['solve_order', 'updated'])
-            self._sides6_seen = frozenset(self._sides6_seen)
+            # self._sides6_seen = frozenset(self._sides6_seen)
             self._reduce_s6()
 
             if check_dead_end(self.processor):
@@ -683,10 +691,18 @@ class Command(BaseCommand):
             self.progress.solve_order = msg
             self.progress.updated = timezone.now()
             self.progress.save(update_fields=['solve_order', 'updated'])
-            self._sides8_seen = frozenset(self._sides8_seen)
+            # self._sides8_seen = frozenset(self._sides8_seen)
             self._reduce_s8()
+
+            if work:
+                work.done = True
+                work.doing = False
+                work.save(update_fields=['done', 'doing'])
+
         except KeyboardInterrupt:
-            pass
+            if work:
+                work.doing = False
+                work.save(update_fields=['doing'])
 
         self.progress.delete()
 
