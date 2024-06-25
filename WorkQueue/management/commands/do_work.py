@@ -20,6 +20,9 @@ class Command(BaseCommand):
 
     help = "Execute work from the work queue"
 
+    RISKY_JOBS = ('eval_loc_1',
+                  'eval_claims')  # no concurrency risk, but good to handle quickly
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -130,8 +133,8 @@ class Command(BaseCommand):
             work.when_done = timezone.now()
             work.save()
 
-    def _find_and_do_work_one(self, only_odd):
-        """ Find work for the worker that only handle eval_loc_1
+    def _find_and_do_risky_one(self, only_odd):
+        """ Find work for the worker that only handle eval_loc_1 and eval_claims
             We prevent parallel processing to avoid claiming the same base piece multiple times
         """
 
@@ -142,7 +145,7 @@ class Command(BaseCommand):
                 .objects
                 .filter(done=False,
                         doing=False,
-                        job_type='eval_loc_1')
+                        job_type__in=self.RISKY_JOBS)
                 .exclude(start_after__gt=now)
                 .annotate(is_odd=F('processor') % 2)
                 .filter(is_odd=only_odd)
@@ -161,7 +164,8 @@ class Command(BaseCommand):
                     .select_for_update()
                     .filter(done=False,
                             doing=False,
-                            priority=lowest_prio)
+                            priority=lowest_prio,
+                            job_type__in=self.RISKY_JOBS)
                     .exclude(start_after__gt=now)
                     .annotate(is_odd=F('processor') % 2)
                     .filter(is_odd=only_odd)
@@ -207,7 +211,7 @@ class Command(BaseCommand):
                 .filter(done=False,
                         doing=False)
                 .exclude(start_after__gt=now)
-                .exclude(job_type='eval_loc_1')
+                .exclude(job_type__in=self.RISKY_JOBS)
                 # .exclude(processor__in=skip_procs)
                 .order_by('start_after'))  # oldest first
 
@@ -226,7 +230,7 @@ class Command(BaseCommand):
                             doing=False,
                             priority=lowest_prio)
                     .exclude(start_after__gt=now)
-                    .exclude(job_type='eval_loc_1')
+                    .exclude(job_type__in=self.RISKY_JOBS)
                     # .exclude(processor__in=skip_procs)
                     .order_by('start_after'))  # oldest first
 
@@ -280,14 +284,14 @@ class Command(BaseCommand):
             return
 
         # keep one worker available for small tasks
-        only_eval_loc_1 = worker_nr < 3         # 1, 2
+        only_concurrency_risks = worker_nr in (1, 2)
         no_eval_loc_4 = worker_nr > 10
 
-        duration = 2 if only_eval_loc_1 else 10
+        duration = 2 if only_concurrency_risks else 10
 
         while worker_nr:
-            if only_eval_loc_1:
-                did_work = self._find_and_do_work_one(worker_nr % 2)
+            if only_concurrency_risks:
+                did_work = self._find_and_do_risky_one(worker_nr % 2)
             else:
                 did_work = self._find_and_do_work_4plus(no_eval_loc_4)
 
