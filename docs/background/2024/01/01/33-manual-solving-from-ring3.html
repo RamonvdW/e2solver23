@@ -82,6 +82,31 @@ The example below has 2215 total options remaining.</p>
 
 <p><img src="/e2solver23/assets/reduce_ring3_4_claims.png" alt="Reduce ring3 claims" width="55%" /></p>
 
+<p>After a few days, 93 of the 123 board instances survived with between 1779 and 4711 options remaining.
+The differences are caused by the number of additional locations that were fixed.</p>
+
+<p>Many days later we reached the sixth level of fixing locations, with this many boards remaining:</p>
+<ul>
+  <li>Level 1: 1 board</li>
+  <li>Level 2: 43 boards (down from 74)</li>
+  <li>Level 3: 92 boards (down from 208)</li>
+  <li>Level 4: 181 boards (down from 495)</li>
+  <li>Level 5: 283 boards (down from 1677)</li>
+  <li>Level 6:</li>
+</ul>
+
+<p>An example of a level 6 board can be seen below. Will it survive much longer?</p>
+
+<p><img src="/e2solver23/assets/close_to_solution_board.png" alt="Reduce ring3 claims" width="70%" /></p>
+
+<p><img src="/e2solver23/assets/close_to_solution_claims.png" alt="Reduce ring3 claims" width="55%" /></p>
+
+<p>It did not survive much longer. Walking all the remaining open spots with eval_loc_1 resulted in the following end-results.
+As can be seen, the constraints in the outer ring are the challenge.
+With the current technique we have to wait until the very end before we find it is a non-solution.</p>
+
+<p><img src="/e2solver23/assets/close_to_solution_pieces.png" alt="Reduce ring3 claims" width="80%" /></p>
+
   </div>
 
   <div class="PageNavigation" style="display:flex; margin-bottom:0">

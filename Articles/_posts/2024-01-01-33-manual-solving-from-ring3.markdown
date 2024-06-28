@@ -58,3 +58,26 @@ On boards with fewer total options left we see more claims showing up.
 The example below has 2215 total options remaining.
 
 ![Reduce ring3 claims]({{"/assets/reduce_ring3_4_claims.png" | relative_url }}){: width="55%"}
+
+After a few days, 93 of the 123 board instances survived with between 1779 and 4711 options remaining.
+The differences are caused by the number of additional locations that were fixed.
+
+Many days later we reached the sixth level of fixing locations, with this many boards remaining:
+- Level 1: 1 board
+- Level 2: 43 boards (down from 74)
+- Level 3: 92 boards (down from 208)
+- Level 4: 181 boards (down from 495)
+- Level 5: 283 boards (down from 1677)
+- Level 6: 
+
+An example of a level 6 board can be seen below. Will it survive much longer?
+
+![Reduce ring3 claims]({{"/assets/close_to_solution_board.png" | relative_url }}){: width="70%"}
+
+![Reduce ring3 claims]({{"/assets/close_to_solution_claims.png" | relative_url }}){: width="55%"}
+
+It did not survive much longer. Walking all the remaining open spots with eval_loc_1 resulted in the following end-results.
+As can be seen, the constraints in the outer ring are the challenge.
+With the current technique we have to wait until the very end before we find it is a non-solution.
+
+![Reduce ring3 claims]({{"/assets/close_to_solution_pieces.png" | relative_url }}){: width="80%"}

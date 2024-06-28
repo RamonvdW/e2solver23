@@ -7,6 +7,7 @@
 from django.http import Http404
 from django.urls import reverse
 from django.utils import timezone
+from django.db.models import Count
 from django.views.generic import TemplateView
 from django.templatetags.static import static
 from Pieces2x2.models import Piece2x2, TwoSideOptions, EvalProgress
@@ -824,8 +825,12 @@ class OptionsListView(TemplateView):
                 work2count[work.processor] = 1
         # for
 
-        age_limit = time.monotonic() - (5 * 60)     # max 5 minutes old
-        query_credits = 25
+        two_side_count = dict()     # [processor] = count
+        for obj in TwoSideOptions.objects.values('processor').annotate(count=Count('processor')):
+            processor_nr = obj['processor']
+            count = obj['count']
+            two_side_count[processor_nr] = count
+        # for
 
         for proc in context['work']:
             processor_nr = proc['processor']
@@ -849,18 +854,7 @@ class OptionsListView(TemplateView):
             proc['seed'] = seed
 
             if not proc['reached_dead_end']:
-                try:
-                    count, stamp = twoside_count_cache[processor_nr]
-                except KeyError:
-                    count, stamp = '?', 0
-
-                if stamp < age_limit and query_credits > 0:
-                    query_credits -= 1
-                    count = TwoSideOptions.objects.filter(processor=processor_nr).count()
-                    stamp = time.monotonic()
-                    twoside_count_cache[processor_nr] = (count, stamp)
-
-                proc['twosides_count'] = count
+                proc['twosides_count'] = two_side_count[processor_nr]
             else:
                 log = proc['choices'].strip()       # removes last \n
                 spl = log.split('\n')               # split lines
