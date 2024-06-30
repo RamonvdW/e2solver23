@@ -8,6 +8,7 @@ from django.utils import timezone
 from django.core.management.base import BaseCommand
 from Pieces2x2.models import TwoSide, TwoSideOptions, Piece2x2, EvalProgress
 from Pieces2x2.helpers import calc_segment
+from WorkQueue.models import ProcessorUsedPieces
 from WorkQueue.operations import (propagate_segment_reduction, get_unused_for_locs, set_loc_used, request_eval_claims,
                                   set_dead_end)
 import sys
@@ -22,20 +23,20 @@ class Command(BaseCommand):
 
         self.twoside_border = TwoSide.objects.get(two_sides='XX').nr
 
-        self.processor = 0
+        self.processor_nr = 0
         self.loc = 0
         self.reductions = {1: 0, 2: 0, 3: 0, 4: 0}     # [side_nr] = count
         self.bulk_reduce = dict()       # [segment] = [two_side, ..]
 
     def add_arguments(self, parser):
         # parser.add_argument('--verbose', action='store_true')
-        parser.add_argument('processor', nargs=1, type=int, help='Processor number to use')
-        parser.add_argument('loc', nargs=1, type=int, help='Location on board (1..64)')
+        parser.add_argument('processor', type=int, help='Processor number to use')
+        parser.add_argument('loc', type=int, help='Location on board (1..64)')
         parser.add_argument('claimed', nargs='*', type=int, help="Base piece number claimed for other location")
         parser.add_argument('--nop', action='store_true', help='Do not propagate')
 
     def _get_unused(self, claimed):
-        unused = get_unused_for_locs(self.processor, [self.loc])
+        unused = get_unused_for_locs(self.processor_nr, [self.loc])
 
         if self.loc != 36 and 139 in unused:
             unused.remove(139)
@@ -64,7 +65,7 @@ class Command(BaseCommand):
         segment = calc_segment(self.loc, side_nr)
         options = (TwoSideOptions
                    .objects
-                   .filter(processor=self.processor,
+                   .filter(processor=self.processor_nr,
                            segment=segment)
                    .values_list('two_side', flat=True))
         options = list(options)
@@ -82,16 +83,28 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
-        self.loc = options['loc'][0]
+        self.loc = options['loc']
         if self.loc < 1 or self.loc > 64:
             self.stderr.write('[ERROR] Invalid location')
             return
 
-        self.processor = options['processor'][0]
-
-        self.stdout.write('[INFO] Location: %s; processor=%s' % (self.loc, self.processor))
-
+        self.processor_nr = options['processor']
         nop = options['nop']
+
+        self.stdout.write('[INFO] Location: %s; processor=%s' % (self.loc, self.processor_nr))
+
+        try:
+            used = ProcessorUsedPieces.objects.get(processor=self.processor_nr)
+        except ProcessorUsedPieces.DoesNotExist:
+            # not available
+            pass
+        else:
+            loc_str = 'loc%s' % self.loc
+            p2x2_nr = getattr(used, loc_str, 0)
+            # self.stdout.write('[DEBUG] p2x2_nr for loc %s is %s' % (loc_str, p2x2_nr))
+            if p2x2_nr > 0:
+                self.stdout.write('[INFO] No work: location is already filled')
+                return
 
         unused = self._get_unused(options['claimed'])
 
@@ -131,20 +144,17 @@ class Command(BaseCommand):
 
         count = qset.count()
 
-        self.stdout.write('[INFO] Number of Piece2x2: %s' % count)
-
         if count == 0:
-            if len(side1_options) + len(side2_options) + len(side3_options) + len(side4_options) == 4:
-                self.stdout.write('[INFO] Location seems filled')
-                return
+            # not filled in and no options left --> dead end
+            self.stdout.write('[INFO] No solution possible for loc %s' % self.loc)
 
             self.stderr.write('[ERROR] Safety stop')
-            set_dead_end(self.processor)
+            set_dead_end(self.processor_nr)
 
             if EvalProgress.objects.filter(
                                     eval_size=1,
                                     eval_loc=self.loc,
-                                    processor=self.processor,
+                                    processor=self.processor_nr,
                                     segment=0,
                                     todo_count=0,
                                     left_count=0,
@@ -152,7 +162,7 @@ class Command(BaseCommand):
                 EvalProgress(
                         eval_size=1,
                         eval_loc=self.loc,
-                        processor=self.processor,
+                        processor=self.processor_nr,
                         segment=0,
                         todo_count=0,
                         left_count=0,
@@ -160,6 +170,8 @@ class Command(BaseCommand):
                         updated=timezone.now()).save()
 
             sys.exit(1)
+
+        self.stdout.write('[INFO] Number of Piece2x2: %s' % count)
 
         side1_new = list(qset.distinct('side1').values_list('side1', flat=True))
         side2_new = list(qset.distinct('side2').values_list('side2', flat=True))
@@ -199,20 +211,20 @@ class Command(BaseCommand):
             # for
 
         for segment, two_sides in self.bulk_reduce.items():
-            qset2 = TwoSideOptions.objects.filter(processor=self.processor, segment=segment, two_side__in=two_sides)
+            qset2 = TwoSideOptions.objects.filter(processor=self.processor_nr, segment=segment, two_side__in=two_sides)
             qset2.delete()
         # for
 
         if not nop:
             for segment in self.bulk_reduce.keys():
-                propagate_segment_reduction(self.processor, segment)
+                propagate_segment_reduction(self.processor_nr, segment)
             # for
 
         if count == 1:
             # only 1 solution left: set the base pieces as used
             self.stdout.write('[INFO] Single solution left for loc %s' % self.loc)
             p2x2 = qset.first()
-            set_loc_used(self.processor, self.loc, p2x2)
+            set_loc_used(self.processor_nr, self.loc, p2x2)
             return
 
         if count < 10:
@@ -230,7 +242,7 @@ class Command(BaseCommand):
                                                                      self.reductions[3],
                                                                      self.reductions[4]))
             if not nop:
-                request_eval_claims(self.processor)
+                request_eval_claims(self.processor_nr)
 
 
 # end of file
