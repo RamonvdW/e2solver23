@@ -5,6 +5,7 @@
 #  Licensed under BSD-3-Clause-Clear. See LICENSE file for details.
 
 from django.core.management.base import BaseCommand
+from Pieces2x2.models import TwoSideOptions
 from WorkQueue.models import ProcessorUsedPieces
 
 
@@ -112,5 +113,12 @@ class Command(BaseCommand):
                 self.stdout.write('[INFO] Use --commit to actually remove')
         else:
             self.stdout.write('[INFO] Found no boards to remove')
+
+        # clean up the TwoSideOptions
+        if commit:
+            proc_nrs = list(ProcessorUsedPieces.objects.distinct('processor').values_list('processor', flat=True))
+            TwoSideOptions.objects.exclude(processor__in=proc_nrs).delete()
+        count = TwoSideOptions.objects.count()
+        print('[INFO] %s TwoSideOption records left' % count)
 
 # end of file
