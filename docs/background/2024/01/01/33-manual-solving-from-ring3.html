@@ -92,7 +92,7 @@ The differences are caused by the number of additional locations that were fixed
   <li>Level 3: 92 boards (down from 208)</li>
   <li>Level 4: 181 boards (down from 495)</li>
   <li>Level 5: 283 boards (down from 1677)</li>
-  <li>Level 6:</li>
+  <li>Level 6: 1005 boards</li>
 </ul>
 
 <p>An example of a level 6 board can be seen below. Will it survive much longer?</p>
@@ -106,6 +106,117 @@ As can be seen, the constraints in the outer ring are the challenge.
 With the current technique we have to wait until the very end before we find it is a non-solution.</p>
 
 <p><img src="/e2solver23/assets/close_to_solution_pieces.png" alt="Reduce ring3 claims" width="80%" /></p>
+
+<p>After adding the 7th (419 boards) and 8th fixed pieces, only 1 board survived. Everything else was eliminated and removed.</p>
+
+<p><img src="/e2solver23/assets/close_to_solution_last.png" alt="Reduce ring3 claims" width="70%" /></p>
+
+<p>Below are the claims for base pieces on each location, limited to 5 claims.</p>
+
+<figure class="highlight"><pre><code class="language-text" data-lang="text">[INFO] Processor=16365
+[INFO] 88 base pieces in use
+[INFO] Loc 10 requires base 208 on nr1
+[INFO] Loc 11 requires base 222 on nr4
+[INFO] Loc 15 requires base 255 on nr2
+[INFO] Loc 47 requires base 124 on nr1
+[INFO] Loc 51 requires base 72 on nr1
+[INFO] Loc 55 requires base 249 on nr4
+[INFO] Remaining small claims:
+1.nr1: [1, 2, 3]  *** MULTI (2) 1.nr1 + 57.nr3 ***
+1.nr2: [15, 20, 24, 25]
+2.nr1: [6, 11, 20, 31, 33]
+2.nr2: [7, 25, 42, 43, 44]
+2.nr3: [104, 120, 125, 247]
+2.nr4: [131, 166, 237, 240]
+3.nr1: [11, 20, 31, 45, 54]
+3.nr3: [174, 177, 236]
+3.nr4: [111, 131, 189, 194, 223]
+4.nr1: [13, 46, 47, 54]
+4.nr2: [30, 36, 45]
+4.nr3: [126, 231, 237, 240]
+4.nr4: [238, 243, 247]
+5.nr1: [14, 28]
+5.nr2: [9, 52]
+5.nr3: [126, 250]
+5.nr4: [142, 230]
+6.nr1: [7, 55]
+6.nr2: [35, 50, 58]
+6.nr3: [122, 156]
+6.nr4: [133, 234]
+7.nr1: [29, 30, 44]
+7.nr2: [32, 34, 60]
+7.nr3: [108, 145, 175, 184]
+7.nr4: [125, 197, 256]
+8.nr2: [1, 2, 3, 4]  *** MULTI (2) 64.nr4 + 8.nr2 ***
+9.nr1: [22, 28, 46, 53]
+9.nr2: [103, 233, 236, 237]
+9.nr3: [12, 13, 35, 40, 47]
+9.nr4: [122, 169, 242]
+10.nr2: [112, 145]
+10.nr3: [194, 231, 232]
+10.nr4: [132, 204]
+11.nr1: [158, 239]
+11.nr2: [163, 202, 246]
+11.nr3: [205, 206]
+12.nr1: [158, 225]
+12.nr2: [168, 226]
+12.nr3: [218, 232]
+12.nr4: [83, 92]
+13.nr1: [182, 244]
+13.nr2: [166, 180]
+13.nr3: [226, 236]
+13.nr4: [80, 90]
+14.nr1: [104, 111]
+14.nr2: [111, 240]
+14.nr3: [102, 195]
+14.nr4: [131, 192]
+15.nr1: [122, 218]
+15.nr3: [104, 248]
+15.nr4: [133, 223]
+17.nr1: [25, 45, 55, 59]
+17.nr2: [97, 99]
+17.nr3: [14, 15, 50]
+17.nr4: [133, 195]
+23.nr1: [215, 223]
+23.nr2: [134, 220, 225]
+23.nr3: [214, 227]
+23.nr4: [136, 182, 210, 229]
+25.nr1: [6, 44]
+25.nr2: [130, 174]
+25.nr3: [24, 33]
+25.nr4: [170, 244]
+31.nr1: [132, 216]
+31.nr3: [118, 128, 247]
+33.nr1: [10, 22]
+33.nr2: [243, 248]
+33.nr3: [13, 38]
+33.nr4: [215, 251]
+39.nr1: [123, 184, 192]
+39.nr3: [174, 243]
+47.nr3: [112, 113, 217]
+49.nr1: [54, 55]
+49.nr2: [166, 170]
+49.nr3: [38, 47, 56, 59]
+49.nr4: [182, 186, 210]
+51.nr2: [150, 163]
+51.nr3: [123, 192, 199]
+52.nr1: [118, 215]
+52.nr2: [237, 240, 247]
+53.nr1: [92, 97]
+53.nr2: [133, 195, 201]
+54.nr1: [119, 227]
+54.nr2: [105, 163]
+54.nr3: [115, 170, 180, 246]
+54.nr4: [105, 108, 111, 126, 225]
+55.nr1: [120, 134, 247]
+55.nr3: [125, 132, 223, 231, 232]
+57.nr3: [1, 2, 3]  *** MULTI (2) 1.nr1 + 57.nr3 ***
+58.nr2: [92, 120, 125, 126, 231]
+64.nr4: [1, 2, 3, 4]  *** MULTI (2) 64.nr4 + 8.nr2 ***</code></pre></figure>
+
+<p>In the end, it also reached a dead end. No solution possible for this Ring3.</p>
+
+<p><img src="/e2solver23/assets/close_to_solution_last_failed.png" alt="Reduce ring3 claims" width="60%" /></p>
 
   </div>
 
@@ -121,7 +232,7 @@ With the current technique we have to wait until the very end before we find it 
     <div style="width:50%; display:block; text-align:right">
         
             <b>Next: </b>
-            <a class="next" href="/e2solver23/background/2024/01/01/98-wang-tiles.html">Wang Tiles</a>
+            <a class="next" href="/e2solver23/background/2024/01/01/40-further-study.html">Further study</a>
         
     </div>
     <div>
