@@ -8,7 +8,7 @@ from django.core.management.base import BaseCommand
 from Pieces2x2.models import TwoSide, TwoSideOptions, Piece2x2, EvalProgress
 from Pieces2x2.helpers import LOC_CORNERS, LOC_BORDERS, LOC_HINTS, calc_segment
 from WorkQueue.operations import used_note_add
-from WorkQueue.models import ProcessorUsedPieces
+from WorkQueue.models import ProcessorUsedPieces, Work
 
 
 class Command(BaseCommand):
@@ -199,7 +199,7 @@ class Command(BaseCommand):
         # for
 
         # remainder gets the standard set
-        self.stdout.write('[INFO] Remainding locations')
+        self.stdout.write('[INFO] Remaining locations')
         twosides_side1 = twosides_side2 = twosides_side3 = twosides_side4 = standard_twosides
 
         for loc in range(1, 64+1):
