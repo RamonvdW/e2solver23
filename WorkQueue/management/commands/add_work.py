@@ -65,11 +65,12 @@ class Command(BaseCommand):
         elif job_type == 'scan9':
             job_type = 'eval_loc_9'
             self.stdout.write(
-                '[INFO] Adding work: %s %s %s {1 2 3 4 5 6 14 22 30 38 46 9 17 25 33 41 42 43 44 45}' % (
+                '[INFO] Adding work: %s %s %s {1 3 5 6 22 38 46 17 33 41 43 45}' % (
                     processor, job_type, prio_seed))
 
             bulk = []
-            for loc in (1, 2, 3, 4, 5, 6, 14, 22, 30, 38, 46, 9, 17, 25, 33, 41, 42, 43, 44, 45):
+            #for loc in (1, 2, 3, 4, 5, 6, 14, 22, 30, 38, 46, 9, 17, 25, 33, 41, 42, 43, 44, 45):
+            for loc in (1, 3, 5, 6, 22, 38, 46, 17, 33, 41, 43, 45):
                 work = Work(processor=processor, job_type=job_type, priority=prio_seed,
                             location=loc, nop=nop)
                 bulk.append(work)
