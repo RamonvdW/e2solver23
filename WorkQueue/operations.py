@@ -169,10 +169,10 @@ def propagate_segment_reduction(processor, segment):
     loc_b, loc_e = _segment_to_loc_4(segment)
 
     # _add_work(processor, 5, 'eval_loc_4', loc_a)
-    _add_work(processor, 40, 'eval_loc_4', loc_b)
+    # _add_work(processor, 40, 'eval_loc_4', loc_b)
     # _add_work(processor, 5, 'eval_loc_4', loc_c)
     # _add_work(processor, 5, 'eval_loc_4', loc_d)
-    _add_work(processor, 40, 'eval_loc_4', loc_e)
+    # _add_work(processor, 40, 'eval_loc_4', loc_e)
     # _add_work(processor, 5, 'eval_loc_4', loc_f)
 
     # eval_loc_9
