@@ -133,7 +133,7 @@ class Command(BaseCommand):
             work.when_done = timezone.now()
             work.save()
 
-    def _find_and_do_risky_one(self, only_odd):
+    def _find_and_do_risky_one(self, group):
         """ Find work for the worker that only handle eval_loc_1 and eval_claims
             We prevent parallel processing to avoid claiming the same base piece multiple times
         """
@@ -147,8 +147,8 @@ class Command(BaseCommand):
                         doing=False,
                         job_type__in=self.RISKY_JOBS)
                 .exclude(start_after__gt=now)
-                .annotate(is_odd=F('processor') % 2)
-                .filter(is_odd=only_odd)
+                .annotate(group=F('processor') % 4)
+                .filter(group=group)
                 .order_by('start_after'))  # oldest first
 
         prios = qset.distinct('priority').order_by('priority').values_list('priority', flat=True)
@@ -167,8 +167,8 @@ class Command(BaseCommand):
                             priority=lowest_prio,
                             job_type__in=self.RISKY_JOBS)
                     .exclude(start_after__gt=now)
-                    .annotate(is_odd=F('processor') % 2)
-                    .filter(is_odd=only_odd)
+                    .annotate(group=F('processor') % 4)
+                    .filter(group=group)
                     .order_by('start_after'))  # oldest first
 
             for work in qset.all():
@@ -284,14 +284,15 @@ class Command(BaseCommand):
             return
 
         # keep one worker available for small tasks
-        only_concurrency_risks = worker_nr in (1, 2)
+        only_concurrency_risks = worker_nr in (1, 2, 3, 4)
         no_eval_loc_4 = worker_nr > 10
 
         duration = 2 if only_concurrency_risks else 10
 
         while worker_nr:
             if only_concurrency_risks:
-                did_work = self._find_and_do_risky_one(worker_nr % 2)
+                group = worker_nr % 4
+                did_work = self._find_and_do_risky_one(group)
             else:
                 did_work = self._find_and_do_work_4plus(no_eval_loc_4)
 
