@@ -51,12 +51,6 @@ class Command(BaseCommand):
         for two in TwoSide.objects.all():
             two2nr[two.two_sides] = two.nr
         # for
-        self.twoside2reverse = dict()
-        for two_sides, nr in two2nr.items():
-            two_rev = two_sides[1] + two_sides[0]
-            rev_nr = two2nr[two_rev]
-            self.twoside2reverse[nr] = rev_nr
-        # for
 
         self.processor_nr = 0
         self.segment = 0
@@ -66,7 +60,6 @@ class Command(BaseCommand):
                      49, 50, 55, 56,
                      57, 58, 63, 64)
         self.side_options = ([], [])        # s0..s23
-        self.side_options_rev = ([], [])    # s0..s23
         self.segment_options = dict()       # [segment] = side_options
         self.reductions = 0
 
@@ -164,23 +157,20 @@ class Command(BaseCommand):
         if 36 not in self.locs and 139 in unused:
             unused.remove(139)
 
-        # if 10 not in self.locs and 208 in unused:
-        #     unused.remove(208)
-        #
-        # if 15 not in self.locs and 255 in unused:
-        #     unused.remove(255)
-        #
-        # if 50 not in self.locs and 181 in unused:
-        #     unused.remove(181)
-        #
-        # if 55 not in self.locs and 249 in unused:
-        #     unused.remove(249)
+        if 10 not in self.locs and 208 in unused:
+            unused.remove(208)
+
+        if 15 not in self.locs and 255 in unused:
+            unused.remove(255)
+
+        if 50 not in self.locs and 181 in unused:
+            unused.remove(181)
+
+        if 55 not in self.locs and 249 in unused:
+            unused.remove(249)
 
         self.stdout.write('[INFO] %s base pieces in use' % (256 - len(unused)))
         return unused
-
-    def _reverse_sides(self, options):
-        return [self.twoside2reverse[two_side] for two_side in options]
 
     def _get_loc_side_options(self, loc, side_nr):
         segment = calc_segment(loc, side_nr)
@@ -283,8 +273,6 @@ class Command(BaseCommand):
                              s34, s35, s36, s37, s38, s39, s40, s41,
                              s42, s43, s44, s45, s46, s47]
 
-        self.side_options_rev = [self._reverse_sides(s) for s in self.side_options]
-
         self.segment_options[calc_segment(self.locs[0], 1)] = s0
         self.segment_options[calc_segment(self.locs[1], 1)] = s1
         self.segment_options[calc_segment(self.locs[2], 1)] = s2
@@ -348,8 +336,8 @@ class Command(BaseCommand):
             s1, s2, s3, s4 = self.side_nrs[p_nr]
             options1 = self.side_options[s1]
             options2 = self.side_options[s2]
-            options3 = self.side_options_rev[s3]
-            options4 = self.side_options_rev[s4]
+            options3 = self.side_options[s3]
+            options4 = self.side_options[s4]
 
             if len(options1) == 1 and len(options2) == 1 and len(options3) == 1 and len(options4) == 1:
                 # completely decided locations; no need to evaluate
@@ -443,8 +431,7 @@ class Command(BaseCommand):
         # counts = dict()
         for side in set(twoside_open):
             # ensure we have a Piece2x2 that can connect to this side
-            side_rev = self.twoside2reverse[side]
-            p2x2 = qset.filter(side1=side_rev).first()
+            p2x2 = qset.filter(side1=side).first()
             if not p2x2:
                 # no solution
                 # print('[DEBUG] check_open_ends: out of options for side: %s' % repr(side))
@@ -471,25 +458,25 @@ class Command(BaseCommand):
                     # neighbour on side1
                     p2x2 = self.board[neighs[0]]
                     if p2x2:
-                        qset2 = qset2.filter(side1=self.twoside2reverse[p2x2.side3])
+                        qset2 = qset2.filter(side1=p2x2.side3)
 
                 if neighs[1] >= 0:
                     # neighbour on side2
                     p2x2 = self.board[neighs[1]]
                     if p2x2:
-                        qset2 = qset2.filter(side2=self.twoside2reverse[p2x2.side4])
+                        qset2 = qset2.filter(side2=p2x2.side4)
 
                 if neighs[2] >= 0:
                     # neighbour on side3
                     p2x2 = self.board[neighs[2]]
                     if p2x2:
-                        qset2 = qset2.filter(side3=self.twoside2reverse[p2x2.side1])
+                        qset2 = qset2.filter(side3=p2x2.side1)
 
                 if neighs[3] >= 0:
                     # neighbour on side4
                     p2x2 = self.board[neighs[3]]
                     if p2x2:
-                        qset2 = qset2.filter(side4=self.twoside2reverse[p2x2.side2])
+                        qset2 = qset2.filter(side4=p2x2.side2)
 
                 if qset2.first() is None:
                     # no solution
@@ -522,26 +509,26 @@ class Command(BaseCommand):
                 s1, s2, s3, s4 = self.side_nrs[p_nr]
                 options_side1 = self.side_options[s1]
                 options_side2 = self.side_options[s2]
-                options_side3 = self.side_options_rev[s3]
-                options_side4 = self.side_options_rev[s4]
+                options_side3 = self.side_options[s3]
+                options_side4 = self.side_options[s4]
 
                 n1, n2, n3, n4 = self.neighbours[p_nr]
                 if n1 >= 0:
                     p = self.board[n1]
                     if p:
-                        options_side1 = [self.twoside2reverse[p.side3]]
+                        options_side1 = [p.side3]
                 if n2 >= 0:
                     p = self.board[n2]
                     if p:
-                        options_side2 = [self.twoside2reverse[p.side4]]
+                        options_side2 = [p.side4]
                 if n3 >= 0:
                     p = self.board[n3]
                     if p:
-                        options_side3 = [self.twoside2reverse[p.side1]]
+                        options_side3 = [p.side1]
                 if n4 >= 0:
                     p = self.board[n4]
                     if p:
-                        options_side4 = [self.twoside2reverse[p.side2]]
+                        options_side4 = [p.side2]
 
                 count = qset.filter(side1__in=options_side1,
                                     side2__in=options_side2,
@@ -592,26 +579,26 @@ class Command(BaseCommand):
         s1, s2, s3, s4 = self.side_nrs[p_nr]
         options_side1 = self.side_options[s1]
         options_side2 = self.side_options[s2]
-        options_side3 = self.side_options_rev[s3]
-        options_side4 = self.side_options_rev[s4]
+        options_side3 = self.side_options[s3]
+        options_side4 = self.side_options[s4]
 
         n1, n2, n3, n4 = self.neighbours[p_nr]
         if n1 >= 0:
             p = self.board[n1]
             if p:
-                options_side1 = [self.twoside2reverse[p.side3]]
+                options_side1 = [p.side3]
         if n2 >= 0:
             p = self.board[n2]
             if p:
-                options_side2 = [self.twoside2reverse[p.side4]]
+                options_side2 = [p.side4]
         if n3 >= 0:
             p = self.board[n3]
             if p:
-                options_side3 = [self.twoside2reverse[p.side1]]
+                options_side3 = [p.side1]
         if n4 >= 0:
             p = self.board[n4]
             if p:
-                options_side4 = [self.twoside2reverse[p.side2]]
+                options_side4 = [p.side2]
 
         for p in self._iter(options_side1, options_side2, options_side3, options_side4):
             self._board_place(p_nr, p)
@@ -630,12 +617,12 @@ class Command(BaseCommand):
         return False
 
     def _segment_to_loc(self, segment):
-        """ reverse of calc_segment """
+        """ inverse of calc_segment """
 
-        if segment > 128:
+        if segment > 99:
             # assume side = 2
-            loc2 = segment - 129
-            loc4 = segment - 128
+            loc2 = segment - 101
+            loc4 = segment - 100
 
             if loc2 in self.skip_locs:
                 loc2 = 99
@@ -699,17 +686,17 @@ class Command(BaseCommand):
             s1, s2, s3, s4 = self.side_nrs[p_nr]
             options_side1 = self.side_options[s1]
             options_side2 = self.side_options[s2]
-            options_side3 = self.side_options_rev[s3]
-            options_side4 = self.side_options_rev[s4]
+            options_side3 = self.side_options[s3]
+            options_side4 = self.side_options[s4]
 
             if side_n == 1:
                 options_side1 = [side]
             elif side_n == 2:
                 options_side2 = [side]
             elif side_n == 3:
-                options_side3 = [self.twoside2reverse[side]]
+                options_side3 = [side]
             else:   # side_n == 4:
-                options_side4 = [self.twoside2reverse[side]]
+                options_side4 = [side]
 
             found = False
             for p in self._iter(options_side1, options_side2, options_side3, options_side4):

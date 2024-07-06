@@ -8,6 +8,7 @@ from django.utils import timezone
 from django.core.management.base import BaseCommand
 from Pieces2x2.models import TwoSide, TwoSideOptions, Piece2x2, EvalProgress
 from Pieces2x2.helpers import calc_segment
+from WorkQueue.models import Work
 from WorkQueue.operations import propagate_segment_reduction, get_unused_for_locs, check_dead_end
 import time
 
