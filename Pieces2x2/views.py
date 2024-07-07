@@ -804,7 +804,7 @@ class OptionsListView(TemplateView):
                            .order_by('-processor')          # consistent order
                            .exclude(processor=0)
                            .values('processor',
-                                   'from_ring1',
+                                   'created_from',
                                    'reached_dead_end',
                                    'choices'))
 
@@ -841,17 +841,6 @@ class OptionsListView(TemplateView):
             except KeyError:
                 count = 0
             proc['count'] = count
-
-            ring1_nr = proc['from_ring1']
-            try:
-                seed = ring1_seed_cache[ring1_nr]
-            except KeyError:
-                try:
-                    seed = Ring1.objects.get(nr=ring1_nr).seed
-                except Ring1.DoesNotExist:
-                    seed = '?'
-                ring1_seed_cache[ring1_nr] = seed
-            proc['seed'] = seed
 
             if not proc['reached_dead_end']:
                 proc['twosides_count'] = two_side_count[processor_nr]

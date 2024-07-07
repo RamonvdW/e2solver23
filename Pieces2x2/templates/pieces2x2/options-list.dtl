@@ -24,8 +24,7 @@
         <thead>
             <tr>
                 <th>Processor</th>
-                <th>Ring1</th>
-                <th>Seed</th>
+                <th>Created from</th>
                 <th>Work</th>
                 <th>TwoSides left</th>
             </tr>
@@ -34,9 +33,8 @@
             {% if not proc.reached_dead_end %}
                 <tr>
                     <td><a href="{{ proc.url }}" target="_blank">{{ proc.processor }}</a></td>
-                    <td{% if proc.color %} style="background:{{ proc.color }}"{% endif %}>{{ proc.from_ring1 }}</td>
-                    <td>{{ proc.seed }}</td>
-                    <td>{{ proc.count }}</td>
+                    <td>{{ proc.created_from }}</td>
+                    <td{% if proc.color %} style="background:{{ proc.color }}"{% endif %}>{{ proc.count }}</td>
                     <td>{{ proc.twosides_count }}</td>
                 </tr>
             {% endif %}
@@ -50,8 +48,7 @@
         <thead>
             <tr>
                 <th>Processor</th>
-                <th>Ring1</th>
-                <th>Seed</th>
+                <th>Created from</th>
                 <th>Last log</th>
             </tr>
         </thead>
@@ -59,8 +56,7 @@
             {% if proc.reached_dead_end %}
                 <tr>
                     <td><a href="{{ proc.url }}" target="_blank">{{ proc.processor }}</a></td>
-                    <td>{{ proc.from_ring1 }}</td>
-                    <td>{{ proc.seed }}</td>
+                    <td>{{ proc.created_from }}</td>
                     <td style="text-align:left">{{ proc.last_log }}</td>
                 </tr>
             {% endif %}
